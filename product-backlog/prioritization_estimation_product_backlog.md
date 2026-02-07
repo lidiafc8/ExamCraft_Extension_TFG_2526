@@ -1,0 +1,69 @@
+# PRIORIZACIÓN Y ESTIMACIÓN DE ESFUERZO DEL PRODUCT BACKLOG
+
+### Criterior utilizados
+
+- **MoSCoW**:
+     - **M** (Must have): Crítico. Sin esto, la extensión no cumple su función básica (MVP).
+
+     - **S** (Should have): Importante. Debería estar, pero si falta, existe una solución manual o alternativa temporal.
+
+     - **C** (Could have): Deseable. Mejora la experiencia, pero no es vital.
+
+     - **W** (Won't have): No se hará en esta iteración (o es puramente cosmético de baja prioridad).
+
+- **Tallas (Estimación de esfuerzo/complejidad)**:
+     - **XS**: Cambio de texto, botón simple, configuración básica.
+
+    - **S**: Lógica simple, navegación, alertas.
+
+    - **M**: Lógica de negocio estándar, formularios, gestión de estado media.
+
+    - **L**: Algoritmos complejos, integración con APIs externas (LLM), gestión de almacenamiento (Storage).
+
+    - **XL**: Alta complejidad técnica, generación de archivos complejos (PDF/Word), gestión de sistemas de archivos.
+
+
+## TABLA
+
+| HU-XX | Descripción | Priorización MoSCoW | Estimación Coste (XS, S, M, L, XL) |
+|------|-------------|---------------------|-----------------------------------|
+| **INICIO** | **INICIO** | **INICIO** | **INICIO** |
+| HU-01 | Como profesor quiero poder abrir ExamCraft desde la pestaña “Extensiones” de mi navegador Chrome para poder ejecutarla rápida y fácilmente. | Must Have | S |
+| HU-02 | Como profesor quiero poder elegir en la página de inicio de ExamCraft entre “Crear examen” o “Consultar exámenes anteriores”, para que no haya confusión y todos los elementos estén bien organizados. | Must Have | S |
+| HU-03 | Como profesor quiero que al seleccionar la opción “Crear examen” se muestre una pantalla con las distintas modalidades de creación: “Crear examen por partes” o “Crear examen completo”, para poder elegir si deseo crear el examen paso a paso o en una sola vez. | Must Have | S |
+| **CREAR EXAMEN POR PARTES** | **CREAR EXAMEN POR PARTES** | **CREAR EXAMEN POR PARTES** | **CREAR EXAMEN POR PARTES** |
+| HU-04 | Como profesor quiero que al elegir “Crear examen por partes”, se muestre una pantalla que me permita elegir entre las siguientes partes: Enunciado, Restricciones de atributos y Relaciones entre entidades, para así poder empezar por la creación del ejercicio que yo quiera. | Must Have | S |
+| HU-05 | Como profesor quiero que al elegir la parte “Enunciado” se me dé a elegir entre los diferentes dominios de examen que existen, es decir, entre examen de Clínica Veterinaria o Ajedrez, para así poder seleccionar qué tipo de enunciado quiero crear. | Must Have | M |
+| HU-06 | Como profesor quiero que, tras haber seleccionado el dominio deseado,  la parte “Enunciado” se divida en dos pasos con redirección automática y sin elección a elegir, el primero correspondiente a la generación del texto del enunciado, y el segundo para la generación del diagrama UML del mismo, para así poder proceder ordenadamente. | Must Have | S |
+| HU-07 | Como profesor quiero que en la pantalla en la que se muestran los diferentes dominios de examen a elegir, se muestre además un botón no interactivo “Añadir nuevo dominio de examen”, para así saber que existe un punto de extensión en esa parte concreta de la extensión. | Should Have (se podría informar de otra manera) | XS |
+| HU-08 | Como profesor quiero que al elegir generar la parte “Restricciones de atributos” o la parte “Relaciones entre entidades” se me pregunte si quiero que el sistema tenga en cuenta alguna información almacenada anteriormente, para así poder elegir si quiero que el sistema se base y se mantenga dentro del contexto de otro examen ya creado para la generación de dicha parte nueva. | Must Have | S |
+| HU-09 | Como profesor quiero que en caso de una respuesta positiva en la HU-07, se me muestre un sistema de carpetas con todos los exámenes almacenados hasta el momento en el sistema y una vista previa del contenido de cada uno de ellos, para así poder seleccionar qué examen utilizar como contexto para la generación de la parte seleccionada anteriormente. | Must Have | XL |
+| HU-10 | Como profesor quiero que en caso de una respuesta negativa en la HU-07, se me muestre un aviso que requiera confirmación, que informe que por falta de contexto, para la generación correcta de la parte seleccionada se tendrá que generar junto a ella un nuevo enunciado, para así poder generar la parte elegida con toda la información necesaria para su comprensión. | Must Have | S |
+| HU-11 | Como profesor quiero que en caso de respuesta negativa en la HU-09, se me vuelva a mostrar la pantalla correspondiente a la selección de la parte a generar, es decir, la de la HU-04, para así garantizar que las partes “Restricciones de atributos” y “Relaciones entre entidades” no puedan ser generadas totalmente desde 0 sin ningún contexto ni enunciado. | Must Have | S |
+| **CREAR EXAMEN COMPLETO** | **CREAR EXAMEN COMPLETO** | **CREAR EXAMEN COMPLETO** | **CREAR EXAMEN COMPLETO** |
+| HU-12 | Como profesor quiero que al elegir “Crear examen completo”, se me dé a elegir entre los diferentes dominios de examen que existen, es decir, entre examen de Clínica Veterinaria o Ajedrez, para así poder seleccionar qué tipo de examen quiero crear. | Must Have | M |
+| **SOLUCIÓN** | **SOLUCIÓN** | **SOLUCIÓN** | **SOLUCIÓN** |
+| HU-13 | Como profesor quiero que en el paso de generación del texto del enunciado (dentro de la parte “Enunciado”) se me muestre la solución propuesta de dicho paso en una pantalla de solución intermedia, antes de pasar al paso de la generación del diagrama UML, para así poder decidir si me gusta o no el enunciado devuelto antes de generar su correspondiente diagrama. | Must Have | XL |
+| HU-14 | Como profesor quiero que se me muestre el segundo paso correspondiente a la generación del diagrama UML (de la parte “Enunciado”) solo si he validado la solución del primer paso propuesta por el sistema previamente en la pantalla de solución intermedia, para así definir claramente qué texto de enunciado quiero utilizar. | Must Have | M |
+| HU-15 | Como profesor quiero que el segundo paso correspondiente a la generación del diagrama UML (de la parte “Enunciado”) me lleve directamente a la página de solución final, donde se me muestre de forma unificada la solución de los dos pasos, para así poder ver el resultado final y completo de la parte “Enunciado”. | Must Have | XL |
+| HU-16 | Como profesor quiero que como paso previo a cualquier pantalla de solución (intermedia o final), independientemente de lo solicitado, se me muestre el prompt que el sistema lanzará para obtener la solución, para así poder modificarlo a mi gusto para personalizar la consulta antes de pasar a la pantalla de la solución. | Must Have | L (Requiere construir el prompt dinámicamente y exponerlo) |
+| HU-17 | Como profesor quiero que tanto en la pantalla de solución final como en la intermedia se me muestre un apartado en formato Word con la solución de la parte o examen solicitado, para así poder leer de forma adecuada la solución proporcionada por el sistema. | Should Have (podría ser en otro formato disponible) | XL (Renderizar formato “Word” en web es complejo) |
+| HU-18 | Como profesor quiero que en la pantalla de solución final, concretamente en el apartado de la solución de la parte o examen solicitado en formato Word, en caso de haber generado un nuevo enunciado, se muestre el código Mermaid del diagrama UML proporcionado, para así poder comprobar el diagrama concreto. | Must Have | L |
+| HU-19 | Como profesor quiero que tanto en la pantalla de solución final como en la intermedia se me muestre una caja de texto editable donde se encuentre el prompt que se ha lanzado, para así poder eliminarlo, modificarlo o crear otras consultas personalizadas dentro de dicha caja a partir de la solución dada. | Must Have | M |
+| HU-20 | Como profesor quiero poder volver a hacer una consulta (HU-15) a partir de una solución proporcionada por el sistema, usando un botón para volver a generar la solución, para que se muestre otra nueva posible solución una vez pulsado. | Must Have | M |
+| HU-21 | Como profesor quiero poder volver a generar una nueva solución a partir de otra dada previamente pulsando un botón, para así poder conocer otras soluciones alternativas. | Could Have | M |
+| HU-22 | Como profesor quiero poder descargar, desde la pantalla de solución final, la solución proporcionada por el sistema en tres formatos diferentes a elegir, en Word, PDF o MarkDown, para así poder almacenar en mi sistema local, en este caso, en Descargas, dicha solución. | Must Have | XL (Generar binarios en el cliente es pesado) |
+| HU-23 | Como profesor quiero poder guardar, desde la pantalla de solución final y con el nombre que yo establezca, la solución proporcionada por el sistema en el almacenamiento de la extensión, para que esta aparezca en el apartado de “Consultar exámenes anteriores” y pueda ser usado como contexto para futuras peticiones. | Must Have | L (Implica usar la API chrome.storage.local) |
+| HU-24 | Como profesor quiero que la solución proporcionada tenga en cuenta siempre los exámenes anteriormente creados y almacenados en el sistema, para así evitar que no me genere soluciones similares a las ya dadas en otras ocasiones, a menos que yo lo especifique explícitamente (HU-07). | Must Have | XL |
+| **EXÁMENES ANTERIORES** | **EXÁMENES ANTERIORES** | **EXÁMENES ANTERIORES** | **EXÁMENES ANTERIORES** |
+| HU-25 | Como profesor quiero que al seleccionar la opción para consultar los exámenes anteriores se me muestre un sistema de carpetas con todos los exámenes almacenados hasta el momento en la extensión, para así poder visualizar en detalle todos los exámenes que se han ido generando. | Must Have | L |
+| HU-26 | Como profesor quiero que en la pantalla “Consultar exámenes anteriores”, cuando pulse una parte de un examen creado, se me muestre en otra pantalla una vista previa de esa parte en formato PDF, para así poder visualizar el contenido de esta adecuadamente. | Must Have | L |
+| HU-27 | Como profesor quiero poder descargar, desde la pantalla de “Consultar exámenes anteriores”, exámenes completos almacenados en la extensión en formato ZIP, para así tener en mi sistema local, en este caso, en Descargas, todas las partes que lo constituyen, tanto en formato Word, MarkDown o PDF. | Could Have (Facilita la descarga si se quiere bajar todo) | L |
+| HU-28 | Como profesor quiero que, desde la pantalla de vista previa de cualquier parte específica de un examen que yo haya seleccionado previamente, se me permita descargar dicha parte tanto en formato Word, MarkDown o PDF, para así tener en mi sistema local, en este caso, en Descargas, una parte específica de un examen que yo quiera. | Must Have | M |
+| **NAVEGACIÓN** | **NAVEGACIÓN** | **NAVEGACIÓN** | **NAVEGACIÓN** |
+| HU-29 | Como profesor quiero poder cancelar cualquier acción que requiera también confirmación, para así poder expresar mi deseo de no realizar dicha operación. | Must Have | S |
+| HU-30 | Como profesor, quiero disponer de una barra de navegación tipo migas de pan (breadcrumb) que muestre la ruta jerárquica de navegación (por ejemplo: Inicio > Crear examen > Crear examen por partes), para poder identificar mi ubicación actual dentro del sistema. | Could Have (Aclara navegación) | S |
+| HU-31 | Como profesor, quiero tener un botón “Volver” que me permite retroceder en cualquier pestaña, para así poder navegar entre las diferentes pantallas correctamente. | Must Have | S |
+
+
+
