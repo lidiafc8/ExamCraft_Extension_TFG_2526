@@ -1,3 +1,7 @@
+import React from "react"
+import logoExamCraft from "../../assets/icon512.png"
+import examIcon from "../../assets/exam.png"
+import archiveIcon from "../../assets/archive.png"
 
 interface Props {
   onStart: () => void
@@ -5,29 +9,48 @@ interface Props {
 
 export default function WelcomeScreen({ onStart }: Props) {
   return (
-    <div className="container" style={{ textAlign: "center", position: "relative", height: "100vh" }}>
+    <div className="exam-app">
       
-      {/* Contenido Central */}
-      <div style={{ marginTop: "100px" }}>
-        <h1>¡Bienvenido a ExamCraft!</h1>
-        <p>Herramienta de ayuda para la generación automática de exámenes de la asignatura Diseño y Pruebas I</p>
-      </div>
+      {/* --- HEADER --- */}
+      <header className="app-header">
+        <div className="header-left">
+          <span className="logo-icon"><img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" /></span> 
+          <span>INICIO</span>
+        </div>
+        <div className="header-right">
+        </div>
+      </header>
 
-      {/* EL BOTÓN EN LA ESQUINA */}
-      <button 
-        onClick={onStart} 
-        className="btn-primary"
-        style={{
-          position: "absolute",
-          top: "20px",
-          right: "20px",
-          padding: "10px 20px",
-          fontSize: "14px"
-        }}
-      >
-        Acceder a GitHub
+      {/* --- CONTENIDO CENTRAL --- */}
+      <main className="main-content">
+        
+        <h1 className="main-title">BIENVENIDO A EXAMCRAFT</h1>
+        
+        <div className="subtitle-badge">
+          ¿Qué desea hacer?
+        </div>
+
+        <div className="cards-container">
+          
+          <button className="action-card">
+            <span className="exam-icon"><img src={examIcon} alt="Icono examen" width="100" height="100" /></span> 
+            <span className="card-label">Crear examen</span>
+          </button>
+
+          <button className="action-card">
+              <span className="archive-icon"><img src={archiveIcon} alt="Icono archivo" width="100" height="100" /></span> {/* Icono carpeta */}
+            <span className="card-label">
+              Consultar exámenes <br/> anteriores
+            </span>
+          </button>
+
+        </div>
+
+      </main>
+
+      <button onClick={onStart} className="btn-floating-github">
+         GitHub Info
       </button>
-
     </div>
   )
 }
