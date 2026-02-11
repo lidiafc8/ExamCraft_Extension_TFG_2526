@@ -1,0 +1,315 @@
+/* =========================================
+   1. RESET Y BASE
+   ========================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.exam-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #EFDECD; 
+  overflow: hidden;
+}
+
+/* =========================================
+   2. HEADER (Barra superior)
+   ========================================= */
+.app-header {
+  background-color: #B48574; 
+  padding: 15px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  height: 70px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-weight: bold;
+  color: #3E2723;
+  font-size: 1.2rem;
+}
+
+.header-right {
+  color: #3E2723;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.logo-icon {
+  display: flex; 
+  align-items: center;
+}
+
+.menu-icon {
+  font-size: 28px;
+  cursor: pointer;
+  color: #3E2723;
+}
+
+/* =========================================
+   3. CONTENIDO PRINCIPAL (HOME)
+   ========================================= */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding-bottom: 50px;
+}
+
+
+.main-title {
+  font-size: 3rem;
+  color: #5D3A3A; 
+  text-transform: uppercase;
+  font-style: italic;
+  font-weight: 900;
+  text-shadow: 2px 2px 0px rgba(255,255,255,0.4);
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+
+.main-title.small {
+  font-size: 2rem;
+}
+
+
+.subtitle-badge {
+  background-color: #E6DFF0; 
+  color: #6A4C93;            
+  border: none;
+  border-radius: 50px;      
+  padding: 10px 40px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 15px rgba(155, 114, 207, 0.25);
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
+}
+
+
+.cards-container {
+  display: flex;
+  gap: 60px;
+  justify-content: center;
+}
+
+.action-card {
+  background-color: #A67C6D; 
+  width: 220px;
+  height: 220px;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px 20px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 5px 5px 10px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+.action-card:hover {
+  transform: translateY(-5px);
+}
+
+.card-icon-box {
+  background-color: #FDF5E6; 
+  padding: 15px;
+  border-radius: 10px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+}
+
+.card-icon-img {
+  font-size: 40px;
+}
+
+.card-label {
+  background-color: #FDF5E6;
+  width: 100%;
+  padding: 8px;
+  border-radius: 20px;
+  color: #000;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* =========================================
+   5. PANTALLA GITHUB
+   ========================================= */
+
+
+.content-card {
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 4px 15px rgba(62, 39, 35, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loading-text {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #5D3A3A;
+  font-weight: bold;
+}
+
+
+.btn-back {
+  background-color: #3E2723; 
+  color: #FDF5E6;            
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;      
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+  z-index: 100;              
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+
+.btn-back:hover {
+  transform: scale(1.1); 
+  background-color: #5D3A3A; 
+}
+
+
+.profiles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.user-card {
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid #A67C6D;
+}
+
+.avatar {
+  border-radius: 50%;
+  border: 2px solid #B48574;
+}
+
+.user-details h3 {
+  color: #5D3A3A;
+  font-size: 1.1rem;
+  margin-bottom: 2px;
+}
+
+.user-details small {
+  color: #888;
+}
+
+
+.repo-card {
+  background-color: #A67C6D;
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+}
+
+.repo-card h3 {
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+
+.repo-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+}
+
+.repo-desc {
+  font-style: italic;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.repo-stars {
+  background: rgba(255,255,255,0.2);
+  padding: 5px 10px;
+  border-radius: 10px;
+  display: inline-block;
+  margin-bottom: 15px;
+}
+
+
+.repo-link {
+  display: inline-block;
+  background-color: #FDF5E6; 
+  color: #3E2723;            
+  padding: 8px 20px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.repo-link:hover {
+  transform: scale(1.05);
+  background-color: #fff;
+}
+
+
+.btn-floating-github {
+  position: absolute;  
+  bottom: 20px;        
+  right: 20px;         
+  
+
+  background-color: #3E2723; 
+  color: #FDF5E6;           
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;      
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+  z-index: 100;              
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-floating-github:hover {
+  transform: scale(1.1);    
+  background-color: #5D3A3A; 
+}
