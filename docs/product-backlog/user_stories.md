@@ -47,51 +47,51 @@
 * **HU-13:** Como profesor quiero que al elegir “Crear examen completo”, se me dé a elegir entre los diferentes dominios de examen que existen, es decir, entre examen de Clínica Veterinaria o Ajedrez, para así poder seleccionar qué tipo de examen quiero crear.
 ![Boceto de elegir dominio cuando se va a generar un examen al completo](mock_ups/elegir_dominio_examen_completo.png)
 
-## SOLUCIÓN
+## PROPUESTA
 
-* **HU-14:** Como profesor quiero que en el paso de generación del texto del enunciado (dentro de la parte “Enunciado”) se me muestre la solución propuesta de dicho paso en una pantalla de solución intermedia, antes de pasar al paso de la generación del diagrama UML, para así poder decidir si me gusta o no el enunciado devuelto antes de generar su correspondiente diagrama.
-![Boceto de generar solución primera parte de la extensión funcional](mock_ups/paso_intermedio_generacion_enunciado.png)
+* **HU-14:** Como profesor quiero que en el paso de generación del texto del enunciado (dentro de la parte “Enunciado”) se me muestre la propuesta proporcionada de dicho paso en una pantalla de propuesta intermedia, antes de pasar al paso de la generación del diagrama UML, para así poder decidir si me gusta o no el enunciado devuelto antes de generar su correspondiente diagrama.
+![Boceto de generar propuesta primera parte de la extensión funcional](mock_ups/paso_intermedio_generacion_enunciado.png)
 
-* **HU-15:** Como profesor quiero que se me muestre el segundo paso correspondiente a la generación del diagrama UML (de la parte “Enunciado”) solo si he validado la solución del primer paso propuesta por el sistema previamente en la pantalla de solución intermedia, para así definir claramente qué texto de enunciado quiero utilizar.
+* **HU-15:** Como profesor quiero que se me muestre el segundo paso correspondiente a la generación del diagrama UML (de la parte “Enunciado”) solo si he validado la propuesta del primer paso proporcionada por el sistema previamente en la pantalla de propuesta intermedia, para así definir claramente qué texto de enunciado quiero utilizar.
 ![Boceto de paso 2 de diagrama UML](mock_ups/paso_intermedio_diagrama_uml.png)
 
-* **HU-16:** Como profesor quiero que el segundo paso correspondiente a la generación del diagrama UML (de la parte “Enunciado”) me lleve directamente a la página de solución final, donde se me muestre de forma unificada la solución de los dos pasos, para así poder ver el resultado final y completo de la parte “Enunciado”.
-![Boceto de pasar del diagrama UML a la solución general](mock_ups/desde_diagrama_a_general.png)
-![Boceto de solución general de la extensión](mock_ups/solucion_general_extension_funcional.png)
+* **HU-16:** Como profesor quiero que el segundo paso correspondiente a la generación del diagrama UML (de la parte “Enunciado”) me lleve directamente a la página de propuesta final, donde se me muestre de forma unificada la propuesta de los dos pasos, para así poder ver el resultado final y completo de la parte “Enunciado”.
+![Boceto de pasar del diagrama UML a la propuesta general](mock_ups/desde_diagrama_a_general.png)
+![Boceto de propuesta general de la extensión](mock_ups/solucion_general_extension_funcional.png)
 
-* **HU-17:** Como profesor quiero que como paso previo a cualquier pantalla de solución (intermedia o final), independientemente de lo solicitado, se me muestre el prompt que el sistema lanzará para obtener la solución, para así poder modificarlo a mi gusto para personalizar la consulta antes de pasar a la pantalla de la solución.
+* **HU-17:** Como profesor quiero que como paso previo a cualquier pantalla de propuesta (intermedia o final), independientemente de lo solicitado, se me muestre el prompt que el sistema lanzará para obtener la propuesta, para así poder modificarlo a mi gusto para personalizar la consulta antes de pasar a la pantalla de la propuesta.
 ![Boceto de prompt inicial de la extensión funcional paso 1](mock_ups/prompt_inicial_paso1_extension.png)
 ![Boceto de prompt inicial de la extensión funcional paso 2](mock_ups/prompt_inicial_paso2_extension.png)
 
-* **HU-18:** Como profesor quiero que tanto en la pantalla de solución final como en la intermedia se me muestre un apartado en formato Word con la solución de la parte o examen solicitado, para así poder leer de forma adecuada la solución proporcionada por el sistema.
+* **HU-18:** Como profesor quiero que tanto en la pantalla de propuesta final como en la intermedia se me muestre un apartado en formato MarkDown con la propuesta de la parte o examen solicitado, para así poder leer de forma adecuada la propuesta proporcionada por el sistema.
 ![Boceto de paso 1 de enunciado](mock_ups/paso_intermedio_generacion_enunciado.png)
 ![Boceto de paso 2 de diagrama UML](mock_ups/paso_intermedio_diagrama_uml.png)
-![Boceto de solución general de la extensión](mock_ups/solucion_general_extension_funcional.png)
+![Boceto de propuesta general de la extensión](mock_ups/solucion_general_extension_funcional.png)
 
-* **HU-19:** Como profesor quiero que en la pantalla de solución final, concretamente en el apartado de la solución de la parte o examen solicitado en formato Word, en caso de haber generado un nuevo enunciado, se muestre el código Mermaid del diagrama UML proporcionado, para así poder comprobar el diagrama concreto.
-![Boceto de solución general de la extensión](mock_ups/solucion_general_extension_funcional.png)
+* **HU-19:** Como profesor quiero que en la pantalla de propuesta final, concretamente en el apartado de la propuesta de la parte o examen solicitado en formato MarkDown, en caso de haber generado un nuevo enunciado, se muestre el código Mermaid del diagrama UML proporcionado junto con su dibujo de cajas, para así poder comprobar el diagrama concreto de manera cómoda.
+![Boceto de propuesta general de la extensión](mock_ups/solucion_general_extension_funcional.png)
 
-* **HU-20:** Como profesor quiero que tanto en la pantalla de solución final como en la intermedia se me muestre una caja de texto editable donde se encuentre el prompt que se ha lanzado, para así poder eliminarlo, modificarlo o crear otras consultas personalizadas dentro de dicha caja a partir de la solución dada.
-![Boceto de generar solución primera parte de la extensión funcional](mock_ups/paso_intermedio_generacion_enunciado.png)
+* **HU-20:** Como profesor quiero que tanto en la pantalla de propuesta final como en la intermedia se me muestre una caja de texto editable donde se encuentre el prompt que se ha lanzado, para así poder eliminarlo, modificarlo o crear otras consultas personalizadas dentro de dicha caja a partir de la propuesta dada.
+![Boceto de generar propuesta primera parte de la extensión funcional](mock_ups/paso_intermedio_generacion_enunciado.png)
 ![Boceto de paso 2 de diagrama UML](mock_ups/paso_intermedio_diagrama_uml.png)
 
 
-* **HU-21:** Como profesor quiero poder volver a hacer una consulta (**HU-20**) a partir de una solución proporcionada por el sistema, usando un botón para volver a generar la solución, para que se muestre otra nueva posible solución una vez pulsado.
+* **HU-21:** Como profesor quiero poder volver a hacer una consulta (**HU-20**) a partir de una propuesta proporcionada por el sistema, usando un botón para volver a generar la propuesta, para que se muestre otra nueva posible propuesta una vez pulsado.
 ![Boceto de volver a generar el enunciado de la extensión funcional](mock_ups/volver_a_generar_extension.png)
 ![Boceto de volver a generar el diagrama UML](mock_ups/volver_a_generar_diagrama.png)
 
 
-* **HU-22:** Como profesor quiero poder volver a generar una nueva solución a partir de otra dada previamente pulsando un botón, para así poder conocer otras soluciones alternativas.
+* **HU-22:** Como profesor quiero poder volver a generar una nueva propuesta a partir de otra dada previamente pulsando un botón, para así poder conocer otras propuestas alternativas.
 ![Boceto de volver a generar el enunciado de la extensión funcional](mock_ups/volver_a_generar_extension.png)
 
-* **HU-23:** Como profesor quiero poder descargar, desde la pantalla de solución final, la solución proporcionada por el sistema en tres formatos diferentes a elegir, en Word, PDF o MarkDown, para así poder almacenar en mi sistema local, en este caso, en Descargas, dicha solución.
+* **HU-23:** Como profesor quiero poder descargar, desde la pantalla de propuesta final, la propuesta proporcionada por el sistema en formato MarkDown, para así poder almacenar en mi sistema local, en este caso, en Descargas, dicha propuesta.
 ![Boceto de descargar](mock_ups/descargas.png)
 
-* **HU-24:** Como profesor quiero poder guardar, desde la pantalla de solución final y con el nombre que yo establezca, la solución proporcionada por el sistema en el almacenamiento de la extensión, para que esta aparezca en el apartado de “Consultar exámenes anteriores” y pueda ser usado como contexto para futuras peticiones.
+* **HU-24:** Como profesor quiero poder guardar, desde la pantalla de propuesta final y con el nombre que yo establezca, la propuesta proporcionada por el sistema en el almacenamiento de la extensión, para que esta aparezca en el apartado de “Consultar exámenes anteriores” y pueda ser usado como contexto para futuras peticiones.
 ![Boceto de guardar en examenes anteriores](mock_ups/guardar_examenes_anteriores.png)
 
-* **HU-25:** Como profesor quiero que la solución proporcionada tenga en cuenta siempre los exámenes anteriormente creados y almacenados en el sistema, para así evitar que no me genere soluciones similares a las ya dadas en otras ocasiones, a menos que yo lo especifique explícitamente (**HU-10**)
-![Boceto de solución general de la extensión](mock_ups/solucion_general_extension_funcional.png)
+* **HU-25:** Como profesor quiero que la propuesta proporcionada tenga en cuenta siempre los exámenes anteriormente creados y almacenados en el sistema, para así evitar que no me genere propuestas similares a las ya dadas en otras ocasiones, a menos que yo lo especifique explícitamente (**HU-10**)
+![Boceto de propuesta general de la extensión](mock_ups/solucion_general_extension_funcional.png)
 
 ## PANTALLA “CONSULTAR EXÁMENES ANTERIORES”
 
@@ -117,3 +117,5 @@
 
 * **HU-32:** Como profesor, quiero tener un botón “Volver” que me permite retroceder en cualquier pestaña, para así poder navegar entre las diferentes pantallas correctamente.
 ![Boceto de volver](mock_ups/volver.png)
+
+* **HU-33:** Como profesor quiero descargar y guardar las propuestas devueltas por el sistema, además de en formato MarkDown, en formato Word y PDF, para así poder tener los archivos en formatos más legibles y variados.
