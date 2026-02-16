@@ -29,9 +29,8 @@ Se sigue la metodología **Git Flow** con las siguientes reglas específicas:
 
 ### Gestión de Ramas
 * **Versiones estables:** Las ramas `main` y `develop` siempre deben contener versiones funcionales.
-* **Limpieza:** Las ramas de *feature* o *fix* deben eliminarse una vez fusionadas (merge) a `develop`.
 * **Releases:**
-    * Se deben enviar cambios a `main` y generar una *release* mínimo **1 vez por sprint** (o semanalmente).
+    * Se deben enviar cambios a `main` y generar una *release* mínimo **1 vez por sprint**.
 
 ### Pull Requests (PR) y Revisiones
 * Es obligatorio trabajar con **Pull Requests**.
