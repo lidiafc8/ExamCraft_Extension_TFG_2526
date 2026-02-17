@@ -1,15 +1,15 @@
 # PROMPT PARA LA GENERACIÓN DE RESTRICCIONES DE ATRIBUTOS
 
 ## Recursos a proporcionar:
-* `RESTRICCIONES DE ATRIBUTOS DE EJEMPLO DE EXÁMENES ANTERIORES.pdf`
+* `attribute_constraints_examples_previous_exams.md`
 
 ## Prompt a utilizar:
 
-Una vez creado el diagrama, generarás el enunciado para el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (no nulo, etc). Para ello, te adjunto el pdf llamado “Restricciones de atributos de ejemplo exámenes anteriores” como referencia. Deberá cumplir estos requisitos:
+Una vez creado el diagrama, generarás el enunciado para el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (no nulo, etc). Para ello, te adjunto el archivo md llamado “attribute_constraints_examples_previous_exams” como referencia. Deberá cumplir estos requisitos:
 
 -	ÚNICAMENTE generarás las restricciones a nivel de entidad de los atributos de las clases a implementar por el alumno.
 
--	Las restricciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo pdf.
+-	Las restricciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
 
 -	Sé lo más creativo posible en cuanto a restricciones, ni muy simples, ni muy complejas.
 

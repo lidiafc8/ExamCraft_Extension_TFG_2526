@@ -1,13 +1,13 @@
 # PROMPT PARA LA GENERACIÓN DE EXTENSIÓN FUNCIONAL (DIAGRAMA UML) - ENTIDADES, ATRIBUTOS, RELACIONES
 
 ## Recursos a proporcionar:
-* `EXTENSIONES FUNCIONALES DE EJEMPLO.pdf`
+* `functional_extension_examples.md`
 
 ## Prompt a utilizar:
 
 Una vez que tenemos la extensión funcional completa del nuevo examen, pasaremos a la siguiente tarea que quiero que realices.
 
-Quiero que en base a la lógica de la extensión funcional que me has pasado, me generes un diagrama UML en código Mermaid similar al de los ejemplos que te he pasado en el documento “Enunciados de ejemplo”. Ten en cuenta estos requisitos:
+Quiero que en base a la lógica de la extensión funcional que me has pasado, me generes un diagrama UML en código Mermaid similar al de los ejemplos que te he pasado en el documento md “functional_extension_examples”. Ten en cuenta estos requisitos:
 
 -	Recuerda todo el contexto dado en la anterior petición.
 
