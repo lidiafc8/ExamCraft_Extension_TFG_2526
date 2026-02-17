@@ -101,10 +101,10 @@
 * **HU-27:** Como profesor quiero que en la pantalla “Consultar exámenes anteriores”, cuando pulse una parte de un examen creado, se me muestre en otra pantalla una vista previa de esa parte en formato PDF, para así poder visualizar el contenido de esta adecuadamente.
 ![Boceto de los ejercicios de un examen almacenado](mock_ups/ver_ejercicios_examen_alamcenados.png)
 
-* **HU-28:** Como profesor quiero poder descargar, desde la pantalla de “Consultar exámenes anteriores”, exámenes completos almacenados en la extensión en formato ZIP, para así tener en mi sistema local, en este caso, en Descargas, todas las partes que lo constituyen, tanto en formato Word, MarkDown o PDF.
+* **HU-28:** Como profesor quiero poder descargar, desde la pantalla de “Consultar exámenes anteriores”, exámenes completos almacenados en la extensión en formato ZIP, para así tener en mi sistema local, en este caso, en Descargas, todas las partes que lo constituyen en formato MarkDown.
 ![Boceto de la descarga](mock_ups/ejercicios_almacenados_zip.png)
 
-* **HU-29:** Como profesor quiero que, desde la pantalla de vista previa de cualquier parte específica de un examen que yo haya seleccionado previamente, se me permita descargar dicha parte tanto en formato Word, MarkDown o PDF, para así tener en mi sistema local, en este caso, en Descargas, una parte específica de un examen que yo quiera.
+* **HU-29:** Como profesor quiero que, desde la pantalla de vista previa de cualquier parte específica de un examen que yo haya seleccionado previamente, se me permita descargar dicha parte en formato MarkDown, para así tener en mi sistema local, en este caso, en Descargas, una parte específica de un examen que yo quiera.
 ![Boceto de la descarga de ejercicios](mock_ups/descarga_ejercicio.png)
 
 ## NAVEGACIÓN
