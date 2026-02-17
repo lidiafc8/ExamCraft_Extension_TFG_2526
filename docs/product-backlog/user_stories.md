@@ -98,7 +98,7 @@
 * **HU-26:** Como profesor quiero que al seleccionar la opción para consultar los exámenes anteriores se me muestre un sistema de carpetas con todos los exámenes almacenados hasta el momento en la extensión, para así poder visualizar en detalle todos los exámenes que se han ido generando.
 ![Boceto de elegir carpetas de examenes anteriores](mock_ups/carpetas_de_examenes_anteriores.png)
 
-* **HU-27:** Como profesor quiero que en la pantalla “Consultar exámenes anteriores”, cuando pulse una parte de un examen creado, se me muestre en otra pantalla una vista previa de esa parte en formato PDF, para así poder visualizar el contenido de esta adecuadamente.
+* **HU-27:** Como profesor quiero que en la pantalla “Consultar exámenes anteriores”, cuando pulse una parte de un examen creado, se me muestre en otra pantalla una vista previa de esa parte en formato MarkDown, para así poder visualizar el contenido de esta adecuadamente.
 ![Boceto de los ejercicios de un examen almacenado](mock_ups/ver_ejercicios_examen_alamcenados.png)
 
 * **HU-28:** Como profesor quiero poder descargar, desde la pantalla de “Consultar exámenes anteriores”, exámenes completos almacenados en la extensión en formato ZIP, para así tener en mi sistema local, en este caso, en Descargas, todas las partes que lo constituyen en formato MarkDown.
