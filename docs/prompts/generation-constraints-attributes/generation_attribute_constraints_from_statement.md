@@ -1,8 +1,8 @@
 # PROMPT PARA LA GENERACIÓN DE RESTRICCIONES DE ATRIBUTOS A PARTIR DE UN ENUNCIADO CONCRETO
 
 ## Recursos a proporcionar:
-* `EXTENSION FUNCIONAL SELECCIONADA.pdf`
-* `RESTRICCIONES DE ATRIBUTOS DE EJEMPLO DE EXÁMENES ANTERIORES.pdf`
+* `functional_extension_selected.md`
+* `attribute_constraints_examples_previous_exams.md`
 
 ## Prompt a utilizar:
 
@@ -32,11 +32,11 @@ Nuestra misión es generar, a partir de un enunciado dado, el ejercicio de un ex
 
 - Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
 
-Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica del enunciado y el diagrama UML en código Mermaid que te paso en el archivo pdf “Extensión funcional seleccionada”, quiero que me generes el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (no nulo, etc). Para ello, te adjunto el pdf llamado “Restricciones de atributos de ejemplo exámenes anteriores” como referencia. Deberá cumplir estos requisitos:
+Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica del enunciado y el diagrama UML en código Mermaid que te paso en el archivo md “functional_extension_selected”, quiero que me generes el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (no nulo, etc). Para ello, te adjunto el archivo md llamado “attribute_constraints_examples_previous_exams” como referencia. Deberá cumplir estos requisitos:
 
 -	ÚNICAMENTE generarás las restricciones a nivel de entidad de los atributos de las clases a implementar por el alumno.
 
--	Las restricciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo pdf.
+-	Las restricciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
 
 -	NO AÑADAS las restricciones de los atributos correspondientes a las relaciones entre las entidades, eso se definirá más adelante.
 
