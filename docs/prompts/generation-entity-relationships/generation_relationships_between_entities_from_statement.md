@@ -1,8 +1,8 @@
 # PROMPT COMPLETO PARA GENERACIÓN DE RELACIONES ENTRE ENTIDADES A PARTIR DE UN ENUNCIADO CONCRETO
 
 ## Recursos a proporcionar:
-* `EXTENSION FUNCIONAL SELECCIONADA.pdf`
-* `RELACIONES ENTRE ENTIDADES DE EJEMPLO DE EXÁMENES ANTERIORES.pdf`
+* `functional_extension_selected.md`
+* `relationships_between_entities_examples_previous_exams.md`
 
 ## Prompt a utilizar:
 
@@ -28,13 +28,13 @@ Nuestra misión es generar, a partir de un enunciado dado, el ejercicio de un ex
 
 -	Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
 
-Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica del enunciado y el diagrama UML en código Mermaid que te paso en el archivo pdf “Extensión funcional seleccionada”, quiero que me generes el ejercicio “RELACIONES ENTRE ENTIDADES” del examen, es decir, describirás en detalle las relaciones a implementar por el alumno entre las distintas entidades, es decir, entre las clases rojas. Para ello, se te adjunta un pdf llamado “Relaciones entre entidades de ejemplos exámenes anteriores” con ejemplos de exámenes anteriores ya realizados.
+Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica del enunciado y el diagrama UML en código Mermaid que te paso en el archivo md “functional_extension_selected”, quiero que me generes el ejercicio “RELACIONES ENTRE ENTIDADES” del examen, es decir, describirás en detalle las relaciones a implementar por el alumno entre las distintas entidades, es decir, entre las clases rojas. Para ello, se te adjunta un archivo md llamado “relationships_between_entities_examples_previous_exams” con ejemplos de exámenes anteriores ya realizados.
 
 Deberá cumplir estos requisitos:
 
 -	Lo que vamos a proporcionar al alumno es un proyecto real que tendrá que manipular, por lo que los atributos de las nuevas clases tendrán anotaciones @Transient, que deberán eliminarse en este ejercicio. Esto se debe indicar explícitamente en este ejercicio.
 
--	Las explicaciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo pdf.
+-	Las explicaciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
 
 -	Se debe especificar la direccionalidad de las relaciones a implementar y las entidades implicadas en cada una de ellas.
 
