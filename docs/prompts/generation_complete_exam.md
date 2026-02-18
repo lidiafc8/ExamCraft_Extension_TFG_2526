@@ -1,9 +1,9 @@
 # PROMPT COMPLETO PARA LA GENERACIÓN DE EXAMEN COMPLETO DISEÑO Y PRUEBAS I
 
 ## Recursos a proporcionar:
-* `EXTENSIONES FUNCIONALES DE EJEMPLO.pdf`
-* `RESTRICCIONES DE ATRIBUTOS DE EJEMPLO DE EXÁMENES ANTERIORES.pdf`
-* `RELACIONES ENTRE ENTIDADES DE EJEMPLO DE EXÁMENES ANTERIORES.pdf`
+* `functional_extension_examples.md`
+* `attribute_constraints_examples_previous_exams.md`
+* `relationships_between_entities_examples_previous_exams.md`
 
 ## Prompt a utilizar:
 
@@ -36,7 +36,7 @@
 
   *	Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
 
-Sabiendo esto, y entendiéndolo a fondo, cogerás los enunciados de exámenes de ejemplo para usarlos como base en el pdf llamado “Extensiones funcionales de ejemplo” que te adjunto.
+Sabiendo esto, y entendiéndolo a fondo, cogerás los enunciados de exámenes de ejemplo para usarlos como base en el archivo md llamado “functional_extension_examples” que te adjunto.
 
 
 ### EXTENSIÓN FUNCIONAL
@@ -86,11 +86,11 @@ Quiero que en base a la lógica de la extensión funcional que me has pasado, me
 
 ### RESTRICCIONES DE ATRIBUTOS
 
-Una vez creado el diagrama, generarás el enunciado para el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (no nulo, etc). Para ello, te adjunto el pdf llamado “Restricciones de atributos de ejemplo exámenes anteriores” como referencia. Deberá cumplir estos requisitos:
+Una vez creado el diagrama, generarás el enunciado para el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (no nulo, etc). Para ello, te adjunto el archivo md llamado “attribute_constraints_examples_previous_exams” como referencia. Deberá cumplir estos requisitos:
 
 *	ÚNICAMENTE generarás las restricciones a nivel de entidad de los atributos de las clases a implementar por el alumno.
 
-*	Las restricciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo pdf.
+*	Las restricciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
 
 *	Sé lo más creativo posible en cuanto a restricciones, ni muy simples, ni muy complejas.
 
@@ -109,13 +109,13 @@ Una vez creado el diagrama, generarás el enunciado para el ejercicio “RESTRIC
 
 Una vez que tenemos la extensión funcional completa del nuevo examen, el diagrama UML y las restricciones de cada atributo, pasaremos a generar el ejercicio “RELACIONES ENTRE ENTIDADES” del examen que estamos creando, es decir, la implementación de las relaciones entre las entidades correspondientes.
 
-Quiero que en base a la lógica de la extensión funcional, el diagrama UML y las restricciones que me has pasado y que ya tenemos, recordando todo el contexto e información proporcionada previa, describirás en detalle las relaciones a implementar por el alumno entre las entidades descritas anteriormente, es decir, entre las clases rojas. Para ello, se te adjunta un pdf llamado “Relaciones entre entidades de ejemplos exámenes anteriores” con ejemplos de exámenes anteriores ya realizados.
+Quiero que en base a la lógica de la extensión funcional, el diagrama UML y las restricciones que me has pasado y que ya tenemos, recordando todo el contexto e información proporcionada previa, describirás en detalle las relaciones a implementar por el alumno entre las entidades descritas anteriormente, es decir, entre las clases rojas. Para ello, se te adjunta un archivo md llamado “relationships_between_entities_examples_previous_exams” con ejemplos de exámenes anteriores ya realizados.
 
 Deberá cumplir estos requisitos:
 
 * Lo que vamos a proporcionar al alumno es un proyecto real que tendrá que manipular, por lo que los atributos de las nuevas clases tendrán anotaciones @Transient, que deberán eliminarse en este ejercicio. Esto se debe indicar explícitamente en este ejercicio.
 
-*	Las explicaciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo pdf.
+*	Las explicaciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
 
 *	Se debe especificar la direccionalidad de las relaciones a implementar y las entidades implicadas en cada una de ellas.
 
