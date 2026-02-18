@@ -1,35 +1,57 @@
 import React from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import petClinic from "../../assets/petclinic.png"
-import chess from "../../assets/chess.png"
+import logoExamCraft from "../../assets/images/icon512.png"
+import petClinic from "../../assets/images/petclinic.png"
+import chess from "../../assets/images/chess.png"
+import comingSoon from "../../assets/images/comingSoon.png"
 
 interface Props {
   onBack: () => void
   onWelcome: () => void
   onSelectDomain: (domainName: string) => void
+  onCreateExam: () => void
 }
 
-export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectDomain }: Props) {
+export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectDomain, onCreateExam }: Props) {
   return (
     <div className="exam-app">
       
       {/* --- HEADER --- */}   
       <header className="app-header">
         <div className="header-left">
-          
-          <span 
-            className="logo-icon" 
-            onClick={onWelcome} 
-            style={{ cursor: 'pointer' }} 
-            title="Volver al Inicio"
-          >
-            <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
-          </span> 
-          
-          <span>
-              INICIO {'>'} CREAR EXAMEN {'>'} POR PARTES {'>'} EXTENSIÓN FUNCIONAL
-          </span>
-        </div>
+              
+                    <span className="logo-icon" onClick={onWelcome}>
+                        <img src={logoExamCraft} alt="Logo" width="60" height="60" />
+                    </span> 
+                 
+                    <nav className="breadcrumb-nav">
+                        <span 
+                            className="breadcrumb-link" 
+                            onClick={onWelcome}
+                            title="Volver al inicio"
+                            >
+                            INICIO
+                        </span>
+        
+                        <span className="breadcrumb-separator">{'>'}</span>
+        
+                        <span className="breadcrumb-link" onClick={onCreateExam}>
+                        CREAR EXAMEN
+                        </span>
+        
+                        <span className="breadcrumb-separator">{'>'}</span>
+        
+                        <span className="breadcrumb-link" onClick={onBack}>
+                        POR PARTES
+                        </span>
+        
+                        <span className="breadcrumb-separator">{'>'}</span>
+        
+                        <span className="breadcrumb-current">
+                        EXTENSIÓN FUNCIONAL
+                        </span>
+                        
+                    </nav>
+                    </div>
         <div className="header-right">
         </div>
       </header>
@@ -53,6 +75,11 @@ export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectD
           <button className="action-card" onClick={() => onSelectDomain("Ajedrez")}>
               <span className="chess-icon"><img src={chess} alt="Icono ajedrez" width="120" height="120" /></span>
             <span className="card-label">Ajedrez</span>
+          </button>
+
+          <button className="action-card">
+              <span className="soon-icon"><img src={comingSoon} alt="Icono comingSoon" width="120" height="120" /></span>
+            <span className="card-label">Crear nuevo dominio</span>
           </button>
 
         </div>

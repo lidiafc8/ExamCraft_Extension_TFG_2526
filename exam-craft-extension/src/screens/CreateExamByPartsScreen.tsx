@@ -1,5 +1,5 @@
 import React from "react"
-import logoExamCraft from "../../assets/icon512.png"
+import logoExamCraft from "../../assets/images/icon512.png"
 
 interface Props {
   onBack: () => void
@@ -14,20 +14,34 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
       {/* --- HEADER --- */}   
       <header className="app-header">
         <div className="header-left">
-          
-          <span 
-            className="logo-icon" 
-            onClick={onWelcome} 
-            style={{ cursor: 'pointer' }} 
-            title="Volver al Inicio"
-          >
-            <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
-          </span> 
-          
-          <span>
-              INICIO {'>'} CREAR EXAMEN {'>'} POR PARTES
-          </span>
-        </div>
+      
+            <span className="logo-icon" onClick={onWelcome}>
+                <img src={logoExamCraft} alt="Logo" width="60" height="60" />
+            </span> 
+         
+            <nav className="breadcrumb-nav">
+                <span 
+                    className="breadcrumb-link" 
+                    onClick={onWelcome}
+                    title="Volver al inicio"
+                    >
+                    INICIO
+                </span>
+
+                <span className="breadcrumb-separator">{'>'}</span>
+
+                <span className="breadcrumb-link" onClick={onBack}>
+                CREAR EXAMEN
+                </span>
+
+                <span className="breadcrumb-separator">{'>'}</span>
+
+                <span className="breadcrumb-current">
+                POR PARTES
+                </span>
+                
+            </nav>
+            </div>
         <div className="header-right">
         </div>
       </header>

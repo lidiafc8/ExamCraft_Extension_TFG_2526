@@ -1,7 +1,7 @@
 import React from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import examIcon from "../../assets/exam.png"
-import archiveIcon from "../../assets/archive.png"
+import logoExamCraft from "../../assets/images/icon512.png"
+import examIcon from "../../assets/images/exam.png"
+import archiveIcon from "../../assets/images/archive.png"
 
 interface Props {
   onStart: () => void

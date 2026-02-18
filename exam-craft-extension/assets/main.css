@@ -1,5 +1,5 @@
 /* =========================================
-   1. RESET Y BASE (ORIGINAL)
+   RESET Y BASE
    ========================================= */
 * {
   box-sizing: border-box;
@@ -17,7 +17,7 @@
 }
 
 /* =========================================
-   2. HEADER (ORIGINAL)
+   HEADER 
    ========================================= */
 .app-header {
   background-color: #B48574; 
@@ -50,18 +50,17 @@
 }
 
 /* =========================================
-   3. CONTENIDO PRINCIPAL (RESTAURADO)
-   Esto arregla el HOME para que todo vuelva a estar centrado
+   MAIN CONTENT
    ========================================= */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;     /* Centrado horizontal */
-  justify-content: center; /* Centrado vertical */
+  align-items: center;     
+  justify-content: center; 
   gap: 20px;
   padding: 20px;
-  overflow: hidden; /* El scroll lo manejan los hijos si hace falta */
+  overflow: hidden; 
 }
 
 .main-title {
@@ -93,7 +92,7 @@
 }
 
 /* =========================================
-   4. TARJETAS HOME (ORIGINAL)
+   HOME CARDS
    ========================================= */
 .cards-container {
   display: flex;
@@ -144,7 +143,7 @@
 }
 
 /* =========================================
-   5. PANTALLA GITHUB / GENERAL (ORIGINAL)
+   GITHUB SCREEN
    ========================================= */
 .content-card {
   background-color: rgba(255, 255, 255, 0.6);
@@ -152,12 +151,12 @@
   border-radius: 20px;
   padding: 30px;
   width: 90%;
-  max-width: 600px; /* Ancho por defecto */
+  max-width: 600px; 
   box-shadow: 0 4px 15px rgba(62, 39, 35, 0.1);
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin: 0 auto; /* <--- Añade esto por seguridad */
+  margin: 0 auto; 
 }
 
 .btn-back {
@@ -175,7 +174,6 @@
 
 .btn-back:hover { transform: scale(1.1); background-color: #5D3A3A; }
 
-/* GitHub Styles */
 .profiles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 .user-card { background-color: #fff; border-radius: 15px; padding: 15px; display: flex; align-items: center; gap: 10px; border: 2px solid #A67C6D; }
 .avatar { border-radius: 50%; border: 2px solid #B48574; }
@@ -188,36 +186,32 @@
 }
 
 /* =========================================
-   NUEVO: ESTILOS ESPECÍFICOS WORKFLOW
-   (Usamos prefijo wf- para NO romper lo anterior)
+   WORKFLOW SPECIFIC STYLES
    ========================================= */
 
-/* 1. CONTENEDOR PRINCIPAL QUE PERMITE SCROLL SOLO EN ESTA PANTALLA */
 .wf-layout-container {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Empieza arriba */
+  justify-content: flex-start; 
   padding-bottom: 50px;
-  overflow-y: auto; /* AQUÍ está la magia del scroll */
+  overflow-y: auto; 
   overflow-x: hidden;
 }
 
-/* 2. CONTENEDOR ANCHO PERO CENTRADO */
 .wf-wide-wrapper {
   width: 100%;
   max-width: 1200px;
   padding: 0 20px;
   display: flex;
   flex-direction: column;
-  align-items: center; /* <--- ESTO ES LA CLAVE: Centra las tarjetas hijas */
+  align-items: center;
   gap: 20px;
-  margin: 0 auto;      /* Asegura que el contenedor mismo esté centrado */
+  margin: 0 auto;   
 }
 
-/* 3. STEPPER (Círculos) */
 .stepper-container {
   display: flex;
   align-items: center;
@@ -225,7 +219,7 @@
   margin: 20px 0;
   width: 100%;
   max-width: 600px;
-  flex-shrink: 0; /* No se aplasta al hacer scroll */
+  flex-shrink: 0; 
 }
 .step-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; }
 .step-circle {
@@ -241,7 +235,6 @@
 .step-completed + .step-line { background-color: #4CAF50; }
 .step-inactive .step-circle { background-color: #e0e0e0; color: #888; }
 
-/* 4. VISTA DIVIDIDA (Dos columnas) */
 .wf-split-view {
   display: flex;
   flex-direction: row;
@@ -266,10 +259,9 @@
   font-weight: bold; color: #3E2723; font-size: 1.1rem; text-align: center;
 }
 
-/* 5. INPUTS Y CAJAS DE TEXTO */
 .wf-textarea {
   width: 100%;
-  flex: 1; /* Crece para ocupar espacio */
+  flex: 1; 
   min-height: 350px;
   padding: 15px;
   border-radius: 10px;
@@ -293,7 +285,6 @@
   white-space: pre-wrap;
 }
 
-/* 6. BOTONES NUEVOS (Estilo Pastilla) */
 .wf-actions-row {
   display: flex;
   justify-content: center;
@@ -324,26 +315,24 @@
 .btn-step.success { background-color: #2E7D32; color: white; }
 .btn-step.success:hover { background-color: #1B5E20; }
 
-/* Spinner */
 .loading-spinner {
   border: 4px solid #f3f3f3; border-top: 4px solid #3E2723;
   border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* Texto de instrucciones más atractivo */
 .wf-instruction-text {
-  font-size: 1.15rem;       /* Más grande (aprox 18px) */
-  color: #5D4037;           /* Marrón café medio (muy legible) */
-  line-height: 1.6;         /* Espacio entre líneas para que respire */
+  font-size: 1.15rem;       
+  color: #5D4037;           
+  line-height: 1.6;        
   text-align: center;
-  max-width: 650px;         /* Evita que las líneas sean eternas (mejora lectura) */
-  margin: 0 auto 25px auto; /* Centrado horizontalmente y separado del textarea */
-  font-weight: 500;         /* Un pelín más grueso que el texto normal */
+  max-width: 650px;        
+  margin: 0 auto 25px auto; 
+  font-weight: 500;         
 }
 
 /* =========================================
-   ESTILOS DEL MENÚ VERTICAL (Crear Examen por Partes)
+   VERTICAL MENU STYLES
    ========================================= */
 
 .vertical-menu-container {
@@ -353,12 +342,11 @@
   width: 100%;
   max-width: 500px;       
   margin-bottom: 30px;
-  /* Centrado en pantalla */
   align-self: center; 
 }
 
 .menu-btn {
-  background-color: #A67C6D; /* Color marrón suave de las tarjetas */
+  background-color: #A67C6D; 
   color: white;
   font-size: 1.3rem;
   font-weight: bold;
@@ -370,16 +358,48 @@
   transition: all 0.2s ease;
   text-transform: uppercase; 
   letter-spacing: 1px;
-  width: 100%; /* Que ocupe todo el ancho del contenedor */
+  width: 100%; 
 }
 
 .menu-btn:hover {
-  background-color: #8D5E50; /* Un poco más oscuro al pasar el ratón */
-  transform: translateY(-3px); /* Efecto de elevación */
+  background-color: #8D5E50;
+  transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
 
 .menu-btn:active {
   transform: translateY(0); 
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+
+/* =========================================
+   BREADCRUMBS STYLES
+   ========================================= */
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 18px; 
+}
+
+.breadcrumb-link {
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-weight: 500;
+}
+
+.breadcrumb-link:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: #4e3506; 
+  margin: 0 2px;
+}
+
+.breadcrumb-current {
+  color: #210e01; 
+  font-weight: bold;
 }

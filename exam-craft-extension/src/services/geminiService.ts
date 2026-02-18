@@ -1,6 +1,6 @@
 const API_KEY = process.env.PLASMO_PUBLIC_GEMINI_API_KEY;
 
-const MODEL = "gemini-2.5-pro"; 
+const MODEL = "gemini-2.5-flash"; 
 
 const BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 

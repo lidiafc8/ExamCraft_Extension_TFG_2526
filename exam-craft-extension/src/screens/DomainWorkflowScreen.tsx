@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import logoExamCraft from "../../assets/icon512.png"
+import logoExamCraft from "../../assets/images/icon512.png"
 import extensionPromptMarkdown from "bundle-text:../prompts/functional-extension-generation/generation_statement_functional_extension.md"
 import { sendToGemini } from "../services/geminiService"
 import { parseMasterPrompt } from "../utils/promptParser"
@@ -8,9 +8,12 @@ interface Props {
   domainName: string;
   onBack: () => void;
   onWelcome: () => void;
+  onCreateExam: () => void;
+  onCreateExamByParts: () => void;
+  onFunctionalExtension: () => void;
 }
 
-export default function DomainWorkflowScreen({ domainName, onBack, onWelcome }: Props) {
+export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, onCreateExam, onCreateExamByParts, onFunctionalExtension }: Props) {
   const [currentStep, setCurrentStep] = useState(1);
   const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
   
@@ -66,11 +69,46 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome }: 
     <div className="exam-app">
       <header className="app-header">
         <div className="header-left">
-          <span className="logo-icon" onClick={onWelcome}>
-            <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-          </span> 
-          <span>INICIO {'>'} CREAR EXAMEN {'>'} POR PARTES {'>'} EXTENSIÓN FUNCIONAL {'>'} {domainName.toUpperCase()}</span>
-        </div>
+      
+            <span className="logo-icon" onClick={onWelcome}>
+                <img src={logoExamCraft} alt="Logo" width="60" height="60" />
+            </span> 
+         
+            <nav className="breadcrumb-nav">
+                <span 
+                    className="breadcrumb-link" 
+                    onClick={onWelcome}
+                    title="Volver al inicio"
+                    >
+                    INICIO
+                </span>
+
+                <span className="breadcrumb-separator">{'>'}</span>
+
+                <span className="breadcrumb-link" onClick={onCreateExam}>
+                CREAR EXAMEN
+                </span>
+
+                <span className="breadcrumb-separator">{'>'}</span>
+
+                <span className="breadcrumb-link" onClick={onCreateExamByParts}>
+                POR PARTES
+                </span>
+
+                <span className="breadcrumb-separator">{'>'}</span>
+
+                <span className="breadcrumb-link" onClick={onFunctionalExtension}>
+                    EXTENSIÓN FUNCIONAL
+                </span>
+
+                <span className="breadcrumb-separator">{'>'}</span>
+
+                <span className="breadcrumb-current">
+                {domainName.toUpperCase()}
+                </span>
+                
+            </nav>
+            </div>
       </header>
 
       <div className="main-content"> 
@@ -112,13 +150,17 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome }: 
                     <div className="wf-split-view">
                         <div className="wf-column">
                             <span className="wf-column-title">Prompt enviado</span>
-                            <textarea className="wf-textarea" value={promptText} readOnly />
+                            <textarea 
+                            className="wf-textarea" 
+                            value={promptText}
+                            onChange={(e) => setPromptText(e.target.value)}
+                        />
                             <button onClick={handleGenerate} className="btn-step primary" disabled={isLoading}>
-                                {isLoading ? '...' : 'Reintentar'}
+                                {isLoading ? '...' : 'Volver a generar'}
                             </button>
                         </div>
                         <div className="wf-column">
-                            <span className="wf-column-title">Respuesta de Gemini</span>
+                            <span className="wf-column-title">Propuesta de texto de enunciado</span>
                             <div className="wf-result-box" style={{whiteSpace: 'pre-wrap'}}>
                                 {isLoading ? 'Generando...' : responseText}
                             </div>
@@ -137,8 +179,17 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome }: 
 
                 {currentStep === 2 && (
                     <div className="content-card">
-                        <h2>Paso 2 (Placeholder)</h2>
-                        <button onClick={() => setCurrentStep(1)} className="btn-step secondary">Volver</button>
+                        <h2 className="main-title small">Confirmación</h2>
+                        <p className="wf-instruction-text">
+                            ¿Está seguro que desea usar el texto de enunciado generado? Una vez confirmado, se generará el diagrama UML en base a él y no podrá modificarlo.                        </p> 
+                        <div className="wf-actions-row">
+                            <button onClick={() => setCurrentStep(1)} className="btn-step secondary">
+                                Cancelar y seguir editando enunciado
+                            </button>
+                            <button className="btn-step success">
+                                Confirmar y pasar al paso 2 (Diagrama UML)
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

@@ -51,7 +51,9 @@ export default function IndexTab() {
         onSelectDomain={(domainName) => {
              setSelectedDomain(domainName)  
              setScreen("domainWorkflow") 
-          }}/>
+          }}
+        onCreateExam={() => setScreen("createExam")}
+        />
       )}
 
       {screen === "domainWorkflow" && (
@@ -59,6 +61,9 @@ export default function IndexTab() {
           domainName={selectedDomain}
           onBack={() => setScreen("functionalExtension")} 
           onWelcome={() => setScreen("welcome")} 
+          onCreateExam={() => setScreen("createExam")}
+          onCreateExamByParts={() => setScreen("createExamByParts")}
+          onFunctionalExtension={() => setScreen("functionalExtension")}
         />
       )}
 

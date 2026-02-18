@@ -1,7 +1,7 @@
 import React from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import completeExamIcon from "../../assets/complete_exam.png"
-import partsExamIcon from "../../assets/parts_exam.png"
+import logoExamCraft from "../../assets/images/icon512.png"
+import completeExamIcon from "../../assets/images/complete_exam.png"
+import partsExamIcon from "../../assets/images/parts_exam.png"
 
 interface Props {
   onBack: () => void
@@ -15,20 +15,28 @@ export default function CreateExamScreen({ onBack, onCreateExamByParts }: Props)
       {/* --- HEADER --- */}   
       <header className="app-header">
         <div className="header-left">
-          
-          <span 
-            className="logo-icon" 
-            onClick={onBack} 
-            style={{ cursor: 'pointer' }} 
-            title="Volver al Inicio"
-          >
-            <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
-          </span> 
-          
-          <span>
-              INICIO {'>'} CREAR EXAMEN
-          </span>
-        </div>
+      
+            <span className="logo-icon" onClick={onBack}>
+                <img src={logoExamCraft} alt="Logo" width="60" height="60" />
+            </span> 
+         
+            <nav className="breadcrumb-nav">
+                <span 
+                    className="breadcrumb-link" 
+                    onClick={onBack}
+                    title="Volver al inicio"
+                    >
+                    INICIO
+                </span>
+
+                <span className="breadcrumb-separator">{'>'}</span>
+
+                <span className="breadcrumb-current">
+                CREAR EXAMEN
+                </span>
+                
+            </nav>
+            </div>
         <div className="header-right">
         </div>
       </header>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import type { GithubUser } from "../models/GithubUser"
 import type { GithubRepo } from "../models/GithubRepo"
 import { GithubService } from "../services/githubService"
-import logoExamCraft from "../../assets/icon512.png"
+import logoExamCraft from "../../assets/images/icon512.png"
 
 interface Props {
   onBack: () => void
