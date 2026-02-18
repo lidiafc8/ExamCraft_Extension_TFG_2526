@@ -1,19 +1,19 @@
 # PROMPT PARA LA GENERACIÓN DE RELACIONES ENTRE ENTIDADES
 
 ## Recursos a proporcionar:
-* `RELACIONES ENTRE ENTIDADES DE EJEMPLO DE EXÁMENES ANTERIORES.pdf`
+* `relationships_between_entities_examples_previous_exams.md`
 
 ## Prompt a utilizar:
 
 Una vez que tenemos la extensión funcional completa del nuevo examen y el diagrama UML, pasaremos a generar el ejercicio “RELACIONES ENTRE ENTIDADES” del examen que estamos creando, es decir, la implementación de las relaciones entre las entidades correspondientes.
 
-Quiero que en base a la lógica de la extensión funcional y el diagrama UML que me has pasado y que ya tenemos, recordando todo el contexto e información proporcionada previa, describirás en detalle las relaciones a implementar por el alumno entre las entidades descritas anteriormente, es decir, entre las clases rojas. Para ello, se te adjunta un pdf llamado “Relaciones entre entidades de ejemplos exámenes anteriores” con ejemplos de exámenes anteriores ya realizados.
+Quiero que en base a la lógica de la extensión funcional y el diagrama UML que me has pasado y que ya tenemos, recordando todo el contexto e información proporcionada previa, describirás en detalle las relaciones a implementar por el alumno entre las entidades descritas anteriormente, es decir, entre las clases rojas. Para ello, se te adjunta un archivo md llamado “relationships_between_entities_examples_previous_exams” con ejemplos de exámenes anteriores ya realizados.
 
 Deberá cumplir estos requisitos:
 
 -	Lo que vamos a proporcionar al alumno es un proyecto real que tendrá que manipular, por lo que los atributos de las nuevas clases tendrán anotaciones @Transient, que deberán eliminarse en este ejercicio. Esto se debe indicar explícitamente en este ejercicio.
 
--	Las explicaciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo pdf.
+-	Las explicaciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
 
 -	Se debe especificar la direccionalidad de las relaciones a implementar y las entidades implicadas en cada una de ellas.
 

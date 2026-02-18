@@ -1,7 +1,7 @@
 # PROMPT COMPLETO PARA LA GENERACIÓN DE EXTENSIÓN FUNCIONAL (ENUNCIADO)
 
 ## Recursos a proporcionar:
-* `EXTENSIONES FUNCIONALES DE EJEMPLO.pdf`
+* `functional_extension_examples.md`
 
 ## Prompt a utilizar:
 
@@ -32,9 +32,9 @@ Nuestra misión es generar un enunciado tomando el rol de profesores para una as
 
 * Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
 
-Sabiendo esto, y entendiéndolo a fondo, cogerás los enunciados de exámenes de ejemplo para usarlos como base en el pdf llamado “Extensiones funcionales de ejemplo” que te adjunto.
+Sabiendo esto, y entendiéndolo a fondo, cogerás los enunciados de exámenes de ejemplo para usarlos como base en el archivo md llamado “functional_extension_examples” que te adjunto.
 
-Teniendo estos ejemplos, tu tarea es proporcionarme una extensión de enunciado nueva que sea funcional del proyecto **[ajedrez/clínica veterinaria]**, que cumpla estos requisitos:
+Teniendo estos ejemplos, tu tarea es proporcionarme una extensión de enunciado nueva que sea funcional del proyecto {{DOMAIN}}, que cumpla estos requisitos:
 
 *	La extensión funcional deberá añadir alguna funcionalidad nueva no repetida en anteriores exámenes, es decir, los exámenes pasados como ejemplo.
 

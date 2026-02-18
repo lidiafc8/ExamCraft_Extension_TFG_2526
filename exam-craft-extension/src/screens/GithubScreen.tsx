@@ -37,14 +37,25 @@ export default function GithubScreen({ onBack }: Props) {
 
   return (
     <div className="exam-app">
-      
-      {/* --- HEADER --- */}
+
+      {/* --- HEADER --- */}   
       <header className="app-header">
         <div className="header-left">
-          <span className="logo-icon">
+          
+          <span 
+            className="logo-icon" 
+            onClick={onBack} 
+            style={{ cursor: 'pointer' }} 
+            title="Volver al Inicio"
+          >
             <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
           </span> 
-          <span>GITHUB INFO</span>
+          
+          <span>
+              GITHUB INFO
+          </span>
+        </div>
+        <div className="header-right">
         </div>
       </header>
 
