@@ -1,1 +1,21 @@
-# ExamCraft_TFG_2526
+# ExamCraft Extension - TFG 25/26
+
+<p align="center">
+  <img src="exam-craft-extension/assets/icon512.png" alt="ExamCraft Logo" width="140" />
+</p>
+
+Herramienta dirigida al profesorado de la asignatura Diseño y Pruebas I de la Universidad de Sevilla, cuyo objetivo es facilitar la generación automatizada de exámenes, optimizando el proceso de elaboración y mejorando la eficiencia en la creación de pruebas de evaluación.
+
+## Ejecutar el proyecto en modo desarrollo
+
+### 1 - Acceder a la carpeta del proyecto
+cd exam-craft-extension
+
+### 2 - Instalar dependencias
+npm install
+
+### 3 - Ejecutar en modo desarrollo
+npm run dev
+
+
+
