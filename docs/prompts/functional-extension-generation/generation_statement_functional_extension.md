@@ -34,7 +34,7 @@ Nuestra misión es generar un enunciado tomando el rol de profesores para una as
 
 Sabiendo esto, y entendiéndolo a fondo, cogerás los enunciados de exámenes de ejemplo para usarlos como base en el pdf llamado “Extensiones funcionales de ejemplo” que te adjunto.
 
-Teniendo estos ejemplos, tu tarea es proporcionarme una extensión de enunciado nueva que sea funcional del proyecto **[ajedrez/clínica veterinaria]**, que cumpla estos requisitos:
+Teniendo estos ejemplos, tu tarea es proporcionarme una extensión de enunciado nueva que sea funcional del proyecto {{DOMAIN}}, que cumpla estos requisitos:
 
 *	La extensión funcional deberá añadir alguna funcionalidad nueva no repetida en anteriores exámenes, es decir, los exámenes pasados como ejemplo.
 

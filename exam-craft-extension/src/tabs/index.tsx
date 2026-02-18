@@ -1,23 +1,69 @@
 import { useState } from "react"
 import WelcomeScreen from "../screens/WelcomeScreen"
 import GithubScreen from "../screens/GithubScreen"
+import CreateExamScreen from "../screens/CreateExamScreen"
+import CreateExamByPartsScreen from "../screens/CreateExamByPartsScreen"
+import FunctionalExtensionScreen from "../screens/FunctionalExtensionScreen"
+import DomainWorkflowScreen from "../screens/DomainWorkflowScreen"
 import "/assets/main.css"
 
 export default function IndexTab() {
-  // Estado: Controla qué pantalla vemos. Empezamos en "welcome"
-  const [screen, setScreen] = useState<"welcome" | "github">("welcome")
+  const [selectedDomain, setSelectedDomain] = useState<string>("")
+  const [screen, setScreen] = useState<
+    "welcome" | 
+    "github" | 
+    "createExam" | 
+    "createExamByParts" | 
+    "functionalExtension" | 
+    "domainWorkflow" 
+  >("welcome")
 
   return (
     <div>
-      {/* 1. Si el estado es "welcome", mostramos la Bienvenida */}
       {screen === "welcome" && (
-        <WelcomeScreen onStart={() => setScreen("github")} />
+        <WelcomeScreen 
+        onStart={() => setScreen("github")} 
+        onCreateExam={() => setScreen("createExam")}
+        onBack={() => setScreen("welcome")}/>
       )}
 
-      {/* 2. Si el estado es "github", mostramos el Panel */}
       {screen === "github" && (
         <GithubScreen onBack={() => setScreen("welcome")} />
       )}
+
+      {screen === "createExam" && (
+        <CreateExamScreen 
+        onBack={() => setScreen("welcome")} 
+        onCreateExamByParts={() => setScreen("createExamByParts")} />
+      )}
+
+      {screen === "createExamByParts" && (
+        <CreateExamByPartsScreen 
+        onBack={() => setScreen("createExam")} 
+        onWelcome={() => setScreen("welcome")} 
+        onFunctionalExtension={() => setScreen("functionalExtension")} />
+      )}
+
+      {screen === "functionalExtension" && (
+        <FunctionalExtensionScreen 
+        onBack={() => setScreen("createExamByParts")} 
+        onWelcome={() => setScreen("welcome")} 
+        onSelectDomain={(domainName) => {
+             setSelectedDomain(domainName)  
+             setScreen("domainWorkflow") 
+          }}/>
+      )}
+
+      {screen === "domainWorkflow" && (
+        <DomainWorkflowScreen 
+          domainName={selectedDomain}
+          onBack={() => setScreen("functionalExtension")} 
+          onWelcome={() => setScreen("welcome")} 
+        />
+      )}
+
+
     </div>
   )
 }
+
