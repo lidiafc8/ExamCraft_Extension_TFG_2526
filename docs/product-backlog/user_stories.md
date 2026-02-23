@@ -54,7 +54,7 @@
 
 * **HU-15:** Como profesor quiero que se me muestre el segundo paso correspondiente a la generación del diagrama UML (de la parte “Enunciado”) solo si he validado la propuesta del primer paso proporcionada por el sistema previamente en la pantalla de propuesta intermedia, para así definir claramente qué texto de enunciado quiero utilizar.
 ![Boceto de paso 2 de confirmación del enunciado](mock_ups/confirmar_enunciado_extension_funcional.png)
-![Boceto de paso 2 de diagrama UML](mock_ups/diagrama_uml_principal_con_diagrama.png)
+![Boceto de paso 2 de diagrama UML](mock_ups/extension_funcional_con_diagrama.png)
 
 * **HU-16:** Como profesor quiero que el segundo paso correspondiente a la generación del diagrama UML (de la parte “Enunciado”) me lleve directamente a la página de propuesta final, donde se me muestre de forma unificada la propuesta de los dos pasos, para así poder ver el resultado final y completo de la parte “Enunciado”.
 ![Boceto de pasar del diagrama UML a la propuesta general](mock_ups/diagrama_uml_principal_con_diagrama_solucion_generada.png)
@@ -66,7 +66,6 @@
 
 * **HU-18:** Como profesor quiero que tanto en la pantalla de propuesta final como en la intermedia se me muestre un apartado en formato MarkDown con la propuesta de la parte o examen solicitado, para así poder leer de forma adecuada la propuesta proporcionada por el sistema.
 ![Boceto de paso 1 de enunciado](mock_ups/enunciado_propuesta.png)
-![Boceto de paso 2 de diagrama UML](mock_ups/diagrama_uml_principal_con_diagrama.png)
 ![Boceto de propuesta general de la extensión](mock_ups/extension_funcional_con_diagrama.png)
 
 * **HU-19:** Como profesor quiero que en la pantalla de propuesta final, concretamente en el apartado de la propuesta de la parte o examen solicitado en formato MarkDown, en caso de haber generado un nuevo enunciado, se muestre el código Mermaid del diagrama UML proporcionado junto con su dibujo de cajas, para así poder comprobar el diagrama concreto de manera cómoda.
@@ -74,13 +73,11 @@
 
 * **HU-20:** Como profesor quiero que tanto en la pantalla de propuesta final como en la intermedia se me muestre una caja de texto editable donde se encuentre el prompt que se ha lanzado, para así poder eliminarlo, modificarlo o crear otras consultas personalizadas dentro de dicha caja a partir de la propuesta dada.
 ![Boceto de generar propuesta primera parte de la extensión funcional](mock_ups/enunciado_propuesta.png)
-![Boceto de paso 2 de diagrama UML](mock_ups/diagrama_uml_principal_con_diagrama.png)
 ![Boceto de paso final de la extensión funcional](mock_ups/extension_funcional_con_diagrama.png)
 
 
 * **HU-21:** Como profesor quiero poder volver a hacer una consulta (**HU-20**) a partir de una propuesta proporcionada por el sistema, usando un botón para volver a generar la propuesta, para que se muestre otra nueva posible propuesta una vez pulsado.
 ![Boceto de volver a generar el enunciado de la extensión funcional](mock_ups/paso1_extension_volver_a_generar.png)
-![Boceto de volver a generar el diagrama UML](mock_ups/diagrama_uml_volver_a_generar.png)
 
 
 * **HU-22:** Como profesor quiero poder volver a generar una nueva propuesta a partir de otra dada previamente pulsando un botón, para así poder conocer otras propuestas alternativas.
