@@ -1,5 +1,5 @@
 /* =========================================
-   1. RESET Y BASE
+   RESET Y BASE
    ========================================= */
 * {
   box-sizing: border-box;
@@ -17,7 +17,7 @@
 }
 
 /* =========================================
-   2. HEADER (Barra superior)
+   HEADER 
    ========================================= */
 .app-header {
   background-color: #B48574; 
@@ -27,6 +27,7 @@
   justify-content: space-between;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   height: 70px;
+  flex-shrink: 0;
 }
 
 .header-left {
@@ -45,29 +46,22 @@
 }
 
 .logo-icon {
-  display: flex; 
-  align-items: center;
-}
-
-.menu-icon {
-  font-size: 28px;
-  cursor: pointer;
-  color: #3E2723;
+  display: flex; align-items: center; cursor: pointer;
 }
 
 /* =========================================
-   3. CONTENIDO PRINCIPAL (HOME)
+   MAIN CONTENT
    ========================================= */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: center;     
+  justify-content: center; 
   gap: 20px;
-  padding-bottom: 50px;
+  padding: 20px;
+  overflow: hidden; 
 }
-
 
 .main-title {
   font-size: 3rem;
@@ -81,11 +75,7 @@
   text-align: center;
 }
 
-
-.main-title.small {
-  font-size: 2rem;
-}
-
+.main-title.small { font-size: 2rem; }
 
 .subtitle-badge {
   background-color: #E6DFF0; 
@@ -101,7 +91,9 @@
   letter-spacing: 0.5px;
 }
 
-
+/* =========================================
+   HOME CARDS
+   ========================================= */
 .cards-container {
   display: flex;
   gap: 60px;
@@ -124,9 +116,7 @@
   transition: transform 0.2s;
 }
 
-.action-card:hover {
-  transform: translateY(-5px);
-}
+.action-card:hover { transform: translateY(-5px); }
 
 .card-icon-box {
   background-color: #FDF5E6; 
@@ -138,10 +128,6 @@
   align-items: center;
   justify-content: center;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
-}
-
-.card-icon-img {
-  font-size: 40px;
 }
 
 .card-label {
@@ -157,30 +143,21 @@
 }
 
 /* =========================================
-   5. PANTALLA GITHUB
+   GITHUB SCREEN
    ========================================= */
-
-
 .content-card {
   background-color: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 30px;
   width: 90%;
-  max-width: 600px;
+  max-width: 600px; 
   box-shadow: 0 4px 15px rgba(62, 39, 35, 0.1);
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin: 0 auto; 
 }
-
-.loading-text {
-  text-align: center;
-  font-size: 1.5rem;
-  color: #5D3A3A;
-  font-weight: bold;
-}
-
 
 .btn-back {
   background-color: #3E2723; 
@@ -195,121 +172,234 @@
   transition: transform 0.2s, background-color 0.2s;
 }
 
+.btn-back:hover { transform: scale(1.1); background-color: #5D3A3A; }
 
-.btn-back:hover {
-  transform: scale(1.1); 
-  background-color: #5D3A3A; 
+.profiles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.user-card { background-color: #fff; border-radius: 15px; padding: 15px; display: flex; align-items: center; gap: 10px; border: 2px solid #A67C6D; }
+.avatar { border-radius: 50%; border: 2px solid #B48574; }
+.repo-card { background-color: #A67C6D; color: white; padding: 20px; border-radius: 15px; text-align: center; }
+.repo-link { display: inline-block; background-color: #FDF5E6; color: #3E2723; padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; }
+.btn-floating-github {
+  position: absolute; bottom: 20px; right: 20px; 
+  background-color: #3E2723; color: #FDF5E6; border: none; padding: 10px 20px;
+  border-radius: 50px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; transition: transform 0.2s;
 }
 
+/* =========================================
+   WORKFLOW SPECIFIC STYLES
+   ========================================= */
 
-.profiles-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
+.wf-layout-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; 
+  padding-bottom: 50px;
+  overflow-y: auto; 
+  overflow-x: hidden;
 }
 
-.user-card {
-  background-color: #fff;
-  border-radius: 15px;
-  padding: 15px;
+.wf-wide-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 0 auto;   
+}
+
+.stepper-container {
   display: flex;
   align-items: center;
-  gap: 10px;
-  border: 2px solid #A67C6D;
+  justify-content: center;
+  margin: 20px 0;
+  width: 100%;
+  max-width: 600px;
+  flex-shrink: 0; 
+}
+.step-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; }
+.step-circle {
+  width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 1.2rem; transition: all 0.3s ease; border: 3px solid transparent;
+}
+.step-label { margin-top: 8px; font-size: 0.9rem; font-weight: 600; color: #555; }
+.step-line { flex-grow: 1; height: 4px; background-color: #e0e0e0; margin: 0 10px 25px 10px; border-radius: 2px; }
+
+.step-active .step-circle { background-color: #3E2723; color: white; box-shadow: 0 0 0 4px rgba(62, 39, 35, 0.2); }
+.step-active .step-label { color: #3E2723; font-weight: bold; }
+.step-completed .step-circle { background-color: #4CAF50; color: white; }
+.step-completed + .step-line { background-color: #4CAF50; }
+.step-inactive .step-circle { background-color: #e0e0e0; color: #888; }
+
+.wf-split-view {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 100%;
+  align-items: stretch;
+  min-height: 500px;
 }
 
-.avatar {
-  border-radius: 50%;
-  border: 2px solid #B48574;
-}
-
-.user-details h3 {
-  color: #5D3A3A;
-  font-size: 1.1rem;
-  margin-bottom: 2px;
-}
-
-.user-details small {
-  color: #888;
-}
-
-
-.repo-card {
-  background-color: #A67C6D;
-  color: white;
+.wf-column {
+  flex: 1;
+  background: rgba(255,255,255,0.45);
   padding: 20px;
   border-radius: 15px;
-  text-align: center;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border: 1px solid rgba(255,255,255,0.5);
 }
 
-.repo-card h3 {
-  margin-bottom: 10px;
-  font-size: 1.3rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+.wf-column-title {
+  font-weight: bold; color: #3E2723; font-size: 1.1rem; text-align: center;
 }
 
-
-.repo-name {
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-bottom: 5px;
-}
-
-.repo-desc {
-  font-style: italic;
-  font-size: 0.9rem;
-  margin-bottom: 10px;
-}
-
-.repo-stars {
-  background: rgba(255,255,255,0.2);
-  padding: 5px 10px;
+.wf-textarea {
+  width: 100%;
+  flex: 1; 
+  min-height: 350px;
+  padding: 15px;
   border-radius: 10px;
-  display: inline-block;
-  margin-bottom: 15px;
+  border: 2px solid #B48574;
+  background-color: #FFF8E1;
+  color: #3E2723;
+  font-family: 'Consolas', monospace;
+  font-size: 0.95rem;
+  resize: vertical;
 }
 
-
-.repo-link {
-  display: inline-block;
-  background-color: #FDF5E6; 
-  color: #3E2723;            
-  padding: 8px 20px;
-  border-radius: 20px;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 0.9rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transition: transform 0.2s;
-}
-
-.repo-link:hover {
-  transform: scale(1.05);
+.wf-result-box {
+  width: 100%;
+  flex: 1;
+  min-height: 350px;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #aaa;
   background-color: #fff;
+  overflow-y: auto;
+  white-space: pre-wrap;
 }
 
+.wf-actions-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 10px;
+}
 
-.btn-floating-github {
-  position: absolute;  
-  bottom: 20px;        
-  right: 20px;         
-  
-
-  background-color: #3E2723; 
-  color: #FDF5E6;           
-  border: none;
-  padding: 10px 20px;
-  border-radius: 50px;      
+.btn-step {
+  padding: 12px 30px;
+  border-radius: 50px;
   font-weight: bold;
+  border: none;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-  z-index: 100;              
-  transition: transform 0.2s, background-color 0.2s;
+  font-size: 1rem;
+  min-width: 140px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-step:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
+
+.btn-step.primary { background-color: #3E2723; color: white; }
+.btn-step.primary:hover { background-color: #5D3A3A; }
+
+.btn-step.secondary { background-color: #D7CCC8; color: #3E2723; }
+.btn-step.secondary:hover { background-color: #BCAAA4; }
+
+.btn-step.success { background-color: #2E7D32; color: white; }
+.btn-step.success:hover { background-color: #1B5E20; }
+
+.loading-spinner {
+  border: 4px solid #f3f3f3; border-top: 4px solid #3E2723;
+  border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.wf-instruction-text {
+  font-size: 1.15rem;       
+  color: #5D4037;           
+  line-height: 1.6;        
+  text-align: center;
+  max-width: 650px;        
+  margin: 0 auto 25px auto; 
+  font-weight: 500;         
 }
 
-.btn-floating-github:hover {
-  transform: scale(1.1);    
-  background-color: #5D3A3A; 
+/* =========================================
+   VERTICAL MENU STYLES
+   ========================================= */
+
+.vertical-menu-container {
+  display: flex;
+  flex-direction: column; 
+  gap: 20px;             
+  width: 100%;
+  max-width: 500px;       
+  margin-bottom: 30px;
+  align-self: center; 
+}
+
+.menu-btn {
+  background-color: #A67C6D; 
+  color: white;
+  font-size: 1.3rem;
+  font-weight: bold;
+  padding: 20px 30px;     
+  border: none;
+  border-radius: 15px;    
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+  transition: all 0.2s ease;
+  text-transform: uppercase; 
+  letter-spacing: 1px;
+  width: 100%; 
+}
+
+.menu-btn:hover {
+  background-color: #8D5E50;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.menu-btn:active {
+  transform: translateY(0); 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+
+/* =========================================
+   BREADCRUMBS STYLES
+   ========================================= */
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 18px; 
+}
+
+.breadcrumb-link {
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-weight: 500;
+}
+
+.breadcrumb-link:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: #4e3506; 
+  margin: 0 2px;
+}
+
+.breadcrumb-current {
+  color: #210e01; 
+  font-weight: bold;
 }
