@@ -16,7 +16,7 @@ Nuestra misión es generar, a partir de un enunciado dado, el ejercicio de un ex
 
      -	Concepto de colores de clases: 
 
-         - **Clases negras**: El núcleo del sistema. Clases estables que se usan como contexto, pero que no forma parte de la tarea de implementación. 
+         - **Clases negras**: El núcleo del sistema. Clases estables que se usan como contexto, pero que quedan fuera de la tarea de implementación. 
 
          - **Clases rojas**: La tarea principal del alumno, se deben crear desde 0. Las clases vienen creadas pero su contenido está vacío.
 
@@ -28,17 +28,17 @@ Nuestra misión es generar, a partir de un enunciado dado, el ejercicio de un ex
 
          - Tendremos relaciones únicamente unidireccionales.
 
-         - La cardinalidad podrá ser de 1..1, 1, 0..1, 0..n, 1..n. Las relaciones muchos a muchos no se pedirán en ningún caso.
+         - La cardinalidad podrá ser de 1..1, 1, 0..1, 0..n, 1..n. Las relaciones muchos a muchos se omitirán en todos los casos.
 
 - Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
 
-Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica del enunciado y el diagrama UML en código Mermaid que te paso en el archivo md “functional_extension_selected”, quiero que me generes el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (no nulo, etc). Para ello, te adjunto el archivo md llamado “attribute_constraints_examples_previous_exams” como referencia. Deberá cumplir estos requisitos:
+Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica del enunciado y el diagrama UML en código Mermaid que te paso en el archivo md “functional_extension_selected”, quiero que me generes el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (not null, etc). Para ello, te adjunto el archivo md llamado “attribute_constraints_examples_previous_exams” como referencia. Deberá cumplir estos requisitos:
 
 -	ÚNICAMENTE generarás las restricciones a nivel de entidad de los atributos de las clases a implementar por el alumno.
 
 -	Las restricciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
 
--	NO AÑADAS las restricciones de los atributos correspondientes a las relaciones entre las entidades, eso se definirá más adelante.
+-	Omitirás en tu respuesta cualquier mención y explicación sobre las restricciones de los atributos correspondientes a las relaciones entre las entidades, eso se definirá más adelante.
 
 -	Sé lo más creativo posible en cuanto a restricciones, ni muy simples, ni muy complejas.
 

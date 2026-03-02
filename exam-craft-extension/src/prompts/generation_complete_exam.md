@@ -16,7 +16,7 @@
 
     - Concepto de colores de clases:
   
-      - **Clases negras**: El núcleo del sistema. Clases estables que se usan como contexto, pero que no forma parte de la tarea de implementación.  
+      - **Clases negras**: El núcleo del sistema. Clases estables que se usan como contexto, pero que quedan fuera de la tarea de implementación.  
 
       - **Clases azules**: La base proporcionada. Son clases ya implementadas con las que las clases rojas interactuarán. Pueden estar sujetas a modificaciones para integrar las nuevas funcionalidades. 
 
@@ -32,7 +32,7 @@
 
       -	Tendremos relaciones únicamente unidireccionales.
 
-      -	La cardinalidad podrá ser de 1..1, 1, 0..1, 0..n, 1..n. Las relaciones muchos a muchos no se pedirán en ningún caso.
+      -	La cardinalidad podrá ser de 1..1, 1, 0..1, 0..n, 1..n. Las relaciones muchos a muchos se omitirán en todos los casos.
 
   *	Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
 
@@ -43,11 +43,11 @@ Sabiendo esto, y entendiéndolo a fondo, cogerás los enunciados de exámenes de
 
 Teniendo estos ejemplos, tu tarea es proporcionarme una extensión de enunciado nueva que sea funcional del proyecto **[ajedrez/clínica veterinaria]**, que cumpla estos requisitos:
 
-*	La extensión funcional deberá añadir alguna funcionalidad nueva no repetida en anteriores exámenes, es decir, los exámenes pasados como ejemplo.
+*	La extensión funcional deberá añadir alguna funcionalidad nueva respecto a los anteriores exámenes, es decir, los exámenes pasados como ejemplo.
 
-*	No se te pide el código Mermaid, solo el enunciado en texto plano explicando la nueva extensión funcional.
+*	**Omite en tu respuesta el código Mermaid**, devuelve solo el enunciado en texto plano explicando la nueva extensión funcional.
 
-*	No añadirás ninguna nota para el alumno ni para el profesorado.
+*	Omite en tu respuesta cualquier nota dirigida hacia el alumno y al profesorado.
 
 *	La extensión funcional devuelta deberá tener la misma estructura narrativa que la de los proporcionados como ejemplo, tanto el principio como el final del enunciado.
 
@@ -57,13 +57,13 @@ Teniendo estos ejemplos, tu tarea es proporcionarme una extensión de enunciado 
 
 *	Sé lo más creativo posible.
 
-*	Como te he explicado antes, las clases azules eran generadas por el profesorado como apoyo de la lógica nueva creada, tú no tienes que crear ninguna, simplemente desde la base de clases negras, genera una extensión funcional de clases rojas usando tu creatividad.
+*	Como te he explicado antes, las clases azules eran generadas por el profesorado como apoyo de la lógica nueva creada, por lo que tú evitarás crearlas. Simplemente desde la base de clases negras, genera una extensión funcional de clases rojas usando tu creatividad.
 
-*	No hace falta mencionar el color de las clases que se van a dar, puesto que eso los alumnos lo verán en el diagrama.
+*	En ningún caso mencionarás ni explicarás el color de las clases que se van a dar, puesto que eso los alumnos lo verán en el diagrama.
 
 *	Devuélveme directamente el enunciado resultado como si fuera el del examen, sin comentarios entre medio ni indicaciones concretas generadas por ti.
 
-*	Al no haber clases azules, no deberás decir ninguna información acerca de ellas en el enunciado generado, aunque en los enunciados de ejemplos si venga. 
+*	Debido a la ausencia de clases azules, omite en tu respuesta cualquier información acerca de ellas en el enunciado generado, aunque en los enunciados de ejemplos si venga.
 
 ---
 Una vez que tenemos la extensión funcional completa del nuevo examen, pasaremos a la siguiente tarea que quiero que realices.
@@ -86,7 +86,7 @@ Quiero que en base a la lógica de la extensión funcional que me has pasado, me
 
 ### RESTRICCIONES DE ATRIBUTOS
 
-Una vez creado el diagrama, generarás el enunciado para el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (no nulo, etc). Para ello, te adjunto el archivo md llamado “attribute_constraints_examples_previous_exams” como referencia. Deberá cumplir estos requisitos:
+Una vez creado el diagrama, generarás el enunciado para el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (not null, etc). Para ello, te adjunto el archivo md llamado “attribute_constraints_examples_previous_exams” como referencia. Deberá cumplir estos requisitos:
 
 *	ÚNICAMENTE generarás las restricciones a nivel de entidad de los atributos de las clases a implementar por el alumno.
 
