@@ -13,7 +13,7 @@ Nuestra misión es generar, a partir de un enunciado dado, el ejercicio de un ex
 -	Respecto al diagrama UML:
 
      - 	Concepto de colores de clases:  
-         - **Clases negras**: El núcleo del sistema. Clases estables que se usan como contexto, pero que no forma parte de la tarea de implementación. 
+         - **Clases negras**: El núcleo del sistema. Clases estables que se usan como contexto, pero que quedan fuera de la tarea de implementación. 
          - **Clases rojas**: La tarea principal del alumno, se deben crear desde 0. Las clases vienen creadas pero su contenido está vacío.
 
          - Las clases negras son la base de la que partimos siempre en todos los exámenes, el dominio común a todos los exámenes dependiendo de qué tipo (clínica o ajedrez) de examen estemos generando y las rojas, pueden variar según la extensión funcional que se le añada.
@@ -24,7 +24,7 @@ Nuestra misión es generar, a partir de un enunciado dado, el ejercicio de un ex
 
          - Tendremos relaciones únicamente unidireccionales.
 
-         - La cardinalidad podrá ser de 1..1, 1, 0..1, 0..n, 1..n. Las relaciones muchos a muchos no se pedirán en ningún caso.
+         - La cardinalidad podrá ser de 1..1, 1, 0..1, 0..n, 1..n. Las relaciones muchos a muchos se omitirán en todos los casos.
 
 -	Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
 
@@ -44,7 +44,7 @@ Deberá cumplir estos requisitos:
 
 -	Se debe indicar que deberá implementar correctamente la cardinalidad de la relación, poniendo ejemplos simples de la relación actual para que se entienda bien.
 
--	NO AÑADAS ninguna anotación para los alumnos ni criterios de evaluación, solo lo que se te especifica.
+-	Omite en tu respuesta cualquier anotación para los alumnos y criterios de evaluación, solo devuelve lo que se te especifica.
 
 -	El enunciado deberá seguir la siguiente sintaxis:
 
