@@ -57,6 +57,23 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
         setResponseText(result);
         setInternalStep('result');
 
+        try {
+            await fetch("http://localhost:3001/save-log", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    exercise: "functional_extension",
+                    domain: domainName,               
+                    hiddenContext: hiddenContext,     
+                    visiblePrompt: promptText,        
+                    response: result                  
+                })
+            });
+            console.log("Log enviado al servidor local correctamente.");
+        } catch (error) {
+            console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
+        }
+
     } catch (error) {
         console.error(error);
         alert("Error al generar.");
