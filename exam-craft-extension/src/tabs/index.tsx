@@ -6,6 +6,7 @@ import CreateExamByPartsScreen from "../screens/CreateExamByPartsScreen"
 import FunctionalExtensionScreen from "../screens/FunctionalExtensionScreen"
 import DomainWorkflowScreen from "../screens/DomainWorkflowScreen"
 import "/assets/main.css"
+import AttributesConstraintsWorkflowScreen from "~src/screens/AttributesConstraintsWorkflowScreen"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
@@ -14,6 +15,7 @@ export default function IndexTab() {
     "github" | 
     "createExam" | 
     "createExamByParts" | 
+    "attributesConstraints" |
     "functionalExtension" | 
     "domainWorkflow" 
   >("welcome")
@@ -41,7 +43,8 @@ export default function IndexTab() {
         <CreateExamByPartsScreen 
         onBack={() => setScreen("createExam")} 
         onWelcome={() => setScreen("welcome")} 
-        onFunctionalExtension={() => setScreen("functionalExtension")} />
+        onFunctionalExtension={() => setScreen("functionalExtension")}
+        onAttributesConstraints={() => setScreen("attributesConstraints")} />
       )}
 
       {screen === "functionalExtension" && (
@@ -67,6 +70,13 @@ export default function IndexTab() {
         />
       )}
 
+      {screen === "attributesConstraints" && (
+        <AttributesConstraintsWorkflowScreen 
+          onBack={() => setScreen("createExamByParts")} 
+          onWelcome={() => setScreen("welcome")} 
+          onCreateExam={() => setScreen("createExam")}
+        />
+      )}
 
     </div>
   )

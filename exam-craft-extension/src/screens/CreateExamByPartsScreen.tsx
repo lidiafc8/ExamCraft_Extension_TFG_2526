@@ -5,9 +5,10 @@ interface Props {
   onBack: () => void
   onWelcome: () => void
   onFunctionalExtension: () => void
+  onAttributesConstraints: () => void
 }
 
-export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension }: Props) {
+export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints }: Props) {
   return (
     <div className="exam-app">
       
@@ -61,7 +62,7 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
             Extensión funcional
           </button>
 
-          <button className="menu-btn">
+          <button className="menu-btn" onClick={onAttributesConstraints}>
             Restricciones de atributos
           </button>
 
