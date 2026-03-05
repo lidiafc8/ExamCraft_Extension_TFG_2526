@@ -45,17 +45,36 @@ export default function CreateExamExtensionStep2Screen({
 
   const cleanMermaidCode = (text: string) => {
     if (!text) return "";
-    let code = text.replace(/```(?:mermaid)?\s*([\s\S]*?)\s*```/, '$1');
+
+    let code = text.replace(/```(?:mermaid)?\s*([\s\S]*?)\s*```/, "$1");
+
     if (code === text) {
-        code = text.replace(/```mermaid/gi, '').replace(/```/g, '');
+      code = text.replace(/```mermaid/gi, "").replace(/```/g, "");
     }
+
     const startKeywordIndex = code.search(/classDiagram|graph|stateDiagram|erDiagram/);
     if (startKeywordIndex !== -1) {
-        code = code.substring(startKeywordIndex);
+      code = code.substring(startKeywordIndex);
     }
-    code = code.replace(/^\s*(style|classDef|linkStyle)\b.*$/gm, '');
-    code = code.replace(/color:\s*(?:#[0-9a-fA-F]{3,6}|[a-zA-Z]+);?/gi, '');
-    code = code.replace(/\n\s*\n/g, '\n');
+
+    // eliminar definiciones de estilos
+    code = code.replace(/^\s*classDef.*$/gm, "");
+
+    // eliminar solo asignaciones de estilos (class X redClass)
+    code = code.replace(/^\s*class\s+\w+\s+\w+\s*$/gm, "");
+
+    // eliminar estilos de nodos o enlaces
+    code = code.replace(/^\s*(style|linkStyle).*$/gm, "");
+
+    // eliminar propiedades de color
+    code = code.replace(/fill:\s*[^,;]+/gi, "");
+    code = code.replace(/stroke:\s*[^,;]+/gi, "");
+    code = code.replace(/color:\s*[^,;]+/gi, "");
+    code = code.replace(/#[0-9a-fA-F]{3,6}/g, "");
+
+    // limpiar líneas vacías
+    code = code.replace(/\n\s*\n/g, "\n");
+
     return code.trim();
   };
 
