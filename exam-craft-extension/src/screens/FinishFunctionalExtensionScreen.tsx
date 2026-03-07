@@ -35,25 +35,33 @@ export default function FinishFunctionalExtensionScreen({
             .trim();
     };
 
-    const handleSaveToChrome = (domainName, extensionFinish) => {
+    const handleSaveToChrome = () => {
         // Verificamos que estamos en el entorno de una extensión de Chrome
         if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
             
+            // 1. Pedimos al usuario que elija el nombre del proyecto
+            const userChosenName = prompt("Introduce el nombre para guardar este examen:", domainName);
+            
+            // Si el usuario cancela (null) o no escribe nada, abortamos
+            if (userChosenName === null) return;
+            
+            const finalName = userChosenName.trim() || domainName;
+
             const dataToSave = {
-                domainName: domainName,
+                domainName: finalName,
                 extensionFinish: extensionFinish,
                 savedAt: new Date().toISOString()
             };
 
-            // Guardamos usando una clave única (por ejemplo, basada en el nombre del dominio)
-            const storageKey = `project_${domainName.replace(/\s+/g, '_').toLowerCase()}`;
+            // 2. Usamos Date.now() para que la clave sea única y no se borren exámenes anteriores
+            const storageKey = `project_${Date.now()}`;
 
             chrome.storage.local.set({ [storageKey]: dataToSave }, () => {
                 if (chrome.runtime.lastError) {
                     console.error("Error al guardar:", chrome.runtime.lastError);
                     alert("No se pudo guardar en el almacenamiento local.");
                 } else {
-                    alert("¡Proyecto guardado con éxito en la extensión!");
+                    alert(`¡Proyecto "${finalName}" guardado con éxito!`);
                 }
             });
         } else {
@@ -63,14 +71,9 @@ export default function FinishFunctionalExtensionScreen({
 
     const extractMermaidCode = (fullText: string) => {
         if (!fullText) return "";
-        // Buscamos el bloque que contiene la palabra clave de Mermaid
         const separatorRegex = /-{5,}|={5,}/; 
         const parts = fullText.split(separatorRegex);
-        
-        // Buscamos la parte que empiece con classDiagram o similar
         const diagramPart = parts.find(p => p.toLowerCase().includes("classdiagram") || p.toLowerCase().includes("graph")) || "";
-        
-        // Limpiamos posibles títulos residuales dentro de esa parte
         return diagramPart.replace(/.*?(classDiagram|graph)/is, "$1").trim();
     };
 
@@ -132,7 +135,6 @@ export default function FinishFunctionalExtensionScreen({
                             </div>
 
                             {/* COLUMNA DERECHA: DIAGRAMA RENDERIZADO */}
-                            
                             <div className="content-card" style={{ flex: '1.2', display: 'flex', flexDirection: 'column', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '15px', overflow: 'hidden' }}>
                                 <div style={{ padding: '10px', background: '#f8f9fa', borderBottom: '1px solid #eee', fontWeight: 'bold', textAlign: 'center', fontSize: '14px' }}>
                                     📊 Visualización del Modelo UML
@@ -167,7 +169,7 @@ export default function FinishFunctionalExtensionScreen({
                                 }}
                                 onMouseOver={(e) => e.currentTarget.style.background = '#f0f0f0'}
                                 onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-                                onClick={() => handleSaveToChrome(domainName,extensionFinish)}
+                                onClick={handleSaveToChrome}
                                 title="Guardar en la extensión"
                             >
                                 <svg 
