@@ -161,9 +161,19 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
                         </div>
                         <div className="wf-column">
                             <span className="wf-column-title">Propuesta de texto de enunciado</span>
-                            <div className="wf-result-box" style={{whiteSpace: 'pre-wrap'}}>
-                                {isLoading ? 'Generando...' : responseText}
-                            </div>
+                            
+                            {isLoading ? (
+                                <div className="wf-result-box" style={{ whiteSpace: 'pre-wrap' }}>
+                                    Generando...
+                                </div>
+                            ) : (
+                                <textarea 
+                                    className="wf-result-box"
+                                    value={responseText}
+                                    onChange={(e) => setResponseText(e.target.value)}
+                                />
+                            )}
+                            
                             <button onClick={() => setCurrentStep(2)} className="btn-step primary">
                                 Confirmar y Continuar
                             </button>
