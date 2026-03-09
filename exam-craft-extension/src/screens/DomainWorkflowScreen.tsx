@@ -11,9 +11,10 @@ interface Props {
   onCreateExam: () => void;
   onCreateExamByParts: () => void;
   onFunctionalExtension: () => void;
+  onCreateDiagram: (text: string) => void;
 }
 
-export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, onCreateExam, onCreateExamByParts, onFunctionalExtension }: Props) {
+export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, onCreateExam, onCreateExamByParts, onFunctionalExtension, onCreateDiagram }: Props) {
   const [currentStep, setCurrentStep] = useState(1);
   const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
   
@@ -213,7 +214,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
                             <button onClick={() => setCurrentStep(1)} className="btn-step secondary">
                                 Cancelar y seguir editando enunciado
                             </button>
-                            <button className="btn-step success">
+                            <button onClick={() => onCreateDiagram(responseText)} className="btn-step success">
                                 Confirmar y pasar al paso 2 (Diagrama UML)
                             </button>
                         </div>
