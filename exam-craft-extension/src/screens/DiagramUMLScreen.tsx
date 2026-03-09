@@ -106,7 +106,7 @@ export default function DiagramUMLScreen({
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        exercise: "functional_extension_complete",
+                        exercise: "diagram_uml_functional_extension",
                         domain: domainName,               
                         hiddenContext: hiddenContext,     
                         visiblePrompt: promptText,        
