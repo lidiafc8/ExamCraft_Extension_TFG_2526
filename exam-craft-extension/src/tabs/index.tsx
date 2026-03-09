@@ -7,6 +7,7 @@ import DomainSelectionScreen from "../screens/DomainSelectionScreen"
 import DomainWorkflowScreen from "../screens/DomainWorkflowScreen"
 import DiagramUMLScreen from "../screens/DiagramUMLScreen"
 import FinishFunctionalExtensionScreen from "../screens/FinishFunctionalExtensionScreen"
+import StorageExamsScreen from "../screens/StorageExamsScreen"
 import "/assets/main.css"
 
 export default function IndexTab() {
@@ -21,7 +22,8 @@ export default function IndexTab() {
     "functionalExtension" | 
     "domainWorkflow" |
     "diagramUML" |
-    "finishFunctionalExtension"
+    "finishFunctionalExtension" |
+    "storage" |
     "domainSelection" | 
     "domainWorkflow" 
   >("welcome")
@@ -32,7 +34,8 @@ export default function IndexTab() {
         <WelcomeScreen 
         onStart={() => setScreen("github")} 
         onCreateExam={() => setScreen("createExam")}
-        onBack={() => setScreen("welcome")}/>
+        onBack={() => setScreen("welcome")}
+        onStorage={() => setScreen("storage")}/>
       )}
 
       {screen === "github" && (
@@ -87,13 +90,12 @@ export default function IndexTab() {
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
-          onFunctionalExtension={() => setScreen("functionalExtension")}
+          onFunctionalExtension={() => setScreen("domainSelection")}
           onStatementStep1={() => setScreen("domainWorkflow")}
           onFinishExtension={(extensionFinish) => {
             setFunctionalExtensionCompleted(extensionFinish)
             setScreen("finishFunctionalExtension")
           }}
-          onFunctionalExtension={() => setScreen("domainSelection")}
         />
       )}
 
@@ -112,7 +114,13 @@ export default function IndexTab() {
             setScreen("diagramUML")
           }}
         />
-        )}
+      )}
+
+      {screen === "storage" && (
+        <StorageExamsScreen 
+          onWelcome={() => setScreen("welcome")}
+        />
+      )}
 
 
     </div>
