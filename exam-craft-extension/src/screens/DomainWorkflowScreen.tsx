@@ -63,7 +63,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    exercise: "functional_extension",
+                    exercise: "statement_functional_extension",
                     domain: domainName,               
                     hiddenContext: hiddenContext,     
                     visiblePrompt: promptText,        
