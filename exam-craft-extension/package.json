@@ -10,6 +10,10 @@
     "package": "plasmo package"
   },
   "dependencies": {
+    "@mermaid-js/parser": "^1.0.0",
+    "mermaid": "^11.12.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "plasmo": "0.90.5",
     "react": "18.2.0",
     "react-dom": "18.2.0"
@@ -26,6 +30,9 @@
   "manifest": {
     "host_permissions": [
       "https://*/*"
+    ],
+    "permissions": [
+      "storage"
     ]
   }
 }

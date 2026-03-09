@@ -11,9 +11,10 @@ interface Props {
   onCreateExam: () => void;
   onCreateExamByParts: () => void;
   onFunctionalExtension: () => void;
+  onCreateDiagram: (text: string) => void;
 }
 
-export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, onCreateExam, onCreateExamByParts, onFunctionalExtension }: Props) {
+export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, onCreateExam, onCreateExamByParts, onFunctionalExtension, onCreateDiagram }: Props) {
   const [currentStep, setCurrentStep] = useState(1);
   const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
   
@@ -56,6 +57,23 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
         
         setResponseText(result);
         setInternalStep('result');
+
+        try {
+            await fetch("http://localhost:3001/save-log", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    exercise: "functional_extension",
+                    domain: domainName,               
+                    hiddenContext: hiddenContext,     
+                    visiblePrompt: promptText,        
+                    response: result                  
+                })
+            });
+            console.log("Log enviado al servidor local correctamente.");
+        } catch (error) {
+            console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
+        }
 
     } catch (error) {
         console.error(error);
@@ -161,9 +179,19 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
                         </div>
                         <div className="wf-column">
                             <span className="wf-column-title">Propuesta de texto de enunciado</span>
-                            <div className="wf-result-box" style={{whiteSpace: 'pre-wrap'}}>
-                                {isLoading ? 'Generando...' : responseText}
-                            </div>
+                            
+                            {isLoading ? (
+                                <div className="wf-result-box" style={{ whiteSpace: 'pre-wrap' }}>
+                                    Generando...
+                                </div>
+                            ) : (
+                                <textarea 
+                                    className="wf-result-box"
+                                    value={responseText}
+                                    onChange={(e) => setResponseText(e.target.value)}
+                                />
+                            )}
+                            
                             <button onClick={() => setCurrentStep(2)} className="btn-step primary">
                                 Confirmar y Continuar
                             </button>
@@ -186,7 +214,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
                             <button onClick={() => setCurrentStep(1)} className="btn-step secondary">
                                 Cancelar y seguir editando enunciado
                             </button>
-                            <button className="btn-step success">
+                            <button onClick={() => onCreateDiagram(responseText)} className="btn-step success">
                                 Confirmar y pasar al paso 2 (Diagrama UML)
                             </button>
                         </div>

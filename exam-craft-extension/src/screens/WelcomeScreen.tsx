@@ -7,9 +7,10 @@ interface Props {
   onStart: () => void
   onCreateExam: () => void
   onBack: () => void
+  onStorage: () => void
 }
 
-export default function WelcomeScreen({ onStart, onCreateExam, onBack }: Props) {
+export default function WelcomeScreen({ onStart, onCreateExam, onBack, onStorage }: Props) {
   return (
     <div className="exam-app">
       
@@ -50,7 +51,7 @@ export default function WelcomeScreen({ onStart, onCreateExam, onBack }: Props) 
             <span className="card-label">Crear examen</span>
           </button>
 
-          <button className="action-card">
+          <button className="action-card" onClick={onStorage}>
               <span className="archive-icon"><img src={archiveIcon} alt="Icono archivo" width="100" height="100" /></span> {/* Icono carpeta */}
             <span className="card-label">Consultar exámenes <br/> anteriores</span>
           </button>
