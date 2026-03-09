@@ -3,7 +3,7 @@ import WelcomeScreen from "../screens/WelcomeScreen"
 import GithubScreen from "../screens/GithubScreen"
 import CreateExamScreen from "../screens/CreateExamScreen"
 import CreateExamByPartsScreen from "../screens/CreateExamByPartsScreen"
-import FunctionalExtensionScreen from "../screens/FunctionalExtensionScreen"
+import DomainSelectionScreen from "../screens/DomainSelectionScreen"
 import DomainWorkflowScreen from "../screens/DomainWorkflowScreen"
 import DiagramUMLScreen from "../screens/DiagramUMLScreen"
 import FinishFunctionalExtensionScreen from "../screens/FinishFunctionalExtensionScreen"
@@ -24,6 +24,8 @@ export default function IndexTab() {
     "diagramUML" |
     "finishFunctionalExtension" |
     "storage"
+    "domainSelection" | 
+    "domainWorkflow" 
   >("welcome")
 
   return (
@@ -50,11 +52,11 @@ export default function IndexTab() {
         <CreateExamByPartsScreen 
         onBack={() => setScreen("createExam")} 
         onWelcome={() => setScreen("welcome")} 
-        onFunctionalExtension={() => setScreen("functionalExtension")} />
+        onFunctionalExtension={() => setScreen("domainSelection")} />
       )}
 
-      {screen === "functionalExtension" && (
-        <FunctionalExtensionScreen 
+      {screen === "domainSelection" && (
+        <DomainSelectionScreen 
         onBack={() => setScreen("createExamByParts")} 
         onWelcome={() => setScreen("welcome")} 
         onSelectDomain={(domainName) => {
@@ -68,7 +70,7 @@ export default function IndexTab() {
       {screen === "domainWorkflow" && (
         <DomainWorkflowScreen 
           domainName={selectedDomain}
-          onBack={() => setScreen("functionalExtension")} 
+          onBack={() => setScreen("domainSelection")} 
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
@@ -117,6 +119,7 @@ export default function IndexTab() {
       {screen === "storage" && (
         <StorageExamsScreen 
           onWelcome={() => setScreen("welcome")}
+          onFunctionalExtension={() => setScreen("domainSelection")}
         />
       )}
 
