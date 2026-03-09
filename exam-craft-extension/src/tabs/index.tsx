@@ -23,7 +23,7 @@ export default function IndexTab() {
     "domainWorkflow" |
     "diagramUML" |
     "finishFunctionalExtension" |
-    "storage"
+    "storage" |
     "domainSelection" | 
     "domainWorkflow" 
   >("welcome")
@@ -119,7 +119,6 @@ export default function IndexTab() {
       {screen === "storage" && (
         <StorageExamsScreen 
           onWelcome={() => setScreen("welcome")}
-          onFunctionalExtension={() => setScreen("domainSelection")}
         />
       )}
 
