@@ -1,5 +1,10 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
 import logoExamCraft from "../../assets/icon512.png"
+import carpeta from "../../assets/images/archive.png"
+import examen from "../../assets/images/exam.png"
+import attributesConstraintsPromptMarkdown from "bundle-text:../prompts/generation-constraints-attributes/generation_attribute_constraints_from_statement.md"
+import { parseMasterPrompt } from "~src/utils/promptParser"
+import { sendToGemini } from "~src/services/geminiService"
 
 interface Props {
   onBack: () => void
@@ -8,66 +13,380 @@ interface Props {
 }
 
 export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome, onCreateExam }: Props) {
+
+  const [step, setStep] = useState<'selection' | 'workflow'>('selection');
+  const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
+  
+  const [projects, setProjects] = useState<any[]>([]);
+  const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
+  
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const [promptText, setPromptText] = useState("");
+  const [hiddenContext, setHiddenContext] = useState("");
+  const [responseText, setResponseText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  useEffect(() => {
+    if (step === 'selection' && typeof chrome !== "undefined" && chrome.storage?.local) {
+      chrome.storage.local.get(null, (items) => {
+        const projectList = Object.keys(items)
+          .filter(key => key.startsWith('project_'))
+          .map(key => ({
+            id: key,
+            ...items[key]
+          }));
+        setProjects(projectList);
+      });
+    }
+  }, [step]);
+
+
+  const allowedFolders = ["clínica veterinaria", "ajedrez"];
+  const projectsInFolder = projects.filter(p => 
+      p.domainName && selectedDomainFolder && p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
+  );
+
+  const handleSelectProject = (project: any) => {
+      setSelectedProject(project);
+      setShowConfirmModal(true);
+  };
+
+  const handleConfirmSelection = () => {
+      setShowConfirmModal(false);
+      setStep('workflow');
+      setInternalStep('input');
+  };
+
+    const handleSaveToChrome = () => {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        
+        if (!selectedProject || !selectedProject.id) {
+            alert("Error: No hay un examen válido seleccionado para actualizar.");
+            return;
+        }
+
+        const updatedExamData = {
+            ...selectedProject, 
+            attributeConstraints: responseText,
+            updatedAt: new Date().toISOString()
+        };
+
+        chrome.storage.local.set({ [selectedProject.id]: updatedExamData }, () => {
+            if (chrome.runtime.lastError) {
+                console.error("Error al actualizar:", chrome.runtime.lastError);
+                alert("No se pudo actualizar el examen en el almacenamiento local.");
+            } else {
+                setSelectedProject(updatedExamData);
+                alert(`¡Examen "${selectedProject.customName || selectedProject.domainName}" actualizado con éxito! Se han añadido las restricciones.`);
+            }
+        });
+    } else {
+        alert("Esta funcionalidad solo está disponible dentro de la Extensión de Chrome.");
+    }
+};
+
+  useEffect(() => {
+    if (attributesConstraintsPromptMarkdown && selectedProject?.domainName) {
+        const { visibleText, hiddenContext } = parseMasterPrompt(attributesConstraintsPromptMarkdown);
+
+        const finalVisible = visibleText.replaceAll("{{DOMAIN}}", selectedProject.domainName);
+        
+        setPromptText(finalVisible);    
+        setHiddenContext(hiddenContext);
+    }
+  }, [selectedProject]);
+
+
+  const handleGenerate = async () => {
+    setIsLoading(true);
+    setResponseText("");
+
+    try {
+        const finalPayload = `
+        CONTEXTO Y RECURSOS (Información interna):
+        
+        [RECURSOS ESTÁTICOS Y EJEMPLOS]:
+        ${hiddenContext}
+
+        [ENUNCIADO Y DIAGRAMA DEL EXAMEN SELECCIONADO]:
+        ${selectedProject.extensionFinish}
+
+        INSTRUCCIONES PRINCIPALES:
+        ${promptText}
+        `;
+
+        console.log("Enviando a Gemini:", finalPayload);
+
+        const result = await sendToGemini(finalPayload);
+        
+        setResponseText(result);
+        setInternalStep('result');
+
+        try {
+            await fetch("http://localhost:3001/save-log", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    exercise: "attributes_constraints",
+                    domain: selectedProject.domainName,
+                    hiddenContext: hiddenContext,     
+                    visiblePrompt: promptText,        
+                    response: result                  
+                })
+            });
+            console.log("Log enviado al servidor local correctamente.");
+        } catch (error) {
+            console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("Error al generar.");
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="exam-app">
+    <div className="exam-app" style={{ position: 'relative' }}>
       
+      {/* --- MODAL DE CONFIRMACIÓN --- */}
+      {showConfirmModal && selectedProject && (
+          <div style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              display: 'flex', justifyContent: 'center', alignItems: 'center',
+              zIndex: 1000 
+          }}>
+              <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
+                  <h3 className="main-title small" style={{ marginBottom: '15px', color: '#4a3728' }}>Confirmar Contexto</h3>
+                  <p style={{ marginBottom: '25px', color: '#555', fontSize: '15px' }}>
+                      ¿Deseas utilizar <strong>{selectedProject.customName || `Examen de ${selectedProject.domainName}`}</strong> como base para generar el ejercicio de restricciones?
+                  </p>
+                  <div className="wf-actions-row" style={{ justifyContent: 'center', gap: '15px' }}>
+                      <button 
+                          onClick={() => { setShowConfirmModal(false); setSelectedProject(null); }} 
+                          className="btn-step secondary"
+                      >
+                          Cancelar
+                      </button>
+                      <button 
+                          onClick={handleConfirmSelection} 
+                          className="btn-step primary"
+                      >
+                          Confirmar
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
       {/* --- HEADER --- */}   
       <header className="app-header">
         <div className="header-left">
-              
-                    <span className="logo-icon" onClick={onWelcome}>
-                        <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-                    </span> 
-                 
-                    <nav className="breadcrumb-nav">
-                        <span 
-                            className="breadcrumb-link" 
-                            onClick={onWelcome}
-                            title="Volver al inicio"
-                            >
-                            INICIO
-                        </span>
-        
-                        <span className="breadcrumb-separator">{'>'}</span>
-        
-                        <span className="breadcrumb-link" onClick={onCreateExam}>
-                        CREAR EXAMEN
-                        </span>
-        
-                        <span className="breadcrumb-separator">{'>'}</span>
-        
-                        <span className="breadcrumb-link" onClick={onBack}>
-                        POR PARTES
-                        </span>
-        
-                        <span className="breadcrumb-separator">{'>'}</span>
-        
-                        <span className="breadcrumb-current">
-                        RESTRICCIONES DE ATRIBUTOS
-                        </span>
-                        
-                    </nav>
-                    </div>
-        <div className="header-right">
+            <span className="logo-icon" onClick={onWelcome} style={{ cursor: 'pointer' }}>
+                <img src={logoExamCraft} alt="Logo" width="60" height="60" />
+            </span> 
+            <nav className="breadcrumb-nav">
+                <span className="breadcrumb-link" onClick={onWelcome} title="Volver al inicio">
+                    INICIO
+                </span>
+                <span className="breadcrumb-separator">{'>'}</span>
+                <span className="breadcrumb-link" onClick={onCreateExam}>
+                    CREAR EXAMEN
+                </span>
+                <span className="breadcrumb-separator">{'>'}</span>
+                <span className="breadcrumb-link" onClick={onBack}>
+                    POR PARTES
+                </span>
+                <span className="breadcrumb-separator">{'>'}</span>
+                <span className="breadcrumb-current">
+                    RESTRICCIONES DE ATRIBUTOS
+                </span>
+            </nav>
         </div>
       </header>
 
       {/* --- CONTENIDO CENTRAL --- */}
       <main className="main-content">
 
-        <div className="content-card">
-          <h2 className="main-title small">¡ATENCIÓN!</h2>
-            <p className="wf-instruction-text">Para generar el ejercicio "Restricciones de Atributos" es necesario elegir un examen ya creado y almacenado previamente en el sistema, ¿desea continuar?</p>              
-              <div className="wf-actions-row">
-                <button onClick={() => onBack()} className="btn-step secondary">
-                  No, volver
-                </button>
-                <button className="btn-step success">
-                  Si, proceder a la selección
-                </button>
-              </div>
-        </div>
-      </main>      
+        {/* PASO 1: SELECCIÓN DE CARPETA Y ARCHIVO */}
+        {step === 'selection' && (
+            <div className="content-card" style={{ width: '100%', maxWidth: '900px' }}>
+                
+                {/* NIVEL 1: MOSTRAR CARPETAS */}
+                {!selectedDomainFolder ? (
+                    <>
+                        <h2 className="main-title small">Selecciona un dominio</h2>
+                        <p className="wf-instruction-text" style={{ textAlign: 'center' }}>
+                            Para generar el ejercicio "Restricciones de Atributos" es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base para este ejercicio.
+                        </p>
+
+                        <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
+                            gap: '30px', 
+                            marginTop: '30px',
+                            padding: '20px'
+                        }}>
+                            {allowedFolders.map((folderName) => (
+                                <div key={folderName} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <img 
+                                        src={carpeta} 
+                                        alt="Carpeta" 
+                                        width="90" 
+                                        style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                                        onClick={() => setSelectedDomainFolder(folderName)}
+                                        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                    />
+                                    <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center', textTransform: 'capitalize' }}>
+                                        {folderName}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="wf-actions-row" style={{ marginTop: '30px' }}>
+                            <button onClick={() => onBack()} className="btn-step secondary">
+                                Volver
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    /* NIVEL 2: MOSTRAR ARCHIVOS DENTRO DE LA CARPETA */
+                    <>
+                        <h2 className="main-title small">Exámenes de {selectedDomainFolder.toUpperCase()}</h2>
+                        <p className="wf-instruction-text" style={{ textAlign: 'center' }}>
+                            Haz clic en el examen específico que deseas utilizar como contexto.
+                        </p>
+
+                        <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
+                            gap: '30px', 
+                            marginTop: '30px',
+                            padding: '20px'
+                        }}>
+                            {projectsInFolder.length > 0 ? (
+                                projectsInFolder.map((proj) => (
+                                    <div key={proj.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <span 
+                                            className="parts-exam-icon" 
+                                            style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
+                                            onClick={() => handleSelectProject(proj)}
+                                            title="Abrir examen"
+                                        >
+                                            <img 
+                                                src={examen} 
+                                                alt="Abrir examen" 
+                                                width="80" 
+                                                height="80" 
+                                                style={{ transition: 'transform 0.2s' }} 
+                                                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                            />
+                                        </span>
+                                        <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
+                                            {proj.customName || `Examen de ${proj.domainName}`}
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#888' }}>
+                                    Aún no has guardado ningún examen en esta carpeta.
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="wf-actions-row" style={{ marginTop: '30px' }}>
+                            <button onClick={() => setSelectedDomainFolder(null)} className="btn-step secondary">
+                                Volver
+                            </button>
+                        </div>
+                    </>
+                )}
+
+            </div>
+        )}
+
+        {/* PASO 2: FLUJO DEL EJERCICIO */}
+        {step === 'workflow' && selectedProject && (
+            <div className="content-card" style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', maxHeight: '85vh', overflowY: 'auto', position: 'relative' }}>
+                
+                <h2 className="main-title small">
+                    {internalStep === 'input' ? 'Restricciones de Atributos' : `Generar Restricciones: ${selectedProject.customName || selectedProject.domainName.toUpperCase()}`}
+                </h2>
+                
+                <div className="wf-wide-wrapper" style={{ flex: 1 }}>
+                {internalStep === 'input' ? (
+                    <>
+                        <p className="wf-instruction-text" style={{ marginTop: 0 }}>
+                            Este es el prompt que se usará para generar las restricciones de atributos del examen seleccionado, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar"</strong>.
+                        </p>                        
+                        <textarea 
+                            className="wf-textarea" 
+                            value={promptText}
+                            onChange={(e) => setPromptText(e.target.value)}
+                            style={{ minHeight: '300px', width: '100%', boxSizing: 'border-box' }}
+                        />
+                        <div className="wf-actions-row" style={{ marginTop: '20px' }}>
+                            <button onClick={onBack} className="btn-step secondary">Volver</button>
+                            <button onClick={handleGenerate} className="btn-step primary">
+                                {isLoading ? <div className="loading-spinner"></div> : 'Generar'}
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                      <div className="wf-split-view">
+                        <div className="wf-column">
+                            <span className="wf-column-title">Prompt enviado</span>
+                            <textarea 
+                                className="wf-textarea" 
+                                value={promptText}
+                                onChange={(e) => setPromptText(e.target.value)}
+                                style={{ minHeight: '300px' }}
+                            />
+                            <button onClick={handleGenerate} className="btn-step primary" disabled={isLoading} style={{ marginTop: '20px' }}>
+                                {isLoading ? '...' : 'Volver a generar'}
+                            </button>
+                        </div>
+                        <div className="wf-column">
+                            <span className="wf-column-title">Propuesta de restricciones de atributos</span>
+                            
+                            {isLoading ? (
+                                <div className="wf-result-box" style={{ whiteSpace: 'pre-wrap', minHeight: '300px' }}>
+                                    Generando...
+                                </div>
+                            ) : (
+                                <textarea 
+                                    className="wf-result-box"
+                                    value={responseText}
+                                    onChange={(e) => setResponseText(e.target.value)}
+                                    style={{ minHeight: '300px' }}
+                                />
+                            )}
+                            
+                            <button onClick={handleSaveToChrome} className="btn-step primary" style={{ marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                Guardar
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                    <polyline points="17 21 17 13 7 13 7 21" />
+                                    <polyline points="7 3 7 8 15 8" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div> 
+                    </>
+                )}
+                </div>
+            </div>
+        )}
+        </main>      
     </div>
   )
 }

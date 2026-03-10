@@ -30,30 +30,27 @@ export default function FinishFunctionalExtensionScreen({
     const cleanMermaidCode = (code: string) => {
         if (!code) return '';
         return code
-            .replace(/<[^>]*>?/gm, '') // Elimina HTML
-            .replace(/&nbsp;/g, ' ')   // Elimina espacios HTML
+            .replace(/<[^>]*>?/gm, '') 
+            .replace(/&nbsp;/g, ' ')   
             .trim();
     };
 
     const handleSaveToChrome = () => {
-        // Verificamos que estamos en el entorno de una extensión de Chrome
         if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
             
-            // 1. Pedimos al usuario que elija el nombre del proyecto
-            const userChosenName = prompt("Introduce el nombre para guardar este examen:", domainName);
+            const userChosenName = prompt("Introduce el nombre para guardar este examen:", `Examen de ${domainName}`);
             
-            // Si el usuario cancela (null) o no escribe nada, abortamos
             if (userChosenName === null) return;
             
-            const finalName = userChosenName.trim() || domainName;
+            const finalName = userChosenName.trim() || `Examen de ${domainName}`;
 
             const dataToSave = {
-                domainName: finalName,
+                domainName: domainName, 
+                customName: finalName,  
                 extensionFinish: extensionFinish,
                 savedAt: new Date().toISOString()
             };
 
-            // 2. Usamos Date.now() para que la clave sea única y no se borren exámenes anteriores
             const storageKey = `project_${Date.now()}`;
 
             chrome.storage.local.set({ [storageKey]: dataToSave }, () => {
@@ -61,7 +58,7 @@ export default function FinishFunctionalExtensionScreen({
                     console.error("Error al guardar:", chrome.runtime.lastError);
                     alert("No se pudo guardar en el almacenamiento local.");
                 } else {
-                    alert(`¡Proyecto "${finalName}" guardado con éxito!`);
+                    alert(`¡Examen "${finalName}" guardado con éxito en la carpeta de ${domainName.toUpperCase()}!`);
                 }
             });
         } else {
@@ -125,7 +122,7 @@ export default function FinishFunctionalExtensionScreen({
                             
                             {/* COLUMNA IZQUIERDA: TEXTO COMPLETO */}
                             <div className="content-card" style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
-                                <p className="wf-instruction-text" style={{ fontWeight: 'bold' }}>📄 Informe de la Extensión:</p>
+                                <p className="wf-instruction-text" style={{ fontWeight: 'bold' }}>Informe de la Extensión:</p>
                                 <textarea 
                                     className="wf-textarea" 
                                     style={{ flex: 1, resize: 'none', fontSize: '13px', lineHeight: '1.6', padding: '15px' }}
@@ -137,7 +134,7 @@ export default function FinishFunctionalExtensionScreen({
                             {/* COLUMNA DERECHA: DIAGRAMA RENDERIZADO */}
                             <div className="content-card" style={{ flex: '1.2', display: 'flex', flexDirection: 'column', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '15px', overflow: 'hidden' }}>
                                 <div style={{ padding: '10px', background: '#f8f9fa', borderBottom: '1px solid #eee', fontWeight: 'bold', textAlign: 'center', fontSize: '14px' }}>
-                                    📊 Visualización del Modelo UML
+                                    Visualización del Modelo UML
                                 </div>
                                 <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '20px' }}>
                                     {mermaidCode ? (

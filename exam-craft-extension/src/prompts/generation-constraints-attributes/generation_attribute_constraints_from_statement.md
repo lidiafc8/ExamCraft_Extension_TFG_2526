@@ -1,7 +1,6 @@
 # PROMPT PARA LA GENERACIÓN DE RESTRICCIONES DE ATRIBUTOS A PARTIR DE UN ENUNCIADO CONCRETO
 
 ## Recursos a proporcionar:
-* `functional_extension_selected.md`
 * `attribute_constraints_examples_previous_exams.md`
 
 ## Prompt a utilizar:
@@ -32,7 +31,7 @@ Nuestra misión es generar, a partir de un enunciado dado, el ejercicio de un ex
 
 - Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
 
-Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica del enunciado y el diagrama UML en código Mermaid que te paso en el archivo md “functional_extension_selected”, quiero que me generes el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (not null, etc). Para ello, te adjunto el archivo md llamado “attribute_constraints_examples_previous_exams” como referencia. Deberá cumplir estos requisitos:
+Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica del enunciado y el diagrama UML en código Mermaid que te proporciono en la sección de contexto de este mensaje, quiero que me generes el ejercicio “RESTRICCIONES DE ATRIBUTOS” del examen, es decir, las restricciones a nivel de entidad de los atributos que componen las clases a implementar por el alumno, es decir, de las clases rojas. (not null, etc). Para ello, te adjunto el archivo md llamado “attribute_constraints_examples_previous_exams” como referencia. Deberá cumplir estos requisitos:
 
 -	ÚNICAMENTE generarás las restricciones a nivel de entidad de los atributos de las clases a implementar por el alumno.
 
