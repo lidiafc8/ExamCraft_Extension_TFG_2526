@@ -59,6 +59,8 @@ export default function FinishFunctionalExtensionScreen({
                     alert("No se pudo guardar en el almacenamiento local.");
                 } else {
                     alert(`¡Examen "${finalName}" guardado con éxito en la carpeta de ${domainName.toUpperCase()}!`);
+
+                    onWelcome();
                 }
             });
         } else {
@@ -118,10 +120,10 @@ export default function FinishFunctionalExtensionScreen({
                             {domainName.toUpperCase()}: Resultado Final
                         </h2>
 
-                        <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', minHeight: '600px' }}>
+                        <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', minHeight: '200px' }}>
                             
                             {/* COLUMNA IZQUIERDA: TEXTO COMPLETO */}
-                            <div className="content-card" style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
+                            <div className="content-card" style={{ flex: '2', display: 'flex', flexDirection: 'column' }}>
                                 <p className="wf-instruction-text" style={{ fontWeight: 'bold' }}>Informe de la Extensión:</p>
                                 <textarea 
                                     className="wf-textarea" 
@@ -132,7 +134,7 @@ export default function FinishFunctionalExtensionScreen({
                             </div>
 
                             {/* COLUMNA DERECHA: DIAGRAMA RENDERIZADO */}
-                            <div className="content-card" style={{ flex: '1.2', display: 'flex', flexDirection: 'column', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '15px', overflow: 'hidden' }}>
+                            <div className="content-card" style={{ flex: '2', display: 'flex', flexDirection: 'column', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '15px', overflow: 'hidden' }}>
                                 <div style={{ padding: '10px', background: '#f8f9fa', borderBottom: '1px solid #eee', fontWeight: 'bold', textAlign: 'center', fontSize: '14px' }}>
                                     Visualización del Modelo UML
                                 </div>
@@ -149,37 +151,14 @@ export default function FinishFunctionalExtensionScreen({
                         </div>
 
                         {/* ACCIONES FINALES */}
-                        <div className="wf-actions-row" style={{ marginTop: '30px', justifyContent: 'center', gap: '20px' }}>
+                        <div className="wf-actions-row" style={{ marginTop: '20px', justifyContent: 'center', gap: '20px' }}>
                             <button onClick={onBack} className="btn-step secondary" style={{ padding: '12px 30px' }}>
                                 Volver a UML
                             </button>
                             
-                            <button 
-                                style={{ 
-                                    background: 'transparent', 
-                                    border: '1px solid #ccc', 
-                                    color: '#333', 
-                                    padding: '8px 16px', 
-                                    borderRadius: '4px', 
-                                    cursor: 'pointer',
-                                    transition: 'background 0.3s'
-                                }}
-                                onMouseOver={(e) => e.currentTarget.style.background = '#f0f0f0'}
-                                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-                                onClick={handleSaveToChrome}
-                                title="Guardar en la extensión"
-                            >
-                                <svg 
-                                    width="24" 
-                                    height="24" 
-                                    viewBox="0 0 24 24" 
-                                    fill="none" 
-                                    stroke="currentColor" 
-                                    strokeWidth="2" 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round"
-                                    style={{ verticalAlign: 'middle' }}
-                                >
+                            <button onClick={handleSaveToChrome} className="btn-step primary" style={{ marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                Guardar
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                                     <polyline points="17 21 17 13 7 13 7 21" />
                                     <polyline points="7 3 7 8 15 8" />

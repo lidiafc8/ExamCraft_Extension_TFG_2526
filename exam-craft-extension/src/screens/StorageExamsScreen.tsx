@@ -22,16 +22,14 @@ const extractMermaidCode = (fullText: string) => {
 };
 
 export default function StorageExamsScreen({ onWelcome }: Props) {
-    // --- ESTADOS ---
+
     const [projects, setProjects] = useState<any[]>([]);
     const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null);
     const [selectedProject, setSelectedProject] = useState<any | null>(null);
     
-    // Estados para la edición del nombre del archivo
     const [editingId, setEditingId] = useState<string | null>(null);
     const [tempName, setTempName] = useState("");
 
-    // 1. CARGAR DATOS
     useEffect(() => {
         if (typeof chrome !== "undefined" && chrome.storage?.local) {
             chrome.storage.local.get(null, (items) => {
@@ -46,7 +44,6 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
         }
     }, []);
 
-    // 2. FUNCIÓN PARA RENOMBRAR
     const handleRename = (id: string) => {
         if (!tempName.trim()) {
             setEditingId(null);
@@ -69,7 +66,6 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
         }
     };
 
-    // 3. FUNCIÓN PARA BORRAR UN EXAMEN
     const handleDelete = (id: string, e?: React.MouseEvent) => {
         if (e) e.stopPropagation(); 
         
@@ -121,18 +117,21 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
 
                 <main className="main-content" style={{ padding: '30px', paddingBottom: '100px', height: 'auto', overflow: 'visible', flex: 1 }}>
                     
-                    <div className="section-block" style={{ marginBottom: '50px' }}>
+                    <div className="section-block" style={{marginBottom: '1px' }}>
                         <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '20px' }}>
                             Extensión Funcional
                         </h2>
+                    </div>
                         
-                        <div style={{ display: 'flex', gap: '20px', height: '500px' }}>
+                    <div className="section-block" style={{ width: '80%',marginBottom: '0px' }}>
+
+                        <div style={{ display: 'flex', gap: '10px', height: '600px' }}>
                             <div className="content-card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                <h3 style={{ marginBottom: '10px' }}>Enunciado Generado</h3>
+                                <h3 style={{ marginBottom: '10px' }}>PROPUESTA DEL MODELO</h3>
                                 <textarea className="wf-textarea" readOnly value={selectedProject.extensionFinish} style={{ flex: 1, resize: 'none', padding: '15px', fontSize: '14px' }} />
                             </div>
                             <div className="content-card" style={{ flex: 1.5, backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
-                                <h3 style={{ marginBottom: '10px' }}>Modelo UML</h3>
+                                <h3 style={{ marginBottom: '10px' }}>ILUSTRACIÓN DIAGRAMA UML</h3>
                                 <div style={{ flex: 1, overflow: 'auto', border: '1px solid #eee', borderRadius: '8px' }}>
                                     <MermaidViewer chartCode={cleanMermaidCode(mermaidCode)} />
                                 </div>
@@ -140,18 +139,20 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
                         </div>
                     </div>
 
-                    <div className="section-block" style={{ marginBottom: '50px' }}>
-                        <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '20px' }}>
+                    <div className="section-block" style={{marginBottom: '1px', marginTop: '40px' }}>
+                        <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
                             Restricciones de Atributos
                         </h2>
-                        
+                    </div>
+
+                    <div className="section-block" style={{ width: '200%',marginBottom: '50px' }}>
                         <div className="content-card" style={{ padding: '20px' }}>
                             {selectedProject.attributeConstraints ? (
                                 <textarea 
                                     className="wf-textarea" 
                                     readOnly 
                                     value={selectedProject.attributeConstraints} 
-                                    style={{ width: '100%', minHeight: '200px', resize: 'vertical', padding: '15px', fontSize: '14px' }} 
+                                    style={{ width: '100%', minHeight: '500px', resize: 'vertical', padding: '15px', fontSize: '14px' }} 
                                 />
                             ) : (
                                 <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
@@ -160,12 +161,17 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
                             )}
                         </div>
                     </div>
+                    
+                    
 
-                    <div className="section-block" style={{ marginBottom: '50px' }}>
-                        <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '20px' }}>
+                    <div className="section-block" style={{marginBottom: '1px' }}>
+                        <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
                             Relaciones entre Entidades
                         </h2>
+                    </div>
                         
+                    <div className="section-block" style={{ width: '200%',marginBottom: '50px' }}>
+
                         <div className="content-card" style={{ padding: '20px' }}>
                             {selectedProject.entityRelations ? (
                                 <textarea 
@@ -184,7 +190,7 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
 
                     <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '15px' }}>
                         <button onClick={() => setSelectedProject(null)} className="btn-back" style={{ position: 'relative', margin: 0 }}>
-                            Volver a la carpeta
+                            Volver
                         </button>
                         <button 
                             onClick={(e) => handleDelete(selectedProject.id, e as unknown as React.MouseEvent)} 
@@ -279,24 +285,41 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
                                                 }
                                             }}
                                             style={{ 
-                                                marginTop: '10px', textAlign: 'center', width: '90%', fontSize: '14px', 
-                                                padding: '5px', borderRadius: '4px', border: '2px solid #b08968', outline: 'none'
+                                                marginTop: '10px', 
+                                                textAlign: 'center', 
+                                                width: '90%', 
+                                                fontSize: '14px', 
+                                                padding: '5px', 
+                                                borderRadius: '4px', 
+                                                border: '2px solid #b08968', 
+                                                outline: 'none',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden'
                                             }}
                                         />
                                     ) : (
                                         <span 
                                             className="card-label" 
                                             style={{ 
-                                                cursor: 'text', marginTop: '10px', padding: '5px', 
-                                                width: '100%', display: 'block', textAlign: 'center',
-                                                border: '2px solid transparent' 
+                                                cursor: 'text', 
+                                                marginTop: '10px', 
+                                                padding: '5px', 
+                                                width: '100%', 
+                                                display: 'block', 
+                                                textAlign: 'center',
+                                                border: '2px solid transparent',
+                                                whiteSpace: 'nowrap',       
+                                                overflow: 'hidden',         
+                                                textOverflow: 'ellipsis',    
+                                                boxSizing: 'border-box'      
                                             }}
                                             onClick={(e) => { 
                                                 e.stopPropagation(); 
                                                 setEditingId(proj.id); 
                                                 setTempName(proj.customName || `Examen de ${proj.domainName}`); 
                                             }}
-                                            title="Haz clic para renombrar"
+                                            title= {`${tempName}`}
                                         >
                                             {proj.customName || `Examen de ${proj.domainName}`}
                                         </span>

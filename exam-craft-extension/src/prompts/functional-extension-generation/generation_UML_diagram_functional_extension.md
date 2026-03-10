@@ -11,7 +11,7 @@ Quiero que en base a la lógica de la extensión funcional que me has pasado, me
 
 -	Recuerda todo el contexto dado en la anterior petición.
 
--	De los enunciados de ejemplo, céntrate en los del proyecto del que hemos creado la extensión (ajedrez o clínica veterinaria)
+-	De los enunciados de ejemplo, céntrate en la estructura del código Mermaid de los del proyecto {{DOMAIN}}
 
      - De ellos, mantendrás la estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), de las clases base, es decir, las de color negro.
 
@@ -19,6 +19,4 @@ Quiero que en base a la lógica de la extensión funcional que me has pasado, me
 
 -	Para las relaciones, si estas tienen un nombre asignado, este debe constar en el diagrama.
 
--	El color del contenido de las clases negras debe ser negro también. 
-
--	El color del contenido de las clases rojas debe ser rojo también.
+-    REGLA ESTRICTA DE FORMATO: Genera código Mermaid válido y estándar. Bajo ninguna circunstancia utilices comandos de estilo (como style, classDef o linkStyle). Limítate exclusivamente a definir las clases, sus atributos, métodos y las relaciones entre ellas. Separa cada instrucción con un salto de línea.

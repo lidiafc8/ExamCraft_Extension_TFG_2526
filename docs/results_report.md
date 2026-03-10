@@ -1,7 +1,7 @@
 # ANÁLISIS DE RESULTADOS Y EVALUACIÓN DE PROMPTS
 
 - **Modelo Evaluado:** API de Gemini
-- **Total de Logs Analizados:** 3
+- **Total de Logs Analizados:** 31
 
 ---
 
@@ -20,10 +20,10 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 
 | Métrica | Cantidad | Porcentaje |
 | :--- | :---: | :---: |
-| **Total de Pruebas (Logs)** | 15 | 100% |
-| ✅ **Éxitos Totales** | 8 | **53.33%** |
-| ⚠️ **Éxito Parcial:** | 5 | **33.33%** |
-| ❌ **Fallos / Alucinaciones** | 2 | **13.33%** |
+| **Total de Pruebas (Logs)** | 31 | 100% |
+| ✅ **Éxitos Totales** | 21 | **67.74%** |
+| ⚠️ **Éxito Parcial:** | 8 | **25.80%** |
+| ❌ **Fallos / Alucinaciones** | 2 | **6.45%** |
 
 ## 2. Criterios de Evaluación
 
@@ -36,28 +36,36 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 ## 3. Análisis por Ejercicio
 
 ### 3.1. Enunciado de la Extensión Funcional - Parte 1 (`functional_extension`)
-* **Total de pruebas:** 8 (5 para Clínica Veterinaria, 3 para Ajedrez)
-* **Ratio de Éxito:** 100%
+* **Total de pruebas:** 9 para Clínica Veterinaria, 5 para Ajedrez
+* **Ratio de Éxito:** 22.22% (7/9 Clínica Veterinaria), 100% (5/5 Ajedrez) 
 * **Observaciones Positivas:** 
     - El modelo respeta muy bien el tono académico y usa correctamente los recursos ocultos.
 * **Errores Comunes (Fallos):** 
-    - No se han encontrado errores comunes en los logs analizados.
+    - Clínica Veterinaria
+        - Devuelve una extensión funcional muy parecida a otras que se le pasan como ejemplo.
+        - Devuelve las relaciones de las entidades, cuando se le especifica que no las devuelva.
+    
+    - Generalmente, devuelve siempre las mismas extensiones debido a la ausencia de una actualización dinámica del contexto de los ejempllos pasados.
 * **Propuesta de mejora para el Prompt:** 
-    - Sustituir la palabra "NO" por otra similar para evitar la poda de dichos segmentos.
+    - Sustituir la palabra "NO" por otra similar para evitar la poda de dichos segmentos. (REALIZADO)
+    - Actualizar dinámicamente el contexto conforme se vayan generando extensiones funcionales.
 
 ### 3.2. Diagrama UML de la Extensión Funcional - Parte 2 (`UML_diagram`)
-* **Total de pruebas:** 7 (5 para Clínica Veterinaria, 2 para Ajedrez)
-* **Ratio de Éxito:** 0%
-* **Observaciones Positivas:** Devuelve el código Mermaid con las relaciones, los colores y los atributos de la forma en la que se le piden, en base a los ejemplos pasados de exámenes anteriores.
-* **Errores Comunes (Fallos):** Para el dominio Clínica Veterinaria devuelve bien las clases generales pero a la hora de generar el código Mermaid de las nuevas clases a implementar delira, inventándose clases que no se han mencionado en la extensión funcional y añadiendo atributos que carecen de relación con el examen. Para el dominio Ajedrez, no devuelve nada relacionado con el dominio Ajedrez, el código Mermaid devuelto contiene las clases de Clínica Veterinaria.
+* **Total de pruebas:** 8 para Clínica Veterinaria, 6 para Ajedrez
+* **Ratio de Éxito:** 25% (2/8 Clínica Veterinaria), 66.66% (4/6 Ajedrez) 
+* **Observaciones Positivas:** Devuelve el código Mermaid con las relaciones y los atributos de la forma en la que se le piden, en base a los ejemplos pasados de exámenes anteriores.
+* **Errores Comunes (Fallos):** 
+    - Para ambos dominios:
+        - A la hora de generar el código Mermaid de las nuevas clases a implementar delira, inventándose clases que no se han mencionado en la extensión funcional y añadiendo atributos que carecen de relación con el examen (esto se debía porque no se le estaba pasando bien el contexto).
+        - La generación del dibujo del diagrama UML falla a veces.
 * **Propuesta de mejora para el Prompt:** Cammbiar el código devuelto de español a inglés para asegurar consistencia con la extensión funcional origen, además de mejorar las respuestas de este.
 
 ### 3.3. Restricciones de atributos - (`attributes_constraints`)
-* **Total de pruebas:** [X]
-* **Ratio de Éxito:** [X]%
-* **Observaciones Positivas:** 
-* **Errores Comunes (Fallos):**
-* **Propuesta de mejora para el Prompt:**
+* **Total de pruebas:** 2 para Clínica Veterinaria, 1 para Ajedrez
+* **Ratio de Éxito:** 100% para ambos
+* **Observaciones Positivas:** El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
+* **Errores Comunes (Fallos):** No se han visualizado errores hasta el momento.
+* **Propuesta de mejora para el Prompt:** Ninguna.
 
 ### 3.4. Relaciones entre entidades - (`entity_relationships`)
 * **Total de pruebas:** [X]

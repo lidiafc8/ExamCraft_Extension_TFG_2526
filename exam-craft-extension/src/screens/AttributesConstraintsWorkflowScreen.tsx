@@ -81,6 +81,8 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
             } else {
                 setSelectedProject(updatedExamData);
                 alert(`¡Examen "${selectedProject.customName || selectedProject.domainName}" actualizado con éxito! Se han añadido las restricciones.`);
+            
+                onWelcome();
             }
         });
     } else {
@@ -91,10 +93,8 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
   useEffect(() => {
     if (attributesConstraintsPromptMarkdown && selectedProject?.domainName) {
         const { visibleText, hiddenContext } = parseMasterPrompt(attributesConstraintsPromptMarkdown);
-
-        const finalVisible = visibleText.replaceAll("{{DOMAIN}}", selectedProject.domainName);
         
-        setPromptText(finalVisible);    
+        setPromptText(visibleText);    
         setHiddenContext(hiddenContext);
     }
   }, [selectedProject]);
@@ -356,7 +356,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                             </button>
                         </div>
                         <div className="wf-column">
-                            <span className="wf-column-title">Propuesta de restricciones de atributos</span>
+                            <span className="wf-column-title">Propuesta del modelo</span>
                             
                             {isLoading ? (
                                 <div className="wf-result-box" style={{ whiteSpace: 'pre-wrap', minHeight: '300px' }}>
