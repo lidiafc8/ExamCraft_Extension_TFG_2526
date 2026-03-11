@@ -49,14 +49,17 @@ export default function DiagramUMLScreen({
 
     //se ejecuta al principio, y cuando se cambia el enunciado 
     //FUNCIONALIDAD DEL MÉTODO ---> es separar el prompt
+
     useEffect(() => {
-        if (extensionPromptMarkdown) {
-            //aqui coge el prompt que le paso y pasa a parsearlo, para separar lo que ve, y lo que se usa como recurso (los ejemplos)
+        if (extensionPromptMarkdown && domainName) {
             const { visibleText, hiddenContext } = parseMasterPrompt(extensionPromptMarkdown);
-            setPromptText(visibleText);    
+            
+            const finalVisible = visibleText.replaceAll("{{DOMAIN}}", domainName);
+            
+            setPromptText(finalVisible);    
             setHiddenContext(hiddenContext);
         }
-    }, [context]);
+    }, [context, domainName]);
 
     const cleanMermaidCode = (code) => {
         if (!code) return '';
@@ -77,11 +80,15 @@ export default function DiagramUMLScreen({
         setResponseText("");
         try {
             const finalPayload = `
-                CONTEXTO Y RECURSOS (Información interna):
-                ${hiddenContext}
-                INSTRUCCIONES PRINCIPALES:
-                ${promptText}
-            `;
+            CONTEXTO Y RECURSOS (Información interna):
+            ${hiddenContext}
+
+            ENUNCIADO / EXTENSIÓN FUNCIONAL (Sobre lo que tienes que hacer el diagrama):
+            ${context}
+
+            INSTRUCCIONES PRINCIPALES:
+            ${promptText}
+        `;
             const result = await sendToGemini(finalPayload);
 
             // --- NUEVA LÓGICA DE LIMPIEZA ---
@@ -100,6 +107,24 @@ export default function DiagramUMLScreen({
 
             setResponseText(cleanResult);
             setInternalStep('result');
+
+            try {
+                await fetch("http://localhost:3001/save-log", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        exercise: "diagram_uml_functional_extension",
+                        domain: domainName,               
+                        hiddenContext: hiddenContext,     
+                        visiblePrompt: promptText,        
+                        response: cleanResult                  
+                    })
+                });
+                console.log("Log enviado al servidor local correctamente.");
+            } catch (error) {
+                console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
+            }
+
         } catch (error) {
             console.error(error);
             alert("Error al generar.");
@@ -218,7 +243,7 @@ export default function DiagramUMLScreen({
                                 <textarea 
                                     className="wf-textarea" 
                                     value={promptText} 
-                                    readOnly 
+                                    onChange={(e) => setPromptText(e.target.value)}
                                     style={{ flex: '1', border: 'none', padding: '20px', fontSize: '14px', resize: 'none', outline: 'none', lineHeight: '1.5' }}
                                 />
                                 <button onClick={handleGenerate} className="btn-step secondary" style={{ margin: '15px', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>

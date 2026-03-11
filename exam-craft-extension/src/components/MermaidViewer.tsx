@@ -6,6 +6,7 @@ mermaid.initialize({
   startOnLoad: false,
   theme: 'base', 
   securityLevel: 'loose',
+  suppressErrorRendering: true,
   themeVariables: {
     primaryColor: '#e8eaf6', 
     primaryBorderColor: '#5c6bc0',

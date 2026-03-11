@@ -7,7 +7,6 @@ interface ParsedPrompt {
 
 export const parseMasterPrompt = (fullText: string): ParsedPrompt => {
   const SPLIT_KEY = "## Prompt a utilizar:";
-
   const parts = fullText.split(SPLIT_KEY);
 
   if (parts.length < 2) {
@@ -17,24 +16,24 @@ export const parseMasterPrompt = (fullText: string): ParsedPrompt => {
   const headerPart = parts[0];
   const bodyPart = parts[1].trim();
 
-  const resourceMatch = headerPart.match(/[\*\-]\s*[`'"]?([^`'"\n\r]+)[`'"]?/);
-
+  const resourceRegex = /[\*\-]\s*[`'"]?([^`'"\n\r]+)[`'"]?/g;
+  
   let hiddenContext = "";
+  let match;
 
-  if (resourceMatch && resourceMatch[1]) {
-    const filename = resourceMatch[1].trim();
+  while ((match = resourceRegex.exec(headerPart)) !== null) {
+    const filename = match[1].trim();
     
     if (RESOURCE_MAP[filename]) {
-        hiddenContext = RESOURCE_MAP[filename];
+        hiddenContext += `\n--- ARCHIVO / RECURSO: ${filename} ---\n${RESOURCE_MAP[filename]}\n`;
         console.log(`Recurso cargado correctamente: ${filename}`);
     } else {
-        console.warn(`Recurso detectado ('${filename}') pero NO coincide con ninguna clave en resourceMap.`);
-        console.log("Claves disponibles:", Object.keys(RESOURCE_MAP));
+        console.log(`Recurso dinámico o no encontrado en map: '${filename}'. Se omitirá del context estático.`);
     }
   }
 
   return {
     visibleText: bodyPart,
-    hiddenContext: hiddenContext
+    hiddenContext: hiddenContext.trim()
   };
 };
