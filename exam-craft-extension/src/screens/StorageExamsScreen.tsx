@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react"
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+
 import logoExamCraft from "../../assets/icon512.png"
 import carpeta from "../../assets/images/archive.png"
 import examen from "../../assets/images/exam.png"
@@ -21,6 +24,26 @@ const extractMermaidCode = (fullText: string) => {
     return diagramPart.replace(/.*?(classDiagram|graph)/is, "$1").trim();
 };
 
+const sanitizeMermaidForModal = (code: string) => {
+    if (!code) return '';
+    
+    const match = code.match(/(classDiagram|graph)[\s\S]*/i);
+    if (!match) return ''; 
+
+    let clean = match[0];
+
+    clean = clean
+        .replace(/<br\s*[\/]?>/gi, '\n')      
+        .replace(/<\/?p[^>]*>/gi, '\n')       
+        .replace(/<\/?div[^>]*>/gi, '\n')      
+        .replace(/<\/?span[^>]*>/gi, '')      
+        .replace(/&nbsp;/g, ' ')               
+        .replace(/&lt;/g, '<')                
+        .replace(/&gt;/g, '>');                
+
+    return clean.trim();
+};
+
 export default function StorageExamsScreen({ onWelcome }: Props) {
 
     const [projects, setProjects] = useState<any[]>([]);
@@ -29,6 +52,8 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
     
     const [editingId, setEditingId] = useState<string | null>(null);
     const [tempName, setTempName] = useState("");
+    
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
 
     useEffect(() => {
         if (typeof chrome !== "undefined" && chrome.storage?.local) {
@@ -94,6 +119,35 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
     // =========================================================
     if (selectedProject) {
         const mermaidCode = extractMermaidCode(selectedProject.extensionFinish);
+        
+        const fullText = selectedProject.extensionFinish || '';
+        const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
+        
+        let introText = fullText;
+        let modalMermaidCode = '';
+
+        if (mermaidMatch) {
+            introText = fullText.substring(0, mermaidMatch.index).trim();
+            modalMermaidCode = sanitizeMermaidForModal(fullText);
+        }
+
+        const examFullMarkdown = `
+# Examen ${selectedProject.domainName}: ${selectedProject.customName || `Examen de ${selectedProject.domainName}`}
+
+## 1. Extensión Funcional y Diagrama UML
+${introText || '*Sin extensión funcional*'}
+
+${modalMermaidCode ? `\`\`\`mermaid\n${modalMermaidCode}\n\`\`\`` : ''}
+
+## 2. Restricciones de Atributos
+${selectedProject.attributeConstraints || '*Sin restricciones para atributos definidas*'}
+
+## 3. Relaciones entre Entidades
+${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*'}
+        `.trim();
+
+        const rawHtml = marked.parse(examFullMarkdown) as string;
+        const safeHtml = DOMPurify.sanitize(rawHtml);
 
         return (
             <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
@@ -127,7 +181,7 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
 
                         <div style={{ display: 'flex', gap: '10px', height: '600px' }}>
                             <div className="content-card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                <h3 style={{ marginBottom: '10px' }}>PROPUESTA DEL MODELO</h3>
+                                <h3 style={{ marginBottom: '10px' }}>ENUNCIADO Y CÓDIGO DIAGRAMA UML</h3>
                                 <textarea className="wf-textarea" readOnly value={selectedProject.extensionFinish} style={{ flex: 1, resize: 'none', padding: '15px', fontSize: '14px' }} />
                             </div>
                             <div className="content-card" style={{ flex: 1.5, backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
@@ -192,6 +246,15 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
                         <button onClick={() => setSelectedProject(null)} className="btn-back" style={{ position: 'relative', margin: 0 }}>
                             Volver
                         </button>
+                        
+                        <button 
+                            onClick={() => setShowPreviewModal(true)} 
+                            className="btn-back"
+                            style={{ position: 'relative', margin: 0, backgroundColor: '#2e7d32', color: 'white' }}
+                        >
+                            Previsualizar Examen
+                        </button>
+
                         <button 
                             onClick={(e) => handleDelete(selectedProject.id, e as unknown as React.MouseEvent)} 
                             className="btn-back"
@@ -200,6 +263,54 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
                             Borrar Examen
                         </button>
                     </div>
+
+                    {showPreviewModal && (
+                        <div style={{
+                            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center',
+                            padding: '40px'
+                        }}>
+                            <div style={{
+                                backgroundColor: '#fff', width: '100%', maxWidth: '900px',
+                                height: '100%', maxHeight: '85vh', borderRadius: '12px',
+                                display: 'flex', flexDirection: 'column', boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                            }}>
+                                <div style={{
+                                    padding: '20px', borderBottom: '2px solid #b08968', 
+                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                }}>
+                                    <h2 style={{ margin: 0 }}>Previsualización del Examen</h2>
+                                    <button 
+                                        onClick={() => setShowPreviewModal(false)}
+                                        style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#666' }}
+                                        title="Cerrar previsualización"
+                                    >
+                                        ✖
+                                    </button>
+                                </div>
+
+                                <div style={{ padding: '30px', overflowY: 'auto', flex: 1, backgroundColor: '#fafafa' }}>
+                                    <div 
+                                        className="content-card exam-markdown-container" 
+                                        style={{ 
+                                            padding: '40px', 
+                                            backgroundColor: '#fff', 
+                                            textAlign: 'left',
+                                            lineHeight: '1.6',
+                                            fontSize: '16px',
+                                            color: '#333'
+                                        }}
+                                        dangerouslySetInnerHTML={{ __html: safeHtml }} 
+                                    />
+                                </div>
+
+                                <div style={{ padding: '20px', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'flex-end' }}>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                 </main>
             </div>
         );
