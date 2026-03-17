@@ -148,7 +148,7 @@ export default function DiagramUMLScreen({
             const combinedResult = `
 ${context.trim()}
 
-## **Diagrama UML (Código Mermaid):**
+## Diagrama UML (Código Mermaid):
 ${responseText.trim()}`.trim();
 
             // 4. Actualizamos el estado para la interfaz (si lo necesitas mostrar en pantalla)

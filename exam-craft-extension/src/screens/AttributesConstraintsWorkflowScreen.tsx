@@ -150,6 +150,38 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
     }
   };
 
+  const handleDownload = () => {
+      if (!selectedProject || !responseText) return;
+
+      const defaultName = `Restricciones_Atributos_${selectedProject.customName}`;
+      const userChosenName = prompt("Introduce el nombre para el archivo a descargar:", defaultName);
+      
+      if (userChosenName === null) return; 
+      
+      let finalFileName = userChosenName.trim() || defaultName;
+      
+      if (!finalFileName.toLowerCase().endsWith('.md')) {
+          finalFileName += '.md';
+      }
+
+      const title = `Restricciones de Atributos - ${selectedProject.customName || selectedProject.domainName}`;
+      
+      const markdownContent = `# ${title}\n\n${responseText}`;
+
+      const blob = new Blob([markdownContent], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = finalFileName;
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="exam-app" style={{ position: 'relative' }}>
       
@@ -315,14 +347,15 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
 
         {/* PASO 2: FLUJO DEL EJERCICIO */}
         {step === 'workflow' && selectedProject && (
-            <div className="content-card" style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', maxHeight: '85vh', overflowY: 'auto', position: 'relative' }}>
+            <div className="content-card" style={{ width: '100%', maxWidth: '1000px', display: 'flex', flexDirection: 'column', maxHeight: '85vh', overflowY: 'auto', position: 'relative' }}>
                 
                 <h2 className="main-title small">
                     {internalStep === 'input' ? 'Restricciones de Atributos' : `Generar Restricciones: ${selectedProject.customName || selectedProject.domainName.toUpperCase()}`}
                 </h2>
                 
                 <div className="wf-wide-wrapper" style={{ flex: 1 }}>
-                {internalStep === 'input' ? (
+                
+ç                {internalStep === 'input' && (
                     <>
                         <p className="wf-instruction-text" style={{ marginTop: 0 }}>
                             Este es el prompt que se usará para generar las restricciones de atributos del examen seleccionado, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar"</strong>.
@@ -331,7 +364,6 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                             className="wf-textarea" 
                             value={promptText}
                             onChange={(e) => setPromptText(e.target.value)}
-                            style={{ minHeight: '300px', width: '100%', boxSizing: 'border-box' }}
                         />
                         <div className="wf-actions-row" style={{ marginTop: '20px' }}>
                             <button onClick={onBack} className="btn-step secondary">Volver</button>
@@ -340,47 +372,61 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                             </button>
                         </div>
                     </>
-                ) : (
+                )}
+
+                {internalStep === 'result' && (
                     <>
-                      <div className="wf-split-view">
-                        <div className="wf-column">
-                            <span className="wf-column-title">Prompt enviado</span>
-                            <textarea 
-                                className="wf-textarea" 
-                                value={promptText}
-                                onChange={(e) => setPromptText(e.target.value)}
-                                style={{ minHeight: '300px' }}
-                            />
-                            <button onClick={handleGenerate} className="btn-step primary" disabled={isLoading} style={{ marginTop: '20px' }}>
-                                {isLoading ? '...' : 'Volver a generar'}
-                            </button>
-                        </div>
-                        <div className="wf-column">
-                            <span className="wf-column-title">Propuesta del modelo</span>
-                            
-                            {isLoading ? (
-                                <div className="wf-result-box" style={{ whiteSpace: 'pre-wrap', minHeight: '300px' }}>
-                                    Generando...
-                                </div>
-                            ) : (
+                        <div className="wf-split-view">
+                            <div className="wf-column">
+                                <span className="wf-column-title">Prompt enviado</span>
                                 <textarea 
-                                    className="wf-result-box"
-                                    value={responseText}
-                                    onChange={(e) => setResponseText(e.target.value)}
-                                    style={{ minHeight: '300px' }}
+                                    className="wf-textarea" 
+                                    value={promptText}
+                                    onChange={(e) => setPromptText(e.target.value)}
                                 />
-                            )}
-                            
-                            <button onClick={handleSaveToChrome} className="btn-step primary" style={{ marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                Guardar
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                                    <polyline points="17 21 17 13 7 13 7 21" />
-                                    <polyline points="7 3 7 8 15 8" />
-                                </svg>
-                            </button>
+                                <button onClick={handleGenerate} className="btn-step primary" disabled={isLoading}>
+                                    {isLoading ? '...' : 'Volver a generar'}
+                                </button>
+                            </div>
+                            <div className="wf-column">
+                                <span className="wf-column-title">Propuesta del modelo</span>
+                                
+                                {isLoading ? (
+                                    <div className="wf-result-box" style={{ whiteSpace: 'pre-wrap' }}>
+                                        Generando...
+                                    </div>
+                                ) : (
+                                    <textarea 
+                                        className="wf-result-box"
+                                        value={responseText}
+                                        onChange={(e) => setResponseText(e.target.value)}
+                                    />
+                                )}
+                                
+                                <div style={{ display: 'flex', gap: '15px' }}>
+                                    <button 
+                                        onClick={handleDownload} 
+                                        className="btn-step secondary" 
+                                        style={{ flex: 1, backgroundColor: '#4a90e2', color: 'white', border: 'none' }}
+                                    >
+                                        Descargar (.md)
+                                    </button>
+
+                                    <button onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', margin: 0 }}>
+                                        Guardar
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                            <polyline points="17 21 17 13 7 13 7 21" />
+                                            <polyline points="7 3 7 8 15 8" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div> 
+
+                        <div className="wf-actions-row" style={{ marginTop: '20px' }}>
+                            <button onClick={() => setInternalStep('input')} className="btn-step secondary">Volver</button>
+                        </div>
                     </>
                 )}
                 </div>

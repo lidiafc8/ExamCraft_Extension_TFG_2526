@@ -108,6 +108,61 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
         }
     };
 
+    const handleDownload = () => {
+    if (!selectedProject) return;
+
+    const title = `Examen_Completo_${selectedProject.customName}` || `Examen de ${selectedProject.domainName}`;
+    
+    const fullText = selectedProject.extensionFinish || '';
+    const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
+    
+    let introText = fullText;
+    let finalMermaidCode = '';
+
+    if (mermaidMatch) {
+        introText = fullText.substring(0, mermaidMatch.index).trim();
+        finalMermaidCode = sanitizeMermaidForModal(fullText); 
+    }
+
+    const markdownContent = `# ${title}
+
+## 1. Extensión Funcional
+${introText || "No hay datos de extensión funcional."}
+
+${finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`` : ''}
+
+## 2. Restricciones de Atributos
+${selectedProject.attributeConstraints || "No se crearon restricciones de atributos para este examen."}
+
+## 3. Relaciones entre Entidades
+${selectedProject.entityRelations || "No se crearon relaciones entre entidades para este examen."}
+`;
+
+    const defaultName = title.replace(/[^a-z0-9áéíóúñ]/gi, '_').toLowerCase();
+    
+    const userChosenName = prompt("Introduce el nombre para el archivo a descargar:", defaultName);
+    
+    if (userChosenName === null) return; 
+    
+    let finalFileName = userChosenName.trim() || defaultName;
+    if (!finalFileName.toLowerCase().endsWith('.md')) {
+        finalFileName += '.md';
+    }
+
+    const blob = new Blob([markdownContent], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = finalFileName;
+    
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+};
+
     // --- LÓGICA DE CARPETAS ESTRICTA ---
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
     const projectsInFolder = projects.filter(p => 
@@ -252,7 +307,15 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                             className="btn-back"
                             style={{ position: 'relative', margin: 0, backgroundColor: '#2e7d32', color: 'white' }}
                         >
-                            Previsualizar Examen
+                            Previsualizar
+                        </button>
+
+                        <button 
+                            onClick={handleDownload} 
+                            className="btn-back"
+                            style={{ position: 'relative', margin: 0, backgroundColor: '#4a90e2', color: 'white', borderColor: '#4a90e2' }}
+                        >
+                            Descargar (.md)
                         </button>
 
                         <button 
@@ -260,7 +323,7 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                             className="btn-back"
                             style={{ position: 'relative', margin: 0, backgroundColor: '#ff4d4f', color: 'white' }}
                         >
-                            Borrar Examen
+                            Eliminar
                         </button>
                     </div>
 
