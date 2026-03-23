@@ -1,7 +1,7 @@
 # PROMPT COMPLETO PARA GENERACIÓN DE TESTS DE LOS DISTITNOS EJERCICIOS
 
 ## Recursos a proporcionar:
-* `generation_test`
+* `generation_test.md`
 
 ## Prompt a utilizar:
 
