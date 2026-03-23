@@ -146,12 +146,10 @@ export default function DiagramUMLScreen({
             // 3. Creamos la combinación en una constante local
             // Usamos .trim() para limpiar espacios innecesarios
             const combinedResult = `
-                CONTEXTO Y ENUNCIADO:
-                ${context.trim()}
+${context.trim()}
 
-                --------------------------------------------------
-                DIAGRAMA UML (Código Mermaid):
-                ${responseText.trim()}`.trim();
+## Diagrama UML (Código Mermaid):
+${responseText.trim()}`.trim();
 
             // 4. Actualizamos el estado para la interfaz (si lo necesitas mostrar en pantalla)
             setExtensionComplete(combinedResult);

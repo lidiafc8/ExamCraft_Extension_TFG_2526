@@ -14,7 +14,6 @@ interface Props {
     onCreateDiagram: (text: string) => void; 
 }
 
-
 export default function FinishFunctionalExtensionScreen({
     domainName, 
     extensionFinish,
@@ -59,7 +58,6 @@ export default function FinishFunctionalExtensionScreen({
                     alert("No se pudo guardar en el almacenamiento local.");
                 } else {
                     alert(`¡Examen "${finalName}" guardado con éxito en la carpeta de ${domainName.toUpperCase()}!`);
-
                     onWelcome();
                 }
             });
@@ -74,6 +72,52 @@ export default function FinishFunctionalExtensionScreen({
         const parts = fullText.split(separatorRegex);
         const diagramPart = parts.find(p => p.toLowerCase().includes("classdiagram") || p.toLowerCase().includes("graph")) || "";
         return diagramPart.replace(/.*?(classDiagram|graph)/is, "$1").trim();
+    };
+
+    const handleDownload = () => {
+        const defaultName = `Extension_Funcional_${domainName}`;
+        const userChosenName = prompt("Introduce el nombre para el archivo a descargar:", defaultName);
+        
+        if (userChosenName === null) return; 
+        
+        let finalFileName = userChosenName.trim() || defaultName;
+        
+        if (!finalFileName.toLowerCase().endsWith('.md')) {
+            finalFileName += '.md';
+        }
+
+        const title = `Extensión Funcional - ${domainName}`;
+        const fullText = extensionFinish || '';
+        const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
+        
+        let introText = fullText;
+        let finalMermaidCode = '';
+
+        if (mermaidMatch) {
+            introText = fullText.substring(0, mermaidMatch.index).trim();
+            finalMermaidCode = cleanMermaidCode(fullText.substring(mermaidMatch.index));
+        }
+
+        const markdownContent = `# ${title}
+
+## Enunciado
+${introText || "No hay texto de enunciado."}
+
+${finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`` : '*No se generó código Mermaid*'}
+`;
+
+        const blob = new Blob([markdownContent], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = finalFileName;
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
     const mermaidCode = extractMermaidCode(extensionFinish);
@@ -156,7 +200,15 @@ export default function FinishFunctionalExtensionScreen({
                                 Volver a UML
                             </button>
                             
-                            <button onClick={handleSaveToChrome} className="btn-step primary" style={{ marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                            <button 
+                                onClick={handleDownload} 
+                                className="btn-step secondary" 
+                                style={{ padding: '12px 30px', backgroundColor: '#4a90e2', color: 'white', border: 'none' }}
+                            >
+                                Descargar (.md)
+                            </button>
+
+                            <button onClick={handleSaveToChrome} className="btn-step primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                 Guardar
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
