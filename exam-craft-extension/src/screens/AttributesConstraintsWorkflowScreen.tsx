@@ -236,7 +236,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                     <>
                         <h2 className="main-title small">Selecciona un dominio</h2>
                         <p className="wf-instruction-text" style={{ textAlign: 'center' }}>
-                            Selecciona la carpeta del dominio que quieres usar como base.
+                            Para generar el ejercicio "Restricciones de Atributos" es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base para este ejercicio.
                         </p>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
@@ -265,6 +265,9 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                 ) : (
                     <>
                         <h2 className="main-title small">Exámenes de {selectedDomainFolder.toUpperCase()}</h2>
+                        <p className="wf-instruction-text" style={{ textAlign: 'center' }}>
+                            Haz clic en el examen específico que deseas utilizar como contexto.
+                        </p>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
                             {projectsInFolder.length > 0 ? (
                                 projectsInFolder.map((proj) => (
@@ -311,7 +314,9 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                 <div className="wf-wide-wrapper">
                 {internalStep === 'input' && (
                     <>
-                        <p className="wf-instruction-text">Revise el prompt y pulse en Generar.</p>
+                        <p className="wf-instruction-text">
+                            Este es el prompt que se usará para generar las restricciones de atributos del examen seleccionado, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar"</strong>.
+                        </p>
                         <textarea 
                             className="wf-textarea" 
                             value={promptText}
@@ -349,7 +354,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                                 />
                                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                     <button onClick={handleDownload} className="btn-step secondary" style={{ flex: 1, backgroundColor: '#4a90e2', color: 'white' }}>
-                                        Descargar
+                                        Descargar (.md)
                                     </button>
 
                                     <button onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1 }}>

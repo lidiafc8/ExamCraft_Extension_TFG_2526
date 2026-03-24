@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react"
 import logoExamCraft from "../../assets/icon512.png"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { sendToGemini } from "~src/services/geminiService"
-// Asegúrate de que esta ruta sea exacta
 import testAttributesPromptMarkdown from "bundle-text:../prompts/generation-test-exercice/generation_tests.md"
 
 interface Props {
@@ -106,7 +105,7 @@ ${restricciones}
             // Creamos el objeto actualizado con los tests
             const updatedExamData = {
                 ...initialData.project, 
-                javaTests: responseText, // Guardamos los tests generados
+                javaTests: responseText, 
                 updatedAt: new Date().toISOString()
             };
 
@@ -116,7 +115,7 @@ ${restricciones}
                     alert("No se pudo guardar el test en el almacenamiento.");
                 } else {
                     alert("¡Tests guardados con éxito en el examen!");
-                    onWelcome(); // Volvemos al inicio tras guardar
+                    onWelcome(); 
                 }
             });
         } else {
