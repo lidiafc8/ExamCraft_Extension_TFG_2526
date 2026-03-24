@@ -211,7 +211,7 @@ ${restricciones}
                                         
                                         {/* BOTÓN DE GUARDADO AÑADIDO */}
                                         <button onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1, backgroundColor: '#28a745' }}>
-                                            Guardar en Examen
+                                            Guardar
                                         </button>
 
                                         <button onClick={onWelcome} className="btn-step secondary" style={{ flex: 1 }}>
