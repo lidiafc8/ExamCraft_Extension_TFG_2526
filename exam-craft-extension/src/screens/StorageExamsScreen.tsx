@@ -109,22 +109,22 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
     };
 
     const handleDownload = () => {
-    if (!selectedProject) return;
+        if (!selectedProject) return;
 
-    const title = `Examen_Completo_${selectedProject.customName}` || `Examen de ${selectedProject.domainName}`;
-    
-    const fullText = selectedProject.extensionFinish || '';
-    const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
-    
-    let introText = fullText;
-    let finalMermaidCode = '';
+        const title = `Examen_Completo_${selectedProject.customName}` || `Examen de ${selectedProject.domainName}`;
+        
+        const fullText = selectedProject.extensionFinish || '';
+        const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
+        
+        let introText = fullText;
+        let finalMermaidCode = '';
 
-    if (mermaidMatch) {
-        introText = fullText.substring(0, mermaidMatch.index).trim();
-        finalMermaidCode = sanitizeMermaidForModal(fullText); 
-    }
+        if (mermaidMatch) {
+            introText = fullText.substring(0, mermaidMatch.index).trim();
+            finalMermaidCode = sanitizeMermaidForModal(fullText); 
+        }
 
-    const markdownContent = `# ${title}
+        const markdownContent = `# ${title}
 
 ## 1. Extensión Funcional
 ${introText || "No hay datos de extensión funcional."}
@@ -136,34 +136,38 @@ ${selectedProject.attributeConstraints || "No se crearon restricciones de atribu
 
 ## 3. Relaciones entre Entidades
 ${selectedProject.entityRelations || "No se crearon relaciones entre entidades para este examen."}
+
+## 4. Tests de Java (JUnit)
+\`\`\`java
+${selectedProject.javaTests || "// No hay tests generados para este examen."}
+\`\`\`
 `;
 
-    const defaultName = title.replace(/[^a-z0-9áéíóúñ]/gi, '_').toLowerCase();
-    
-    const userChosenName = prompt("Introduce el nombre para el archivo a descargar:", defaultName);
-    
-    if (userChosenName === null) return; 
-    
-    let finalFileName = userChosenName.trim() || defaultName;
-    if (!finalFileName.toLowerCase().endsWith('.md')) {
-        finalFileName += '.md';
-    }
+        const defaultName = title.replace(/[^a-z0-9áéíóúñ]/gi, '_').toLowerCase();
+        
+        const userChosenName = prompt("Introduce el nombre para el archivo a descargar:", defaultName);
+        
+        if (userChosenName === null) return; 
+        
+        let finalFileName = userChosenName.trim() || defaultName;
+        if (!finalFileName.toLowerCase().endsWith('.md')) {
+            finalFileName += '.md';
+        }
 
-    const blob = new Blob([markdownContent], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = finalFileName;
-    
-    document.body.appendChild(link);
-    link.click();
-    
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-};
+        const blob = new Blob([markdownContent], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = finalFileName;
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
 
-    // --- LÓGICA DE CARPETAS ESTRICTA ---
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
     const projectsInFolder = projects.filter(p => 
         p.domainName && selectedDomainFolder && p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
@@ -186,6 +190,7 @@ ${selectedProject.entityRelations || "No se crearon relaciones entre entidades p
             modalMermaidCode = sanitizeMermaidForModal(fullText);
         }
 
+        // CORRECCIÓN AQUÍ: Se eliminó la sección de Tests de Java para la previsualización
         const examFullMarkdown = `
 # Examen ${selectedProject.domainName}: ${selectedProject.customName || `Examen de ${selectedProject.domainName}`}
 
@@ -233,7 +238,6 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                     </div>
                         
                     <div className="section-block" style={{ width: '80%',marginBottom: '0px' }}>
-
                         <div style={{ display: 'flex', gap: '10px', height: '600px' }}>
                             <div className="content-card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                                 <h3 style={{ marginBottom: '10px' }}>ENUNCIADO Y CÓDIGO DIAGRAMA UML</h3>
@@ -270,8 +274,6 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                             )}
                         </div>
                     </div>
-                    
-                    
 
                     <div className="section-block" style={{marginBottom: '1px' }}>
                         <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
@@ -280,7 +282,6 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                     </div>
                         
                     <div className="section-block" style={{ width: '200%',marginBottom: '50px' }}>
-
                         <div className="content-card" style={{ padding: '20px' }}>
                             {selectedProject.entityRelations ? (
                                 <textarea 
@@ -292,6 +293,37 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                             ) : (
                                 <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
                                     Aún no se han creado las relaciones entre entidades para este examen.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="section-block" style={{marginBottom: '1px', marginTop: '40px' }}>
+                        <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
+                            Tests de Java
+                        </h2>
+                    </div>
+                        
+                    <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
+                        <div className="content-card" style={{ padding: '20px' }}>
+                            {selectedProject.javaTests ? (
+                                <textarea 
+                                    className="wf-textarea" 
+                                    readOnly 
+                                    value={selectedProject.javaTests} 
+                                    style={{ 
+                                        width: '100%', 
+                                        minHeight: '400px', 
+                                        resize: 'vertical', 
+                                        padding: '15px', 
+                                        fontSize: '13px', 
+                                        fontFamily: 'monospace', 
+                                        backgroundColor: '#f9f9f9' 
+                                    }} 
+                                />
+                            ) : (
+                                <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
+                                    Aún no se han generado los tests para este examen.
                                 </p>
                             )}
                         </div>
@@ -367,13 +399,11 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                                         dangerouslySetInnerHTML={{ __html: safeHtml }} 
                                     />
                                 </div>
-
                                 <div style={{ padding: '20px', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'flex-end' }}>
                                 </div>
                             </div>
                         </div>
                     )}
-
                 </main>
             </div>
         );
@@ -425,7 +455,6 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                                         ×
                                     </button>
 
-                                    {/* Icono de archivo que abre el examen */}
                                     <span 
                                         className="parts-exam-icon" 
                                         style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
@@ -443,7 +472,6 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                                         />
                                     </span>
 
-                                    {/* LÓGICA DE EDICIÓN DEL NOMBRE */}
                                     {editingId === proj.id ? (
                                         <input
                                             autoFocus
@@ -493,7 +521,7 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                                                 setEditingId(proj.id); 
                                                 setTempName(proj.customName || `Examen de ${proj.domainName}`); 
                                             }}
-                                            title= {`${tempName}`}
+                                            title= {`${proj.customName || `Examen de ${proj.domainName}`}`}
                                         >
                                             {proj.customName || `Examen de ${proj.domainName}`}
                                         </span>

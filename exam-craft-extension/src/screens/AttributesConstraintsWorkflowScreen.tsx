@@ -10,24 +10,24 @@ interface Props {
   onBack: () => void
   onWelcome: () => void
   onCreateExam: () => void
+  onCreateTest: (data: { project: any, constraints: string }) => void; 
 }
 
-export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome, onCreateExam }: Props) {
+export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome, onCreateExam, onCreateTest }: Props) {
 
-  const [step, setStep] = useState<'selection' | 'workflow'>('selection');
-  const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
-  
-  const [projects, setProjects] = useState<any[]>([]);
-  const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null);
-  const [selectedProject, setSelectedProject] = useState<any | null>(null);
-  
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [step, setStep] = useState<'selection' | 'workflow'>('selection');
+    const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
+    
+    const [projects, setProjects] = useState<any[]>([]);
+    const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null);
+    const [selectedProject, setSelectedProject] = useState<any | null>(null);
+    
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const [promptText, setPromptText] = useState("");
-  const [hiddenContext, setHiddenContext] = useState("");
-  const [responseText, setResponseText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
+    const [promptText, setPromptText] = useState("");
+    const [hiddenContext, setHiddenContext] = useState("");
+    const [responseText, setResponseText] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (step === 'selection' && typeof chrome !== "undefined" && chrome.storage?.local) {
@@ -60,7 +60,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
       setInternalStep('input');
   };
 
-    const handleSaveToChrome = () => {
+  const handleSaveToChrome = () => {
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
         
         if (!selectedProject || !selectedProject.id) {
@@ -80,9 +80,8 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                 alert("No se pudo actualizar el examen en el almacenamiento local.");
             } else {
                 setSelectedProject(updatedExamData);
-                alert(`¡Examen "${selectedProject.customName || selectedProject.domainName}" actualizado con éxito! Se han añadido las restricciones.`);
-            
-                onWelcome();
+                // CAMBIO: Navegación automática al siguiente apartado tras guardar
+                onCreateTest({ project: updatedExamData, constraints: responseText });
             }
         });
     } else {
@@ -118,8 +117,6 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
         ${promptText}
         `;
 
-        console.log("Enviando a Gemini:", finalPayload);
-
         const result = await sendToGemini(finalPayload);
         
         setResponseText(result);
@@ -137,9 +134,8 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                     response: result                  
                 })
             });
-            console.log("Log enviado al servidor local correctamente.");
         } catch (error) {
-            console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
+            console.warn("Servidor de logs apagado.");
         }
 
     } catch (error) {
@@ -185,7 +181,6 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
   return (
     <div className="exam-app" style={{ position: 'relative' }}>
       
-      {/* --- MODAL DE CONFIRMACIÓN --- */}
       {showConfirmModal && selectedProject && (
           <div style={{
               position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -216,40 +211,27 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
           </div>
       )}
 
-      {/* --- HEADER --- */}   
       <header className="app-header">
         <div className="header-left">
             <span className="logo-icon" onClick={onWelcome} style={{ cursor: 'pointer' }}>
                 <img src={logoExamCraft} alt="Logo" width="60" height="60" />
             </span> 
             <nav className="breadcrumb-nav">
-                <span className="breadcrumb-link" onClick={onWelcome} title="Volver al inicio">
-                    INICIO
-                </span>
+                <span className="breadcrumb-link" onClick={onWelcome}>INICIO</span>
                 <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-link" onClick={onCreateExam}>
-                    CREAR EXAMEN
-                </span>
+                <span className="breadcrumb-link" onClick={onCreateExam}>CREAR EXAMEN</span>
                 <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-link" onClick={onBack}>
-                    POR PARTES
-                </span>
+                <span className="breadcrumb-link" onClick={onBack}>POR PARTES</span>
                 <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-current">
-                    RESTRICCIONES DE ATRIBUTOS
-                </span>
+                <span className="breadcrumb-current">RESTRICCIONES DE ATRIBUTOS</span>
             </nav>
         </div>
       </header>
 
-      {/* --- CONTENIDO CENTRAL --- */}
       <main className="main-content">
 
-        {/* PASO 1: SELECCIÓN DE CARPETA Y ARCHIVO */}
         {step === 'selection' && (
             <div className="content-card" style={{ width: '100%', maxWidth: '900px' }}>
-                
-                {/* NIVEL 1: MOSTRAR CARPETAS */}
                 {!selectedDomainFolder ? (
                     <>
                         <h2 className="main-title small">Selecciona un dominio</h2>
@@ -257,13 +239,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                             Para generar el ejercicio "Restricciones de Atributos" es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base para este ejercicio.
                         </p>
 
-                        <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
-                            gap: '30px', 
-                            marginTop: '30px',
-                            padding: '20px'
-                        }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
                             {allowedFolders.map((folderName) => (
                                 <div key={folderName} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                     <img 
@@ -283,26 +259,16 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                         </div>
 
                         <div className="wf-actions-row" style={{ marginTop: '30px' }}>
-                            <button onClick={() => onBack()} className="btn-step secondary">
-                                Volver
-                            </button>
+                            <button onClick={onBack} className="btn-step secondary">Volver</button>
                         </div>
                     </>
                 ) : (
-                    /* NIVEL 2: MOSTRAR ARCHIVOS DENTRO DE LA CARPETA */
                     <>
                         <h2 className="main-title small">Exámenes de {selectedDomainFolder.toUpperCase()}</h2>
                         <p className="wf-instruction-text" style={{ textAlign: 'center' }}>
                             Haz clic en el examen específico que deseas utilizar como contexto.
                         </p>
-
-                        <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
-                            gap: '30px', 
-                            marginTop: '30px',
-                            padding: '20px'
-                        }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
                             {projectsInFolder.length > 0 ? (
                                 projectsInFolder.map((proj) => (
                                     <div key={proj.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -310,11 +276,10 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                                             className="parts-exam-icon" 
                                             style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
                                             onClick={() => handleSelectProject(proj)}
-                                            title="Abrir examen"
                                         >
                                             <img 
                                                 src={examen} 
-                                                alt="Abrir examen" 
+                                                alt="Abrir" 
                                                 width="80" 
                                                 height="80" 
                                                 style={{ transition: 'transform 0.2s' }} 
@@ -328,38 +293,30 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                                     </div>
                                 ))
                             ) : (
-                                <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#888' }}>
-                                    Aún no has guardado ningún examen en esta carpeta.
-                                </p>
+                                <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#888' }}>No hay exámenes.</p>
                             )}
                         </div>
 
                         <div className="wf-actions-row" style={{ marginTop: '30px' }}>
-                            <button onClick={() => setSelectedDomainFolder(null)} className="btn-step secondary">
-                                Volver
-                            </button>
+                            <button onClick={() => setSelectedDomainFolder(null)} className="btn-step secondary">Volver</button>
                         </div>
                     </>
                 )}
-
             </div>
         )}
 
-        {/* PASO 2: FLUJO DEL EJERCICIO */}
         {step === 'workflow' && selectedProject && (
-            <div className="content-card" style={{ width: '100%', maxWidth: '1000px', display: 'flex', flexDirection: 'column', maxHeight: '85vh', overflowY: 'auto', position: 'relative' }}>
-                
+            <div className="content-card" style={{ width: '100%', maxWidth: '1000px', maxHeight: '85vh', overflowY: 'auto' }}>
                 <h2 className="main-title small">
                     {internalStep === 'input' ? 'Restricciones de Atributos' : `Generar Restricciones: ${selectedProject.customName || selectedProject.domainName.toUpperCase()}`}
                 </h2>
                 
-                <div className="wf-wide-wrapper" style={{ flex: 1 }}>
-                
-ç                {internalStep === 'input' && (
+                <div className="wf-wide-wrapper">
+                {internalStep === 'input' && (
                     <>
-                        <p className="wf-instruction-text" style={{ marginTop: 0 }}>
+                        <p className="wf-instruction-text">
                             Este es el prompt que se usará para generar las restricciones de atributos del examen seleccionado, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar"</strong>.
-                        </p>                        
+                        </p>
                         <textarea 
                             className="wf-textarea" 
                             value={promptText}
@@ -385,54 +342,37 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                                     onChange={(e) => setPromptText(e.target.value)}
                                 />
                                 <button onClick={handleGenerate} className="btn-step primary" disabled={isLoading}>
-                                    {isLoading ? '...' : 'Volver a generar'}
+                                    Volver a generar
                                 </button>
                             </div>
                             <div className="wf-column">
                                 <span className="wf-column-title">Propuesta del modelo</span>
-                                
-                                {isLoading ? (
-                                    <div className="wf-result-box" style={{ whiteSpace: 'pre-wrap' }}>
-                                        Generando...
-                                    </div>
-                                ) : (
-                                    <textarea 
-                                        className="wf-result-box"
-                                        value={responseText}
-                                        onChange={(e) => setResponseText(e.target.value)}
-                                    />
-                                )}
-                                
-                                <div style={{ display: 'flex', gap: '15px' }}>
-                                    <button 
-                                        onClick={handleDownload} 
-                                        className="btn-step secondary" 
-                                        style={{ flex: 1, backgroundColor: '#4a90e2', color: 'white', border: 'none' }}
-                                    >
+                                <textarea 
+                                    className="wf-result-box"
+                                    value={responseText}
+                                    onChange={(e) => setResponseText(e.target.value)}
+                                />
+                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                    <button onClick={handleDownload} className="btn-step secondary" style={{ flex: 1, backgroundColor: '#4a90e2', color: 'white' }}>
                                         Descargar (.md)
                                     </button>
 
-                                    <button onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', margin: 0 }}>
-                                        Guardar
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                                            <polyline points="17 21 17 13 7 13 7 21" />
-                                            <polyline points="7 3 7 8 15 8" />
-                                        </svg>
+                                    <button onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1 }}>
+                                        Guardar y Continuar
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         <div className="wf-actions-row" style={{ marginTop: '20px' }}>
-                            <button onClick={() => setInternalStep('input')} className="btn-step secondary">Volver</button>
+                            <button onClick={() => setInternalStep('input')} className="btn-step secondary">Volver al editor</button>
                         </div>
                     </>
                 )}
                 </div>
             </div>
         )}
-        </main>      
+      </main>      
     </div>
   )
 }

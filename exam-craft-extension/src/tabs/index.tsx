@@ -10,11 +10,16 @@ import FinishFunctionalExtensionScreen from "../screens/FinishFunctionalExtensio
 import StorageExamsScreen from "../screens/StorageExamsScreen"
 import "/assets/main.css"
 import AttributesConstraintsWorkflowScreen from "~src/screens/AttributesConstraintsWorkflowScreen"
+import GenerationTestAtributesScreen from "../screens/GenerationTestAtributesScreen"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
   const [contextResponse, setContextResponse] = useState<string>("")
   const [functionalExtensionCompleted, setFunctionalExtensionCompleted] = useState<string>("")
+  
+  // NUEVO: Estado para compartir datos entre Restricciones y Tests
+  const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string } | null>(null)
+
   const [screen, setScreen] = useState<
     "welcome" | 
     "github" | 
@@ -27,7 +32,7 @@ export default function IndexTab() {
     "finishFunctionalExtension" |
     "storage" |
     "domainSelection" | 
-    "domainWorkflow" 
+    "testAtributes"
   >("welcome")
 
   return (
@@ -63,8 +68,8 @@ export default function IndexTab() {
         onBack={() => setScreen("createExamByParts")} 
         onWelcome={() => setScreen("welcome")} 
         onSelectDomain={(domainName) => {
-             setSelectedDomain(domainName)  
-             setScreen("domainWorkflow") 
+              setSelectedDomain(domainName)  
+              setScreen("domainWorkflow") 
           }}
         onCreateExam={() => setScreen("createExam")}
         />
@@ -130,10 +135,24 @@ export default function IndexTab() {
           onBack={() => setScreen("createExamByParts")} 
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
+          // CORRECCIÓN: Captura los datos y los guarda en el estado antes de saltar de pantalla
+          onCreateTest={(data) => {
+            setSharedTestData(data);
+            setScreen("testAtributes");
+          }}
         />
       )}
 
+      {screen === "testAtributes" && (
+        <GenerationTestAtributesScreen 
+          // PASO DE DATOS: Inyectamos el objeto guardado
+          initialData={sharedTestData} 
+          onBack={() => setScreen("attributesConstraints")} 
+          onWelcome={() => setScreen("welcome")} 
+          onCreateExam={() => setScreen("createExam")}
+          onCreateExamByParts={() => setScreen("createExamByParts")}
+        />
+      )}
     </div>
   )
 }
-
