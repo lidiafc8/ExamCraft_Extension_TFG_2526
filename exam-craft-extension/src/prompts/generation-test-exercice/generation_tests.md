@@ -58,13 +58,3 @@ Requisitos que debe de cumplir:
 - Crea el método @Test public void test1Valid[NOMBRE_ENTIDAD]IsPersisted(). Obtén una instancia válida, guárdala con el repositorio y haz un .flush() dentro de un assertDoesNotThrow.
 
 Genera el código completo de Test1.java aplicando estas reglas a la entidad principal descrita en el UML de este examen en particular.
-
-### Para el ejercicio Test2 :
-
-Genera el código de Test2.java para el examen adjunto siguiendo estas directrices estrictas:
-1.	Infraestructura: La clase debe extender de ReflexiveTest y usar la anotación @DataJpaTest.
-2.	Objetivo: Validar el mapeo objeto-relacional (JPA) de la entidad principal y sus relaciones según el UML.
-3.	Uso de Reflexión: > * Usa checkThatFieldIsAnnotatedWith(Clase.class, "atributo", Anotacion.class) para cada flecha del UML.
-o	IMPORTANTE: La anotación debe buscarse en la clase donde nace la flecha en el diagrama.
-4.	Validación de Multiplicidad: Si en el extremo de la relación aparece un 1 o 1..n, añade un método de test que use checkThatFieldsAreMandatory(objeto, em, "nombreRelacion").
-5.	Estilo de código: Genera métodos individuales y limpios
