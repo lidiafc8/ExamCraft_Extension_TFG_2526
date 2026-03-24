@@ -228,11 +228,21 @@ ${selectedProject.javaTests || "// No hay tests generados para este examen."}
         setIsCreating(true);
 
         try {
-            const OWNER = "lidiafc8";
+            const userResponse = await fetch("https://api.github.com/user", {
+                headers: { Authorization: `token ${MY_TOKEN}` }
+            });
+
+            if (!userResponse.ok) {
+                throw new Error("Token inválido o caducado (Requires authentication)");
+            }
+
+            const userData = await userResponse.json();
+            const TARGET_OWNER = userData.login; 
+            const TEMPLATE_OWNER = "lidiafc8";  
 
             const newRepo = await GithubService.createRepoFromTemplate(
                 MY_TOKEN,
-                OWNER, 
+                TEMPLATE_OWNER, 
                 TEMPLATE_REPO, 
                 newRepoName
             );
@@ -259,7 +269,7 @@ ${selectedProject.javaTests || "// No hay tests generados para este examen."}
 
             await GithubService.createOrUpdateFile(
                 MY_TOKEN,
-                OWNER,
+                TARGET_OWNER, 
                 newRepoName,
                 "descripcion_control_check.md", 
                 markdownContent,
@@ -269,7 +279,6 @@ ${selectedProject.javaTests || "// No hay tests generados para este examen."}
             if (selectedProject.javaTests) {
                 const allTestsCode = selectedProject.javaTests;
 
-                // Busca el patrón "### `NombreArchivo.java`"
                 const regex = /###\s*`?([a-zA-Z0-9_]+\.java)`?\s*([\s\S]*?)(?=###\s*`?[a-zA-Z0-9_]+\.java`?|$)/gi;
                 const matches = [...allTestsCode.matchAll(regex)];
 
@@ -284,7 +293,7 @@ ${selectedProject.javaTests || "// No hay tests generados para este examen."}
 
                         await GithubService.createOrUpdateFile(
                             MY_TOKEN,
-                            OWNER,
+                            TARGET_OWNER,
                             newRepoName,
                             filePath,
                             fileContent, 
@@ -301,7 +310,7 @@ ${selectedProject.javaTests || "// No hay tests generados para este examen."}
 
                     await GithubService.createOrUpdateFile(
                         MY_TOKEN,
-                        OWNER,
+                        TARGET_OWNER, 
                         newRepoName,
                         fallbackPath,
                         fallbackContent, 
