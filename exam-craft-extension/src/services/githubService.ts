@@ -72,7 +72,6 @@ export const GithubService = {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          owner: "lidiafc8",
           name: newRepoName,
           private: true
         })
