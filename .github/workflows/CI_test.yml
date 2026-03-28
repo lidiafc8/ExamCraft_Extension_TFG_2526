@@ -10,26 +10,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-test-analyze:
-    runs-on: ubuntu-latest  # Linux es suficiente y más rápido
+  build-extension:
+    runs-on: windows-latest
 
     defaults:
       run:
         working-directory: exam-craft-extension
 
     steps:
-      - name: Checkout del código
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'                        # Caché automática de node_modules
+          cache: 'npm'
           cache-dependency-path: exam-craft-extension/package-lock.json
 
       - name: Instalar dependencias
-        run: npm ci                           # Más rápido y reproducible que npm install
+        run: npm ci
 
       - name: Build (Plasmo)
         run: npm run build
@@ -42,4 +42,4 @@ jobs:
         with:
           name: chrome-extension-build
           path: exam-craft-extension/build/
-          retention-days: 7                   # Evita acumular artefactos indefinidamente
+          retention-days: 7
