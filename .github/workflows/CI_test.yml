@@ -3,7 +3,7 @@ name: CI Plasmo Extension
 on:
   pull_request: {}
   push:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -11,8 +11,7 @@ concurrency:
 
 jobs:
   build-test-analyze:
-    # CAMBIAMOS LINUX POR WINDOWS AQUÍ:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest  # Linux es suficiente y más rápido
 
     defaults:
       run:
@@ -26,19 +25,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'                        # Caché automática de node_modules
+          cache-dependency-path: exam-craft-extension/package-lock.json
 
       - name: Instalar dependencias
-        # En Windows no necesitamos trucos raros, npm install normal funciona
-        run: npm install
+        run: npm ci                           # Más rápido y reproducible que npm install
 
-      - name: Construir la extensión (Plasmo Build)
+      - name: Build (Plasmo)
         run: npm run build
         env:
           NODE_ENV: production
 
-      - name: Subir extensión como artefacto
+      - name: Subir artefacto
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: chrome-extension-build
           path: exam-craft-extension/build/
+          retention-days: 7                   # Evita acumular artefactos indefinidamente
