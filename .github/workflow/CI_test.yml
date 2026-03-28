@@ -1,0 +1,63 @@
+name: CI Plasmo Extension
+
+on:
+  pull_request: {}
+  push:
+    branches: [ "main", "develop" ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm' 
+
+      - name: Instalar dependencias
+        run: npm ci 
+
+      # --- 1. FASE DE PRUEBAS (COMENTADA TEMPORALMENTE) ---
+      # Descomenta estas dos líneas cuando tengas tus tests configurados
+      # - name: Ejecutar Tests y Cobertura
+      #   run: npm run test:coverage 
+
+      # --- 2. FASE DE CALIDAD (COMENTADA TEMPORALMENTE) ---
+      # Descomenta este bloque cuando tengas el SONAR_TOKEN en los Secrets de GitHub
+      # - name: Análisis de SonarCloud para TypeScript/React
+      #   uses: SonarSource/sonarcloud-github-action@master
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # Descomenta este bloque cuando tengas tests y el CODACY_PROJECT_TOKEN
+      # - name: Reporte a Codacy
+      #   uses: codacy/codacy-coverage-reporter-action@v1.3.0
+      #   with:
+      #     project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+      #     coverage-reports: coverage/lcov.info 
+
+      # --- 3. FASE DE CONSTRUCCIÓN FINAL (El candado) ---
+      - name: Construir la extensión (Plasmo Build)
+        if: success() 
+        run: npm run build
+        # Plasmo generará la carpeta 'build' con el código listo para Chrome.
+
+      # --- 4. OPCIONAL: GUARDAR EL RESULTADO ---
+      - name: Subir extensión como artefacto
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-extension-build
+          path: build/
