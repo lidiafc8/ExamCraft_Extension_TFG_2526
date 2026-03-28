@@ -28,19 +28,15 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Instalar y preparar dependencias para Linux
-        # Este comando le dice a npm: "instala todo, pero asegúrate de traer las piezas de Linux x64"
+      - name: Instalar dependencias para Linux
+        # Forzamos a npm a descargar las versiones de Linux aunque tú estés en Windows
         run: |
           npm install --platform=linux --arch=x64
-          # Por si acaso algún paquete se resiste, forzamos los 3 rebeldes:
           npm install --platform=linux --arch=x64 sharp @parcel/watcher lightningcss
 
-      # --- 3. FASE DE CONSTRUCCIÓN FINAL ---
       - name: Construir la extensión (Plasmo Build)
-        if: success() 
         run: npm run build
 
-      # --- 4. GUARDAR EL RESULTADO (ARTEFACTO) ---
       - name: Subir extensión como artefacto
         if: success()
         uses: actions/upload-artifact@v4
