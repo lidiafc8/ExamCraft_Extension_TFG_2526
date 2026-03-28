@@ -13,6 +13,10 @@ jobs:
   build-test-analyze:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: exam-craft-extension
+
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
