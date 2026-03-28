@@ -11,7 +11,8 @@ concurrency:
 
 jobs:
   build-test-analyze:
-    runs-on: ubuntu-latest
+    # CAMBIAMOS LINUX POR WINDOWS AQUÍ:
+    runs-on: windows-latest
 
     defaults:
       run:
@@ -20,25 +21,20 @@ jobs:
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Instalación Limpia para Linux
-        # Borramos cualquier rastro previo y forzamos la descarga de binarios de Linux
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install --platform=linux --arch=x64
-          # Instalamos los 3 motores críticos de Plasmo para Linux x64
-          npm install --platform=linux --arch=x64 sharp @parcel/watcher lightningcss
+      - name: Instalar dependencias
+        # En Windows no necesitamos trucos raros, npm install normal funciona
+        run: npm install
 
       - name: Construir la extensión (Plasmo Build)
-        # Si sigue fallando, añadimos una variable de entorno para forzar el modo producción
-        run: NODE_ENV=production npm run build
+        run: npm run build
+        env:
+          NODE_ENV: production
 
       - name: Subir extensión como artefacto
         if: success()
