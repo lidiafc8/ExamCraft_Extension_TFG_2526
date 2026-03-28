@@ -13,7 +13,6 @@ jobs:
   build-test-analyze:
     runs-on: ubuntu-latest
 
-    # Indicamos que todos los comandos 'run' se ejecuten dentro de la carpeta de la extensión
     defaults:
       run:
         working-directory: exam-craft-extension
@@ -30,23 +29,13 @@ jobs:
           node-version: '20'
 
       - name: Instalar dependencias
-        # Usamos install en lugar de ci para mayor flexibilidad con los archivos lock
         run: npm install 
 
-      - name: Corregir Sharp para Linux (Necesario para Plasmo Build)
-        # Esto soluciona el error de "Could not load the sharp module"
-        run: npm install --platform=linux --arch=x64 sharp
-
-      # --- 1. FASE DE PRUEBAS (COMENTADA) ---
-      # - name: Ejecutar Tests y Cobertura
-      #   run: npm run test:coverage 
-
-      # --- 2. FASE DE CALIDAD (COMENTADA) ---
-      # - name: Análisis de SonarCloud
-      #   uses: SonarSource/sonarcloud-github-action@master
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Preparar Binarios para Linux (Sharp y Parcel)
+        # Forzamos la instalación de los paquetes que dan problemas en entornos Linux/Nube
+        run: |
+          npm install --platform=linux --arch=x64 sharp
+          npm install --platform=linux --arch=x64 @parcel/watcher
 
       # --- 3. FASE DE CONSTRUCCIÓN FINAL ---
       - name: Construir la extensión (Plasmo Build)
@@ -59,5 +48,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: chrome-extension-build
-          # Plasmo genera la salida en 'build' dentro de su propia carpeta
           path: exam-craft-extension/build/
