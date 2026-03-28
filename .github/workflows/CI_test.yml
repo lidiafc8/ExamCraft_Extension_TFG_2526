@@ -28,14 +28,12 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Instalar dependencias
-        run: npm install 
-
-      - name: Preparar Binarios para Linux (Sharp y Parcel)
-        # Forzamos la instalación de los paquetes que dan problemas en entornos Linux/Nube
+      - name: Instalar y preparar dependencias para Linux
+        # Este comando le dice a npm: "instala todo, pero asegúrate de traer las piezas de Linux x64"
         run: |
-          npm install --platform=linux --arch=x64 sharp
-          npm install --platform=linux --arch=x64 @parcel/watcher
+          npm install --platform=linux --arch=x64
+          # Por si acaso algún paquete se resiste, forzamos los 3 rebeldes:
+          npm install --platform=linux --arch=x64 sharp @parcel/watcher lightningcss
 
       # --- 3. FASE DE CONSTRUCCIÓN FINAL ---
       - name: Construir la extensión (Plasmo Build)
