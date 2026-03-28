@@ -13,6 +13,7 @@ jobs:
   build-test-analyze:
     runs-on: ubuntu-latest
 
+    # Indicamos que todos los comandos 'run' se ejecuten dentro de la carpeta de la extensión
     defaults:
       run:
         working-directory: exam-craft-extension
@@ -29,38 +30,34 @@ jobs:
           node-version: '20'
 
       - name: Instalar dependencias
-        run: npm ci 
+        # Usamos install en lugar de ci para mayor flexibilidad con los archivos lock
+        run: npm install 
 
-      # --- 1. FASE DE PRUEBAS (COMENTADA TEMPORALMENTE) ---
-      # Descomenta estas dos líneas cuando tengas tus tests configurados
+      - name: Corregir Sharp para Linux (Necesario para Plasmo Build)
+        # Esto soluciona el error de "Could not load the sharp module"
+        run: npm install --platform=linux --arch=x64 sharp
+
+      # --- 1. FASE DE PRUEBAS (COMENTADA) ---
       # - name: Ejecutar Tests y Cobertura
       #   run: npm run test:coverage 
 
-      # --- 2. FASE DE CALIDAD (COMENTADA TEMPORALMENTE) ---
-      # Descomenta este bloque cuando tengas el SONAR_TOKEN en los Secrets de GitHub
-      # - name: Análisis de SonarCloud para TypeScript/React
+      # --- 2. FASE DE CALIDAD (COMENTADA) ---
+      # - name: Análisis de SonarCloud
       #   uses: SonarSource/sonarcloud-github-action@master
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # Descomenta este bloque cuando tengas tests y el CODACY_PROJECT_TOKEN
-      # - name: Reporte a Codacy
-      #   uses: codacy/codacy-coverage-reporter-action@v1.3.0
-      #   with:
-      #     project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-      #     coverage-reports: coverage/lcov.info 
-
-      # --- 3. FASE DE CONSTRUCCIÓN FINAL (El candado) ---
+      # --- 3. FASE DE CONSTRUCCIÓN FINAL ---
       - name: Construir la extensión (Plasmo Build)
         if: success() 
         run: npm run build
-        # Plasmo generará la carpeta 'build' con el código listo para Chrome.
 
-      # --- 4. OPCIONAL: GUARDAR EL RESULTADO ---
+      # --- 4. GUARDAR EL RESULTADO (ARTEFACTO) ---
       - name: Subir extensión como artefacto
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: chrome-extension-build
-          path: build/
+          # Plasmo genera la salida en 'build' dentro de su propia carpeta
+          path: exam-craft-extension/build/
