@@ -28,14 +28,17 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Instalar dependencias para Linux
-        # Forzamos a npm a descargar las versiones de Linux aunque tú estés en Windows
+      - name: Instalación Limpia para Linux
+        # Borramos cualquier rastro previo y forzamos la descarga de binarios de Linux
         run: |
+          rm -rf node_modules package-lock.json
           npm install --platform=linux --arch=x64
+          # Instalamos los 3 motores críticos de Plasmo para Linux x64
           npm install --platform=linux --arch=x64 sharp @parcel/watcher lightningcss
 
       - name: Construir la extensión (Plasmo Build)
-        run: npm run build
+        # Si sigue fallando, añadimos una variable de entorno para forzar el modo producción
+        run: NODE_ENV=production npm run build
 
       - name: Subir extensión como artefacto
         if: success()
