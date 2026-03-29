@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0                        # Obligatorio para SonarCloud
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
@@ -35,6 +37,14 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarqube-scan-action@v5
+        with:
+          projectBaseDir: exam-craft-extension
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Subir artefacto
         if: success()
