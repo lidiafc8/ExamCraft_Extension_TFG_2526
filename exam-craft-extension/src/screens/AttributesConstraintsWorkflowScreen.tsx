@@ -80,7 +80,6 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                 alert("No se pudo actualizar el examen en el almacenamiento local.");
             } else {
                 setSelectedProject(updatedExamData);
-                // CAMBIO: Navegación automática al siguiente apartado tras guardar
                 onCreateTest({ project: updatedExamData, constraints: responseText });
             }
         });
@@ -129,9 +128,10 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                 body: JSON.stringify({
                     exercise: "attributes_constraints",
                     domain: selectedProject.domainName,
-                    hiddenContext: hiddenContext,     
-                    visiblePrompt: promptText,        
-                    response: result                  
+                    hiddenContext,
+                    selectedExam: selectedProject.extensionFinish,
+                    visiblePrompt: promptText,
+                    response: result
                 })
             });
         } catch (error) {
@@ -182,34 +182,53 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
     <div className="exam-app" style={{ position: 'relative' }}>
       
       {showConfirmModal && selectedProject && (
-          <div style={{
-              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.6)',
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              zIndex: 1000 
-          }}>
-              <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
-                  <h3 className="main-title small" style={{ marginBottom: '15px', color: '#4a3728' }}>Confirmar Contexto</h3>
-                  <p style={{ marginBottom: '25px', color: '#555', fontSize: '15px' }}>
-                      ¿Deseas utilizar <strong>{selectedProject.customName || `Examen de ${selectedProject.domainName}`}</strong> como base para generar el ejercicio de restricciones?
-                  </p>
-                  <div className="wf-actions-row" style={{ justifyContent: 'center', gap: '15px' }}>
-                      <button 
-                          onClick={() => { setShowConfirmModal(false); setSelectedProject(null); }} 
-                          className="btn-step secondary"
-                      >
-                          Cancelar
-                      </button>
-                      <button 
-                          onClick={handleConfirmSelection} 
-                          className="btn-step primary"
-                      >
-                          Confirmar
-                      </button>
-                  </div>
-              </div>
-          </div>
-      )}
+        <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            zIndex: 1000 
+        }}>
+            <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
+                <h3 className="main-title small" style={{ marginBottom: '15px', color: '#4a3728' }}>Confirmar Contexto</h3>
+                
+                <p style={{ marginBottom: selectedProject.attributeConstraints ? '15px' : '25px', color: '#555', fontSize: '15px' }}>
+                    ¿Deseas utilizar <strong>{selectedProject.customName || `Examen de ${selectedProject.domainName}`}</strong> como base para generar el ejercicio de restricciones?
+                </p>
+
+                {selectedProject.attributeConstraints && (
+                    <div style={{
+                        backgroundColor: '#fff8e1',
+                        border: '1px solid #f9a825',
+                        borderRadius: '8px',
+                        padding: '12px 15px',
+                        marginBottom: '20px',
+                        textAlign: 'left',
+                        fontSize: '13px',
+                        color: '#7a5800'
+                    }}>
+                        <strong>Este examen ya tiene restricciones de atributos generadas.</strong>
+                        <br />
+                        Si continúas, las restricciones anteriores serán reemplazadas por las nuevas.
+                    </div>
+                )}
+
+                <div className="wf-actions-row" style={{ justifyContent: 'center', gap: '15px' }}>
+                    <button 
+                        onClick={() => { setShowConfirmModal(false); setSelectedProject(null); }} 
+                        className="btn-step secondary"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        onClick={handleConfirmSelection} 
+                        className="btn-step primary"
+                    >
+                        {selectedProject.attributeConstraints ? 'Continuar y reemplazar' : 'Confirmar'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    )}
 
       <header className="app-header">
         <div className="header-left">
