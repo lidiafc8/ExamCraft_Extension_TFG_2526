@@ -1,0 +1,70 @@
+name: PR Discord Notification
+
+on:
+  pull_request:
+    branches: ["develop"]
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-discord-open-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post message to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          MARKER=""
+
+          # Mensaje más bonito para el equipo
+          CONTENT="🚀 **Nuevo Pull Request en ExamCraft**
+          **Título:** ${PR_TITLE}
+          **Autor:** ${AUTHOR}
+          **Enlace:** ${PR_URL}
+          ---"
+
+          # Enviar mensaje a Discord (wait=true devuelve el JSON con el ID)
+          payload=$(jq -n --arg content "$CONTENT" '{content: $content}')
+          resp=$(curl -sS -X POST "${DISCORD_WEBHOOK_URL}?wait=true" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+
+          msg_id=$(echo "$resp" | jq -r '.id // empty')
+          
+          if [ -z "$msg_id" ] || [ "$msg_id" == "null" ]; then
+            echo "Error: Discord no devolvió un ID de mensaje. Revisa el Webhook URL."
+            echo "Respuesta de Discord: $resp"
+            exit 1
+          fi
+
+          # Buscar si ya existe un comentario del bot en la PR
+          comments=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --paginate)
+          existing_id=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].id // empty
+          ')
+
+          # Guardamos el ID del mensaje de Discord en un comentario oculto de la PR
+          # Esto servirá para que otros workflows puedan EDITAR el mensaje de Discord más tarde
+          body="${MARKER}
+          discord_message_id=${msg_id}
+          🔔 Notificación enviada a Discord."
+
+          if [ -n "$existing_id" ] && [ "$existing_id" != "null" ]; then
+            gh api -X PATCH "repos/${REPO}/issues/comments/${existing_id}" -f body="$body" >/dev/null
+          else
+            gh api -X POST "repos/${REPO}/issues/${PR_NUMBER}/comments" -f body="$body" >/dev/null
+          fi
