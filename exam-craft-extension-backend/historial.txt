@@ -18,3 +18,43 @@ Dominio: Ajedrez
 Ejercicio: attributes_constraints
 Dominio: Clínica Veterinaria
 ------------------
+
+--- LOG 30/3/2026, 11:17:02 ---
+Ejercicio: attributes_constraints
+Dominio: Ajedrez
+------------------
+
+--- LOG 30/3/2026, 11:17:57 ---
+Ejercicio: attributes_constraints
+Dominio: Ajedrez
+------------------
+
+--- LOG 30/3/2026, 11:18:00 ---
+Ejercicio: attribute_tests
+Dominio: Ajedrez
+------------------
+
+--- LOG 30/3/2026, 11:19:02 ---
+Ejercicio: attributes_constraints
+Dominio: Ajedrez
+------------------
+
+--- LOG 30/3/2026, 11:20:22 ---
+Ejercicio: attributes_constraints
+Dominio: Clínica Veterinaria
+------------------
+
+--- LOG 30/3/2026, 11:21:27 ---
+Ejercicio: attribute_tests
+Dominio: Clínica Veterinaria
+------------------
+
+--- LOG 30/3/2026, 11:24:20 ---
+Ejercicio: attributes_constraints
+Dominio: Clínica Veterinaria
+------------------
+
+--- LOG 30/3/2026, 11:25:20 ---
+Ejercicio: attribute_tests
+Dominio: Clínica Veterinaria
+------------------

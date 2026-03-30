@@ -57,4 +57,8 @@ Requisitos que debe de cumplir:
 - Usa EXCLUSIVAMENTE el método heredado setValue(entidad, "atributo", Tipo.class, valor) para asignar datos válidos a todos los atributos de la entidad, evadiendo así fallos de compilación si el alumno no ha creado los setters.
 - Crea el método @Test public void test1Valid[NOMBRE_ENTIDAD]IsPersisted(). Obtén una instancia válida, guárdala con el repositorio y haz un .flush() dentro de un assertDoesNotThrow.
 
+Por favor, no generes nada de comentarios, solo los tests para copiar lo que me devuelvas directamente para ejecutarlo.
+
+Tampoco pongas nada de ```java y ``` 
+
 Genera el código completo de Test1.java aplicando estas reglas a la entidad principal descrita en el UML de este examen en particular.
