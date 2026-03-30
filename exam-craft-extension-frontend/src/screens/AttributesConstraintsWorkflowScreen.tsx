@@ -29,6 +29,9 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
     const [responseText, setResponseText] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [savedData, setSavedData] = useState<{ project: any, constraints: string } | null>(null);
+
   useEffect(() => {
     if (step === 'selection' && typeof chrome !== "undefined" && chrome.storage?.local) {
       chrome.storage.local.get(null, (items) => {
@@ -80,8 +83,8 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                 alert("No se pudo actualizar el examen en el almacenamiento local.");
             } else {
                 setSelectedProject(updatedExamData);
-                // CAMBIO: Navegación automática al siguiente apartado tras guardar
-                onCreateTest({ project: updatedExamData, constraints: responseText });
+                setSavedData({ project: updatedExamData, constraints: responseText });
+                setShowSuccessModal(true); 
             }
         });
     } else {
@@ -207,6 +210,35 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                           Confirmar
                       </button>
                   </div>
+              </div>
+          </div>
+      )}
+
+      {showSuccessModal && savedData && (
+          <div style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              display: 'flex', justifyContent: 'center', alignItems: 'center',
+              zIndex: 1000
+          }}>
+              <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '15px' }}>✅</div>
+                  <h3 className="main-title small" style={{ marginBottom: '10px', color: '#4a3728' }}>
+                      ¡Guardado correctamente!
+                  </h3>
+                  <p style={{ marginBottom: '25px', color: '#555', fontSize: '15px' }}>
+                      Las restricciones de atributos de <strong>{savedData.project.customName || savedData.project.domainName}</strong> han sido actualizadas correctamente.
+                  </p>
+                  <button
+                      onClick={() => {
+                          setShowSuccessModal(false);
+                          onCreateTest(savedData);
+                      }}
+                      className="btn-step primary"
+                      style={{ width: '100%' }}
+                  >
+                      Continuar
+                  </button>
               </div>
           </div>
       )}

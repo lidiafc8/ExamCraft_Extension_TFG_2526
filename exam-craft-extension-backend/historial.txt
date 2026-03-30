@@ -18,3 +18,18 @@ Dominio: Ajedrez
 Ejercicio: attributes_constraints
 Dominio: Clínica Veterinaria
 ------------------
+
+--- LOG 30/3/2026, 14:34:33 ---
+Ejercicio: statement_functional_extension
+Dominio: Clínica Veterinaria
+------------------
+
+--- LOG 30/3/2026, 14:35:05 ---
+Ejercicio: diagram_uml_functional_extension
+Dominio: Clínica Veterinaria
+------------------
+
+--- LOG 30/3/2026, 14:35:40 ---
+Ejercicio: attributes_constraints
+Dominio: Clínica Veterinaria
+------------------
