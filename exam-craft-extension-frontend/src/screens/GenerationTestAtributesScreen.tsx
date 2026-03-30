@@ -93,7 +93,6 @@ ${restricciones}
         }
     };
 
-    // --- NUEVA FUNCIÓN DE GUARDADO ---
     const handleSaveToChrome = () => {
         if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
             
@@ -102,7 +101,6 @@ ${restricciones}
                 return;
             }
 
-            // Creamos el objeto actualizado con los tests
             const updatedExamData = {
                 ...initialData.project, 
                 javaTests: responseText, 
@@ -209,7 +207,6 @@ ${restricciones}
                                             Descargar .md
                                         </button>
                                         
-                                        {/* BOTÓN DE GUARDADO AÑADIDO */}
                                         <button onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1, backgroundColor: '#28a745' }}>
                                             Guardar
                                         </button>
