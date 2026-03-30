@@ -17,7 +17,6 @@ export default function IndexTab() {
   const [contextResponse, setContextResponse] = useState<string>("")
   const [functionalExtensionCompleted, setFunctionalExtensionCompleted] = useState<string>("")
   
-  // NUEVO: Estado para compartir datos entre Restricciones y Tests
   const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string } | null>(null)
 
   const [screen, setScreen] = useState<
@@ -135,7 +134,6 @@ export default function IndexTab() {
           onBack={() => setScreen("createExamByParts")} 
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
-          // CORRECCIÓN: Captura los datos y los guarda en el estado antes de saltar de pantalla
           onCreateTest={(data) => {
             setSharedTestData(data);
             setScreen("testAtributes");
@@ -145,7 +143,6 @@ export default function IndexTab() {
 
       {screen === "testAtributes" && (
         <GenerationTestAtributesScreen 
-          // PASO DE DATOS: Inyectamos el objeto guardado
           initialData={sharedTestData} 
           onBack={() => setScreen("attributesConstraints")} 
           onWelcome={() => setScreen("welcome")} 

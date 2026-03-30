@@ -1,5 +1,5 @@
 export const sendToGemini = async (prompt: string): Promise<string> => {
-  // La URL de tu servidor backend local
+
   const BACKEND_URL = "http://localhost:3000/generate";
 
   try {
@@ -9,8 +9,6 @@ export const sendToGemini = async (prompt: string): Promise<string> => {
       headers: {
         "Content-Type": "application/json",
       },
-      // Enviamos el prompt al servidor. 
-      // El servidor se encargará de poner la API KEY y llamar a Google.
       body: JSON.stringify({ prompt }),
     });
 
@@ -29,7 +27,6 @@ export const sendToGemini = async (prompt: string): Promise<string> => {
 
   } catch (error: any) {
     console.error("Error en geminiService:", error);
-    // Este mensaje es el que saldrá en tu 'alert' de la extensión
     throw new Error(error.message || "No se pudo conectar con el servidor backend");
   }
 };
