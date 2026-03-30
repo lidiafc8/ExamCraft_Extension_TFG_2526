@@ -1,8 +1,6 @@
 name: PR Discord Notification
 
 on:
-  push:
-    branches: ["**"] # Se activará con cualquier push a cualquier rama
   pull_request:
     branches: ["develop"]
     types: [opened, reopened]
@@ -12,7 +10,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: pr-discord-open-${{ github.ref }} # Cambiado para evitar conflictos en push
+  group: pr-discord-open-${{ github.ref }} 
   cancel-in-progress: false
 
 jobs:
@@ -22,7 +20,6 @@ jobs:
       - name: Post message to Discord
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          # Usamos variables de entorno condicionales por si es un push o un PR
           EVENT_NAME: ${{ github.event_name }}
           PR_TITLE: ${{ github.event.pull_request.title || github.event.head_commit.message }}
           PR_URL: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}
