@@ -34,7 +34,6 @@ export default function GenerationTestAtributesScreen({
             const enunciadoGeneral = initialData.project.extensionFinish || "Sin enunciado";
             const restricciones = initialData.constraints || "Sin restricciones detectadas";
 
-            // 1. Agrupamos todo lo que queremos que esté OCULTO para no saturar la pantalla
             const contextoOculto = `
 === ENUNCIADO Y DIAGRAMA ===
 ${enunciadoGeneral}
@@ -43,21 +42,17 @@ ${enunciadoGeneral}
 ${restricciones}
 `;
             
-            // 2. Extraemos el texto del archivo markdown importado
             let rawPrompt = testAttributesPromptMarkdown || "Genera tests de atributos para el dominio {{DOMAIN}}.";
             
-            // 3. Usamos tu función parseMasterPrompt para procesar el markdown
             const { visibleText, hiddenContext: parsedHidden } = parseMasterPrompt(rawPrompt);
 
-            // 4. Limpiamos la parte visible: ponemos el dominio y quitamos el texto {{context}} si existía
             let finalPrompt = visibleText
                 .replace(/{{context}}/gi, "") 
                 .replace(/{{DOMAIN}}/gi, domain)
                 .trim();
 
-            // 5. Guardamos cada cosa en su sitio
-            setPromptText(finalPrompt); // Esto es lo único que verá el usuario
-            setHiddenContext(parsedHidden + "\n\n" + contextoOculto); // Esto se envía a la IA en secreto
+            setPromptText(finalPrompt);
+            setHiddenContext(parsedHidden + "\n\n" + contextoOculto); 
         }
     }, [initialData]);
 

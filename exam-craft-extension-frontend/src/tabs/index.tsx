@@ -20,7 +20,6 @@ export default function IndexTab() {
   
   const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string } | null>(null)
 
-  // Cambio 1: Inicializamos con 'attributes' en lugar de null para evitar errores de TypeScript
   const [testOrigin, setTestOrigin] = useState<'attributes' | 'general'>('attributes');
 
   const [screen, setScreen] = useState<
@@ -166,8 +165,8 @@ export default function IndexTab() {
       {screen === "testAtributes" && (
         <GenerationTestAtributesScreen 
           initialData={sharedTestData} 
-          source={testOrigin} // Cambio 3: Añadimos la prop 'source' que faltaba
-          onBack={() => setScreen(testOrigin === 'attributes' ? "attributesConstraints" : "testGeneral")} // Cambio 4: Hacemos el onBack dinámico
+          source={testOrigin} 
+          onBack={() => setScreen(testOrigin === 'attributes' ? "attributesConstraints" : "testGeneral")} 
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}

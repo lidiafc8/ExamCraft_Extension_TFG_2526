@@ -9,11 +9,10 @@ interface Props {
     onBack: () => void
     onWelcome: () => void
     onCreateExam: () => void
-    onCreateExamByParts: () => void; // CORRECCIÓN 1: Añadido aquí
+    onCreateExamByParts: () => void; 
     onCreateTest1: (data: { project: any, constraints: string }) => void; 
 }
 
-// CORRECCIÓN 1: Añadido onCreateExamByParts a los parámetros
 export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreateExam, onCreateExamByParts, onCreateTest1 }: Props) {
     const [step, setStep] = useState<'folders' | 'exams' | 'parts' | 'workflow'>('folders');
     
@@ -44,8 +43,6 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
         p.domainName && selectedDomainFolder && p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
     );
 
-    // CORRECCIÓN APLICADA AQUÍ: Quitamos 'attributeConstraints' de la lista negra
-    // y añadimos las keys de metadata (savedAt, updatedAt, extensionFinish)
     const getAvailableParts = (project: any) => {
         const forbiddenKeys = ["id", "domainName", "customName", "extensionFinish", "savedAt", "updatedAt"];
         return Object.keys(project).filter(key => !forbiddenKeys.includes(key));
@@ -70,7 +67,6 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
     return (
         <div className="exam-app" style={{ position: 'relative' }}>
             
-            {/* MODAL ÉXITO */}
             {showSuccessModal && savedData && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -87,7 +83,6 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                             Se han extraído las restricciones de la parte seleccionada.
                         </p>
                         <button 
-                            // CORRECCIÓN 3: Cambiado onCreateTest por onCreateTest1
                             onClick={() => { setShowSuccessModal(false); onCreateTest1(savedData); }} 
                             className="btn-step primary" 
                             style={{ width: '100%' }}
@@ -117,7 +112,6 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
 
             <main className="main-content">
                 
-                {/* PASO 1: CARPETAS */}
                 {step === 'folders' && (
                     <div className="content-card" style={{ width: '100%', maxWidth: '900px' }}>
                         <h2 className="main-title small">Selecciona un dominio</h2>
@@ -150,7 +144,6 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                     </div>
                 )}
 
-                {/* PASO 2: EXÁMENES */}
                 {step === 'exams' && selectedDomainFolder && (
                     <div className="content-card" style={{ width: '100%', maxWidth: '900px' }}>
                         <h2 className="main-title small">Exámenes de {selectedDomainFolder.toUpperCase()}</h2>
@@ -193,7 +186,6 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                     </div>
                 )}
 
-                {/* PASO 3: PARTES DEL EXAMEN */}
                 {step === 'parts' && selectedProject && (
                     <div className="content-card" style={{ width: '100%', maxWidth: '900px' }}>
                         <h2 className="main-title small">¿Qué parte quieres evaluar?</h2>
@@ -234,7 +226,6 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                     </div>
                 )}
 
-                {/* PASO 4: GENERACIÓN Y VISTA PREVIA */}
                 {step === 'workflow' && selectedProject && (
                     <div className="content-card" style={{ width: '100%', maxWidth: '800px', textAlign: 'center' }}>
                         <h2 className="main-title small">{selectedProject.customName || "Revisar Contenido"}</h2>
@@ -264,7 +255,6 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                 Volver atrás
                             </button>
                             <button 
-                                // CORRECCIÓN 2: Añadido () => para que no se ejecute solo al cargar
                                 onClick={() => onCreateTest1({ project: selectedProject, constraints: selectedProject[selectedPartKey] })} 
                                 disabled={isLoading || !selectedProject[selectedPartKey]}
                                 className="btn-step primary"
