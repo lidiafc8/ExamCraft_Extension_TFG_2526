@@ -63,6 +63,6 @@ ${response}
     res.sendStatus(200);
 });
 
-app.listen(3001, () => {
-  console.log('Servidor de Logs escuchando en http://localhost:3001');
+app.listen(3000, () => {
+  console.log('Servidor de Logs escuchando en http://localhost:3000');
 });
