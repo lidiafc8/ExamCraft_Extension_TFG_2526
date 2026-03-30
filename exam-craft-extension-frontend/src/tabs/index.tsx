@@ -11,6 +11,7 @@ import StorageExamsScreen from "../screens/StorageExamsScreen"
 import "/assets/main.css"
 import AttributesConstraintsWorkflowScreen from "~src/screens/AttributesConstraintsWorkflowScreen"
 import GenerationTestAtributesScreen from "../screens/GenerationTestAtributesScreen"
+import GeneralGenerationTestScreen from "../screens/GeneralGenerationTestScreen"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
@@ -18,6 +19,9 @@ export default function IndexTab() {
   const [functionalExtensionCompleted, setFunctionalExtensionCompleted] = useState<string>("")
   
   const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string } | null>(null)
+
+  // Cambio 1: Inicializamos con 'attributes' en lugar de null para evitar errores de TypeScript
+  const [testOrigin, setTestOrigin] = useState<'attributes' | 'general'>('attributes');
 
   const [screen, setScreen] = useState<
     "welcome" | 
@@ -31,7 +35,8 @@ export default function IndexTab() {
     "finishFunctionalExtension" |
     "storage" |
     "domainSelection" | 
-    "testAtributes"
+    "testAtributes" |
+    "testGeneral"
   >("welcome")
 
   return (
@@ -59,7 +64,9 @@ export default function IndexTab() {
         onBack={() => setScreen("createExam")} 
         onWelcome={() => setScreen("welcome")} 
         onFunctionalExtension={() => setScreen("domainSelection")}
-        onAttributesConstraints={() => setScreen("attributesConstraints")} />
+        onAttributesConstraints={() => setScreen("attributesConstraints")} 
+        onGenerateTest={() => setScreen("testGeneral")}
+        />
       )}
 
       {screen === "domainSelection" && (
@@ -85,6 +92,20 @@ export default function IndexTab() {
           onCreateDiagram={(context) => {
             setContextResponse(context)
             setScreen("diagramUML")
+          }}
+        />
+      )}
+
+      {screen === "testGeneral" && (
+        <GeneralGenerationTestScreen 
+          onBack={() => setScreen("createExamByParts")} 
+          onWelcome={() => setScreen("welcome")}
+          onCreateExam={() => setScreen("createExam")}
+          onCreateExamByParts={() => setScreen("createExamByParts")}
+          onCreateTest1={(data) => {
+            setSharedTestData(data);
+            setTestOrigin('general');
+            setScreen("testAtributes");
           }}
         />
       )}
@@ -136,6 +157,7 @@ export default function IndexTab() {
           onCreateExam={() => setScreen("createExam")}
           onCreateTest={(data) => {
             setSharedTestData(data);
+            setTestOrigin('attributes');
             setScreen("testAtributes");
           }}
         />
@@ -144,7 +166,8 @@ export default function IndexTab() {
       {screen === "testAtributes" && (
         <GenerationTestAtributesScreen 
           initialData={sharedTestData} 
-          onBack={() => setScreen("attributesConstraints")} 
+          source={testOrigin} // Cambio 3: Añadimos la prop 'source' que faltaba
+          onBack={() => setScreen(testOrigin === 'attributes' ? "attributesConstraints" : "testGeneral")} // Cambio 4: Hacemos el onBack dinámico
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}

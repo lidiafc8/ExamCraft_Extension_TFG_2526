@@ -6,9 +6,10 @@ interface Props {
   onWelcome: () => void
   onFunctionalExtension: () => void
   onAttributesConstraints: () => void
+  onGenerateTest: () => void
 }
 
-export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints }: Props) {
+export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onGenerateTest }: Props) {
   return (
     <div className="exam-app">
       
@@ -68,6 +69,10 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
 
           <button className="menu-btn">
             Relaciones entre entidades
+          </button>
+
+          <button className="menu-btn" onClick={onGenerateTest}>
+            Generar tests
           </button>
 
         </div>
