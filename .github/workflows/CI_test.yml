@@ -41,7 +41,7 @@ jobs:
       - name: SonarCloud Scan
         uses: sonarsource/sonarqube-scan-action@v5
         with:
-          projectBaseDir: exam-craft-extension
+          projectBaseDir: exam-craft-extension-frontend
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
