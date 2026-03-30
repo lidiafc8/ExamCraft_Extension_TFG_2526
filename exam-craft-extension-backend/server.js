@@ -72,19 +72,7 @@ app.post('/generate', async (req, res) => {
   });
 });
 
-// --- RUTA PARA GUARDAR LOGS ---
-app.post('/save-log', (req, res) => {
-  const { exercise, domain, response } = req.body;
-  const logEntry = `\n--- LOG ${new Date().toLocaleString()} ---\nEjercicio: ${exercise}\nDominio: ${domain}\n------------------\n`;
-
-  fs.appendFile('historial.txt', logEntry, (err) => {
-    if (err) return res.status(500).send("Error al guardar log");
-    res.send("Log guardado");
-  });
-});
-
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor ExamCraft corriendo en http://localhost:${PORT}`);
   console.log(`Llaves cargadas en el sistema: ${API_KEYS.length}`);
 });

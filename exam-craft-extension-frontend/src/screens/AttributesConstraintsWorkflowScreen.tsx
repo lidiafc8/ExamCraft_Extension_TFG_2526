@@ -126,7 +126,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
         setInternalStep('result');
 
         try {
-            await fetch("http://localhost:3000/save-log", {
+            await fetch("http://localhost:3001/save-log", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
