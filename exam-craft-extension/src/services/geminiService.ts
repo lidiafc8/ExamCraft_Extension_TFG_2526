@@ -1,47 +1,35 @@
-const API_KEY = process.env.PLASMO_PUBLIC_GEMINI_API_KEY;
-
-const MODEL = "gemini-2.5-flash"; 
-
-const BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
-
 export const sendToGemini = async (prompt: string): Promise<string> => {
-  if (!API_KEY) {
-    throw new Error("Falta la API Key de Gemini en el archivo .env");
-  }
-
-  const finalUrl = `${BASE_URL}?key=${API_KEY}`;
+  // La URL de tu servidor backend local
+  const BACKEND_URL = "http://localhost:3000/generate";
 
   try {
-    const response = await fetch(finalUrl, {
+
+    const response = await fetch(BACKEND_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: prompt }
-            ]
-          }
-        ]
-      }),
+      // Enviamos el prompt al servidor. 
+      // El servidor se encargará de poner la API KEY y llamar a Google.
+      body: JSON.stringify({ prompt }),
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Error ${response.status}: ${errorData.error?.message || response.statusText}`);
+      throw new Error(errorData.details || errorData.error || "Error en el servidor backend");
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!text) return "Gemini respondió pero la respuesta estaba vacía.";
-    
-    return text;
 
-  } catch (error) {
-    console.error("Error conectando con Gemini:", error);
-    throw error;
+    if (!data.text) {
+      throw new Error("El backend no devolvió ninguna respuesta.");
+    }
+
+    return data.text;
+
+  } catch (error: any) {
+    console.error("Error en geminiService:", error);
+    // Este mensaje es el que saldrá en tu 'alert' de la extensión
+    throw new Error(error.message || "No se pudo conectar con el servidor backend");
   }
 };
