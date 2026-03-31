@@ -89,7 +89,7 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
             if (typeof chrome !== "undefined" && chrome.storage?.local) {
                 chrome.storage.local.remove(id, () => {
                     setProjects(prevProjects => prevProjects.filter(p => p.id !== id));
-                    if (selectedProject && selectedProject.id === id) setSelectedProject(null);
+                    if (selectedProject?.id === id) setSelectedProject(null);
                 });
             }
         }
@@ -107,9 +107,10 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
             finalMermaidCode = sanitizeMermaidForModal(fullText);
         }
 
-        const tests = Array.isArray(selectedProject.javaTests)
-            ? selectedProject.javaTests
-            : selectedProject.javaTests ? [selectedProject.javaTests] : [];
+        const rawTests = selectedProject.javaTests;
+        const tests = Array.isArray(rawTests)
+            ? rawTests
+            : rawTests ? [rawTests] : [];
 
         const testsMarkdown = tests.length > 0
             ? tests.map((t: string, i: number) => {
@@ -159,20 +160,14 @@ ${testsMarkdown}
             .replace(/[^a-zA-Z0-9]/g, '-')
             .toLowerCase();
 
-        const newRepoName = `examen-${cleanProjectName}-${Date.now()}`;
-        let TEMPLATE_REPO = "";
-        let TEST_BASE_PATH = "";
+       const newRepoName = `examen-${cleanProjectName}-${Date.now()}`;
         const domain = selectedProject.domainName.toLowerCase();
+        let TEMPLATE_REPO = "DP1-chess-template-exam";
+        let TEST_BASE_PATH = "src/test/java/es/us/dp1/chess/tournament/";
 
-        if (domain.includes("ajedrez")) {
-            TEMPLATE_REPO = "DP1-chess-template-exam";
-            TEST_BASE_PATH = "src/test/java/es/us/dp1/chess/tournament/";
-        } else if (domain.includes("clínica veterinaria") || domain.includes("veterinaria")) {
+        if (domain.includes("clínica veterinaria") || domain.includes("veterinaria")) {
             TEMPLATE_REPO = "DP1-petClinic-template-exam";
             TEST_BASE_PATH = "src/test/java/org/springframework/samples/petclinic/grooming/";
-        } else {
-            TEMPLATE_REPO = "DP1-chess-template-exam";
-            TEST_BASE_PATH = "src/test/java/es/us/dp1/chess/tournament/";
         }
 
         let MY_TOKEN = localStorage.getItem("github_token");
@@ -302,9 +297,10 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
         const rawHtml = marked.parse(examFullMarkdown) as string;
         const safeHtml = DOMPurify.sanitize(rawHtml);
 
-        const tests = Array.isArray(selectedProject.javaTests)
-            ? selectedProject.javaTests
-            : selectedProject.javaTests ? [selectedProject.javaTests] : [];
+        const rawTests = selectedProject.javaTests;
+        const tests = Array.isArray(rawTests)
+            ? rawTests
+            : rawTests ? [rawTests] : [];
 
         return (
             <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
@@ -403,7 +399,7 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                                         .trim();
                                     const highlighted = hljs.highlight(cleanCode, { language: 'java' }).value;
                                     return (
-                                        <div key={i} style={{ marginBottom: '24px' }}>
+                                        <div key={test.substring(0, 20)} style={{ marginBottom: '24px' }}>
                                             <h4 style={{ marginBottom: '8px', color: '#555', fontFamily: 'monospace' }}>
                                                 Test{i + 1}.java
                                             </h4>
@@ -525,14 +521,17 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                                             cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                                         }}>×</button>
-                                    <span className="parts-exam-icon"
-                                        style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
-                                        onClick={() => setSelectedProject(proj)} title="Abrir examen">
+                                    <button
+                                        className="parts-exam-icon"
+                                        style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%', background: 'none', border: 'none', padding: 0 }}
+                                        onClick={() => setSelectedProject(proj)}
+                                        title="Abrir examen"
+                                    >
                                         <img src={examen} alt="Abrir examen" width="80" height="80"
                                             style={{ transition: 'transform 0.2s' }}
                                             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'} />
-                                    </span>
+                                    </button>
                                     {editingId === proj.id ? (
                                         <input autoFocus value={tempName}
                                             onChange={(e) => setTempName(e.target.value)}
@@ -543,12 +542,28 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                                             }}
                                             style={{ marginTop: '10px', textAlign: 'center', width: '90%', fontSize: '14px', padding: '5px', borderRadius: '4px', border: '2px solid #b08968', outline: 'none', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }} />
                                     ) : (
-                                        <span className="card-label"
-                                            style={{ cursor: 'text', marginTop: '10px', padding: '5px', width: '100%', display: 'block', textAlign: 'center', border: '2px solid transparent', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', boxSizing: 'border-box' }}
+                                        <button
+                                            className="card-label"
+                                            style={{ 
+                                                cursor: 'text', 
+                                                marginTop: '10px', 
+                                                padding: '5px 10px', 
+                                                width: '100%', 
+                                                display: 'block', 
+                                                textAlign: 'center', 
+                                                border: '2px solid transparent', 
+                                                whiteSpace: 'nowrap', 
+                                                overflow: 'hidden', 
+                                                textOverflow: 'ellipsis', 
+                                                boxSizing: 'border-box', 
+                                                background: '#f5ede3',
+                                                borderRadius: '20px'
+                                            }}
                                             onClick={(e) => { e.stopPropagation(); setEditingId(proj.id); setTempName(proj.customName || `Examen de ${proj.domainName}`); }}
-                                            title={`${proj.customName || `Examen de ${proj.domainName}`}`}>
+                                            title={proj.customName || `Examen de ${proj.domainName}`}
+                                        >
                                             {proj.customName || `Examen de ${proj.domainName}`}
-                                        </span>
+                                        </button>
                                     )}
                                 </div>
                             ))
