@@ -6,15 +6,15 @@ import { parseMasterPrompt } from "../utils/promptParser"
 import { MermaidViewer } from "../components/MermaidViewer"
 
 interface Props {
-  domainName: string;
-  context: string;
-  onBack: () => void;
-  onWelcome: () => void;
-  onCreateExam: () => void;
-  onCreateExamByParts: () => void;
-  onFunctionalExtension: () => void;
-  onStatementStep1: () => void;
-  onFinishExtension: (text:string) => void;
+  readonly domainName: string;
+  readonly context: string;
+  readonly onBack: () => void;
+  readonly onWelcome: () => void;
+  readonly onCreateExam: () => void;
+  readonly onCreateExamByParts: () => void;
+  readonly onFunctionalExtension: () => void;
+  readonly onStatementStep1: () => void;
+  readonly onFinishExtension: (text:string) => void;
 }
 
 export default function DiagramUMLScreen({ 

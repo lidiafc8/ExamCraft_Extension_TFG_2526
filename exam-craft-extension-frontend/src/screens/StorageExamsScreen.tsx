@@ -9,7 +9,7 @@ import { MermaidViewer } from "../components/MermaidViewer"
 import { GithubService } from "~src/services/githubService";
 
 interface Props {
-    onWelcome: () => void;
+    readonly onWelcome: () => void;
 }
 
 

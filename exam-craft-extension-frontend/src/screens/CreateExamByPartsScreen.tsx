@@ -2,11 +2,11 @@ import React from "react"
 import logoExamCraft from "../../assets/icon512.png"
 
 interface Props {
-  onBack: () => void
-  onWelcome: () => void
-  onFunctionalExtension: () => void
-  onAttributesConstraints: () => void
-  onGenerateTest: () => void
+  readonly onBack: () => void
+  readonly onWelcome: () => void
+  readonly onFunctionalExtension: () => void
+  readonly onAttributesConstraints: () => void
+  readonly onGenerateTest: () => void
 }
 
 export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onGenerateTest }: Props) {

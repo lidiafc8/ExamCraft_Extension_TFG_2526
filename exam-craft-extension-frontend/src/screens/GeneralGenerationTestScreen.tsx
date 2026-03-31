@@ -4,11 +4,11 @@ import carpeta from "../../assets/images/archive.png"
 import examen from "../../assets/images/exam.png"
 
 interface Props {
-    onBack: () => void
-    onWelcome: () => void
-    onCreateExam: () => void
-    onCreateExamByParts: () => void; 
-    onCreateTest1: (data: { project: any, constraints: string }) => void; 
+    readonly onBack: () => void
+    readonly onWelcome: () => void
+    readonly onCreateExam: () => void
+    readonly onCreateExamByParts: () => void; 
+    readonly onCreateTest1: (data: { project: any, constraints: string }) => void; 
 }
 
 export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreateExam, onCreateExamByParts, onCreateTest1 }: Props) {
@@ -16,12 +16,12 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
     
     const [projects, setProjects] = useState<any[]>([]);
     const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null);
-    const [selectedProject, setSelectedProject] = useState<any | null>(null);
+    const [selectedProject, setSelectedProject] = useState<any>(null);
     const [selectedPartKey, setSelectedPartKey] = useState<string>("");
 
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, ] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [savedData, setSavedData] = useState<{ project: any, constraints: string } | null>(null);
+    const [savedData, ] = useState<{ project: any, constraints: string } | null>(null);
 
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
 
@@ -42,8 +42,9 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
     );
 
     const getAvailableParts = (project: any) => {
-        const forbiddenKeys = ["id", "domainName", "customName", "extensionFinish", "savedAt", "updatedAt"];
-        return Object.keys(project).filter(key => !forbiddenKeys.includes(key));
+        const forbiddenKeys = new Set(["id", "domainName", "customName", "extensionFinish", "savedAt", "updatedAt"]);
+
+        return Object.keys(project).filter(key => !forbiddenKeys.has(key));
     };
 
     const handleSelectFolder = (folder: string) => {
@@ -93,16 +94,22 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
 
             <header className="app-header">
                 <div className="header-left">
-                    <span className="logo-icon" onClick={onWelcome} style={{ cursor: 'pointer' }}>
+                    <button className="logo-icon" onClick={onWelcome} style={{ cursor: 'pointer' }}>
                         <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-                    </span> 
+                    </button>
                     <nav className="breadcrumb-nav">
-                      <span className="breadcrumb-link" onClick={onWelcome}>INICIO</span>
-                      <span className="breadcrumb-separator">{'>'}</span>
-                      <span className="breadcrumb-link" onClick={onCreateExam}>CREAR EXAMEN</span>
-                      <span className="breadcrumb-separator">{'>'}</span>
-                      <span className="breadcrumb-link" onClick={onCreateExamByParts}>POR PARTES</span>
-                      <span className="breadcrumb-separator">{'>'}</span>
+                      <button className="breadcrumb-link" onClick={onWelcome}>
+                        INICIO
+                      </button>
+                      <button className="breadcrumb-separator">{'>'}</button>
+                      <button className="breadcrumb-link" onClick={onCreateExam}>
+                        CREAR EXAMEN
+                      </button>
+                      <button className="breadcrumb-separator">{'>'}</button>
+                      <button className="breadcrumb-link" onClick={onCreateExamByParts}>
+                        POR PARTES
+                      </button>
+                      <button className="breadcrumb-separator">{'>'}</button>
                       <span className="breadcrumb-current">TEST DE ATRIBUTOS</span>
                   </nav>
                 </div>
@@ -153,7 +160,7 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                             {projectsInFolder.length > 0 ? (
                                 projectsInFolder.map((proj) => (
                                     <div key={proj.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <span 
+                                        <button 
                                             className="parts-exam-icon" 
                                             style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
                                             onClick={() => handleSelectProject(proj)}
@@ -167,7 +174,7 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                                 onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                             />
-                                        </span>
+                                        </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
                                             {proj.customName || `Examen de ${proj.domainName}`}
                                         </span>
@@ -196,7 +203,7 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                 .filter(key => key.toLowerCase().includes('attribute'))
                                 .map(key => (
                                     <div key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <span 
+                                        <button 
                                             className="parts-exam-icon" 
                                             style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
                                             onClick={() => handleSelectPart(key)}
@@ -210,7 +217,7 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                                 onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                             />
-                                        </span>
+                                        </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
                                             Restricciones de Atributos
                                         </span>

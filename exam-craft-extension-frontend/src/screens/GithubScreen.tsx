@@ -5,7 +5,7 @@ import { GithubService } from "../services/githubService"
 import logoExamCraft from "../../assets/icon512.png"
 
 interface Props {
-  onBack: () => void
+  readonly onBack: () => void
 }
 
 export default function GithubScreen({ onBack }: Props) {

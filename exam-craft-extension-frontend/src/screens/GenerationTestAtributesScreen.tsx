@@ -5,12 +5,12 @@ import { sendToGemini } from "~src/services/geminiService"
 import testAttributesPromptMarkdown from "bundle-text:../prompts/generation-test-exercice/generation_tests.md"
 
 interface Props {
-    initialData: { project: any, constraints: string } | null;
-    source: 'attributes' | 'general'; 
-    onBack: () => void
-    onCreateExamByParts: () => void;
-    onWelcome: () => void
-    onCreateExam: () => void
+    readonly initialData: { project: any, constraints: string } | null;
+    readonly source: 'attributes' | 'general'; 
+    readonly onBack: () => void
+    readonly onCreateExamByParts: () => void;
+    readonly onWelcome: () => void
+    readonly onCreateExam: () => void
 }
 
 export default function GenerationTestAtributesScreen({ 
