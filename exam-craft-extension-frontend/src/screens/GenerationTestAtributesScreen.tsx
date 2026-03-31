@@ -140,20 +140,20 @@ ${restricciones}
       <div className="exam-app">
           <header className="app-header">
               <div className="header-left">
-                  <span className="logo-icon" onClick={onWelcome} style={{cursor: 'pointer'}}>
+                  <button className="logo-icon" onClick={onWelcome} style={{cursor: 'pointer'}}>
                       <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-                  </span> 
+                  </button>
                   <nav className="breadcrumb-nav">
-                      <span className="breadcrumb-link" onClick={onWelcome}>INICIO</span>
+                      <button className="breadcrumb-link" onClick={onWelcome}>INICIO</button>
                       <span className="breadcrumb-separator">{'>'}</span>
-                      <span className="breadcrumb-link" onClick={onCreateExam}>CREAR EXAMEN</span>
+                      <button className="breadcrumb-link" onClick={onCreateExam}>CREAR EXAMEN</button>
                       <span className="breadcrumb-separator">{'>'}</span>
-                      <span className="breadcrumb-link" onClick={onCreateExamByParts}>POR PARTES</span>
+                      <button className="breadcrumb-link" onClick={onCreateExamByParts}>POR PARTES</button>
                       <span className="breadcrumb-separator">{'>'}</span>
                       
-                      <span className="breadcrumb-link" onClick={onBack}>
+                      <button className="breadcrumb-link" onClick={onBack}>
                           {source === 'attributes' ? 'RESTRICCIONES DE ATRIBUTOS' : 'TESTS GENERALES'}
-                      </span>
+                      </button>
 
                       
                       <span className="breadcrumb-separator">{'>'}</span>

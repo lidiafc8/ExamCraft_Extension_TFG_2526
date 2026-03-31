@@ -127,15 +127,20 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
                             {allowedFolders.map((folderName) => (
                                 <div key={folderName} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <img 
-                                        src={carpeta} 
-                                        alt="Carpeta" 
-                                        width="90" 
-                                        style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                                    <button
+                                        type="button"
                                         onClick={() => handleSelectFolder(folderName)}
                                         onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                         onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                    />
+                                        onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'} // Arregla el error de accesibilidad
+                                        onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}    // Arregla el error de accesibilidad
+                                        style={{ 
+                                            background: 'none', border: 'none', padding: 0, 
+                                            cursor: 'pointer', transition: 'transform 0.2s', outline: 'none' 
+                                        }}
+                                        >
+                                        <img src={carpeta} alt="Carpeta" width="90" />
+                                    </button>
                                     <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center', textTransform: 'capitalize' }}>
                                         {folderName}
                                     </span>
@@ -165,14 +170,17 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                             style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
                                             onClick={() => handleSelectProject(proj)}
                                         >
-                                            <img 
-                                                src={examen} 
-                                                alt="Abrir" 
-                                                width="80" 
-                                                height="80" 
-                                                style={{ transition: 'transform 0.2s' }} 
+                                            <img
+                                                src={examen}
+                                                alt="Abrir"
+                                                width="80"
+                                                height="80"
+                                                style={{ transition: 'transform 0.2s' }}
                                                 onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                                tabIndex={0} 
+                                                onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'} 
+                                                onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}    
                                             />
                                         </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
@@ -208,14 +216,17 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                             style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
                                             onClick={() => handleSelectPart(key)}
                                         >
-                                            <img 
-                                                src={examen} 
+                                            <img
+                                                src={examen}
                                                 alt="Restricciones" 
-                                                width="80" 
-                                                height="80" 
-                                                style={{ transition: 'transform 0.2s' }} 
+                                                width="80"
+                                                height="80"
+                                                style={{ transition: 'transform 0.2s', cursor: 'pointer' }}
                                                 onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                                tabIndex={0} 
+                                                onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                                onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                             />
                                         </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
