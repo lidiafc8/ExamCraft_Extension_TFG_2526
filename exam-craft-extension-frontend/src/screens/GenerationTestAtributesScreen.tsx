@@ -97,6 +97,47 @@ ${restricciones}
         }
     };
 
+    const handleSaveToChrome = () => {
+        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+            
+            if (!initialData?.project?.id) {
+                alert("Error: No se ha encontrado el ID del proyecto para actualizar.");
+                return;
+            }
+
+            const updatedExamData = {
+                ...initialData.project, 
+                attributeConstraints: responseText, // Guarda los tests generados
+                updatedAt: new Date().toISOString()
+            };
+
+            chrome.storage.local.set({ [initialData.project.id]: updatedExamData }, () => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error al actualizar:", chrome.runtime.lastError);
+                    alert("No se pudo actualizar el examen en el almacenamiento local.");
+                } else {
+                    alert("¡Tests guardados con éxito en el examen!");
+                    onWelcome(); 
+                }
+            });
+        } else {
+            alert("Esta funcionalidad solo está disponible dentro de la Extensión de Chrome.");
+        }
+    };
+
+    const handleDownload = () => {
+        if (!responseText) return;
+        const fileName = `Tests_Atributos_${initialData?.project?.domainName || 'examen'}.md`;
+        const content = `# Tests de Atributos\n\n${responseText}`;
+        const blob = new Blob([content], { type: "text/markdown" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
     const breadcrumbButtonStyle: React.CSSProperties = {
         background: 'none',
         border: 'none',
@@ -109,7 +150,6 @@ ${restricciones}
         outline: 'none'
     };
 
-    // --- REFACTORIZACIÓN PARA EVITAR DUPLICADOS ---
     const breadcrumbItems = [
         { label: 'INICIO', action: onWelcome },
         { label: 'CREAR EXAMEN', action: onCreateExam },
@@ -199,10 +239,10 @@ ${restricciones}
                                             aria-label="Resultado de los tests"
                                         />
                                         <div style={{ display: 'flex', gap: '10px' }}>
-                                            <button type="button" className="btn-step secondary" style={{ flex: 1, backgroundColor: '#4a90e2', color: 'white' }}>
+                                            <button type="button" onClick={handleDownload} className="btn-step secondary" style={{ flex: 1, backgroundColor: '#4a90e2', color: 'white' }}>
                                                 Descargar .md
                                             </button>
-                                            <button type="button" className="btn-step primary" style={{ flex: 1, backgroundColor: '#28a745' }}>
+                                            <button type="button" onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1, backgroundColor: '#28a745' }}>
                                                 Guardar
                                             </button>
                                             <button type="button" onClick={onWelcome} className="btn-step secondary" style={{ flex: 1 }}>
