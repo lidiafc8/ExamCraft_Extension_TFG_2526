@@ -43,7 +43,7 @@ Deberá cumplir estos requisitos:
 Requisitos que debe de cumplir:
 
 - Inyecta el Repositorio de la nueva entidad y el EntityManager usando @Autowired.
-- Crea el método test1RepositoriesExist(), anótalo con @Test y verifica que el repositorio no es nulo (assertNotNull).
+- Crea el método test1RepositoriesExist(), anótalo con @Test y verifica que el repositorio siempre tiene que tener un valor, nunca null (assertNotNull).
 - Crea el método test1RepositoriesContainsMethod(). ESTRICTAMENTE PROHIBIDO anotarlo con @Test. Este método debe ser llamado internamente desde el final de test1RepositoriesExist() dentro de un bloque if (repositorio != null) para evitar un NullPointerException si la inyección falla.
 - Crea el método @Test public void test1Check[NOMBRE_ENTIDAD]Constraints().
 - Analiza el UML proporcionado. Identifica los campos obligatorios e invoca el método heredado checkThatFieldsAreMandatory(entidad, em, "campo1", "campo2", ...).
@@ -54,10 +54,10 @@ Requisitos que debe de cumplir:
 - Usa el método heredado classIsAnnotatedWith(Clase.class, Entity.class) para verificar @Entity.
 - Si la entidad tiene algún atributo Enum, usa reflexión para verificar que tiene la anotación @Enumerated(EnumType.STRING).
 - Crea un método public static [Entidad] createValid[NOMBRE_ENTIDAD](EntityManager em).
-- Usa EXCLUSIVAMENTE el método heredado setValue(entidad, "atributo", Tipo.class, valor) para asignar datos válidos a todos los atributos de la entidad, evadiendo así fallos de compilación si el alumno no ha creado los setters.
+- Usa EXCLUSIVAMENTE el método heredado setValue(entidad, "atributo", Tipo.class, valor) para asignar datos válidos a todos los atributos de la entidad, evadiendo así fallos de compilación si el alumno se le ha olvidado crear los setters.
 - Crea el método @Test public void test1Valid[NOMBRE_ENTIDAD]IsPersisted(). Obtén una instancia válida, guárdala con el repositorio y haz un .flush() dentro de un assertDoesNotThrow.
 
-Por favor, no generes nada de comentarios, solo los tests para copiar lo que me devuelvas directamente para ejecutarlo.
+Por favor, bajo ninguna circustnacia generes nada de comentarios, solo los tests para copiar lo que me devuelvas directamente para ejecutarlo.
 
 Tampoco pongas nada de ```java y ``` 
 

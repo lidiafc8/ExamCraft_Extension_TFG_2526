@@ -2983,3 +2983,2392 @@ Para poder lanzar este test y comprobar su resultado puede colocarse en la carpe
 ---
 [^1]: La expresión regular para implementar dicha restricción es `^(LOW)|(MEDIUM)|(HIGH)$`
 [^2]: Obtained for the pet of the corresponding visit
+
+# Control práctico de DP1 2024-2025 (Control-check 1) G1
+
+## Enunciado
+
+En este ejercicio, añadiremos la funcionalidad de gestión de enfermedades, síntomas y tratamientos médicos. Concretamente, se proporciona una clase “Disease” que representa a las enfermedades que pueden desarrollar las mascotas, que se relaciona con el tipo de mascotas que pueden sufrirlas. Además, tendremos las clases “Symptom” y “Treatment” que representan a los síntomas que pueden aparecer a consecuencia de una enfermedad y los tratamientos recomendados para cada enfermedad respectivamente. Además, se ha creado una relación que indica qué síntomas son susceptibles de presentarse para una enfermedad llamada “includes”, para ayudar a los veterinarios a realizar diagnósticos más precisos.
+
+El diagrama UML que describe las clases y relaciones con las que vamos a trabajar es el siguiente:
+
+```
+classDiagram
+    class PetType {
+        +Integer id
+        +String name
+    }
+
+    class Disease {
+        +Integer id
+        +String name
+        +Integer severity
+    }
+
+    class Symptom {
+        +Integer id
+        +String name
+        +String virulence
+    }
+
+    class Treatment {
+        +Integer id
+        +String name
+        +Integer baseDose
+        +Integer shockDose
+        +Integer maxDose
+    }
+
+    class Visit {
+        +Integer id
+        +LocalDate date
+        +String description
+    }
+
+    %% Relaciones y Cardinalidades
+    Disease "0..*" --> "1..*" PetType : isSusceptible
+    Symptom "0..*" --> "1..*" Disease : includes
+    Treatment "0..*" --> "1" Disease : recommendedFor
+    Visit "0..*" --> "0..1" Disease : diagnose
+    Visit "0..*" --> "0..*" Symptom : symptoms
+```
+
+Las clases para las que realizaremos el mapeo objeto-relacional como entidades JPA se han señalado en rojo [en el diagrama original]. Las clases en azul son clases que se proporcionan ya mapeadas pero con las que se trabajará durante el control de laboratorio.
+
+Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Si desea ver el resultado que arrojarían las pruebas en backend, puede ejecutarlas (bien mediante su entorno de desarrollo favorito, bien mediante el comando `mvnw test` en la carpeta raíz del proyecto). Cada ejercicio correctamente resuelto valdrá dos puntos, el número de casos de prueba de cada ejercicio puede variar entre uno y otro y la nota se calculará en base al porcentaje de casos de prueba que pasan.
+
+Para comenzar esta prueba debe aceptar la tarea disponible en:
+https://classroom.github.com/a/wuz35o_p
+
+Al aceptar dicha tarea, se creará un repositorio único individual para usted. Debe entregar la actividad en EV asociada al control check proporcionando como texto la dirección url de su repositorio personal. La entrega de su solución al control se realizará mediante un único comando `git push` a su repositorio individual.
+
+> **Nota 1:** No modifique los nombres de las clases ni la signatura (nombre, tipo de respuesta y parámetros) de los métodos proporcionados como material de base para el control.
+
+> **Nota 2:** No modifique las pruebas unitarias proporcionadas como parte del proyecto bajo ningún concepto.
+
+> **Nota 3:** Mientras haya ejercicios no resueltos habrá tests que no funcionen y el comando `mvnw install` finalizará con error. Esto es normal.
+
+> **Nota 4:** La descarga del material y la entrega mediante git forman parte de las competencias evaluadas. No se aceptarán entregas que no hagan uso de este medio.
+
+> **Nota 5:** No se aceptarán proyectos cuyo código fuente no compile correctamente o que provoquen fallos al arrancar la aplicación. Serán evaluados con **0**.
+
+> **Nota 6:** Excepto el ejercicio 5 (que depende del 4), los ejercicios son independientes y pueden resolverse en cualquier orden.
+
+---
+
+### Test 1 – Modificar el servicio de gestión de Visitas
+
+Modificar el método `save` del servicio de gestión de visitas (`VisitService`) de manera que se lance la excepción `UnfeasibleDiagnoseException` en caso de que se intente guardar una visita asociada a una enfermedad que no pueden desarrollar las mascotas del tipo de la que ha venido a la visita. Por ejemplo, imaginen una visita donde el dueño trae a su serpiente y el veterinario lo diagnostica con juanetes en las patas traseras (que no puede ser desarrollada por ese tipo de mascotas, las serpientes no tienen patas). El método debe ser **transaccional** y hacer **rollback** de la transacción en caso de que se lance dicha excepción. Nótese, que existen relaciones entre la clase Disease y la clase PetType que permiten indicar las enfermedades que pueden o no desarrollar las mascotas dependiendo de su tipo/especie.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.time.LocalDateTime;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.samples.petclinic.disease.Disease;
+import org.springframework.samples.petclinic.disease.DiseaseService;
+import org.springframework.samples.petclinic.disease.SymptomRepository;
+import org.springframework.samples.petclinic.disease.TreatmentRepository;
+import org.springframework.samples.petclinic.pet.Pet;
+import org.springframework.samples.petclinic.pet.PetService;
+import org.springframework.samples.petclinic.vet.Vet;
+import org.springframework.samples.petclinic.vet.VetService;
+import org.springframework.samples.petclinic.visit.UnfeasibleDiagnoseException;
+import org.springframework.samples.petclinic.visit.Visit;
+import org.springframework.samples.petclinic.visit.VisitRepository;
+import org.springframework.samples.petclinic.visit.VisitService;
+import org.springframework.stereotype.Service;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))
+public class Test1 {
+
+	@MockBean
+	VisitRepository vr;
+
+	@MockBean
+	SymptomRepository sr;
+
+	@MockBean
+	TreatmentRepository	tr;
+
+    @Autowired
+	VisitService visitService;    
+
+	@Autowired 
+	DiseaseService diseaseService;
+
+	@Autowired 
+	PetService  petService;
+
+	@Autowired
+	VetService vetservice;
+
+	@Autowired
+	EntityManager em;    
+
+	@Test
+	public void test1UnfeasibleDiagnoseDetected() {
+		Visit v=createInvalidDiagnose();		
+		assertThrows(UnfeasibleDiagnoseException.class, () -> visitService.save(v),
+		"The diagnose is unfeasible, an UnfeasibleDiagnoseException should be thrown.");		
+	}
+
+	@Test
+	public void test1ValidDiagnoseSaved() {
+		Visit v=createValidDiagnose();				
+		try {
+			visitService.save(v);				
+		} catch (UnfeasibleDiagnoseException e) {
+			fail("The diagnose is feasible, the exteption shold not be thrown! :"+e.getMessage());
+		}
+		// The save method of the visits repository should be invoked once:
+		verify(vr,times(1)).save(v);
+	}
+
+	private Visit createValidDiagnose() {
+		Vet vet=vetservice.findVetById(1);
+        Pet p=petService.findPetById(1);
+		Disease d=diseaseService.findDiseaseById(1);
+		Visit result=new Visit();
+		result.setPet(p);
+		result.setDiagnose(d);
+		result.setDatetime(LocalDateTime.now());
+		result.setVet(vet);
+        return result;
+	}
+
+	private Visit createInvalidDiagnose() {
+		Vet vet=vetservice.findVetById(1);
+        Pet p=petService.findPetById(2);
+		Disease d=diseaseService.findDiseaseById(1);
+		Visit result=new Visit();
+		result.setPet(p);
+		result.setDiagnose(d);
+		result.setDatetime(LocalDateTime.now());
+		result.setVet(vet);
+        return result;
+	}
+}
+
+```
+---
+
+### Test 2 – Creación de servicios y controlador
+
+#### Parte 2A: Servicios de Gestión *(1 punto)*
+
+Modificar las clases `SymptomService` y `TreatmentService`, para que sean un servicio Spring de lógica de negocio y proporcionen una implementación a los métodos que permitan, usando una implementación del repositorio correspondiente (`SymptomRepository` / `TreatmentRepository`) que será inyectada mediante Spring (usando la anotación “`@Autowired(required=false)`” ):
+
+- Obtener todos los síntomas/tratamientos (`Symptom` / `Treatment`) usando método `getAll` en cada uno de los servicios correspondientes.
+- Grabar un síntoma/tratamiento (`Symptom` / `Treatment`) en la base de datos (método `save`).
+
+Todos estos métodos deben ser **transaccionales**, pero las anotaciones asociadas deben realizarse a nivel de método, no a nivel de clase. No modifique por ahora la implementación del resto de métodos de los servicios, ni tampoco los repositorios (hasta que no implemente las entidades en el ejercicio 4 no podrá hacerlo correctamente).
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.samples.petclinic.disease.Disease;
+import org.springframework.samples.petclinic.disease.Symptom;
+import org.springframework.samples.petclinic.disease.SymptomRepository;
+import org.springframework.samples.petclinic.disease.SymptomService;
+import org.springframework.samples.petclinic.disease.Treatment;
+import org.springframework.samples.petclinic.disease.TreatmentRepository;
+import org.springframework.samples.petclinic.disease.TreatmentService;
+import org.springframework.samples.petclinic.pet.PetType;
+
+@ExtendWith(MockitoExtension.class)
+public class Test2a extends ReflexiveTest{
+    @Mock
+    TreatmentRepository tr;
+    @Mock
+    SymptomRepository sr;
+
+    
+    TreatmentService ts;    
+    SymptomService ss;
+    
+    @BeforeEach
+    public void configuation(){
+        ts=new TreatmentService(tr);
+        ss=new SymptomService(sr);
+    }
+    
+    @Test
+    public void test2aCheckTransactionalityOfTreatmentService(){
+        checkTransactional(TreatmentService.class,"save", Treatment.class);        
+        checkTransactional(TreatmentService.class,"getAll");
+    }
+    
+    @Test
+    public void test2aCheckTransactionalityOfSymptomService(){
+        checkTransactional(SymptomService.class,"save", Symptom.class);        
+        checkTransactional(SymptomService.class,"getAll");
+    }    
+    
+    @Test
+    public void test2aTreatmentServiceCanGetTreatments(){
+        assertNotNull(ts,"TreatmentService was not injected by spring");
+        when(tr.findAll()).thenReturn(List.of());
+        List<Treatment> offers=ts.getAll();
+        assertNotNull(offers,"The list of Treatments found by the TreatmentService was null");
+        // The test fails if the service does not invoke the findAll of the repository:
+        verify(tr).findAll();            
+    }
+    
+
+    @Test
+    public void test2aSymptomServiceCanGetSymptoms(){
+        assertNotNull(ss,"SymptomService was not injected by spring");
+        when(sr.findAll()).thenReturn(List.of());
+        List<Symptom> discounts=ss.getAll();
+        assertNotNull(discounts,"The list of symptoms found by the SymptomService was null");
+        // The test fails if the service does not invoke the findAll of the repository:
+        verify(sr).findAll();               
+    }
+
+    @Test
+    public void test2aSymptomServiceCanSaveSymptoms(){
+        assertNotNull(ss,"SymptomService was not injected by spring");
+        when(sr.save(any(Symptom.class))).thenReturn(null);
+        Disease d=createValidDisease();
+        Symptom s=new Symptom();
+        try{
+            tryToInvokeMethodIrrespectivelyOfParameterTypes(s,"setName","A valid symptom");
+        }catch(Exception e){  
+            System.out.println("An exception was thrown, maybe because Symptom does not extend NamedEntity");  
+        }
+        s.setIncludes(Set.of(d));                
+        ss.save(s);        
+        // The test fails if the service does not invoke the save function of the repository:
+        verify(sr).save(s);     
+    }        
+
+    @Test
+    public void test2aTreatmentServiceCanSaveTreatments() {        
+        assertNotNull(ts,"OfferService was not injected by spring");
+        when(tr.save(any(Treatment.class))).thenReturn(null);
+        Disease d=createValidDisease();
+        Treatment t=new Treatment();
+        try{
+            tryToInvokeMethodIrrespectivelyOfParameterTypes(t, "setName", "Pucherito de la mama");
+        }catch(Exception e){  
+            System.out.println("An exception was thrown, maybe because Treatment does not extend NamedEntity");  
+        }
+        t.setRecommendedFor(Set.of(d));        
+            ts.save(t);        
+        // The test fails if the service does not invoke the save function of the repository:
+        verify(tr).save(t);                
+    }
+
+    private Disease createValidDisease() {
+        PetType pt=new PetType();
+        pt.setId(1);
+        pt.setName("cat");
+        Disease d=new Disease();
+        d.setName("COVID19");
+        d.setDescription("Better not!");
+        d.setSeverity(3);
+        d.setSusceptiblePetTypes(Set.of(pt));
+        return d;
+    }
+
+}
+```
+
+
+### Parte 2B: Controlador para API de Enfermedades *(1 punto)*
+
+Crear un método en el controlador `DiseaseController` (alojado en el paquete `org.springframework.samples.petclinic.disease`): que permita devolver todas las enfermedades existentes. El método debe responder a peticiones tipo GET en la URL:
+
+http://localhost:8080/api/v1/diseases
+
+Así mismo debe crear un método para devolver una enfermedad concreta, este método debe responder a peticiones en la url 
+
+http://localhost:8080/api/v1/diseases/X 
+
+donde X es la Id de la enfermedad a obtener, y devolverá los datos de la enfermedad correspondiente. En caso de que no exista una enfermedad con el id especificado el sistema debe devolver el código de estado `404 NOT_FOUND`.
+
+Estos endpoints de la API asociados a la gestión de enfermedades deberían estar accesibles únicamente para usuarios de tipo **Vet** (authority `"VET"`).
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.samples.petclinic.disease.SymptomRepository;
+import org.springframework.samples.petclinic.disease.TreatmentRepository;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.transaction.Transactional;
+
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+public class Test2b {    	    	
+    
+	@Autowired()
+	private WebApplicationContext context;
+
+    @MockBean
+	SymptomRepository sr;
+
+	@MockBean
+	TreatmentRepository	tr;
+
+
+
+	private MockMvc mockMvc;
+
+	@BeforeEach
+	public void setup() {
+		mockMvc = MockMvcBuilders
+		.webAppContextSetup(context)
+		.apply(SecurityMockMvcConfigurers.springSecurity())
+		.build();
+	}    	
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test2bVetsCanGetDiseases() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/diseases"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$", hasSize(3)));        
+    }
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test2bVetsCanGetDiseaseThaExist() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/diseases/1"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.name", is("Rabies Shot")));        
+    }
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test2bVetsCanNotGetDiseaseThaDontExist() throws JsonProcessingException, Exception{        
+         mockMvc.perform(get("/api/v1/diseases/1"))
+			.andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/diseases/46231"))
+			.andExpect(status().isNotFound());        
+    }
+
+
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "owner1", authorities = {"OWNER"})
+    public void test2bOwnersCannotGetDiseases() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/diseases"))
+			.andExpect(status().isForbidden());	        
+    }
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "owner1", authorities = {"OWNER"})
+    public void test2bOwnersCannotGetDisease() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/diseases/1"))
+			.andExpect(status().isForbidden());	        
+    }
+	
+}
+
+```
+---
+
+### Test 3 – Creación de un componente React de listado de enfermedades
+
+
+Modificar el componente React proporcionado en el fichero `frontend/src/disease/index.js` para que muestre un listado de las enfermedades disponibles en el sistema. 
+
+Para ello debe hacer uso de la API lanzando una petición tipo `GET` contra la URL `api/v1/diseases`.
+
+Este componente debe mostrar las enfermedades en una tabla **tabla** (se recomienda el componente `Table` de reactstrap) incluyendo columnas para su nombre, y el conjunto de tipos de mascotas que pueden desarrollar la enfermedad. Para esto último, el componente debe mostrar en la celda asociada una lista (preferiblemente no ordenada `<ul>`) con el nombre de los tipos de mascotas susceptibles de desarrollar la enfermedad en la celda correspondiente.
+
+Para poder lanzar este test y comprobar su resultado puede colocarse en la carpeta de frontend y ejecutar el comando `npm test` y pulsar `'a’ en el menú de comandos de jest`. Nótese que previamente debe haber lanzado al menos una vez el comando `npm install` para que todas las librerías de node estén instaladas.
+
+---
+
+### Test 4 – Creación de las entidades Symptom y Treatment
+
+Modificar las clases `Symptom` y `Treatment` para que sean entidades. Estas clases están alojadas en el paquete `org.springframework.samples.petclinic.disease`, y deben tener los siguientes atributos y restricciones:
+
+#### Atributos comunes a ambas clases
+
+- El atributo de tipo entero `Integer` llamado `id` actuará como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
+
+- Un atributo de tipo cadena de caracteres `String` llamado `name`obligatorio (no puede ser nulo), que debe tener una longitud mínima de 3 caracteres y máxima de 50 y que no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.).´
+
+#### Atributos de `Treatment`
+
+- El atributo de tipo entero `Integer` llamado `baseDose` , que representa el número de miligramos de tratamiento por kilogramo de peso del animal. Este atributo será obligatorio y tendrá un valor mínimo de 1.
+
+- El atributo de tipo entero llamado `Integer`llamado `shockDose`, que representa una cantidad fija de miligramos. En la lógica de negocio del sistema esta cantidad se añadirá al tratamiento en caso de que la enfermedad a tratar sea mortal (valor 5 para el atributo severity en la entidad Disease). El atributo es opcional, pero si toma valor, tendrá un valor mínimo de 1.
+
+- El atributo de tipo entero `Integer`llamado `maxDose` que representa la dosis máxima de tratamiento que puede llegar a administrarse (en miligramos de tratamiento por kilogramo de peso del animal). Este atributo es obligatorio y tendrá un valor mínimo de 1.
+
+
+#### Atributos de `Symptom`
+
+- El atributo de tipo cadena caracteres `String` llamado `virulence` opcional que únicamente podrá tomar tres valores `LOW`, `MEDIUM`, `HIGH` ¹.
+
+> ¹ Expresión regular: `^(LOW)|(MEDIUM)|(HIGH)$`
+
+
+Modificar las interfaces `SymptomRepository` y `TreatmentRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
+
+Elimine las anotaciones **@Transient** de los métodos y atributos que las tengan en las entidades creadas anteriormente, así como la del atributo `symptoms` de la clase `Visit`. Se pide crear las siguientes relaciones entre las entidades. Cree una relación unidireccional desde `Visit` hacia `Symptom` que exprese la que aparece en el diagrama UML (mostrado en la primera página de este enunciado) respetando sus cardinalidades, usando el atributo `symptoms` de la clase `Visit`.
+
+Además, se pide crear una relación unidireccional desde `Symptom` hacia `Disease` que represente laque aparece en el diagrama UML, tenga en cuenta la cardinalidad que tiene, usando el atributo `includes` en la clase `Symptom`. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, algunos atributos pueden ser nulos puesto que la cardinalidad es *0..n* pero otros no, porque su cardinalidad en el extremo navegable de la relación es *1..n*.
+
+Finalmente, se pide crear una relación unidireccional desde ´Treatment´ hacia ´Disease´ que represente la que aparece en el diagrama, usando como nombre de atributo `recommendedFor`. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, el atributo no puede ser nulo y es obligatorio, puesto que la cardinalidad es *1..n* en el extremo de Disease.
+
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.samples.petclinic.disease.Disease;
+import org.springframework.samples.petclinic.disease.Symptom;
+import org.springframework.samples.petclinic.disease.SymptomRepository;
+import org.springframework.samples.petclinic.disease.Treatment;
+import org.springframework.samples.petclinic.disease.TreatmentRepository;
+import org.springframework.samples.petclinic.visit.Visit;
+import org.springframework.stereotype.Service;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ManyToMany;
+
+@DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))
+public class Test4 extends ReflexiveTest{
+
+    @Autowired(required = false)
+    SymptomRepository symptomsRepo;
+    @Autowired(required = false)
+    TreatmentRepository treatmentsRepo;
+    
+    @Autowired(required = false)
+    EntityManager em;
+
+    @Test
+    public void test4RepositoriesExist(){
+        assertNotNull(symptomsRepo,"The symptoms repository was not injected into the tests, its autowired value was null");
+        assertNotNull(treatmentsRepo,"The treatments repository was not injected into the tests, its autowired value was null");
+        test4RepositoriesContainsMethod();
+    }
+
+    public void test4RepositoriesContainsMethod(){
+        if(symptomsRepo!=null){
+            Object v=symptomsRepo.findById(12);
+            assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned"+
+            "for a symptom that does not exist");
+        }else
+            fail("The symptoms repository was not injected into the tests, its autowired value was null");
+        
+        if(treatmentsRepo!=null){
+            Object v=treatmentsRepo.findById(12);
+            assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned"+
+            "for a treatment that does not exist");
+        }else
+            fail("The treatments repository was not injected into the tests, its autowired value was null");
+    }
+    
+    
+
+    
+    @Test
+    public void test4CheckTreatmentsConstraints() {
+        Map<String,List<Object>> invalidValues=Map.of( 
+                                        "name",     List.of(
+                                                        "      ","a",
+                                                        "En un lugar de la Mancha, de cuyo nombre no quiero acordarme,"+
+                                                        "no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero,"+
+                                                        "adarga antigua, rocín flaco y galgo corredor. Una olla de algo"+
+                                                        "más vaca que carnero, salpicón las más noches, duelos y quebrantos"+
+                                                        "los sábados, lentejas los viernes, algún palomino de añadidura"+
+                                                        "los domingos, consumían las tres partes de su hacienda. "),                                           
+                                            "baseDose",  List.of( -1, 0 ),
+                                            "shockDose", List.of( -1, 0),
+                                            "maxDose", List.of( -1, 0)                                            
+                                            );
+
+
+        Treatment t=createValidTreatment(em);
+        em.persist(t);
+        
+        checkThatFieldsAreMandatory(t, em, "baseDose","maxDose");        
+        
+        checkThatValuesAreNotValid(t, invalidValues,em);   
+    }
+    @Test
+    public void test4CheckSymptomsContraints() {
+         Map<String,List<Object>> invalidValues=Map.of(
+                                            "name",     List.of(
+                                                    "      ","a",
+                                                    "En un lugar de la Mancha, de cuyo nombre no quiero acordarme,"+
+                                                    "no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero,"+
+                                                    "adarga antigua, rocín flaco y galgo corredor. Una olla de algo"+
+                                                    "más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados,"+
+                                                    "lentejas los viernes, algún palomino de añadidura los domingos,"+
+                                                    "consumían las tres partes de su hacienda. "),
+                                            "virulence", List.of ("too bad","oh no!")                                            
+                                            );
+
+
+        Symptom s=createValidSymptom(em);
+        em.persist(s);
+        
+        checkThatFieldsAreMandatory(s, em, "name");        
+        
+        checkThatValuesAreNotValid(s, invalidValues,em);   
+    }
+
+    
+    @Test
+    public void test4CheckTreatmentAnnotations() {        
+        assertTrue(classIsAnnotatedWith(Treatment.class,Entity.class));
+    }
+
+    @Test
+    public void test4CheckSymptomAnnotations() {
+        assertTrue(classIsAnnotatedWith(Symptom.class,Entity.class));
+    }    
+
+    @Test
+    public void test4TreatmentAnnotations() {
+        checkThatFieldIsAnnotatedWith(Treatment.class, "recommendedFor", ManyToMany.class);                          
+    }
+
+    @Test
+    public void test4SymptomAnnotations() {        
+        checkThatFieldIsAnnotatedWith(Symptom.class, "includes", ManyToMany.class);            
+    }
+
+    @Test
+    public void test4VisitAnnotationsAndConstraints(){
+        checkThatFieldIsAnnotatedWith(Visit.class, "symptoms", ManyToMany.class);
+    }
+
+    @Test
+    public void test4TreatmentConstraints() {
+        Treatment t=createValidTreatment(em);
+        checkThatFieldsAreMandatory(t, em,"recommendedFor");        
+    }
+
+    @Test
+    public void test4SymptomsConstraints() {
+        Symptom s=createValidSymptom(em);
+        checkThatFieldsAreMandatory(s, em,"includes");                
+    }
+
+    public static Symptom createValidSymptom(EntityManager em){        
+        Symptom o=new Symptom();        
+        setValue(o,"name",String.class,"Un síntoma válido");
+        o.setVirulence("LOW");
+        o.setIncludes(Set.of(em.find(Disease.class, 1)));
+        return o;
+    }
+
+    public static Treatment createValidTreatment(EntityManager em){
+        Treatment t=new Treatment();
+        setValue(t,"name",String.class,"Un tratamiento válido");
+        t.setBaseDose(10);
+        t.setShockDose(null);
+        t.setMaxDose(50);
+        t.setRecommendedFor(Set.of(em.find(Disease.class,1)));
+        return t;
+    }
+}
+```
+---
+
+### Test 5 – Modificación del script de inicialización de la base de datos
+
+Modificar el script de inicialización de la base de datos, para que se creen los siguientes síntomas (`Symptom`) y tratamientos (`Treatment`):
+
+#### Síntomas 1:
+- `id`: 1
+- `name`: `"Cough"`
+- `virulence`: `"LOW"`
+
+#### Síntomas 2:
+- `id`: 2
+- `name`: `"Hair loss"`
+- `virulence`: `"MEDIUM"`
+
+#### Tratamiento 1:
+- `id`: 1
+- `name` : `"aspirin"` 
+- `baseDose` : 12
+- `shockDose` : null
+- `maxDose` : 50
+
+#### Tratamiento 2:
+- `id`: 2
+- `name` : `"paracetamol"` 
+- `baseDose` : 20
+- `shockDose` : 40
+- `maxDose` : 150
+
+
+Además, debe modificar este script de inicialización de la base de datos para que:
+
+- El **Treatment** cuyo id es **1** se asocie con la Disease con `id 2`
+
+- El **Treatment** cuyo id es **2** se asocie con la Disease con `id 1`
+
+- El **Symptom** cuyo id es **1** tenga como posibles enfermedades incluidas la Disease con `ids 2 y 3` .
+
+- El **Symptom** cuyo id es **2** tenga como posibles enfermedades incluidas la Diseases con `ids 1 y 3`.
+
+- La **Visit** cuyo id es **1** tenga asociados los `síntomas 1 y 2`.
+
+Tenga en cuenta que el orden en que aparecen los `INSERT` en el script de inicialización de la base de datos es relevante al definir las asociaciones.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.disease.Symptom;
+import org.springframework.samples.petclinic.disease.Treatment;
+import org.springframework.samples.petclinic.visit.Visit;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest()
+public class Test5 extends ReflexiveTest {    
+    @Autowired
+    EntityManager em;    
+    
+    @Test
+    public void test5InitialTreatments(){                        
+        Treatment t1=em.find(Treatment.class,1);
+        assertNotNull(t1,"There should exist a Treatment with id:1");
+        assertEquals("aspirin",getFieldValueReflexively(t1, "name"));
+        //assertEquals("Aspirin, also known by its generic name acetylsalicylic acid, 
+        // is a widely used medication with analgesic (pain-relieving), antipyretic (fever-reducing),
+        //  and anti-inflammatory properties.",t1.getDescription());
+        assertEquals(12,t1.getBaseDose());
+        assertNull(t1.getShockDose());
+        assertEquals(50,t1.getMaxDose());
+
+
+        Treatment t2=em.find(Treatment.class,2); 
+        assertNotNull(t2,"There should exist a Treatment with id:2");       
+        assertEquals("paracetamol",getFieldValueReflexively(t2, "name"));
+        //assertEquals("Paracetamol, known as acetaminophen in the United States and Canada, 
+        // is a widely used over-the-counter (OTC) medication with analgesic (pain-relieving) 
+        // and antipyretic (fever-reducing) properties.",t2.getDescription());
+        assertEquals(20,t2.getBaseDose());
+        assertEquals(40,t2.getShockDose());
+        assertEquals(150,t2.getMaxDose());
+        
+
+    }
+    @Test
+    public void test5InitialSymptoms()
+    {
+        Symptom symptom1 = em.find(Symptom.class, 1);
+        assertNotNull(symptom1,"Cannot find sypmtom with id "+1);
+        assertEquals("Cough",getFieldValueReflexively(symptom1,"name"));
+        assertEquals("LOW",symptom1.getVirulence());
+        
+        Symptom symptom2 = em.find(Symptom.class, 2);        
+        assertNotNull(symptom2,"Cannot find sypmtom with id "+2);
+        assertEquals("Hair loss",getFieldValueReflexively(symptom2,"name"));
+        assertEquals("MEDIUM",symptom2.getVirulence());
+        
+    }        
+    
+    @Test
+    public void test5TreatmentLinks() {        
+        checkContainsById(Treatment.class,1,"getRecommendedFor",2,em);
+        checkContainsById(Treatment.class,2,"getRecommendedFor",1,em);        
+    }
+
+    @Test
+    public void test5SymptomsLinks() {        
+        checkContainsById(Symptom.class,1,"getIncludes",2,em);
+        checkContainsById(Symptom.class,1,"getIncludes",3,em);
+        checkContainsById(Symptom.class,2,"getIncludes",1,em);
+        checkContainsById(Symptom.class,2,"getIncludes",3,em);        
+    }
+
+    @Test
+    public void test5VisitsLinks() {
+                         
+        checkContainsById(Visit.class,1,"getSymptoms",1,em);
+        checkContainsById(Visit.class,1,"getSymptoms",2,em);
+        
+    }
+
+}
+```
+
+# Control práctico de DP1 2024-2025 (Control-check 1)
+
+## Enunciado
+
+En este ejercicio, añadiremos la funcionalidad de gestión de cirugías a las mascotas. En concreto, tendremos la clase "Surgery", que representa la realización de una cirugía a una mascota por un equipo de veterinarios, y la clase "OperatingRoom", que representa las distintas salas de operaciones disponibles en la clínica para realizar la cirugía. Cada sala de operaciones está preparada para tratar a un determinado tipo de cirugía concreto, representado con la clase "SurgeryType". Por ejemplo, podemos tener las salas 1 y 2 preparadas para cirugía de tejidos blandos y la sala 3 preparada para cirugía oftálmica. Además, la clase SurgeryType se relaciona con aquellos PetType a los que ese tipo de cirugía puede aplicar.
+
+El diagrama UML que describe las clases y relaciones con las que vamos a trabajar es el siguiente:
+```mermaid
+classDiagram
+    class Surgery {
+        +Integer id
+        +String name
+        +LocalDate date
+        +String description
+    }
+
+    class OperatingRoom {
+        +Integer id
+        +String name
+        +Integer size
+        +String sterilizationLevel
+    }
+
+    class SurgeryType {
+        +Integer id
+        +String name
+    }
+
+    class Pet {
+        +Integer id
+        +String name
+        +LocalDate birthDate
+    }
+
+    class PetType {
+        +Integer id
+        +String name
+    }
+
+    Surgery --> Pet : pet (1)
+    Surgery --> SurgeryType : type (1)
+    Surgery --> OperatingRoom : room (1)
+    OperatingRoom "0..*" --> "1..*" SurgeryType : validFor
+    SurgeryType "0..*" --> "0..*" PetType : susceptiblePetTypes
+```
+
+Las clases para las que realizaremos el mapeo objeto-relacional como entidades JPA se han señalado en rojo. Las clases en azul son clases que se proporcionan ya mapeadas pero con las que se trabajará durante el control de laboratorio.
+
+Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Si desea ver el resultado que arrojarían las pruebas en backend, puede ejecutarlas (bien mediante su entorno de desarrollo favorito, bien mediante el comando "mvnw test" en la carpeta raíz del proyecto). Cada ejercicio correctamente resuelto valdrá dos puntos, el número de casos de prueba de cada ejercicio puede variar entre uno y otro y la nota se calculará en base al porcentaje de casos de prueba que pasan. Por ejemplo, si pasan la mitad (50%) de los casos de prueba de un ejercicio, usted obtendrá un punto (2*0,5=1), y si pasan un 10% obtendrá 0,2 puntos.
+
+Para comenzar esta prueba debe aceptar la tarea disponible en:
+https://classroom.github.com/a/aLOR6cj9
+
+Al aceptar dicha tarea, se creará un repositorio único individual para usted, debe usar dicho repositorio para realizar el control práctico. Debe entregar la actividad en EV asociada al control check proporcionando como texto la dirección url de su repositorio personal. Recuerde que además debe entregar su solución del control.
+
+La entrega de su solución al control se realizará mediante un único comando "git push" a su repositorio individual. Recuerde que debe hacer push antes de cerrar sesión en la computadora y abandonar el aula, de lo contrario, su intento se evaluará como no presentado. Su primera tarea en este control será clonar (recuerde que si va a usar los equipos del aula para realizar el control necesitará usar un token de autenticación de GitHub como clave, tiene un documento de ayuda a la configuración en el propio repositorio del control). A continuación, deberá importar el proyecto en su entorno de desarrollo favorito y comenzar los ejercicios abajo listados. Al importar el proyecto, el mismo puede presentar errores de compilación. No se preocupe, si existen, dichos errores irán despareciendo conforme usted vaya implementando los distintos ejercicios del control.
+
+> **Nota importante 1:** No modifique los nombres de las clases ni la signatura (nombre, tipo de respuesta y parámetros) de los métodos proporcionados como material de base para el control. Las pruebas que se usan para la evaluación dependen de que las clases y los métodos tengan la estructura y nombres proporcionados. Si los modifica probablemente no pueda hacer que pasen las pruebas, y obtendrá una mala calificación.
+
+> **Nota importante 2:** No modifique las pruebas unitarias proporcionadas como parte del proyecto bajo ningún concepto. Aunque modifique las pruebas en su copia local del proyecto, éstas serán restituidas mediante un comando git previamente a la ejecución de las pruebas para la emisión de la nota final, por lo que sus modificaciones en las pruebas no serán tenidas en cuenta en ningún momento.
+
+> **Nota importante 3:** Mientras haya ejercicios no resueltos habrá tests que no funcionen y, por tanto, el comando mvnw install finalizará con error. Esto es normal debido a la forma en la que está planteado el control y no hay que preocuparse por ello. Si se quiere probar la aplicación se puede ejecutar de la forma habitual pese a que mvnw install finalice con error.
+
+> **Nota importante 4:** La descarga del material de la prueba usando git, y la entrega de su solución con git a través del repositorio GitHub creado a tal efecto forman parte de las competencias evaluadas durante el examen, por lo que no se aceptarán entregas que no hagan uso de este medio, y no se podrá solicitar ayuda a los profesores para realizar estas tareas.
+
+> **Nota importante 5:** No se aceptarán como soluciones válidas proyectos cuyo código fuente no compile correctamente o que provoquen fallos al arrancar la aplicación en la inicialización del contexto de Spring. Las soluciones cuyo código fuente no compile o sean incapaces de arrancar el contexto de Spring serán evaluadas con una nota de 0.
+
+> **Nota importante 6:** Excepto el ejercicio 5 (que depende del 4) los ejercicios del examen son independientes y pueden ser resueltos en cualquier orden.
+
+---
+
+## Test 1 – Modificar el servicio de gestión de Visitas para que no permita guardar recomendaciones de cirugía imposibles
+
+Modificar el método `save` del servicio de gestión de visitas (`VisitService`) de manera que se lance la excepción (`UnfeasibleSurgeryException`) en caso de que se intente guardar una visita asociada a una recomendación de un tipo de cirugía que no aplica a las mascotas del tipo de la que ha venido a la visita. Por ejemplo, imaginen una visita donde el dueño trae a su pájaro y el veterinario le recomienda la cirugía de extracción de una pieza dental (que no puede ser realizada sobre ese tipo de mascotas). El método debe ser transaccional y hacer rollback de la transacción en caso de que se lance dicha excepción.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.samples.petclinic.pet.Pet;
+import org.springframework.samples.petclinic.pet.PetService;
+import org.springframework.samples.petclinic.surgery.SurgeryType;
+import org.springframework.samples.petclinic.surgery.SurgeryTypeRepository;
+import org.springframework.samples.petclinic.vet.Vet;
+import org.springframework.samples.petclinic.vet.VetService;
+import org.springframework.samples.petclinic.visit.UnfeasibleSurgeryException;
+import org.springframework.samples.petclinic.visit.Visit;
+import org.springframework.samples.petclinic.visit.VisitRepository;
+import org.springframework.samples.petclinic.visit.VisitService;
+import org.springframework.stereotype.Service;
+
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.SystemException;
+
+@DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))
+public class Test1 {
+
+	@MockBean
+	VisitRepository vr;
+
+    @Autowired
+	VisitService visitService;    
+
+	@Autowired 
+	SurgeryTypeRepository surgeryTypeRepository;
+
+	@Autowired 
+	PetService  petService;
+
+	@Autowired
+	VetService vetservice;
+
+	@Autowired
+	EntityManager em;    
+
+	@Test
+	public void test1UnfeasibleSurgeryRecommended() throws SystemException {
+		Visit v=createInvalidVisit();		
+		
+		assertThrows(UnfeasibleSurgeryException.class, () -> visitService.save(v),"The surgery type is not valid for the pet type. An exception should be thrown.");		
+		// assertTrue(em.getTransaction().getRollbackOnly());
+	}
+
+	@Test
+	public void test1ValidSurgerySaved() {
+		Visit v=createValidVisit();				
+		try {
+			visitService.save(v);				
+		} catch (UnfeasibleSurgeryException e) {
+			fail("The surgery type is valid for the pet type. No exception should be thrown. :"+e.getMessage());
+		}
+		verify(vr,times(1)).save(v);
+	}
+
+	@Test
+	public void test1NoSurgerySaved() {
+		Visit v=createNoSurgeryVisit();				
+		try {
+			visitService.save(v);				
+		} catch (UnfeasibleSurgeryException e) {
+			fail("The surgery type is valid for the pet type. No exception should be thrown. :"+e.getMessage());
+		}
+		verify(vr,times(1)).save(v);
+	}
+
+	private SurgeryType findSurgeryTypeById(int id) {
+		Optional<SurgeryType> st = surgeryTypeRepository.findById(id);
+		return st.isPresent() ? st.get() : null;
+	}
+
+	private Visit createValidVisit() {
+		Vet vet=vetservice.findVetById(1);
+        Pet p=petService.findPetById(1);
+		SurgeryType st = findSurgeryTypeById(2);
+		Visit result=new Visit();
+		result.setPet(p);
+		result.setRecommends(st);
+		result.setDatetime(LocalDateTime.now());
+		result.setVet(vet);
+        return result;
+	}
+
+	private Visit createNoSurgeryVisit() {
+		Vet vet=vetservice.findVetById(1);
+        Pet p=petService.findPetById(3);
+		Visit result=new Visit();
+		result.setPet(p);
+		result.setRecommends(null);
+		result.setDatetime(LocalDateTime.now());
+		result.setVet(vet);
+        return result;
+	}
+
+	private Visit createInvalidVisit() {
+		Vet vet=vetservice.findVetById(1);
+        Pet p=petService.findPetById(3);
+		SurgeryType st = findSurgeryTypeById(2);
+		Visit result=new Visit();
+		result.setPet(p);
+		result.setRecommends(st);
+		result.setDatetime(LocalDateTime.now());
+		result.setVet(vet);
+        return result;
+	}
+}
+```
+---
+
+## Test 2 – Creación de servicio y del controlador para devolver los tipos de cirugía disponibles
+
+### Parte 2A: Servicios de Gestión (1 punto)
+
+Modificar la clase `SurgeryTypeService` para que sea un servicio Spring de lógica de negocio y proporcionen una implementación a los métodos que permitan:
+
+1. Obtener todos los tipos de cirugía (`SurgeryType`) almacenados en la base de datos como una lista usando el repositorio (método `findSurgeryTypes` del servicio).
+2. Obtener el tipo de cirugía (`SurgeryType`) correspondiente a un id pasado por parámetro o `null` en caso de que no exista (método `findSurgeryTypeById` del servicio).
+
+Todos estos métodos deben ser transaccionales, pero las anotaciones asociadas deben realizarse a nivel de método, no a nivel de clase.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.samples.petclinic.surgery.SurgeryType;
+import org.springframework.samples.petclinic.surgery.SurgeryTypeRepository;
+import org.springframework.samples.petclinic.surgery.SurgeryTypeService;
+
+@ExtendWith(MockitoExtension.class)
+public class Test2a extends ReflexiveTest{
+
+    @Mock
+    SurgeryTypeRepository str;
+
+    SurgeryTypeService sts;
+    
+    @BeforeEach
+    public void configuation(){
+        sts = new SurgeryTypeService(str);
+    }
+    
+    @Test
+    public void test2aCheckTransactionalityOfSurgeryTypeService(){
+        checkTransactional(SurgeryTypeService.class,"findSurgeryTypes");
+        checkTransactional(SurgeryTypeService.class, "findSurgeryTypeById", Integer.class);
+    }
+    
+    
+    @Test
+    public void test2aSurgeryTypeServiceCanGetSurgeryTypes(){
+        assertNotNull(sts,"SurgeryTypeService was not injected by spring");
+        when(str.findAll()).thenReturn(List.of());
+        List<SurgeryType> types = sts.findSurgeryTypes();
+        assertNotNull(types, "The list of SurgeryTypes found by the SurgeryTypeService was null");
+        // The test fails if the service does not invoke the findAll of the repository:
+        verify(str).findAll();            
+    }
+    
+    @Test
+    public void test2aSurgeryTypeServiceCanGetSurgeryTypeWithId(){
+        assertNotNull(sts,"SurgeryTypeService was not injected by spring");
+        when(str.findById(any(Integer.class))).thenReturn(Optional.of(Test4.createSurgeryType(null)));
+        SurgeryType type = sts.findSurgeryTypeById(3);
+        assertNotNull(type ,"The SurgeryType found by the SurgeryTypeService was null and should not be");
+        // The test fails if the service does not invoke the findAll of the repository:
+        verify(str).findById(any(Integer.class));            
+    }
+
+    @Test
+    public void test2aSurgeryTypeServiceCanGetSurgeryTypeWithIdAndReturnNull(){
+        assertNotNull(sts,"SurgeryTypeService was not injected by spring");
+        when(str.findById(any(Integer.class))).thenReturn(Optional.empty());
+        SurgeryType type = sts.findSurgeryTypeById(3);
+        assertNull(type ,"The SurgeryType found by the SurgeryTypeService was not null and should be");
+        // The test fails if the service does not invoke the findAll of the repository:
+        verify(str).findById(any(Integer.class));            
+    }
+}
+```
+
+### Parte 2B: Creación del controlador para devolver los tipos de cirugía disponibles
+
+Crear un método en el controlador `SurgeryTypeController` (alojado en el paquete `org.springframework.samples.petclinic.surgery`) que permita devolver todos los tipos de cirugía existentes. El método debe responder a peticiones tipo GET en la URL:
+```
+http://localhost:8080/api/v1/surgerytypes
+```
+
+Así mismo debe crear un método para devolver un tipo de cirugía concreto, este método debe responder a peticiones en la url `http://localhost:8080/api/v1/surgerytypes/X` donde X es el Id del tipo de cirugía a obtener, y devolverá los datos del tipo de cirugía correspondiente. En caso de que no exista un tipo de cirugía con el id especificado el sistema debe devolver el código de estado 404 (NOT_FOUND).
+
+Estos endpoint de la API asociados a la gestión de tipos de cirugía deberían estar accesibles únicamente para usuarios de tipo Vet (que tengan la authority "VET").
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import jakarta.transaction.Transactional;
+
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+public class Test2b {    	    	
+    
+	@Autowired
+	private WebApplicationContext context;
+	
+	private MockMvc mockMvc;
+
+	@BeforeEach
+	public void setup() {
+		mockMvc = MockMvcBuilders
+                    .webAppContextSetup(context)
+                    .apply(SecurityMockMvcConfigurers.springSecurity())
+                    .build();
+	}    	
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test2bVetsCanGetSurgeryTypes() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/surgerytypes"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$", hasSize(5)));        
+    }
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test2bVetsCanGettypeThatExist() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/surgerytypes/1"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.name", is("Dental extractions")));        
+    }
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test2bVetsCanNotGettypesThatDontExist() throws JsonProcessingException, Exception{        
+        mockMvc.perform(get("/api/v1/surgerytypes/1"))
+        .andExpect(status().isOk());
+       mockMvc.perform(get("/api/v1/surgerytypes/46231"))
+			.andExpect(status().isNotFound());        
+    }
+
+
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "owner1", authorities = {"OWNER"})
+    public void test2bOwnersCannotGettypes() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/surgerytypes"))
+			.andExpect(status().isForbidden());	        
+    }
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "owner1", authorities = {"OWNER"})
+    public void test2bOwnersCannotGetSpecifictypes() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/surgerytypes/1"))
+			.andExpect(status().isForbidden());	        
+    }
+	
+}
+```
+---
+
+## Test 3 – Creación de un componente React de listado de tipos de cirugía
+
+Modificar el componente React proporcionado en el fichero `frontend/src/surgerytype/index.js` para que muestre un listado de las enfermedades disponibles en el sistema. Para ello debe hacer uso de la API lanzando una petición tipo GET contra la URL `api/v1/surgerytypes`. Un ejemplo de respuesta que podría obtener es:
+```json
+[
+  {
+    "id": 1,
+    "name": "Dental extractions",
+    "susceptiblePetTypes": [
+      {"name": "dog", "id": 2},
+      {"name": "cat", "id": 1},
+      {"name": "snake", "id": 4}
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Bladder surgery",
+    "susceptiblePetTypes": [
+      {"name": "cat", "id": 1},
+      {"name": "hamster", "id": 6}
+    ]
+  }
+]
+```
+
+Este componente debe mostrar los tipos de cirugía en una tabla (se recomienda usar el componente `Table` de reactstrap) incluyendo columnas para su nombre, y el conjunto de tipos de mascotas al que aplica este tipo de cirugía. Para esto último, el componente debe mostrar en la celda asociada una lista (preferiblemente no ordenada `<ul>`) con el nombre de los tipos de mascotas a los que aplica en la celda correspondiente.
+
+Para poder lanzar este test y comprobar su resultado puede colocarse en la carpeta de frontend y ejecutar el comando `npm test` y pulsar `a` en el menú de comandos de jest. Nótese que previamente debe haber lanzado al menos una vez el comando `npm install` para que todas las librerías de node estén instaladas.
+
+---
+
+## Test 4 – Creación de las entidades Surgery y OperatingRoom y sus repositorios asociados
+
+Modificar las clases `Surgery` y `OperatingRoom` para que sean entidades y eliminar las anotaciones `@Transient` de estas clases. Estas clases están alojadas en el paquete `org.springframework.samples.petclinic.surgery`, y deben tener los siguientes atributos y restricciones:
+
+**Para ambas clases:**
+- El atributo de tipo entero (`Integer`) llamado `"id"` actuará como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
+- Un atributo de tipo cadena de caracteres (`String`) llamado `"name"` obligatorio (no puede ser nulo), que debe tener una longitud mínima de 3 caracteres y máxima de 50 y que no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.).
+
+**Para la clase Surgery:**
+- Un atributo de tipo fecha (`LocalDate`) llamado `"date"`, que representa la fecha en que se realiza la cirugía. Seguirá el formato `"dd/MM/yyyy"` (puede usar como ejemplo la clase `Pet` y su fecha de nacimiento para ver cómo se especificar dicho formato, pero nótese que el patrón del formato es distinto). Este atributo debe ser obligatorio y se almacenará en la BD con el nombre de columna `"surgery_date"`.
+- El atributo de tipo cadena caracteres (`String`) llamado `"description"` opcional.
+
+**Para la clase OperatingRoom:**
+- Un atributo de tipo entero llamado `"size"` obligatorio, que representa el tamaño de la sala en metros cuadrados, y tiene que ser un número mayor que cero.
+- Un atributo de tipo cadena de caracteres (`String`) llamado `"sterilizationLevel"` obligatorio que únicamente podrá tomar tres valores: `"FULL"`, `"SEMI"`, `"LOW"`.
+
+Modificar las interfaces `SurgeryRepository` y `OperationRoomRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
+
+Se pide crear las siguientes relaciones entre las entidades:
+
+- Una relación unidireccional desde `Surgery` hacia `Pet` que exprese la que aparece en el diagrama UML respetando sus cardinalidades, usando el atributo `"pet"`.
+- Una relación unidireccional desde `Surgery` hacia `SurgeryType` que represente la que aparece en el diagrama UML respetando sus cardinalidades, usando el atributo `"type"`.
+- Una relación unidireccional desde `OperatingRoom` hacia `SurgeryType` que represente la que aparece en el diagrama UML respetando sus cardinalidades, usando el atributo `"validFor"`.
+- Una relación unidireccional desde `Surgery` hacia `OperatingRoom` que exprese la que aparece en el diagrama UML respetando sus cardinalidades, usando el atributo `"room"` de la clase `"Surgery"`.
+
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.samples.petclinic.pet.Pet;
+import org.springframework.samples.petclinic.pet.PetType;
+import org.springframework.samples.petclinic.surgery.OperatingRoom;
+import org.springframework.samples.petclinic.surgery.OperatingRoomRepository;
+import org.springframework.samples.petclinic.surgery.Surgery;
+import org.springframework.samples.petclinic.surgery.SurgeryRepository;
+import org.springframework.samples.petclinic.surgery.SurgeryType;
+import org.springframework.stereotype.Service;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+
+@DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))
+public class Test4 extends ReflexiveTest{
+
+    @Autowired(required = false)
+    SurgeryRepository surgeryRepo;
+    @Autowired(required = false)
+    OperatingRoomRepository roomRepo;
+    
+    @Autowired
+    EntityManager em;
+
+
+    @Test
+    public void test4CheckRoomAnnotations() {        
+        assertTrue(classIsAnnotatedWith(OperatingRoom.class,Entity.class));
+    }
+
+    @Test
+    public void test4CheckSurgeryAnnotations() {
+        assertTrue(classIsAnnotatedWith(Surgery.class,Entity.class));
+    }    
+    
+    @Test
+    public void test4RoomAnnotations() {
+        checkThatFieldIsAnnotatedWith(OperatingRoom.class, "validFor", ManyToMany.class);                          
+        checkThatFieldIsAnnotatedWith(Surgery.class, "date", Column.class);
+        checkThatFieldIsAnnotatedWithDateTimeFormat(Surgery.class,"date","dd/MM/yyyy");        
+    }
+
+    @Test
+    public void test4SurgeryAnnotations() {        
+        checkThatFieldIsAnnotatedWith(Surgery.class, "type", ManyToOne.class);        
+        checkThatFieldIsAnnotatedWith(Surgery.class, "room", ManyToOne.class);                
+        checkThatFieldIsAnnotatedWith(Surgery.class, "pet", ManyToOne.class);        
+    }
+
+
+    @Test
+    private void test4RoomConstraints() {
+        OperatingRoom t=Test4.createValidRoom(em);
+        checkThatFieldsAreMandatory(t, em,"validFor");        
+    }
+
+    @Test
+    public void test4SurgeryConstraints() {
+        Surgery s=Test4.createValidSurgery(em);
+        checkThatFieldsAreMandatory(s, em,"room", "type", "pet");                
+    }
+
+    @Test
+    public void test4RepositoriesExist(){
+        assertNotNull(surgeryRepo,"The surgery repository was not injected into the tests, its autowired value was null");
+        assertNotNull(roomRepo,"The operation room repository was not injected into the tests, its autowired value was null");
+        test4RepositoriesContainsMethod();
+    }
+
+    public void test4RepositoriesContainsMethod(){
+        if(surgeryRepo!=null){
+            Object v=surgeryRepo.findById(12);
+            assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a surgery that does not exist");
+        }else
+            fail("The surgery repository was not injected into the tests, its autowired value was null");
+        
+        if(roomRepo!=null){
+            Object v=roomRepo.findById(12);
+            assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a room that does not exist");
+        }else
+            fail("The room repository was not injected into the tests, its autowired value was null");
+    }
+        
+    @Test
+    public void test4CheckSurgeryConstraints() {
+        Map<String,List<Object>> invalidValues=Map.of(
+                                            "name",     List.of(
+                                                    "      ","a",
+                                                    "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados, lentejas los viernes, algún palomino de añadidura los domingos, consumían las tres partes de su hacienda. ")                                            
+                                            );
+
+        Surgery t=createValidSurgery(em);
+        em.persist(t);
+        
+        checkThatFieldsAreMandatory(t, em, "name","date");
+        checkThatValuesAreNotValid(t, invalidValues,em);   
+    }
+
+    @Test
+    public void test4CheckRoomContraints() {
+         Map<String,List<Object>> invalidValues=Map.of(
+                                            "name",     List.of(
+                                                    "      ","a",
+                                                    "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados, lentejas los viernes, algún palomino de añadidura los domingos, consumían las tres partes de su hacienda. "),
+                                            "sterilizationLevel", List.of("bla bla", "")
+                                        );
+
+        OperatingRoom s=createValidRoom(em);
+        em.persist(s);
+        
+        checkThatFieldsAreMandatory(s, em, "name", "sterilizationLevel");        
+        checkThatValuesAreNotValid(s, invalidValues,em);   
+
+
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();            
+
+        for (int size : List.of(-1,0)) {
+            s.setSize(size);
+            Set<ConstraintViolation<Object>> violations=validator.validate(s);
+            if(violations.isEmpty()){
+                assertThrows(Exception.class,() -> em.persist(s),
+                    "You are not constraining the size, since the value "+size+" was considered valid (and it should not be valid)");
+            }
+            s.setSize(12);
+        }
+
+    }
+
+    public static OperatingRoom createValidRoom(EntityManager em){        
+        OperatingRoom o = new OperatingRoom();
+        setValue(o,"name",String.class,"Una habitación propia");
+        o.setSize(23);
+        o.setSterilizationLevel("FULL");
+        o.setValidFor(Set.of(createSurgeryType(em)));
+
+        if (em != null) {
+            em.persist(o);
+        }
+        
+        return o;
+    }
+
+    public static SurgeryType createSurgeryType(EntityManager em) {
+        SurgeryType st;
+        if (em != null) {
+            st = em.find(SurgeryType.class,1);
+        } else {
+            st = new SurgeryType();
+            st.setName("Extracción dental");
+            st.setSusceptiblePetTypes(Set.of(createValidPetType(em)));
+        }
+        return st;
+    }
+
+    public static Pet createValidPet(EntityManager em) {
+        Pet p;
+        if (em != null) {
+            p = em.find(Pet.class,1);
+        } else {
+            p = new Pet();
+            p.setName("gatito lindo");
+            p.setBirthDate(LocalDate.of(2023, 12, 17));
+            p.setType(createValidPetType(em));
+        }
+        return p;
+    }
+
+    public static PetType createValidPetType(EntityManager em) {
+        PetType pt;
+        if (em != null) {
+            pt = em.find(PetType.class,1);
+        } else {
+            pt = new PetType();
+            pt.setName("cat");
+        }
+        return pt;
+    }
+
+    public static Surgery createValidSurgery(EntityManager em){
+        Surgery t=new Surgery();
+        setValue(t,"name",String.class,"Una cirugía válida");
+        t.setDate(LocalDate.of(2023, 12, 16));
+        t.setRoom(createValidRoom(em));
+        t.setType(createSurgeryType(em));
+        t.setPet(createValidPet(em));
+        return t;
+    }
+}
+```
+
+---
+
+## Test 5 – Modificación del script de inicialización de la base de datos para incluir dos cirugías y dos salas de operaciones
+
+Modificar el script de inicialización de la base de datos, para que se creen las siguientes cirugías (`Surgery`) y salas de operaciones (`OperatingRoom`):
+
+**Surgery 1:**
+- id: 1
+- name: "Fang extraction"
+- description: null
+- date: 16/10/2024
+- room: OperatingRoom con id=1
+- pet: Pet con id=3
+- type: SurgeryType con id=1
+
+**Surgery 2:**
+- id: 2
+- name: "Removal of a bladder stone"
+- description: "Removal of a bladder stone to a 10-year-old cat."
+- date: 17/10/2024
+- room: OperatingRoom con id=2
+- pet: Pet con id=1
+- type: SurgeryType con id=2
+
+**OperatingRoom 1:**
+- id: 1
+- name: "Room for dental surgery"
+- size: 15
+- sterilizationLevel: "SEMI"
+- Asociado con los SurgeryType con ids 1, 3 y 4
+
+**OperatingRoom 2:**
+- id: 2
+- name: "Room for soft tissue surgery"
+- size: 20
+- sterilizationLevel: "FULL"
+- Asociado con los SurgeryType con ids 2 y 5
+
+> Tenga en cuenta que el orden en que aparecen los INSERT en el script de inicialización de la base de datos es relevante al definir las asociaciones.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.pet.Pet;
+import org.springframework.samples.petclinic.surgery.OperatingRoom;
+import org.springframework.samples.petclinic.surgery.Surgery;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest
+public class Test5 extends ReflexiveTest {
+    
+    @Autowired
+    EntityManager em;
+
+    @Test
+    public void test5InitialSurgery1(){                        
+        Surgery t1=em.find(Surgery.class,1);
+        assertNotNull(t1,"There should exist a Surgery with id:1");
+        assertEquals("Fang extraction",getFieldValueReflexively(t1, "name"));
+        assertNull(t1.getDescription());
+        assertEquals(LocalDate.of(2024, 10, 16),t1.getDate());        
+        assertEquals(em.find(OperatingRoom.class, 1), t1.getRoom());
+        assertNotNull(t1.getPet());
+        assertEquals(3, t1.getPet().getId());
+        assertNotNull(t1.getRoom());
+        assertEquals(1, getFieldValueReflexively(t1.getRoom(), "id"));
+        assertNotNull(t1.getType());
+        assertEquals(1, t1.getType().getId());
+    }
+
+    @Test
+    public void test5InitialSurgery2(){                        
+        Surgery t2=em.find(Surgery.class,2); 
+        assertNotNull(t2,"There should exist a Surgery with id:2");       
+        assertEquals("Removal of a bladder stone",getFieldValueReflexively(t2, "name"));
+        assertEquals("Removal of a bladder stone to a 10-year-old cat.",t2.getDescription());
+        assertEquals(LocalDate.of(2024,10,17),t2.getDate());
+        assertEquals(em.find(OperatingRoom.class, 2), t2.getRoom());
+        assertNotNull(t2.getPet());
+        assertEquals(1, t2.getPet().getId());
+        assertNotNull(t2.getRoom());
+        assertEquals(2, getFieldValueReflexively(t2.getRoom(), "id"));
+        assertNotNull(t2.getType());
+        assertEquals(2, t2.getType().getId());
+    }
+
+    @Test
+    public void test5InitialOperatingRoom1()
+    {
+        OperatingRoom s1 = em.find(OperatingRoom.class, 1);
+        assertNotNull(s1,"Cannot find operating room with id "+1);
+        assertEquals("Room for dental surgery",getFieldValueReflexively(s1,"name"));
+        assertEquals(15, s1.getSize());
+        assertEquals("SEMI", s1.getSterilizationLevel());
+    }
+
+    @Test
+    public void test5InitialOperatingRoom2() {
+        OperatingRoom s2 = em.find(OperatingRoom.class, 2);        
+        assertNotNull(s2,"Cannot find operating room with id "+2);
+        assertEquals("Room for soft tissue surgery",getFieldValueReflexively(s2,"name"));
+        assertEquals(20, s2.getSize());
+        assertEquals("FULL", s2.getSterilizationLevel());
+    }        
+
+    
+    @Test
+    public void test5OperatingRoomLinks() {        
+        checkContainsById(OperatingRoom.class,1,"getValidFor",1,em);
+        checkContainsById(OperatingRoom.class,1,"getValidFor",3,em);
+        checkContainsById(OperatingRoom.class,1,"getValidFor",4,em);
+        checkContainsById(OperatingRoom.class,2,"getValidFor",2,em);        
+        checkContainsById(OperatingRoom.class,2,"getValidFor",5,em);        
+    }
+    
+}
+```
+
+# Control práctico de DP1 2024-2025 (Control-check 1)
+
+## Enunciado
+
+En este ejercicio, añadiremos la funcionalidad de gestión de cursos de especialización sobre mascotas para los veterinarios de las clínicas. Concretamente, se proporciona una clase "Course" que representa los cursos disponibles, relacionados con los tipos de mascota sobre los que versan y el veterinario que actúa como profesor. Además, tendremos las clases "CourseAttendance" y "CoursePayment" que registran la información asociada con los veterinarios que asisten al curso como alumnos y el pago de las tasas correspondientes, dado que el profesor no trabaja gratis.
+
+El diagrama UML que describe las clases y relaciones con las que vamos a trabajar es el siguiente:
+```mermaid
+classDiagram
+    class Course {
+        +Integer id
+        +String name
+    }
+
+    class CourseAttendance {
+        +Integer id
+        +LocalDate registeredOn
+        +Integer grade
+    }
+
+    class CoursePayment {
+        +Integer id
+        +LocalDate paidOn
+        +Double amount
+    }
+
+    class Vet {
+        +Integer id
+        +String name
+    }
+
+    class PetType {
+        +Integer id
+        +String name
+    }
+
+    class Specialty {
+        +Integer id
+        +String name
+    }
+
+    Course "1" --> "0..*" PetType : petTypes
+    Course "1" --> "1" Vet : instructor
+    Course "1" --> "1..*" Specialty : specialties
+    Vet "1" --> "0..*" Specialty : specialties
+    CourseAttendance "0..*" --> "1" Course : course
+    Course "1" --> "0..*" CourseAttendance : attendants
+    CourseAttendance "1" --> "1" Vet : attendant
+    CourseAttendance "1" --> "0..*" CoursePayment : payments
+```
+
+Las clases para las que realizaremos el mapeo objeto-relacional como entidades JPA se han señalado en rojo. Las clases en azul son clases que se proporcionan ya mapeadas pero con las que se trabajará durante el control de laboratorio.
+
+Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Si desea ver el resultado que arrojarían las pruebas en backend, puede ejecutarlas (bien mediante su entorno de desarrollo favorito, bien mediante el comando "mvnw test" en la carpeta raíz del proyecto). Cada ejercicio correctamente resuelto valdrá dos puntos, el número de casos de prueba de cada ejercicio puede variar entre uno y otro y la nota se calculará en base al porcentaje de casos de prueba que pasan. Por ejemplo, si pasan la mitad (50%) de los casos de prueba de un ejercicio, usted obtendrá un punto (2*0,5=1), y si pasan un 10% obtendrá 0,2 puntos.
+
+Para comenzar esta prueba debe aceptar la tarea disponible en:
+https://classroom.github.com/a/dGR4ggrZ
+
+Al aceptar dicha tarea, se creará un repositorio único individual para usted, debe usar dicho repositorio para realizar el control práctico. Debe entregar la actividad en EV asociada al control check proporcionando como texto la dirección URL de su repositorio personal. Recuerde que además debe entregar su solución del control.
+
+La entrega de su solución al control se realizará mediante un único comando "git push" a su repositorio individual. Recuerde que debe hacer push antes de cerrar sesión en la computadora y abandonar el aula, de lo contrario, su intento se evaluará como no presentado. Su primera tarea en este control será clonar (recuerde que si va a usar los equipos del aula para realizar el control necesitará usar un token de autenticación de GitHub como clave, tiene un documento de ayuda a la configuración en el propio repositorio del control). A continuación, deberá importar el proyecto en su entorno de desarrollo favorito y comenzar los ejercicios abajo listados. Al importar el proyecto, el mismo puede presentar errores de compilación. No se preocupe, si existen, dichos errores irán despareciendo conforme usted vaya implementando los distintos ejercicios del control.
+
+> **Nota importante 1:** No modifique los nombres de las clases ni la signatura (nombre, tipo de respuesta y parámetros) de los métodos proporcionados como material de base para el control. Las pruebas que se usan para la evaluación dependen de que las clases y los métodos tengan la estructura y nombres proporcionados. Si los modifica probablemente no pueda hacer que pasen las pruebas.
+
+> **Nota importante 2:** No modifique las pruebas unitarias proporcionadas como parte del proyecto bajo ningún concepto. Aunque modifique las pruebas en su copia local del proyecto, éstas serán restituidas mediante un comando git previamente a la ejecución de las pruebas para la emisión de la nota final, por lo que sus modificaciones en las pruebas no serán tenidas en cuenta en ningún momento.
+
+> **Nota importante 3:** Mientras haya ejercicios no resueltos habrá tests que no funcionen y, por tanto, el comando "mvnw install" finalizará con error. Esto es normal debido a la forma en la que está planteado el control y no hay que preocuparse por ello. Si se quiere probar la aplicación se puede ejecutar de la forma habitual pese a que "mvnw install" finalice con error.
+
+> **Nota importante 4:** La descarga del material de la prueba usando git, y la entrega de su solución con git a través del repositorio GitHub creado a tal efecto forman parte de las competencias evaluadas durante el examen, por lo que no se aceptarán entregas que no hagan uso de este medio, y no se podrá solicitar ayuda a los profesores para realizar estas tareas.
+
+> **Nota importante 5:** No se aceptarán como soluciones válidas proyectos cuyo código fuente no compile correctamente o que provoquen fallos al arrancar la aplicación en la inicialización del contexto de Spring. Las soluciones cuyo código fuente no compile o incapaces de arrancar el contexto de Spring serán evaluadas con una nota de 0.
+
+> **Nota importante 6:** Excepto el ejercicio 5 (que dependen del 4) los ejercicios del examen son independientes y pueden ser resueltos en cualquier orden.
+
+---
+
+## Test 1 – Modificar el servicio de gestión de Asistencia a Cursos para que no permita guardar cursos cuyo instructor no conozca la especialidad a impartir
+
+Modificar el método `save` del servicio de gestión de cursos (`CourseService`) de manera que se lance la excepción (`UnfeasibleCourseException`) en caso de que se intente guardar un curso sobre una especialidad que no tiene asociada el veterinario que lo va a impartir. Por ejemplo, imaginen un curso sobre la especialidad radiology que va a ser impartido por Rafael Ortega que tiene la especialidad de surgery y por tanto no podría impartir dicho curso. El método debe ser transaccional y hacer rollback de la transacción en caso de que se lance dicha excepción. Nótese, que existen relaciones entre la clase `Course` y la clase `Specialty`, entre `Course` y `Vet`, y entre `Vet` y `Specialty`.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.samples.petclinic.course.Course;
+import org.springframework.samples.petclinic.course.CourseRepository;
+import org.springframework.samples.petclinic.course.CourseService;
+import org.springframework.samples.petclinic.course.UnfeasibleCourseException;
+import org.springframework.samples.petclinic.vet.Vet;
+import org.springframework.samples.petclinic.vet.VetService;
+import org.springframework.stereotype.Service;
+
+@DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))
+public class Test1 {
+
+	@MockBean
+	CourseRepository cr;
+
+	private static final Integer VET_ID = 4;
+	private static final Integer OTHER_SPECIALTY_ID = 1;
+
+	@Autowired(required = false)
+	CourseService courseService;
+
+	@Autowired
+	VetService vetService;
+
+	@Test
+	public void test1UnfeasibleCourseDetected() {
+		Course c = createCourseWithouthSpecialty();
+		c.setCourseSpecialty(vetService.findSpecialtyById(OTHER_SPECIALTY_ID));
+		assertThrows(UnfeasibleCourseException.class, () -> courseService.save(c),
+				"The course is associated with a specialty that the vet teacher does not have, so an Unfeasible Course exception should be thrown.");
+	}
+
+	@Test
+	public void test1ValidCourseSaved() {
+		Course c = createCourseWithouthSpecialty();
+		c.setCourseSpecialty(c.getTeacher().getSpecialty());
+		try {
+			courseService.save(c);
+		} catch (UnfeasibleCourseException e) {
+			fail("The course is valid, the exception should not be thrown! :" + e.getMessage());
+		}
+		verify(cr, times(1)).save(c);
+	}
+
+	@Test
+	public void test1ValidCourseWithoutSpecialtySaved() {
+		Course c = createCourseWithouthSpecialty();
+		try {
+			courseService.save(c);
+		} catch (UnfeasibleCourseException e) {
+			fail("The course is valid, the exception should not be thrown! :" + e.getMessage());
+		}
+		verify(cr, times(1)).save(c);
+	}
+
+	public Course createCourseWithouthSpecialty() {
+		Vet vet = vetService.findVetById(VET_ID);
+		Course c = new Course();
+		c.setName("Test course");
+		c.setDescription("Dummy description");
+		c.setMaxAttendants(10);
+		c.setPrice(100.0);
+		c.setTeacher(vet);
+		return c;
+	}
+
+}
+```
+---
+
+## Test 2 – Creación de servicios de gestión de las asistencias a cursos y los pagos; y del controlador para devolver los cursos disponibles
+
+### Parte 2A: Servicios de Gestión (1 punto)
+
+Modificar las clases `CourseAttendanceService` y `CoursePaymentService`, para que sean un servicio Spring de lógica de negocio y proporcionen una implementación a los métodos que permitan, usando una implementación del repositorio correspondiente (`CourseAttendanceRepository` / `CoursePaymentRepository`) que será inyectada mediante Spring (usando la anotación `@Autowired(required=false)`):
+
+1. Obtener todas las asistencias a cursos/pagos de cursos (`CourseAttendance` / `CoursePayment`) almacenados en la base de datos como una lista usando el repositorio (método `getAll` en cada uno de los servicios correspondientes).
+2. Grabar una asistencia a cursos/pago (`CourseAttendance` / `CoursePayment`) en la base de datos (método `save`).
+
+Todos estos métodos deben ser transaccionales, pero las anotaciones asociadas deben realizarse a nivel de método, no a nivel de clase. No modifique por ahora la implementación del resto de métodos de los servicios, ni tampoco los repositorios (hasta que no implemente las entidades en el ejercicio 4 no podrá hacerlo correctamente).
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.samples.petclinic.course.Course;
+import org.springframework.samples.petclinic.course.CourseAttendance;
+import org.springframework.samples.petclinic.course.CourseAttendanceRepository;
+import org.springframework.samples.petclinic.course.CourseAttendanceService;
+import org.springframework.samples.petclinic.course.CoursePayment;
+import org.springframework.samples.petclinic.course.CoursePaymentRepository;
+import org.springframework.samples.petclinic.course.CoursePaymentService;
+import org.springframework.samples.petclinic.course.UnfeasibleCourseException;
+import org.springframework.samples.petclinic.vet.Vet;
+
+import jakarta.persistence.EntityManager;
+
+@ExtendWith(MockitoExtension.class)
+public class Test2a extends ReflexiveTest{
+    @Mock
+    CourseAttendanceRepository car;
+    @Mock
+    CoursePaymentRepository cpr;
+
+    @Autowired(required = false)
+    EntityManager em;  
+
+    
+    CourseAttendanceService cas;    
+    CoursePaymentService cps;
+    
+    @BeforeEach
+    public void configuation(){
+        cas=new CourseAttendanceService(car);
+        cps=new CoursePaymentService(cpr);
+    }
+    
+    @Test
+    public void test2aCheckTransactionalityOfCourseAttendanceService(){
+        checkTransactional(CourseAttendanceService.class,"save", CourseAttendance.class);        
+        checkTransactional(CourseAttendanceService.class,"getAll");
+    }
+    
+    @Test
+    public void test2aCheckTransactionalityOfCoursePaymentService(){
+        checkTransactional(CoursePaymentService.class,"save", CoursePayment.class);        
+        checkTransactional(CoursePaymentService.class,"getAll");
+    }    
+    
+    @Test
+    public void test2aCourseAttendanceServiceCanGetCourseAttendances(){
+        assertNotNull(cas,"CourseAttendanceService was not injected by spring");
+        when(car.findAll()).thenReturn(List.of());
+        List<CourseAttendance> attendances=cas.getAll();
+        assertNotNull(attendances,"The list of Attendances found by the CourseAttendanceService was null");
+        // The test fails if the service does not invoke the findAll of the repository:
+        verify(car).findAll();            
+    }
+    
+
+    @Test
+    public void test2aCoursePaymentServiceCanGetCoursePayments(){
+        assertNotNull(cps,"CoursePaymentService was not injected by spring");
+        when(cpr.findAll()).thenReturn(List.of());
+        List<CoursePayment> payments=cps.getAll();
+        assertNotNull(payments,"The list of Payments found by the CoursePaymentService was null");
+        // The test fails if the service does not invoke the findAll of the repository:
+        verify(cpr).findAll();            
+    }
+
+    @Test
+    public void test2aCourseAttendanceServiceCanSaveCourseAttendances(){
+        assertNotNull(cas,"CourseAttendanceService was not injected by spring");
+        when(car.save(any(CourseAttendance.class))).thenReturn(null);
+        CourseAttendance ca = createValidCourseAttendance();
+        try {
+            cas.save(ca);
+        } catch (DataAccessException | UnfeasibleCourseException e) {
+            fail("The save method in CourseAttendanceService has failed: "+e.getMessage());
+        }        
+        // The test fails if the service does not invoke the save function of the repository:
+        verify(car).save(ca);     
+    }
+
+    @Test
+    public void test2aCoursePaymentServiceCanSaveCoursePayments(){
+        assertNotNull(cps,"CoursePaymentService was not injected by spring");
+        when(cpr.save(any(CoursePayment.class))).thenReturn(null);
+        CoursePayment cp = createValidCoursePayment();
+        cps.save(cp);        
+        // The test fails if the service does not invoke the save function of the repository:
+        verify(cpr).save(cp);     
+    }
+
+    private CourseAttendance createValidCourseAttendance(){
+        CourseAttendance ca=new CourseAttendance();
+        //setValue(ca,"name",String.class,"Un course attendance válido");
+        ca.setGrade(10);
+        ca.setRegisteredOn(LocalDate.of(2023,12,18));
+        //ca.setPayments(Set.of(Test1old.createValidCoursePayment(em)));
+        ca.setCourse(new Course());
+        ca.setAttendant(new Vet());
+        return ca;
+    }
+
+    private CoursePayment createValidCoursePayment(){        
+        CoursePayment cp=new CoursePayment();     
+        cp.setAmount(10.00);
+        cp.setPaidOn(LocalDate.of(2023,12,18));
+        return cp;
+    }
+}
+```
+
+### Parte 2B: Controlador para API de Cursos (1 punto)
+
+Crear un método en el controlador `CourseController` (alojado en el paquete `org.springframework.samples.petclinic.course`) que permita devolver todos los cursos existentes. El método debe responder a peticiones tipo GET en la URL:
+```
+http://localhost:8080/api/v1/courses
+```
+
+Así mismo debe crear un método para devolver un curso concreto, este método debe responder a peticiones en la url `http://localhost:8080/api/v1/courses/X` donde X es la Id del curso a obtener, y devolverá los datos del curso correspondiente. En caso de que no exista un curso con el id especificado el sistema debe devolver el código de estado 404 (NOT_FOUND).
+
+Estos endpoint de la API asociados a la gestión de cursos deberían estar accesibles únicamente para usuarios de tipo Vet (que tengan la authority "VET").
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.samples.petclinic.course.CourseAttendanceRepository;
+import org.springframework.samples.petclinic.course.CoursePaymentRepository;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.transaction.Transactional;
+
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+public class Test2b {    	    	
+
+    @MockBean
+    CourseAttendanceRepository car;
+
+    @MockBean
+    CoursePaymentRepository cpr;
+
+	@Autowired
+	private WebApplicationContext context;
+	
+	private MockMvc mockMvc;
+
+	@BeforeEach
+	public void setup() {
+		mockMvc = MockMvcBuilders
+		.webAppContextSetup(context)
+		.apply(SecurityMockMvcConfigurers.springSecurity())
+		.build();
+	}    	
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test2bVetsCanGetCourses() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/courses"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$", hasSize(9)));        
+    }
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test2bVetsCanGetCourseThatExists() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/courses/1"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.name", is("Martial Arts for Turtles")));        
+    }
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test2bVetsCanNotGetCourseThatDoesNotExist() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/courses/1"))
+			.andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/courses/46231"))
+			.andExpect(status().isNotFound());        
+    }
+
+
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "owner1", authorities = {"OWNER"})
+    public void test2bOwnersCannotGetCourses() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/courses"))
+			.andExpect(status().isForbidden());	        
+    }
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "owner1", authorities = {"OWNER"})
+    public void test2bOwnersCannotGetCourse() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/courses/1"))
+			.andExpect(status().isForbidden());	        
+    }	
+}
+```
+
+---
+
+## Test 3 – Creación de un componente React de listado de cursos
+
+Modificar el componente React proporcionado en el fichero `frontend/src/course/index.js` para que muestre un listado de los cursos disponibles en el sistema. Para ello debe hacer uso de la API lanzando una petición tipo GET contra la URL `api/v1/courses`.
+
+Este componente debe mostrar los cursos en una tabla (se recomienda usar el componente `Table` de reactstrap) incluyendo columnas para su nombre, y el conjunto de tipos de mascotas para las que es aplicable el curso. Para esto último, el componente debe mostrar en la celda asociada una lista (preferiblemente no ordenada `<ul>`) con el nombre de los tipos de mascotas sobre los que versa el curso en la celda correspondiente.
+
+Para poder lanzar este test y comprobar su resultado puede colocarse en la carpeta de frontend y ejecutar el comando `npm test` y pulsar `a` en el menú de comandos de jest. Nótese que previamente debe haber lanzado al menos una vez el comando `npm install` para que todas las librerías de node estén instaladas.
+
+---
+
+## Test 4 – Creación de las entidades CourseAttendance y CoursePayment y sus repositorios asociados
+
+Modificar las clases `CourseAttendance` y `CoursePayment` para que sean entidades. Estas clases están alojadas en el paquete `org.springframework.samples.petclinic.course`, y deben tener los siguientes atributos y restricciones:
+
+**Para ambas clases:**
+- El atributo de tipo entero (`Integer`) llamado `"id"` actuará como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
+
+**Para la clase CourseAttendance:**
+- El atributo de tipo fecha (`LocalDate`) llamado `"registeredOn"`, que representa la fecha en que el alumno se registra en el curso, seguirá el formato `"dd/MM/yyyy"`. Este atributo debe ser obligatorio. En la base de datos se almacenará con el nombre de columna `"registrationDate"`.
+- El atributo de tipo entero (`Integer`) llamado `"grade"`, que representa la calificación global del curso. Este atributo es opcional, y debe estar en el rango de valores de 0 a 10, ambos inclusive.
+
+**Para la clase CoursePayment:**
+- El atributo de tipo fecha (`LocalDate`) llamado `"paidOn"`, que representa la fecha en que el alumno realiza un pago (parcial o total) del precio del curso, seguirá el formato `"dd/MM/yyyy"`. Este atributo debe ser obligatorio. En la base de datos se almacenará con el nombre de columna `"paymentDate"`.
+- El atributo de tipo doble (`Double`) llamado `"amount"`, que representa la cantidad abonada en el pago. Este atributo será obligatorio.
+
+Modificar las interfaces `CourseAttendanceRepository` y `CoursePaymentRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
+
+Elimine las anotaciones `@Transient` de los métodos y atributos que las tengan en las entidades creadas anteriormente, así como la del atributo `attendants` de la clase `Course`. Se pide crear las siguientes relaciones entre las entidades:
+
+- Una relación bidireccional entre `CourseAttendance` y `Course` que represente la que aparece en el diagrama UML, teniendo en cuenta la cardinalidad que tiene.
+- Dos relaciones unidireccionales desde `CourseAttendance` hacia `Vet` y hacia `CoursePayment` que expresen las que aparecen en el diagrama UML, usando los atributos `"attendant"` y `"payments"` de la clase `CourseAttendance`, correspondientemente.
+
+Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML; por ejemplo, algunos atributos pueden ser nulos puesto que la cardinalidad es 0..n pero otros no, porque su cardinalidad en el extremo navegable de la relación es 1.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.samples.petclinic.course.Course;
+import org.springframework.samples.petclinic.course.CourseAttendance;
+import org.springframework.samples.petclinic.course.CourseAttendanceRepository;
+import org.springframework.samples.petclinic.course.CoursePayment;
+import org.springframework.samples.petclinic.course.CoursePaymentRepository;
+import org.springframework.samples.petclinic.vet.Vet;
+import org.springframework.stereotype.Service;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
+
+@DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))
+public class Test4 extends ReflexiveTest{
+
+    @Autowired(required = false)
+    CourseAttendanceRepository attendanceRepo;
+    @Autowired(required = false)
+    CoursePaymentRepository paymentRepo;
+    
+    @Autowired
+    EntityManager em;
+
+    @Test
+    public void test4RepositoriesExist(){
+        assertNotNull(attendanceRepo,"The course attendance repository was not injected into the tests, its autowired value was null");
+        assertNotNull(paymentRepo,"The course payment repository was not injected into the tests, its autowired value was null");
+        test4RepositoriesContainsMethod();
+    }
+
+    public void test4RepositoriesContainsMethod(){
+        if(attendanceRepo!=null){
+            Object v=attendanceRepo.findById(12);
+            assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a course attendance that does not exist");
+        }else
+            fail("The course attendance repository was not injected into the tests, its autowired value was null");
+        
+        if(paymentRepo!=null){
+            Object v=paymentRepo.findById(12);
+            assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a course payment that does not exist");
+        }else
+            fail("The course payment repository was not injected into the tests, its autowired value was null");
+    }
+    
+    @Test
+    public void test4CheckCourseAttendanceConstraints() {
+        Map<String,List<Object>> invalidValues=Map.of(
+                                            "grade",     List.of(
+                                                        -1,11       
+                                                    )                                            
+                                            );
+
+
+        CourseAttendance ca=createValidCourseAttendance(em);
+        em.persist(ca);
+        
+        checkThatFieldsAreMandatory(ca, em, "registeredOn");        
+        
+        checkThatValuesAreNotValid(ca, invalidValues,em);   
+    }
+
+    @Test
+    public void test4CheckCoursePaymentContraints() {
+
+
+        CoursePayment cp=createValidCoursePayment(em);
+        em.persist(cp);
+        
+        checkThatFieldsAreMandatory(cp, em, "paidOn","amount");        
+          
+    }
+
+    @Test
+    public void test4CheckCourseAttendanceAnnotations() {        
+        assertTrue(classIsAnnotatedWith(CourseAttendance.class,Entity.class));
+    }
+
+    @Test
+    public void test4CheckCoursePaymentAnnotations() {
+        assertTrue(classIsAnnotatedWith(CoursePayment.class,Entity.class));
+    }
+
+    @Test
+    public void test4CourseRemoveAnnotations() {
+        try{
+            assertFalse(isFieldAnnotatedWith(Course.class, "attendants", Transient.class));
+        }catch(NoSuchFieldException ex){
+            fail("The Course class should not have a field with Transient annotation: "+ex.getMessage());
+        }
+    }
+
+    @Test
+    public void test4CourseAttendanceRemoveAnnotations() {
+        try{
+            assertFalse(isFieldAnnotatedWith(CourseAttendance.class, "attendant", Transient.class));
+            assertFalse(isFieldAnnotatedWith(CourseAttendance.class, "course", Transient.class));
+            assertFalse(isFieldAnnotatedWith(CourseAttendance.class, "payments", Transient.class));
+        }catch(NoSuchFieldException ex){
+            fail("The CourseAttendance class should not have a field with Transient annotation: "+ex.getMessage());
+        }
+    }
+
+    @Test
+    public void test4CourseAnnotations() {
+        checkThatFieldIsAnnotatedWith(Course.class, "attendants", OneToMany.class);                          
+    }
+
+    @Test
+    public void test4CourseAttendanceAnnotations() {
+        checkThatFieldIsAnnotatedWith(CourseAttendance.class, "attendant", ManyToOne.class);    
+        checkThatFieldIsAnnotatedWith(CourseAttendance.class, "course", ManyToOne.class); 
+        checkThatFieldIsAnnotatedWith(CourseAttendance.class, "payments", OneToMany.class);                       
+    }
+
+    @Test
+    private void test4CourseConstraints() {
+        Course c=createValidCourse(em);
+        checkThatFieldsAreMandatory(c, em,"teacher","maxAttendants");        
+    }
+
+    @Test
+    private void test4CourseAttendanceConstraints() {
+        CourseAttendance ca = createValidCourseAttendance(em);
+        checkThatFieldsAreMandatory(ca, em,"course","attendant");        
+    }
+
+    public static Course createValidCourse(EntityManager em){        
+        Course c = new Course(); 
+        setValue(c,"name",String.class,"Un course válido");
+        c.setMaxAttendants(10);
+        c.setTeacher(em.find(Vet.class,1));
+        return c;
+    }
+
+    public static CoursePayment createValidCoursePayment(EntityManager em){        
+        CoursePayment cp=new CoursePayment();     
+        cp.setAmount(10.00);
+        cp.setPaidOn(LocalDate.of(2023,12,18));
+        return cp;
+    }
+
+    public static CourseAttendance createValidCourseAttendance(EntityManager em){
+        CourseAttendance ca=new CourseAttendance();
+        ca.setGrade(10);
+        ca.setRegisteredOn(LocalDate.of(2023,12,18));
+        ca.setPayments(Set.of(createValidCoursePayment(em)));
+        ca.setCourse(em.find(Course.class,1));
+        ca.setAttendant(em.find(Vet.class,1));
+        return ca;
+    }
+}
+```
+
+---
+
+## Test 5 – Modificación del script de inicialización de la base de datos para incluir dos asistencias a cursos y sus relaciones
+
+Modificar el script de inicialización de la base de datos, para que se creen las siguientes asistencias a curso (`CourseAttendance`) y pagos de cursos (`CoursePayment`):
+
+**CourseAttendance 1:**
+- id: 1
+- registeredOn: 05-01-2023
+- grade: 5
+
+**CourseAttendance 2:**
+- id: 2
+- registeredOn: 18-12-2023
+- grade: (sin valor aún)
+
+**CoursePayment 1:**
+- id: 1
+- paidOn: 06-01-2023
+- amount: 150.00
+
+**CoursePayment 2:**
+- id: 2
+- paidOn: 10-01-2023
+- amount: 150.00
+
+**CoursePayment 3:**
+- id: 3
+- paidOn: 19-12-2023
+- amount: 50.00
+
+Además, debe modificar este script de inicialización de la base de datos para que:
+
+- El `CourseAttendance` cuyo id es 1 se asocie con el `Vet` cuyo id es 5
+- El `CourseAttendance` cuyo id es 1 se asocie con el `Course` cuyo id es 1
+- El `CourseAttendance` cuyo id es 2 se asocie con el `Vet` cuyo id es 3
+- El `CourseAttendance` cuyo id es 2 se asocie con el `Course` cuyo id es 2
+- El `CourseAttendance` cuyo id es 1 se asocie con los `CoursePayment` con ids 1 y 2
+- El `CourseAttendance` cuyo id es 2 se asocie con el `CoursePayment` con id=3
+
+> Tenga en cuenta que el orden en que aparecen los INSERT en el script de inicialización de la base de datos es relevante al definir las asociaciones.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.course.CourseAttendance;
+import org.springframework.samples.petclinic.course.CoursePayment;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest()
+public class Test5 extends ReflexiveTest {    
+    @Autowired
+    EntityManager em;    
+    
+    @Test
+    public void test5InitialCourseAttendances(){                        
+        CourseAttendance ca1=em.find(CourseAttendance.class,1);
+        assertNotNull(ca1,"There should exist a CourseAttendance with id:1");
+        assertEquals(LocalDate.of(2023,01,05),ca1.getRegisteredOn(), "incorrect registering date for id:1");
+        assertEquals(5,ca1.getGrade());    
+        
+        CourseAttendance ca2=em.find(CourseAttendance.class,2);
+        assertNotNull(ca2,"There should exist a CourseAttendance with id:2");
+        assertEquals(LocalDate.of(2023,12,18),ca2.getRegisteredOn(), "incorrect registering date for id:2");
+        assertEquals(null,ca2.getGrade());
+    }
+
+    @Test
+    public void test5AttendanceRelationships(){
+        checkLinkedById(CourseAttendance.class,1,"getCourse",1,em);
+        checkLinkedById(CourseAttendance.class,2,"getCourse",2,em);
+        checkLinkedById(CourseAttendance.class,1,"getAttendant",5,em);
+        checkLinkedById(CourseAttendance.class,2,"getAttendant",3,em);
+    } 
+
+    @Test
+    public void test5InitialCoursePayments(){                        
+        CoursePayment cp1=em.find(CoursePayment.class,1);
+        assertNotNull(cp1,"There should exist a CoursePayment with id:1");
+        assertEquals(LocalDate.of(2023,01,06),cp1.getPaidOn(), "incorrect payment date for id:1");
+        assertEquals(150.00,cp1.getAmount());    
+        
+        CoursePayment cp2=em.find(CoursePayment.class,2);
+        assertNotNull(cp2,"There should exist a CoursePayment with id:2");
+        assertEquals(LocalDate.of(2023,01,10),cp2.getPaidOn(), "incorrect payment date for id:2");
+        assertEquals(150.00,cp2.getAmount());     
+
+        CoursePayment cp3=em.find(CoursePayment.class,3);
+        assertNotNull(cp3,"There should exist a CoursePayment with id:3");
+        assertEquals(LocalDate.of(2023,12,19),cp3.getPaidOn(), "incorrect payment date for id:3");
+        assertEquals(50.00,cp3.getAmount());     
+    }       
+    
+    @Test
+    public void test5PaymentLinks() {    
+        checkContainsById(CourseAttendance.class,1,"getPayments",1,em);
+        checkContainsById(CourseAttendance.class,1,"getPayments",2,em);
+        checkContainsById(CourseAttendance.class,2,"getPayments",3,em);
+    }   
+}
+```
+
+# Control práctico de DP1 2024-2025 (Control-check 2)
+
+## Enunciado
+
+En este ejercicio, añadiremos la funcionalidad de gestión de enfermedades, síntomas y medicamentos. Concretamente, se proporciona una clase `Disease` que representa a las enfermedades que pueden desarrollar las mascotas, que se relaciona con el tipo de mascotas que pueden sufrirlas. Esta clase, además de la descripción y severidad de la enfermedad, presenta los atributos de contagiosidad y de periodo de incubación de la dolencia.
+
+Además, tendremos las clases `Symptom`y `Medicine` que representan a los síntomas que pueden aparecer a consecuencia de una enfermedad y los medicamentos recomendados para cada enfermedad respectivamente.
+
+Además, se ha creado una relación que indica qué síntomas son susceptibles de presentarse para una enfermedad llamada `includedDiseases`, y otra relación para indicar qué síntomas excluyen que se trate de ciertas enfermedades llamada `excludedDiseases`, para ayudar a los veterinarios a realizar diagnósticos más precisos.
+
+Por otro lado, tenemos una relación denominada `prescribedfor` para indicar la medicación recetada para la cura de la afección de la mascota.
+
+El diagrama UML que describe las clases y relaciones con las que vamos a trabajar es el siguiente:
+
+## Diagrama UML
+
+```mermaid
+classDiagram
+
+class Disease {
+  +Integer id
+  +String name
+  +String description
+  +Integer severity
+  +Boolean contagious
+  +Integer incubationPeriod
+}
+
+class Symptom {
+  +Integer id
+  +String name
+  +String description
+}
+
+class Medicine {
+  +Integer id
+  +String name
+  +String description
+  +Integer medication
+  +LocalDate startDate
+  +LocalDate endDate
+}
+
+class Visit {
+  +Integer id
+  +LocalDate visitDate
+}
+
+class Pet {
+  +Integer id
+  +String name
+}
+
+class PetType {
+  +Integer id
+  +String name
+}
+
+Visit --> "0..*" Symptom : symptoms
+Symptom --> "0..*" Disease : includedDiseases
+Symptom --> "0..*" Disease : excludedDiseases
+Medicine --> "1" Disease : prescribedFor
+Visit --> "0..1" Disease : disease
+Pet --> "1" PetType : type
+Pet --> "0..*" Visit : visits
+```
+
+Las clases para las que realizaremos el mapeo como entidades JPA se han señalado en rojo. Las clases azules son clases que se proporcionan ya mapeadas pero con las que se trabajará durante el control.
+
+Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Si desea ver el resultado que arrojarían las pruebas en backend, puede ejecutarlas:
+
+- Mediante su entorno de desarrollo favorito  
+- O usando el comando:
+
+```bash
+mvnw test
