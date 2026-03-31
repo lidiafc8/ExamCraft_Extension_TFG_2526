@@ -3,7 +3,6 @@ import logoExamCraft from "../../assets/icon512.png"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { sendToGemini } from "~src/services/geminiService"
 import testAttributesPromptMarkdown from "bundle-text:../prompts/generation-test-exercice/generation_tests.md"
-import navigation from "../css/navigation.css"
 
 interface Props {
     readonly initialData: { project: any, constraints: string } | null;
@@ -87,9 +86,9 @@ ${restricciones}
                         response: result 
                     })
                 });
-            } catch (e) {
-                console.error("Error al guardar el log.");
-             }
+            } catch (logError) {
+                console.error("Error al guardar el log:", logError);
+            }
 
         } catch (error) {
             console.error(error);
