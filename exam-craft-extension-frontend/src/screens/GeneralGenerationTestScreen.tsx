@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import logoExamCraft from "../../assets/icon512.png";
 import carpeta from "../../assets/images/archive.png";
-import examen from "../../assets/images/exam.png";
+import specific_exam_part from "../../assets/images/exam_part_storage.png";
+import exam from "../../assets/images/exam.png"
 
 interface Props {
     readonly onBack: () => void;
@@ -153,7 +154,7 @@ export default function GeneralGenerationTestScreen({
                                             onBlur={(e) => handleHover(e, '1')}
                                             style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', transition: 'transform 0.2s', outline: 'none' }}
                                         >
-                                            <img src={examen} alt="Seleccionar examen" width="80" height="80" />
+                                            <img src={exam} alt="Seleccionar examen" width="80" height="80" />
                                         </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
                                             {proj.customName || `Examen de ${proj.domainName}`}
@@ -188,7 +189,7 @@ export default function GeneralGenerationTestScreen({
                                             onBlur={(e) => handleHover(e, '1')}
                                             style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', transition: 'transform 0.2s', outline: 'none' }}
                                         >
-                                            <img src={examen} alt="Ver restricciones" width="80" height="80" />
+                                            <img src={specific_exam_part} alt="Ver restricciones" width="100" height="100" />
                                         </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
                                             Restricciones de Atributos
