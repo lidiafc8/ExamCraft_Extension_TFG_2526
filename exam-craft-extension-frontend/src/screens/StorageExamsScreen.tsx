@@ -530,7 +530,8 @@ ${selectedProject.entityRelations || '*Sin relaciones entre entidades definidas*
                                         <img src={examen} alt="Abrir examen" width="80" height="80"
                                             style={{ transition: 'transform 0.2s' }}
                                             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'} />
+                                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                            onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'} />
                                     </button>
                                     {editingId === proj.id ? (
                                         <input autoFocus value={tempName}
