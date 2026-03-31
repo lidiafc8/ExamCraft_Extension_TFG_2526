@@ -198,7 +198,6 @@ ${selectedProject.javaTests || "// No hay tests generados para este examen."}
             TEST_BASE_PATH = "src/test/java/es/us/dp1/chess/tournament/";
         }
 
-        // --- LÓGICA DE TOKEN SEGURA ---
         let MY_TOKEN = localStorage.getItem("github_token");
 
         if (!MY_TOKEN) {
@@ -220,7 +219,7 @@ ${selectedProject.javaTests || "// No hay tests generados para este examen."}
             `Dominio detectado: ${selectedProject.domainName}\n` +
             `Plantilla seleccionada: lidiafc8/${TEMPLATE_REPO}\n` +
             `Nuevo Repo: ${newRepoName}\n\n` +
-            `Se subirán:\n- descripcion_control_check.md\n- Todos los tests de Java detectados.`
+            `Se subirán:\n- README.md (Actualizado con el enunciado)\n- Todos los tests de Java detectados.`
         );
 
         if (!confirmacion) return;
@@ -249,7 +248,7 @@ ${selectedProject.javaTests || "// No hay tests generados para este examen."}
 
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            const title = `Examen_Completo_${selectedProject.customName || selectedProject.domainName}`;
+            const title = `Examen Completo: ${selectedProject.customName || selectedProject.domainName}`;
             const fullText = selectedProject.extensionFinish || '';
             const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
             
@@ -261,21 +260,21 @@ ${selectedProject.javaTests || "// No hay tests generados para este examen."}
                 finalMermaidCode = sanitizeMermaidForModal(fullText); 
             }
 
-            const markdownContent = `# ${title}\n\n` +
-                `## 1. Extensión Funcional\n${introText || "No hay datos de extensión funcional."}\n\n` +
+            // --- LÓGICA README --
+            const markdownContent = `### ${title}\n\n` +
+                `#### 1. Extensión Funcional\n${introText || "No hay datos de extensión funcional."}\n\n` +
                 (finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`\n\n` : '') +
-                `## 2. Restricciones de Atributos\n${selectedProject.attributeConstraints || "No se crearon restricciones de atributos para este examen."}\n\n` +
-                `## 3. Relaciones entre Entidades\n${selectedProject.entityRelations || "No se crearon relaciones entre entidades para este examen."}\n`;
+                `#### 2. Restricciones de Atributos\n${selectedProject.attributeConstraints || "No se crearon restricciones de atributos para este examen."}\n\n` +
+                `#### 3. Relaciones entre Entidades\n${selectedProject.entityRelations || "No se crearon relaciones entre entidades para este examen."}\n`;
 
-            await GithubService.createOrUpdateFile(
+            await GithubService.updateReadmeWithDescription(
                 MY_TOKEN,
                 TARGET_OWNER, 
                 newRepoName,
-                "descripcion_control_check.md", 
-                markdownContent,
-                "Añadir enunciado y restricciones del control check" 
+                markdownContent
             );
 
+            // --- LÓGICA DE TESTS ---
             if (selectedProject.javaTests) {
                 const allTestsCode = selectedProject.javaTests;
 

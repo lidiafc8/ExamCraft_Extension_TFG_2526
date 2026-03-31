@@ -24,6 +24,28 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
   const [responseText, setResponseText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const [previousExtensions, setPreviousExtensions] = useState<string>("");
+
+    useEffect(() => {
+        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+            chrome.storage.local.get(null, (items) => {
+            const extensions = Object.keys(items)
+                .filter(key => key.startsWith('project_'))
+                .map(key => items[key])
+                .filter(project =>
+                project.domainName?.toLowerCase() === domainName.toLowerCase() &&
+                project.extensionFinish
+                )
+                .map((project, i) =>
+                `# EXTENSIÓN FUNCIONAL PREVIA ${i + 1} (${project.customName || project.domainName})\n${project.extensionFinish}`
+                )
+                .join("\n\n");
+
+            setPreviousExtensions(extensions);
+            });
+        }
+        }, [domainName]);
+
   
   useEffect(() => {
     if (extensionPromptMarkdown) {
@@ -47,6 +69,12 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
         CONTEXTO Y RECURSOS (Información interna):
         ${hiddenContext}
 
+        [RECURSOS ESTÁTICOS Y EJEMPLOS]:
+        ${hiddenContext}
+
+        ${previousExtensions ? `[EXTENSIONES FUNCIONALES YA CREADAS PARA EL DOMINIO "${domainName}" - LA SOLUCIÓN DEVUELTA DEBERÁ EVITAR REPETIR ESTAS EXTENSIONES:\n
+        ${previousExtensions}` : ""}
+
         INSTRUCCIONES PRINCIPALES:
         ${promptText}
         `;
@@ -64,10 +92,11 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     exercise: "statement_functional_extension",
-                    domain: domainName,               
-                    hiddenContext: hiddenContext,     
-                    visiblePrompt: promptText,        
-                    response: result                  
+                    domain: domainName,
+                    hiddenContext,
+                    previousExtensions,
+                    visiblePrompt: promptText,
+                    response: result
                 })
             });
             console.log("Log enviado al servidor local correctamente.");
