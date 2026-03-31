@@ -114,10 +114,11 @@ export default function DiagramUMLScreen({
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         exercise: "diagram_uml_functional_extension",
-                        domain: domainName,               
-                        hiddenContext: hiddenContext,     
-                        visiblePrompt: promptText,        
-                        response: cleanResult                  
+                        domain: domainName,
+                        hiddenContext,
+                        statementContext: context,
+                        visiblePrompt: promptText,
+                        response: cleanResult
                     })
                 });
                 console.log("Log enviado al servidor local correctamente.");
