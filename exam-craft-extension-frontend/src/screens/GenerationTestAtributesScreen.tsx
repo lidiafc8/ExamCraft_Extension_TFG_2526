@@ -105,9 +105,10 @@ ${restricciones}
                 return;
             }
 
+            // AQUI ESTÁ EL CAMBIO: Lo guardamos en javaTests en lugar de attributeConstraints
             const updatedExamData = {
                 ...initialData.project, 
-                attributeConstraints: responseText, // Guarda los tests generados
+                javaTests: responseText, 
                 updatedAt: new Date().toISOString()
             };
 
