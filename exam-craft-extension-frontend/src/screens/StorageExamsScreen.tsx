@@ -14,7 +14,7 @@ import 'highlight.js/styles/github.css';
 hljs.registerLanguage('java', java);
 
 interface Props {
-    onWelcome: () => void;
+    readonly onWelcome: () => void;
 }
 
 const cleanMermaidCode = (code: string) => {

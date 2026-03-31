@@ -5,13 +5,13 @@ import { sendToGemini } from "../services/geminiService"
 import { parseMasterPrompt } from "../utils/promptParser"
 
 interface Props {
-  domainName: string;
-  onBack: () => void;
-  onWelcome: () => void;
-  onCreateExam: () => void;
-  onCreateExamByParts: () => void;
-  onFunctionalExtension: () => void;
-  onCreateDiagram: (text: string) => void;
+  readonly domainName: string;
+  readonly onBack: () => void;
+  readonly onWelcome: () => void;
+  readonly onCreateExam: () => void;
+  readonly onCreateExamByParts: () => void;
+  readonly onFunctionalExtension: () => void;
+  readonly onCreateDiagram: (text: string) => void;
 }
 
 export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, onCreateExam, onCreateExamByParts, onFunctionalExtension, onCreateDiagram }: Props) {

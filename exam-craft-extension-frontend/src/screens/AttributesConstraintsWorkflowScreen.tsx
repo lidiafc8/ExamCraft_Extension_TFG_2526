@@ -7,10 +7,10 @@ import { parseMasterPrompt } from "~src/utils/promptParser"
 import { sendToGemini } from "~src/services/geminiService"
 
 interface Props {
-  onBack: () => void
-  onWelcome: () => void
-  onCreateExam: () => void
-  onCreateTest: (data: { project: any, constraints: string }) => void; 
+  readonly onBack: () => void
+  readonly onWelcome: () => void
+  readonly onCreateExam: () => void
+  readonly onCreateTest: (data: { project: any, constraints: string }) => void; 
 }
 
 export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome, onCreateExam, onCreateTest }: Props) {
