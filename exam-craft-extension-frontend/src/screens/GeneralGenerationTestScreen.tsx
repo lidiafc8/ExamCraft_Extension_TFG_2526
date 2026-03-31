@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react"
 import logoExamCraft from "../../assets/icon512.png"
 import carpeta from "../../assets/images/archive.png"
 import examen from "../../assets/images/exam.png"
-import attributesConstraintsPromptMarkdown from "bundle-text:../prompts/generation-constraints-attributes/generation_attribute_constraints_from_statement.md"
-import { sendToGemini } from "~src/services/geminiService"
 
 interface Props {
     onBack: () => void
