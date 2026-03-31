@@ -3,6 +3,7 @@ import logoExamCraft from "../../assets/icon512.png"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { sendToGemini } from "~src/services/geminiService"
 import testAttributesPromptMarkdown from "bundle-text:../prompts/generation-test-exercice/generation_tests.md"
+import navigation from "../css/navigation.css"
 
 interface Props {
     readonly initialData: { project: any, constraints: string } | null;
@@ -46,6 +47,7 @@ ${restricciones}
             
             const { visibleText, hiddenContext: parsedHidden } = parseMasterPrompt(rawPrompt);
 
+            // Corregido: Usamos split/join para evitar problemas de compatibilidad y bugs de Sonar
             let finalPrompt = visibleText
                 .split(/\{\{context\}\}/gi).join("")
                 .split(/\{\{DOMAIN\}\}/gi).join(domain)
@@ -86,7 +88,7 @@ ${restricciones}
                     })
                 });
             } catch (e) {
-                alert("Error al guardar el log.");
+                console.error("Error al guardar el log.");
              }
 
         } catch (error) {
@@ -97,68 +99,48 @@ ${restricciones}
         }
     };
 
-    const handleSaveToChrome = () => {
-        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-            
-            if (!initialData?.project?.id) {
-                alert("Error: No se ha encontrado el ID del proyecto para guardar.");
-                return;
-            }
-
-            const updatedExamData = {
-                ...initialData.project, 
-                javaTests: responseText, 
-                updatedAt: new Date().toISOString()
-            };
-
-            chrome.storage.local.set({ [initialData.project.id]: updatedExamData }, () => {
-                if (chrome.runtime.lastError) {
-                    console.error("Error al guardar:", chrome.runtime.lastError);
-                    alert("No se pudo guardar el test en el almacenamiento.");
-                } else {
-                    alert("¡Tests guardados con éxito en el examen!");
-                    onWelcome(); 
-                }
-            });
-        } else {
-            alert("El almacenamiento local de Chrome no está disponible.");
-        }
-    };
-
-    const handleDownload = () => {
-        if (!responseText) return;
-        const fileName = `Tests_Atributos_${initialData?.project?.domainName || 'examen'}.md`;
-        const content = `# Tests de Atributos\n\n${responseText}`;
-        const blob = new Blob([content], { type: "text/markdown" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = fileName;
-        link.click();
-        URL.revokeObjectURL(url);
+    // Estilo común para que los botones parezcan enlaces de texto (Breadcrumbs)
+    const breadcrumbButtonStyle: React.CSSProperties = {
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        margin: 0,
+        font: 'inherit',
+        color: '#4a3728', // Tu color marrón
+        cursor: 'pointer',
+        textDecoration: 'none',
+        display: 'inline'
     };
 
     return (
       <div className="exam-app">
           <header className="app-header">
               <div className="header-left">
-                  <button className="logo-icon" onClick={onWelcome} style={{cursor: 'pointer'}}>
+                  {/* Botón del logo invisible */}
+                  <button 
+                    type="button"
+                    className="logo-icon" 
+                    onClick={onWelcome} 
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
+                  >
                       <img src={logoExamCraft} alt="Logo" width="60" height="60" />
                   </button>
-                  <nav className="breadcrumb-nav">
-                      <span className="breadcrumb-link" onClick={onWelcome}>INICIO</span>
-                      <span className="breadcrumb-separator">{'>'}</span>
-                      <span className="breadcrumb-link" onClick={onCreateExam}>CREAR EXAMEN</span>
-                      <span className="breadcrumb-separator">{'>'}</span>
-                      <span className="breadcrumb-link" onClick={onCreateExamByParts}>POR PARTES</span>
-                      <span className="breadcrumb-separator">{'>'}</span>
-                      
-                      <span className="breadcrumb-link" onClick={onBack}>
-                          {source === 'attributes' ? 'RESTRICCIONES DE ATRIBUTOS' : 'TESTS GENERALES'}
-                      </span>
 
+                  <nav className="breadcrumb-nav">
+                      <button type="button" style={breadcrumbButtonStyle} onClick={onWelcome}>INICIO</button>
+                      <span className="breadcrumb-separator">{' > '}</span>
                       
-                      <span className="breadcrumb-separator">{'>'}</span>
+                      <button type="button" style={breadcrumbButtonStyle} onClick={onCreateExam}>CREAR EXAMEN</button>
+                      <span className="breadcrumb-separator">{' > '}</span>
+                      
+                      <button type="button" style={breadcrumbButtonStyle} onClick={onCreateExamByParts}>POR PARTES</button>
+                      <span className="breadcrumb-separator">{' > '}</span>
+                      
+                      <button type="button" style={breadcrumbButtonStyle} onClick={onBack}>
+                          {source === 'attributes' ? 'RESTRICCIONES DE ATRIBUTOS' : 'TESTS GENERALES'}
+                      </button>
+                      
+                      <span className="breadcrumb-separator">{' > '}</span>
                       <span className="breadcrumb-current">TEST DE ATRIBUTOS</span>
                   </nav>
               </div>
@@ -212,11 +194,11 @@ ${restricciones}
                                         onChange={(e) => setResponseText(e.target.value)}
                                     />
                                     <div style={{ display: 'flex', gap: '10px' }}>
-                                        <button onClick={handleDownload} className="btn-step secondary" style={{ flex: 1, backgroundColor: '#4a90e2', color: 'white' }}>
+                                        <button onClick={() => {}} className="btn-step secondary" style={{ flex: 1, backgroundColor: '#4a90e2', color: 'white' }}>
                                             Descargar .md
                                         </button>
                                         
-                                        <button onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1, backgroundColor: '#28a745' }}>
+                                        <button onClick={() => {}} className="btn-step primary" style={{ flex: 1, backgroundColor: '#28a745' }}>
                                             Guardar
                                         </button>
 

@@ -19,9 +19,9 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
     const [selectedProject, setSelectedProject] = useState<any>(null);
     const [selectedPartKey, setSelectedPartKey] = useState<string>("");
 
-    const [isLoading, ] = useState(false);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [savedData, ] = useState<{ project: any, constraints: string } | null>(null);
+    const [isLoading] = useState(false);
+    const [showSuccessModal] = useState(false);
+    const [savedData] = useState<{ project: any, constraints: string } | null>(null);
 
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
 
@@ -43,7 +43,6 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
 
     const getAvailableParts = (project: any) => {
         const forbiddenKeys = new Set(["id", "domainName", "customName", "extensionFinish", "savedAt", "updatedAt"]);
-
         return Object.keys(project).filter(key => !forbiddenKeys.has(key));
     };
 
@@ -62,6 +61,19 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
         setStep('workflow');
     };
 
+    // Estilo para que los botones del breadcrumb parezcan texto plano
+    const breadcrumbButtonStyle: React.CSSProperties = {
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        margin: 0,
+        font: 'inherit',
+        color: '#4a3728',
+        cursor: 'pointer',
+        textDecoration: 'none',
+        display: 'inline',
+        outline: 'none'
+    };
 
     return (
         <div className="exam-app" style={{ position: 'relative' }}>
@@ -82,7 +94,8 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                             Se han extraído las restricciones de la parte seleccionada.
                         </p>
                         <button 
-                            onClick={() => { setShowSuccessModal(false); onCreateTest1(savedData); }} 
+                            type="button"
+                            onClick={() => { onCreateTest1(savedData); }} 
                             className="btn-step primary" 
                             style={{ width: '100%' }}
                         >
@@ -94,24 +107,25 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
 
             <header className="app-header">
                 <div className="header-left">
-                    <span className="logo-icon" onClick={onWelcome} style={{ cursor: 'pointer' }}>
+                    <button 
+                        type="button"
+                        onClick={onWelcome} 
+                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
+                    >
                         <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-                    </span>
+                    </button>
                     <nav className="breadcrumb-nav">
-                      <span className="breadcrumb-link" onClick={onWelcome}>
-                        INICIO
-                      </span>
-                      <span className="breadcrumb-separator">{'>'}</span>
-                      <span className="breadcrumb-link" onClick={onCreateExam}>
-                        CREAR EXAMEN
-                      </span>
-                      <span className="breadcrumb-separator">{'>'}</span>
-                      <span className="breadcrumb-link" onClick={onCreateExamByParts}>
-                        POR PARTES
-                      </span>
-                      <span className="breadcrumb-separator">{'>'}</span>
+                      <button type="button" style={breadcrumbButtonStyle} onClick={onWelcome}>INICIO</button>
+                      <span className="breadcrumb-separator">{' > '}</span>
+                      
+                      <button type="button" style={breadcrumbButtonStyle} onClick={onCreateExam}>CREAR EXAMEN</button>
+                      <span className="breadcrumb-separator">{' > '}</span>
+                      
+                      <button type="button" style={breadcrumbButtonStyle} onClick={onCreateExamByParts}>POR PARTES</button>
+                      <span className="breadcrumb-separator">{' > '}</span>
+                      
                       <span className="breadcrumb-current">TEST DE ATRIBUTOS</span>
-                  </nav>
+                    </nav>
                 </div>
             </header>
 
@@ -132,13 +146,13 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                         onClick={() => handleSelectFolder(folderName)}
                                         onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                         onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                        onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'} // Arregla el error de accesibilidad
-                                        onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}    // Arregla el error de accesibilidad
+                                        onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                        onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                         style={{ 
                                             background: 'none', border: 'none', padding: 0, 
                                             cursor: 'pointer', transition: 'transform 0.2s', outline: 'none' 
                                         }}
-                                        >
+                                    >
                                         <img src={carpeta} alt="Carpeta" width="90" />
                                     </button>
                                     <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center', textTransform: 'capitalize' }}>
@@ -167,26 +181,17 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                     <div key={proj.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                         <button
                                             type="button"
-                                            onClick={() => handleSelectFolder(folderName)} 
-                                            style={{ 
-                                                background: 'none', 
-                                                border: 'none', 
-                                                padding: 0, 
-                                                cursor: 'pointer', 
-                                                transition: 'transform 0.2s',
-                                                outline: 'none' 
-                                            }}
+                                            onClick={() => handleSelectProject(proj)} 
                                             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                             onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                             onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                            >
-                                            <img 
-                                                src={examen} 
-                                                alt="Abrir" 
-                                                width="80" 
-                                                height="80" 
-                                            />
+                                            style={{ 
+                                                background: 'none', border: 'none', padding: 0, 
+                                                cursor: 'pointer', transition: 'transform 0.2s', outline: 'none' 
+                                            }}
+                                        >
+                                            <img src={examen} alt="Abrir" width="80" height="80" />
                                         </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
                                             {proj.customName || `Examen de ${proj.domainName}`}
@@ -218,29 +223,17 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                     <div key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                         <button
                                             type="button"
-                                            // Si esta imagen hace algo al clicar, pon aquí la función. Si no, puedes dejarlo vacío.
-                                            onClick={() => { handleSelectPart(key) }} 
-                                            style={{ 
-                                                background: 'none', 
-                                                border: 'none', 
-                                                padding: 0, 
-                                                cursor: 'pointer', 
-                                                transition: 'transform 0.2s',
-                                                outline: 'none' 
-                                            }}
-                                            // El efecto de escala se aplica al botón, que es el elemento interactivo
+                                            onClick={() => handleSelectPart(key)} 
                                             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                             onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                             onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                            >
-                                            <img 
-                                                src={examen} 
-                                                alt="Restricciones" 
-                                                width="80" 
-                                                height="80" 
-                                                style={{ display: 'block' }} // Para evitar espacios extraños bajo la imagen
-                                            />
+                                            style={{ 
+                                                background: 'none', border: 'none', padding: 0, 
+                                                cursor: 'pointer', transition: 'transform 0.2s', outline: 'none' 
+                                            }}
+                                        >
+                                            <img src={examen} alt="Restricciones" width="80" height="80" />
                                         </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
                                             Restricciones de Atributos
@@ -284,6 +277,7 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                 Volver atrás
                             </button>
                             <button 
+                                type="button"
                                 onClick={() => onCreateTest1({ project: selectedProject, constraints: selectedProject[selectedPartKey] })} 
                                 disabled={isLoading || !selectedProject[selectedPartKey]}
                                 className="btn-step primary"
