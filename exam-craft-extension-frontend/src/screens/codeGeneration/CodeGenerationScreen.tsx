@@ -1,16 +1,15 @@
 import React from "react"
-import logoExamCraft from "../../assets/icon512.png"
+import logoExamCraft from "../../../assets/icon512.png"
 
 interface Props {
   readonly onBack: () => void
   readonly onWelcome: () => void
-  readonly onFunctionalExtension: () => void
-  readonly onAttributesConstraints: () => void
-  readonly onCodeGeneration: () => void
   readonly onGenerateTest: () => void
+  readonly onCreateExamByParts: () => void
+  readonly onGenerateBaseClasses: () => void
 }
 
-export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onGenerateTest, onCodeGeneration }: Props) {
+export default function CreateExamByPartsScreen({ onBack, onWelcome, onGenerateTest, onCreateExamByParts, onGenerateBaseClasses }: Props) {
   return (
     <div className="exam-app">
        
@@ -38,8 +37,14 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
 
                 <span className="breadcrumb-separator">{'>'}</span>
 
-                <span className="breadcrumb-current">
+                <span className="breadcrumb-link" onClick={onCreateExamByParts}>
                 POR PARTES
+                </span>
+
+                <span className="breadcrumb-separator">{'>'}</span>
+
+                <span className="breadcrumb-current">
+                CÓDIGO
                 </span>
                 
             </nav>
@@ -50,28 +55,20 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
 
       <main className="main-content">
         
-        <h1 className="main-title">CREAR EXAMEN POR PARTES</h1>
+        <h1 className="main-title">GENERACIÓN DE CÓDIGO</h1>
         
         <div className="subtitle-badge">
-          ¿Qué parte te gustaría generar primero?
+          Elige la parte del código que quieres generar primero
         </div>
 
         <div className="vertical-menu-container">
-          
-          <button className="menu-btn" onClick={onFunctionalExtension}>
-            Extensión funcional
+
+          <button className="menu-btn" onClick={onGenerateTest}>
+            Generación tests
           </button>
 
-          <button className="menu-btn" onClick={onAttributesConstraints}>
-            Restricciones de atributos
-          </button>
-
-          <button className="menu-btn">
-            Relaciones entre entidades
-          </button>
-
-          <button className="menu-btn1" onClick={onCodeGeneration}>
-            Generación de código
+          <button className="menu-btn" onClick={onGenerateBaseClasses}>
+            Generación clases base
           </button>
 
         </div>
@@ -85,4 +82,3 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
     </div>
   )
 }
-

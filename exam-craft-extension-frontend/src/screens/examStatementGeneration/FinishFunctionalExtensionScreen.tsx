@@ -1,6 +1,6 @@
 import React, { useState } from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import { MermaidViewer } from "../components/MermaidViewer"
+import logoExamCraft from "../../../assets/icon512.png"
+import { MermaidViewer } from "../../components/MermaidViewer"
 
 interface Props {
     readonly domainName: string;

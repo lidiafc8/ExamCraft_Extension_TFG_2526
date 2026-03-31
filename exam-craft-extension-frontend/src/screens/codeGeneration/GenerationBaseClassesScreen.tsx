@@ -1,19 +1,53 @@
 import React, { useState, useEffect } from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import carpeta from "../../assets/images/archive.png"
-import examen from "../../assets/images/exam.png"
-import attributesConstraintsPromptMarkdown from "bundle-text:../prompts/generation-constraints-attributes/generation_attribute_constraints_from_statement.md"
+import logoExamCraft from "../../../assets/icon512.png"
+import carpeta from "../../../assets/images/archive.png"
+import examen from "../../../assets/images/exam.png"
+import generationExamBaseClassesPrompt from "bundle-text:../../prompts/generation-exam-repository/generation_exam_base_classes.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { sendToGemini } from "~src/services/geminiService"
 
 interface Props {
-  readonly onBack: () => void
-  readonly onWelcome: () => void
-  readonly onCreateExam: () => void
-  readonly onCreateTest: (data: { project: any, constraints: string }) => void; 
+    readonly onBack: () => void;
+    readonly onWelcome: () => void;
+    readonly onCreateExam: () => void;
+    readonly onCreateExamByParts: () => void;
+    readonly onCodeGeneration: () => void;
 }
 
-export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome, onCreateExam, onCreateTest }: Props) {
+const CLASES_POR_DEFECTO = {
+    "clínica veterinaria": `
+- BaseEntity
+- NamedEntity
+- Person
+- Owner
+- Vet
+- Pet
+- PetType
+- Specialty
+- Visit
+- Clinic
+- PricingPlan
+- ClinicOwner
+- User
+- Authorities`,
+    "ajedrez": `
+- BaseEntity
+- NamedEntity
+- Authorities
+- User
+- Tournament
+- User
+- ChessMatch
+- ChessBoard
+- Piece`
+};
+
+export default function GenerationBaseClassesScreen({ 
+    onBack, 
+    onWelcome, 
+    onCreateExam, 
+    onCreateExamByParts, 
+    onCodeGeneration }: Props) {
 
     const [step, setStep] = useState<'selection' | 'workflow'>('selection');
     const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
@@ -93,10 +127,20 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
 };
 
   useEffect(() => {
-    if (attributesConstraintsPromptMarkdown && selectedProject?.domainName) {
-        const { visibleText, hiddenContext } = parseMasterPrompt(attributesConstraintsPromptMarkdown);
+    if (generationExamBaseClassesPrompt && selectedProject?.domainName) {
+        const { visibleText, hiddenContext } = parseMasterPrompt(generationExamBaseClassesPrompt);
         
-        setPromptText(visibleText);    
+        const dominio = selectedProject.domainName || "Dominio no especificado";
+        const dominioKey = dominio.toLowerCase();
+        
+        const clasesExistentes = CLASES_POR_DEFECTO[dominioKey] || "No hay clases base registradas para este dominio."; 
+
+        const promptConVariables = visibleText
+            .replace("{dominio}", dominio)
+            .replace("{clases_existentes}", clasesExistentes)
+        
+        
+        setPromptText(promptConVariables);    
         setHiddenContext(hiddenContext);
     }
   }, [selectedProject]);
@@ -153,7 +197,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
   const handleDownload = () => {
       if (!selectedProject || !responseText) return;
 
-      const defaultName = `Restricciones_Atributos_${selectedProject.customName}`;
+      const defaultName = `Clases_Base_${selectedProject.customName}`;
       const userChosenName = prompt("Introduce el nombre para el archivo a descargar:", defaultName);
       
       if (userChosenName === null) return; 
@@ -164,7 +208,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
           finalFileName += '.md';
       }
 
-      const title = `Restricciones de Atributos - ${selectedProject.customName || selectedProject.domainName}`;
+      const title = `Clases Base - ${selectedProject.customName || selectedProject.domainName}`;
       
       const markdownContent = `# ${title}\n\n${responseText}`;
 
@@ -184,84 +228,6 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
 
   return (
     <div className="exam-app" style={{ position: 'relative' }}>
-      
-      {showConfirmModal && selectedProject && (
-        <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
-            zIndex: 1000 
-        }}>
-            <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
-                <h3 className="main-title small" style={{ marginBottom: '15px', color: '#4a3728' }}>Confirmar Contexto</h3>
-                
-                <p style={{ marginBottom: selectedProject.attributeConstraints ? '15px' : '25px', color: '#555', fontSize: '15px' }}>
-                    ¿Deseas utilizar <strong>{selectedProject.customName || `Examen de ${selectedProject.domainName}`}</strong> como base para generar el ejercicio de restricciones?
-                </p>
-
-                {selectedProject.attributeConstraints && (
-                    <div style={{
-                        backgroundColor: '#fff8e1',
-                        border: '1px solid #f9a825',
-                        borderRadius: '8px',
-                        padding: '12px 15px',
-                        marginBottom: '20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        color: '#7a5800'
-                    }}>
-                        <strong>Este examen ya tiene restricciones de atributos generadas.</strong>
-                        <br />
-                        Si continúas, las restricciones anteriores serán reemplazadas por las nuevas.
-                    </div>
-                )}
-
-                <div className="wf-actions-row" style={{ justifyContent: 'center', gap: '15px' }}>
-                    <button 
-                        onClick={() => { setShowConfirmModal(false); setSelectedProject(null); }} 
-                        className="btn-step secondary"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        onClick={handleConfirmSelection} 
-                        className="btn-step primary"
-                    >
-                        {selectedProject.attributeConstraints ? 'Continuar y reemplazar' : 'Confirmar'}
-                    </button>
-                </div>
-            </div>
-        </div>
-    )}
-
-      {showSuccessModal && savedData && (
-          <div style={{
-              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.6)',
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              zIndex: 1000
-          }}>
-              <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
-                  <div style={{ fontSize: '48px', marginBottom: '15px' }}>✅</div>
-                  <h3 className="main-title small" style={{ marginBottom: '10px', color: '#4a3728' }}>
-                      ¡Guardado correctamente!
-                  </h3>
-                  <p style={{ marginBottom: '25px', color: '#555', fontSize: '15px' }}>
-                      Las restricciones de atributos de <strong>{savedData.project.customName || savedData.project.domainName}</strong> han sido actualizadas correctamente.
-                  </p>
-                  <button
-                      onClick={() => {
-                          setShowSuccessModal(false);
-                          onCreateTest(savedData);
-                      }}
-                      className="btn-step primary"
-                      style={{ width: '100%' }}
-                  >
-                      Continuar
-                  </button>
-              </div>
-          </div>
-      )}
 
       <header className="app-header">
         <div className="header-left">
@@ -273,9 +239,11 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                 <span className="breadcrumb-separator">{'>'}</span>
                 <span className="breadcrumb-link" onClick={onCreateExam}>CREAR EXAMEN</span>
                 <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-link" onClick={onBack}>POR PARTES</span>
+                <span className="breadcrumb-link" onClick={onCreateExamByParts}>POR PARTES</span>
                 <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-current">RESTRICCIONES DE ATRIBUTOS</span>
+                <span className="breadcrumb-link" onClick={onCodeGeneration}>CÓDIGO</span>
+                <span className="breadcrumb-separator">{'>'}</span>
+                <span className="breadcrumb-current">CLASES BASE</span>
             </nav>
         </div>
       </header>
@@ -288,7 +256,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                     <>
                         <h2 className="main-title small">Selecciona un dominio</h2>
                         <p className="wf-instruction-text" style={{ textAlign: 'center' }}>
-                            Para generar el ejercicio "Restricciones de Atributos" es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base para este ejercicio.
+                            Para generar las clases base es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base.
                         </p>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
@@ -318,7 +286,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                     <>
                         <h2 className="main-title small">Exámenes de {selectedDomainFolder.toUpperCase()}</h2>
                         <p className="wf-instruction-text" style={{ textAlign: 'center' }}>
-                            Haz clic en el examen específico que deseas utilizar como contexto.
+                            Selecciona el examen específico que deseas utilizar como base para generar las clases.
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
                             {projectsInFolder.length > 0 ? (
@@ -357,17 +325,49 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
             </div>
         )}
 
+        {showConfirmModal && selectedProject && (
+            <div style={{
+                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.6)',
+                display: 'flex', justifyContent: 'center', alignItems: 'center',
+                zIndex: 1000 
+            }}>
+                <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
+                    <h3 className="main-title small" style={{ marginBottom: '15px', color: '#4a3728' }}>Confirmar Examen</h3>
+                    
+                    <p style={{ marginBottom: selectedProject.attributeConstraints ? '15px' : '25px', color: '#555', fontSize: '15px' }}>
+                        ¿Deseas utilizar <strong>{selectedProject.customName || `Examen de ${selectedProject.domainName}`}</strong> como base para generar las clases base?
+                    </p>
+
+                    <div className="wf-actions-row" style={{ justifyContent: 'center', gap: '15px' }}>
+                        <button 
+                            onClick={() => { setShowConfirmModal(false); setSelectedProject(null); }} 
+                            className="btn-step secondary"
+                        >
+                            Cancelar
+                        </button>
+                        <button 
+                            onClick={handleConfirmSelection} 
+                            className="btn-step primary"
+                        >
+                            {'Confirmar'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
         {step === 'workflow' && selectedProject && (
             <div className="content-card" style={{ width: '100%', maxWidth: '1000px', maxHeight: '85vh', overflowY: 'auto' }}>
                 <h2 className="main-title small">
-                    {internalStep === 'input' ? 'Restricciones de Atributos' : `Generar Restricciones: ${selectedProject.customName || selectedProject.domainName.toUpperCase()}`}
+                    {internalStep === 'input' ? 'Clases Base del Examen' : `Generar Clases Base: ${selectedProject.customName || selectedProject.domainName.toUpperCase()}`}
                 </h2>
                 
                 <div className="wf-wide-wrapper">
                 {internalStep === 'input' && (
                     <>
                         <p className="wf-instruction-text">
-                            Este es el prompt que se usará para generar las restricciones de atributos del examen seleccionado, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar"</strong>.
+                            Este es el prompt que se usará para generar las clases base del examen seleccionado, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar"</strong>.
                         </p>
                         <textarea 
                             className="wf-textarea" 
@@ -420,6 +420,35 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                             <button onClick={() => setInternalStep('input')} className="btn-step secondary">Volver al editor</button>
                         </div>
                     </>
+                )}
+
+                {showSuccessModal && savedData && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0.6)',
+                        display: 'flex', justifyContent: 'center', alignItems: 'center',
+                        zIndex: 1000
+                    }}>
+                        <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
+                            <div style={{ fontSize: '48px', marginBottom: '15px' }}>✅</div>
+                            <h3 className="main-title small" style={{ marginBottom: '10px', color: '#4a3728' }}>
+                                ¡Guardado correctamente!
+                            </h3>
+                            <p style={{ marginBottom: '25px', color: '#555', fontSize: '15px' }}>
+                                Las restricciones de atributos de <strong>{savedData.project.customName || savedData.project.domainName}</strong> han sido actualizadas correctamente.
+                            </p>
+                            <button
+                                onClick={() => {
+                                    setShowSuccessModal(false);
+                
+                                }}
+                                className="btn-step primary"
+                                style={{ width: '100%' }}
+                            >
+                                Continuar
+                            </button>
+                        </div>
+                    </div>
                 )}
                 </div>
             </div>

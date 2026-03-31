@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react"
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
-import logoExamCraft from "../../assets/icon512.png"
-import carpeta from "../../assets/images/archive.png"
-import examen from "../../assets/images/exam.png"
-import { MermaidViewer } from "../components/MermaidViewer"
+import logoExamCraft from "../../../assets/icon512.png"
+import carpeta from "../../../assets/images/archive.png"
+import examen from "../../../assets/images/exam.png"
+import { MermaidViewer } from "../../components/MermaidViewer"
 import { GithubService } from "~src/services/githubService";
 import hljs from 'highlight.js/lib/core';
 import java from 'highlight.js/lib/languages/java';
@@ -55,6 +55,7 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
     const [tempName, setTempName] = useState("");
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState("");
 
     useEffect(() => {
         if (typeof chrome !== "undefined" && chrome.storage?.local) {

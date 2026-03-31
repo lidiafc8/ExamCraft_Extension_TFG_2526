@@ -1,8 +1,8 @@
 import React from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import petClinic from "../../assets/images/petclinic.png"
-import chess from "../../assets/images/chess.png"
-import comingSoon from "../../assets/images/comingSoon.png"
+import logoExamCraft from "../../../assets/icon512.png"
+import petClinic from "../../../assets/images/petclinic.png"
+import chess from "../../../assets/images/chess.png"
+import comingSoon from "../../../assets/images/comingSoon.png"
 
 interface Props {
   readonly onBack: () => void

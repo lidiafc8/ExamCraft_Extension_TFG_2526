@@ -372,6 +372,33 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
+.menu-btn1 {
+  background-color: #4d2f1a; 
+  color: white;
+  font-size: 1.3rem;
+  font-weight: bold;
+  padding: 20px 30px;     
+  border: none;
+  border-radius: 15px;    
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+  transition: all 0.2s ease;
+  text-transform: uppercase; 
+  letter-spacing: 1px;
+  width: 100%; 
+}
+
+.menu-btn1:hover {
+  background-color: #4d2f1a; 
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.menu-btn1:active {
+  transform: translateY(0); 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
 
 /* =========================================
    BREADCRUMBS STYLES

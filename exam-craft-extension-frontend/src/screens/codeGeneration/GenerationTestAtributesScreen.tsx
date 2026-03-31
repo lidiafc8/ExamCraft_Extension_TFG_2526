@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react"
-import logoExamCraft from "../../assets/icon512.png"
+import logoExamCraft from "../../../assets/icon512.png"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { sendToGemini } from "~src/services/geminiService"
-import testAttributesPromptMarkdown from "bundle-text:../prompts/generation-exam-repository/generation_tests.md"
+import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/generation_tests.md"
 
 interface Props {
     readonly initialData: { project: any; constraints: string } | null;

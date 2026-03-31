@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import extensionPromptMarkdown from "bundle-text:../prompts/functional-extension-generation/generation_statement_functional_extension.md"
-import { sendToGemini } from "../services/geminiService"
-import { parseMasterPrompt } from "../utils/promptParser"
+import logoExamCraft from "../../../assets/icon512.png"
+import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md"
+import { sendToGemini } from "../../services/geminiService"
+import { parseMasterPrompt } from "../../utils/promptParser"
 
 interface Props {
   readonly domainName: string;

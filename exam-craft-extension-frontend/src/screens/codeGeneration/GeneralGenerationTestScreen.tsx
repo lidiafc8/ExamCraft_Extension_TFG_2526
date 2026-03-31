@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import logoExamCraft from "../../assets/icon512.png";
-import carpeta from "../../assets/images/archive.png";
-import specific_exam_part from "../../assets/images/exam_part_storage.png";
-import exam from "../../assets/images/exam.png"
+import logoExamCraft from "../../../assets/icon512.png";
+import carpeta from "../../../assets/images/archive.png";
+import specific_exam_part from "../../../assets/images/exam_part_storage.png";
+import exam from "../../../assets/images/exam.png"
 import { createPortal } from "react-dom";
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
     readonly onCreateExam: () => void;
     readonly onCreateExamByParts: () => void;
     readonly onCreateTest1: (data: { project: any; constraints: string }) => void;
+    readonly onCodeGeneration: () => void;
 }
 
 export default function GeneralGenerationTestScreen({ 
@@ -18,7 +19,8 @@ export default function GeneralGenerationTestScreen({
     onWelcome, 
     onCreateExam, 
     onCreateExamByParts, 
-    onCreateTest1 
+    onCreateTest1,
+    onCodeGeneration
 }: Props) {
     const [step, setStep] = useState<'folders' | 'exams' | 'parts' | 'workflow'>('folders');
     const [projects, setProjects] = useState<any[]>([]);
@@ -68,7 +70,8 @@ export default function GeneralGenerationTestScreen({
     const breadcrumbConfig = [
         { label: 'INICIO', action: onWelcome },
         { label: 'CREAR EXAMEN', action: onCreateExam },
-        { label: 'POR PARTES', action: onCreateExamByParts }
+        { label: 'POR PARTES', action: onCreateExamByParts },
+        { label: 'CÓDIGO', action: onCodeGeneration }
     ];
 
     const handleHover = (e: React.MouseEvent | React.FocusEvent, scale: string) => {
