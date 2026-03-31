@@ -94,22 +94,22 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
 
             <header className="app-header">
                 <div className="header-left">
-                    <button className="logo-icon" onClick={onWelcome} style={{ cursor: 'pointer' }}>
+                    <span className="logo-icon" onClick={onWelcome} style={{ cursor: 'pointer' }}>
                         <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-                    </button>
+                    </span>
                     <nav className="breadcrumb-nav">
-                      <button className="breadcrumb-link" onClick={onWelcome}>
+                      <span className="breadcrumb-link" onClick={onWelcome}>
                         INICIO
-                      </button>
-                      <button className="breadcrumb-separator">{'>'}</button>
-                      <button className="breadcrumb-link" onClick={onCreateExam}>
+                      </span>
+                      <span className="breadcrumb-separator">{'>'}</span>
+                      <span className="breadcrumb-link" onClick={onCreateExam}>
                         CREAR EXAMEN
-                      </button>
-                      <button className="breadcrumb-separator">{'>'}</button>
-                      <button className="breadcrumb-link" onClick={onCreateExamByParts}>
+                      </span>
+                      <span className="breadcrumb-separator">{'>'}</span>
+                      <span className="breadcrumb-link" onClick={onCreateExamByParts}>
                         POR PARTES
-                      </button>
-                      <button className="breadcrumb-separator">{'>'}</button>
+                      </span>
+                      <span className="breadcrumb-separator">{'>'}</span>
                       <span className="breadcrumb-current">TEST DE ATRIBUTOS</span>
                   </nav>
                 </div>
@@ -165,22 +165,27 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                             {projectsInFolder.length > 0 ? (
                                 projectsInFolder.map((proj) => (
                                     <div key={proj.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <button 
-                                            className="parts-exam-icon" 
-                                            style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
-                                            onClick={() => handleSelectProject(proj)}
-                                        >
-                                            <img
-                                                src={examen}
-                                                alt="Abrir"
-                                                width="80"
-                                                height="80"
-                                                style={{ transition: 'transform 0.2s' }}
-                                                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                                tabIndex={0} 
-                                                onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'} 
-                                                onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}    
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSelectFolder(folderName)} 
+                                            style={{ 
+                                                background: 'none', 
+                                                border: 'none', 
+                                                padding: 0, 
+                                                cursor: 'pointer', 
+                                                transition: 'transform 0.2s',
+                                                outline: 'none' 
+                                            }}
+                                            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                            onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                            onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                            >
+                                            <img 
+                                                src={examen} 
+                                                alt="Abrir" 
+                                                width="80" 
+                                                height="80" 
                                             />
                                         </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
@@ -211,22 +216,30 @@ export default function GeneralGenerationTestScreen({ onBack, onWelcome, onCreat
                                 .filter(key => key.toLowerCase().includes('attribute'))
                                 .map(key => (
                                     <div key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <button 
-                                            className="parts-exam-icon" 
-                                            style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
-                                            onClick={() => handleSelectPart(key)}
-                                        >
-                                            <img
-                                                src={examen}
+                                        <button
+                                            type="button"
+                                            // Si esta imagen hace algo al clicar, pon aquí la función. Si no, puedes dejarlo vacío.
+                                            onClick={() => { handleSelectPart(key) }} 
+                                            style={{ 
+                                                background: 'none', 
+                                                border: 'none', 
+                                                padding: 0, 
+                                                cursor: 'pointer', 
+                                                transition: 'transform 0.2s',
+                                                outline: 'none' 
+                                            }}
+                                            // El efecto de escala se aplica al botón, que es el elemento interactivo
+                                            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                            onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                            onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                            >
+                                            <img 
+                                                src={examen} 
                                                 alt="Restricciones" 
-                                                width="80"
-                                                height="80"
-                                                style={{ transition: 'transform 0.2s', cursor: 'pointer' }}
-                                                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                                tabIndex={0} 
-                                                onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                                onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                                width="80" 
+                                                height="80" 
+                                                style={{ display: 'block' }} // Para evitar espacios extraños bajo la imagen
                                             />
                                         </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>

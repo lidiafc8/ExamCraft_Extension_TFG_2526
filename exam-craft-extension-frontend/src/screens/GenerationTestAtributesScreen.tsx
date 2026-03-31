@@ -47,8 +47,8 @@ ${restricciones}
             const { visibleText, hiddenContext: parsedHidden } = parseMasterPrompt(rawPrompt);
 
             let finalPrompt = visibleText
-                .replace(/{{context}}/gi, "") 
-                .replace(/{{DOMAIN}}/gi, domain)
+                .split(/\{\{context\}\}/gi).join("")
+                .split(/\{\{DOMAIN\}\}/gi).join(domain)
                 .trim();
 
             setPromptText(finalPrompt);
@@ -85,7 +85,9 @@ ${restricciones}
                         response: result 
                     })
                 });
-            } catch (e) { }
+            } catch (e) {
+                alert("Error al guardar el log.");
+             }
 
         } catch (error) {
             console.error(error);
@@ -144,16 +146,16 @@ ${restricciones}
                       <img src={logoExamCraft} alt="Logo" width="60" height="60" />
                   </button>
                   <nav className="breadcrumb-nav">
-                      <button className="breadcrumb-link" onClick={onWelcome}>INICIO</button>
+                      <span className="breadcrumb-link" onClick={onWelcome}>INICIO</span>
                       <span className="breadcrumb-separator">{'>'}</span>
-                      <button className="breadcrumb-link" onClick={onCreateExam}>CREAR EXAMEN</button>
+                      <span className="breadcrumb-link" onClick={onCreateExam}>CREAR EXAMEN</span>
                       <span className="breadcrumb-separator">{'>'}</span>
-                      <button className="breadcrumb-link" onClick={onCreateExamByParts}>POR PARTES</button>
+                      <span className="breadcrumb-link" onClick={onCreateExamByParts}>POR PARTES</span>
                       <span className="breadcrumb-separator">{'>'}</span>
                       
-                      <button className="breadcrumb-link" onClick={onBack}>
+                      <span className="breadcrumb-link" onClick={onBack}>
                           {source === 'attributes' ? 'RESTRICCIONES DE ATRIBUTOS' : 'TESTS GENERALES'}
-                      </button>
+                      </span>
 
                       
                       <span className="breadcrumb-separator">{'>'}</span>
