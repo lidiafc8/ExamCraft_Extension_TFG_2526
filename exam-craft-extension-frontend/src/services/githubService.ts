@@ -1,5 +1,6 @@
 import type { GithubRepo } from "~src/models/GithubRepo"
 import type { GithubUser } from "../models/GithubUser"
+import { sanitizeMermaidForModal } from "~src/utils/mermaidUtils"
 
 export const GithubService = {
   
@@ -204,5 +205,80 @@ export const GithubService = {
       console.error("Error actualizando el README:", error);
       throw error;
     }
-  }
+  },
+
+  async deployExam(
+        token: string, 
+        project: any, 
+        newRepoName: string, 
+        templateRepo: string, 
+        testBasePath: string
+    ): Promise<string> {
+        
+        // 1. Validar el token y obtener el usuario de GitHub
+        const userResponse = await fetch("https://api.github.com/user", {
+            headers: { Authorization: `token ${token}` }
+        });
+        if (!userResponse.ok) throw new Error("Token inválido o caducado (Requires authentication)");
+
+        const userData = await userResponse.json();
+        const TARGET_OWNER = userData.login;
+        const TEMPLATE_OWNER = "lidiafc8";
+
+        // 2. Crear el repositorio desde la plantilla
+        const newRepo = await this.createRepoFromTemplate(token, TEMPLATE_OWNER, templateRepo, newRepoName);
+        
+        // Esperamos un poco para que GitHub inicialice el repo internamente
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // 3. Preparar el contenido del README
+        const title = `Examen Completo: ${project.customName || project.domainName}`;
+        const fullText = project.extensionFinish || '';
+        const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
+        
+        let introText = fullText;
+        let finalMermaidCode = '';
+        
+        if (mermaidMatch) {
+            introText = fullText.substring(0, mermaidMatch.index).trim();
+            finalMermaidCode = sanitizeMermaidForModal(fullText);
+        }
+
+        const markdownContent = `### ${title}\n\n` +
+            `#### 1. Extensión Funcional\n${introText || "No hay datos de extensión funcional."}\n\n` +
+            (finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`\n\n` : '') +
+            `#### 2. Restricciones de Atributos\n${project.attributeConstraints || "No se crearon restricciones de atributos para este examen."}\n\n` +
+            `#### 3. Relaciones entre Entidades\n${project.entityRelations || "No se crearon relaciones entre entidades para este examen."}\n`;
+
+        // 4. Actualizar el README en GitHub
+        await this.updateReadmeWithDescription(token, TARGET_OWNER, newRepoName, markdownContent);
+
+        // 5. Procesar y subir los Tests de Java
+        if (project.javaTests) {
+            const tests = Array.isArray(project.javaTests)
+                ? project.javaTests
+                : [project.javaTests];
+
+            for (let i = 0; i < tests.length; i++) {
+                let fileContent = tests[i].trim()
+                    .replace(/^```[a-z]*\r?\n/i, '')
+                    .replace(/\r?\n```$/i, '')
+                    .trim();
+
+                const fileName = `Test${i + 1}.java`;
+                await this.createOrUpdateFile(
+                    token, 
+                    TARGET_OWNER, 
+                    newRepoName,
+                    `${testBasePath}${fileName}`,
+                    fileContent,
+                    `Añadir test automático: ${fileName}`
+                );
+            }
+        }
+
+        // 6. Devolver la URL del nuevo repositorio para que la UI pueda abrirla
+        return newRepo.html_url;
+    }
+  
 }

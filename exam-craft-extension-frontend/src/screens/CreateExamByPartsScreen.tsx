@@ -48,7 +48,7 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
         </div>
       </header>
 
-      <main className="main-content">
+      <main className="main-content" style={{ overflowY: 'auto', paddingBottom: '40px', paddingTop: '100px' }}>
         
         <h1 className="main-title">CREAR EXAMEN POR PARTES</h1>
         

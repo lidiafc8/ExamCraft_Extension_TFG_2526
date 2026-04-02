@@ -63,12 +63,12 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onGenerateT
 
         <div className="vertical-menu-container">
 
-          <button className="menu-btn" onClick={onGenerateTest}>
-            Generación tests
-          </button>
-
           <button className="menu-btn" onClick={onGenerateBaseClasses}>
             Generación clases base
+          </button>
+
+          <button className="menu-btn" onClick={onGenerateTest}>
+            Generación tests
           </button>
 
         </div>

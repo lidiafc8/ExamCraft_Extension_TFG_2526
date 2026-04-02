@@ -107,7 +107,7 @@ export default function GenerationBaseClassesScreen({
 
         const updatedExamData = {
             ...selectedProject, 
-            attributeConstraints: responseText,
+            baseClasses: responseText,
             updatedAt: new Date().toISOString()
         };
 
@@ -119,6 +119,7 @@ export default function GenerationBaseClassesScreen({
                 setSelectedProject(updatedExamData);
                 setSavedData({ project: updatedExamData, constraints: responseText });
                 setShowSuccessModal(true); 
+                
             }
         });
     } else {
@@ -174,7 +175,7 @@ export default function GenerationBaseClassesScreen({
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    exercise: "attributes_constraints",
+                    exercise: "base_classes_code_generation",
                     domain: selectedProject.domainName,
                     hiddenContext,
                     selectedExam: selectedProject.extensionFinish,
@@ -335,8 +336,8 @@ export default function GenerationBaseClassesScreen({
                 <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
                     <h3 className="main-title small" style={{ marginBottom: '15px', color: '#4a3728' }}>Confirmar Examen</h3>
                     
-                    <p style={{ marginBottom: selectedProject.attributeConstraints ? '15px' : '25px', color: '#555', fontSize: '15px' }}>
-                        ¿Deseas utilizar <strong>{selectedProject.customName || `Examen de ${selectedProject.domainName}`}</strong> como base para generar las clases base?
+                    <p style={{ marginBottom: selectedProject.baseClasses ? '15px' : '25px', color: '#555', fontSize: '15px' }}>
+                        ¿Deseas utilizar <strong>{selectedProject.customName || `Examen de ${selectedProject.domainName}`}</strong> como base para generar las clases base del examen?
                     </p>
 
                     <div className="wf-actions-row" style={{ justifyContent: 'center', gap: '15px' }}>
@@ -410,7 +411,12 @@ export default function GenerationBaseClassesScreen({
                                     </button>
 
                                     <button onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1 }}>
-                                        Guardar y Continuar
+                                        Guardar
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                            <polyline points="17 21 17 13 7 13 7 21" />
+                                            <polyline points="7 3 7 8 15 8" />
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
@@ -435,11 +441,12 @@ export default function GenerationBaseClassesScreen({
                                 ¡Guardado correctamente!
                             </h3>
                             <p style={{ marginBottom: '25px', color: '#555', fontSize: '15px' }}>
-                                Las restricciones de atributos de <strong>{savedData.project.customName || savedData.project.domainName}</strong> han sido actualizadas correctamente.
+                                Las clases base de <strong>{savedData.project.customName || savedData.project.domainName}</strong> han sido actualizadas correctamente.
                             </p>
                             <button
                                 onClick={() => {
                                     setShowSuccessModal(false);
+                                    onWelcome();
                 
                                 }}
                                 className="btn-step primary"
