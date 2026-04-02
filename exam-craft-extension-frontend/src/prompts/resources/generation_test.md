@@ -5302,13 +5302,7 @@ public class Test5 extends ReflexiveTest {
 
 En este ejercicio, añadiremos la funcionalidad de gestión de enfermedades, síntomas y medicamentos. Concretamente, se proporciona una clase `Disease` que representa a las enfermedades que pueden desarrollar las mascotas, que se relaciona con el tipo de mascotas que pueden sufrirlas. Esta clase, además de la descripción y severidad de la enfermedad, presenta los atributos de contagiosidad y de periodo de incubación de la dolencia.
 
-Además, tendremos las clases `Symptom`y `Medicine` que representan a los síntomas que pueden aparecer a consecuencia de una enfermedad y los medicamentos recomendados para cada enfermedad respectivamente.
-
-Además, se ha creado una relación que indica qué síntomas son susceptibles de presentarse para una enfermedad llamada `includedDiseases`, y otra relación para indicar qué síntomas excluyen que se trate de ciertas enfermedades llamada `excludedDiseases`, para ayudar a los veterinarios a realizar diagnósticos más precisos.
-
-Por otro lado, tenemos una relación denominada `prescribedfor` para indicar la medicación recetada para la cura de la afección de la mascota.
-
-El diagrama UML que describe las clases y relaciones con las que vamos a trabajar es el siguiente:
+Además, tendremos las clases `Symptom` y `Medicine` que representan a los síntomas que pueden aparecer a consecuencia de una enfermedad y los medicamentos recomendados para cada enfermedad respectivamente. Se ha creado una relación que indica qué síntomas son susceptibles de presentarse para una enfermedad llamada `includedDiseases`, y otra relación para indicar qué síntomas excluyen que se trate de ciertas enfermedades llamada `excludedDiseases`, para ayudar a los veterinarios a realizar diagnósticos más precisos. Por otro lado, tenemos una relación denominada `prescribedfor` para indicar la medicación recetada para la cura de la afección de la mascota.
 
 ## Diagrama UML
 
@@ -5363,12 +5357,2496 @@ Pet --> "1" PetType : type
 Pet --> "0..*" Visit : visits
 ```
 
-Las clases para las que realizaremos el mapeo como entidades JPA se han señalado en rojo. Las clases azules son clases que se proporcionan ya mapeadas pero con las que se trabajará durante el control.
+> Las clases para las que realizaremos el mapeo como entidades JPA se han señalado en rojo. Las clases azules son clases que se proporcionan ya mapeadas pero con las que se trabajará durante el control.
 
-Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Si desea ver el resultado que arrojarían las pruebas en backend, puede ejecutarlas:
+Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Cada ejercicio correctamente resuelto valdrá **dos puntos**, el número de casos de prueba de cada ejercicio puede variar entre uno y otro y la nota se calculará en base al porcentaje de casos de prueba que pasan. Por ejemplo, si pasan la mitad (50%) de los casos de prueba de un ejercicio, en lugar de dos puntos usted obtendrá un 1.
 
-- Mediante su entorno de desarrollo favorito  
-- O usando el comando:
+Para comenzar el control debe aceptar la tarea a través del siguiente enlace:
+https://classroom.github.com/a/c6rYpQqz
 
-```bash
-mvnw test
+Al aceptar dicha tarea, se creará un repositorio único individual para usted; debe usar dicho repositorio para realizar el control práctico. Debe entregar la actividad en EV asociada al control check proporcionando como texto la dirección url de su repositorio personal. La entrega de su solución al control se realizará mediante un único comando `git push` a su repositorio individual. Recuerde que debe hacer push antes de cerrar sesión en la computadora y abandonar el aula, de lo contrario, su intento se evaluará como no presentado.
+
+---
+
+### Notas Importantes
+
+> **Nota 1:** No modifique los nombres de las clases ni la signatura (nombre, tipo de respuesta y parámetros) de los métodos proporcionados como material de base para el control. Las pruebas que se usan para la evaluación dependen de que las clases y los métodos tengan la estructura y nombres proporcionados. Si los modifica probablemente no pueda hacer que pasen las pruebas.
+
+> **Nota 2:** No modifique las pruebas unitarias proporcionadas como parte del proyecto bajo ningún concepto. Aunque modifique las pruebas en su copia local del proyecto, éstas serán restituidas mediante un comando git previamente a la ejecución de las pruebas para la emisión de la nota final, por lo que sus modificaciones en las pruebas no serán tenidas en cuenta en ningún momento.
+
+> **Nota 3:** Mientras haya ejercicios no resueltos habrá tests que no funcionen y, por tanto, el comando `mvnw install` finalizará con error. Esto es normal. Si se quiere probar la aplicación se puede ejecutar de la forma habitual pese a que `mvnw install` finalice con error.
+
+> **Nota 4:** La descarga del material de la prueba usando git, y la entrega de su solución con git a través del repositorio GitHub creado a tal efecto forman parte de las competencias evaluadas durante el examen, por lo que no se aceptarán entregas que no hagan uso de este medio, y no se podrá solicitar ayuda a los profesores para realizar estas tareas.
+
+> **Nota 5:** No se aceptarán como soluciones válidas proyectos cuyo código fuente no compile correctamente o que provoquen fallos al arrancar la aplicación en la inicialización del contexto de Spring. Las soluciones cuyo código fuente no compile o sean incapaces de arrancar el contexto de Spring serán evaluadas con una nota de **0**.
+
+---
+
+## Test 1 – Creación de las entidades Symptom y Medicine y sus repositorios asociados
+
+### Parte 1A: Entidades Symptom y Medicine y sus repositorios *(1 punto)*
+
+Modificar las clases `Symptom` y `Medicine` para que sean entidades. Estas clases están alojadas en el paquete `org.springframework.samples.petclinic.disease`, y deben tener los siguientes atributos y restricciones:
+
+**Para ambas clases:**
+
+- El atributo de tipo entero `Integer` llamado `id` actuará como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
+
+- Un atributo de tipo cadena de caracteres `String` llamado `name` obligatorio (no puede ser nulo), que debe tener una longitud mínima de 3 caracteres y máxima de 50 y que no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.).
+
+- El atributo de tipo cadena caracteres `String` llamado `description` opcional. 
+
+
+**Para la clase `Medicine`:**
+
+- El atributo de tipo entero `Integer` llamado `medication`, que representa la cantidad de medicación que debe tomar el animal en función de su peso. El atributo será obligatorio y tendrá un valor mínimo de 1 y un valor máximo de 1000 (a partir de este valor, la dosis puede ser mortal).
+
+- El atributo de tipo fecha `LocalDate` llamado `startDate`, que representa la fecha en que comienza la medicación pautada. La fecha seguirá el formato `dd/MM/yyyy` (puede usar como ejemplo la clase Pet y su fecha de nacimiento para ver cómo se especificar dicho formato, pero nótese que el patrón del formato es distinto). Este atributo es obligatorio.
+
+- El atributo de tipo fecha `LocalDate` llamado `endDate`, que representa la fecha en que debe terminar la medicación pautada. Seguirá el formato `dd/MM/yyyy`. Este atributo debe ser obligatorio. 
+
+> Para el formato de fecha puede usar como ejemplo la clase `Pet` y su fecha de nacimiento, pero nótese que el patrón del formato es distinto.
+
+*No modifique por ahora las anotaciones `@Transient` de las clases.* Modificar las interfaces `SymptomRepository` y `MedicineRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.samples.petclinic.disease.Disease;
+import org.springframework.samples.petclinic.disease.MedicineRepository;
+import org.springframework.samples.petclinic.disease.Symptom;
+import org.springframework.samples.petclinic.disease.SymptomRepository;
+import org.springframework.samples.petclinic.disease.Medicine;
+import org.springframework.samples.petclinic.disease.MedicineRepository;
+
+import org.springframework.stereotype.Service;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.validation.ConstraintViolation;
+
+@DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))
+public class Test1A extends ReflexiveTest{
+
+    @Autowired(required = false)
+    SymptomRepository symptomsRepo;
+    @Autowired(required = false)
+    MedicineRepository medicineRepo;
+    
+    @Autowired
+    EntityManager em;
+ 
+    @Test
+    public void test1RepositoriesExist(){
+        assertNotNull(symptomsRepo,"The symptoms repository was not injected into the tests, its autowired value was null");
+        assertNotNull(medicineRepo,"The medicine repository was not injected into the tests, its autowired value was null");
+        test1RepositoriesContainsMethod();
+    }
+
+    public void test1RepositoriesContainsMethod(){
+        if(symptomsRepo!=null){
+            Object v=symptomsRepo.findById(12);
+            assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a symptom that does not exist");
+        }else
+            fail("The symptoms repository was not injected into the tests, its autowired value was null");
+        
+        if(medicineRepo!=null){
+            Object v=medicineRepo.findById(12);
+            assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a medicine that does not exist");
+        }else
+            fail("The medicine repository was not injected into the tests, its autowired value was null");
+    }
+    
+    
+
+    
+    @Test
+    public void test1CheckMedicineConstraints() {
+        Map<String,List<Object>> invalidValues=Map.of( 
+                                        "name",     List.of(
+                                                        "      ","a",
+                                                        "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados, lentejas los viernes, algún palomino de añadidura los domingos, consumían las tres partes de su hacienda. "),                                           
+                                            "medication",  List.of(-1, 0, 1001)
+                                           // "startDate", List.of(LocalDate.ofYearDay(2024, 30),LocalDate.of(2023, 12, 12)),
+                                          //  "endDate", List.of(LocalDate.ofYearDay(2024, 60),LocalDate.of(2024, 12, 13))                                           
+                                            );
+
+
+        Medicine t=createValidMedicine(em);
+        em.persist(t);
+        
+        checkThatFieldsAreMandatory(t, em, "medication","startDate","endDate");        
+        
+        checkThatValuesAreNotValid(t, invalidValues,em);   
+    }
+
+     @Test
+    public void test1CheckSymptomsContraints() {
+         Map<String,List<Object>> invalidValues=Map.of(
+                                            "name",     List.of(
+                                                    "      ",
+                                                    "a",
+                                                    "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados, lentejas los viernes, algún palomino de añadidura los domingos, consumían las tres partes de su hacienda. ")
+                                                  
+                                            );
+
+                                        
+        Symptom s=createValidSymptom(em);
+        em.persist(s);
+        
+        checkThatFieldsAreMandatory(s, em, "name");        
+        
+        checkThatValuesAreNotValid(s, invalidValues,em);   
+    }
+
+    
+    @Test
+    public void test1CheckMedicineAnnotations() {        
+        assertTrue(classIsAnnotatedWith(Medicine.class,Entity.class));
+    }
+
+    @Test
+    public void test1CheckSymptomAnnotations() {
+        assertTrue(classIsAnnotatedWith(Symptom.class,Entity.class));
+    }
+
+    public static Symptom createValidSymptom(EntityManager em){        
+        Symptom o=new Symptom();        
+        setValue(o,"name",String.class,"Un síntoma válido");
+        o.setDescription("Una descripción");
+        o.setIncludedDiseases(Set.of());
+        return o;
+    }
+
+    public static Medicine createValidMedicine(EntityManager em){
+        
+        Medicine medicine = new Medicine();
+        setValue(medicine, "name", String.class, "medicine");
+        medicine.setDescription("description");
+        medicine.setMedication(100);  // Valor dentro del rango
+        medicine.setStartDate(LocalDate.of(2024, 12, 1));
+        medicine.setEndDate(LocalDate.of(2024, 12, 15));
+        medicine.setPrescribedfor(Set.of(em.find(Disease.class,1)));
+        return medicine;
+    }
+}
+```
+
+
+### Parte 1B: Relaciones entre las entidades *(1 punto)*
+
+Elimine las anotaciones `@Transient` de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior, así como la del atributo `symptoms` de la clase `Visit`. Se pide crear las siguientes relaciones entre las entidades:
+
+- Cree una relación unidireccional desde `Visit` hacia `Symptom` que exprese la que aparece en el diagrama UML respetando sus cardinalidades, usando el atributo `symptoms` de la clase `Visit`.
+
+- Cree dos relaciones unidireccionales desde `Symptom` hacia `Disease` que representen las que aparecen en el diagrama UML (al tratarse de una doble relación n a n entre las mismas entidades se trata de unas relaciones bastante exóticas), usando como nombre de los atributos `includedDiseases` y `excludedDiseases` en la clase `Symptom`.
+
+- Cree una relación unidireccional desde `Medicine` hacia `Disease` que represente la que aparece en el diagrama. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.disease.Medicine;
+import org.springframework.samples.petclinic.disease.Symptom;
+import org.springframework.samples.petclinic.visit.Visit;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ManyToMany;
+
+@DataJpaTest()
+public class Test1B extends ReflexiveTest{
+    
+    @Autowired(required = false)
+    EntityManager em;         
+
+    @Test
+    public void test2TreatmentAnnotations() {
+        checkThatFieldIsAnnotatedWith(Medicine.class, "prescribedfor", ManyToMany.class);                          
+    }
+
+    @Test
+    public void test2SymptomAnnotations() {        
+        checkThatFieldIsAnnotatedWith(Symptom.class, "includedDiseases", ManyToMany.class);        
+        checkThatFieldIsAnnotatedWith(Symptom.class, "excludedDiseases", ManyToMany.class);                
+    }
+
+    @Test
+    public void test2VisitAnnotationsAndConstraints(){
+        checkThatFieldIsAnnotatedWith(Visit.class, "symptoms", ManyToMany.class);
+    }
+ 
+    @Test
+    private void test2TreatmentConstraints() {
+        Medicine t=Test1A.createValidMedicine(em);
+        checkThatFieldsAreMandatory(t, em,"prescribedfor");        
+    }
+
+    @Test
+    private void test2SymptomsConstraints() {
+        Symptom s=Test1A.createValidSymptom(em);
+        checkThatFieldsAreMandatory(s, em,"includedDiseases");
+                
+    }
+}
+```
+
+
+---
+
+## Test 2 – Modificación del script de inicialización de la base de datos
+
+### Parte 2A: Incluir dos síntomas y dos medicaciones *(1 punto)*
+
+Modificar el script de inicialización de la base de datos para que se creen los siguientes síntomas (`Symptom`) y medicaciones (`Medicine`):
+
+**Symptom 1:**
+- `id`: 1
+- `name`: `"Cough"`
+- `description`: null
+
+**Symptom 2:**
+- `id`: 2
+- `name`: `"Hair loss"`
+- `description`: `"Hair loss in animals, also known as alopecia, can be a common and concerning symptom with various potential underlying causes."`
+
+**Medicine 1:**
+- `id`: 1
+- `name`: `"aspirin"`
+- `description`: `"Aspirin, also known by its generic name acetylsalicylic acid, is a widely used medication with analgesic (pain-relieving), antipyretic (fever-reducing), and anti-inflammatory properties."`
+- `medication`: 500
+- `startDate`: 17/12/2024
+- `endDate`: 25/12/2024
+
+**Medicine 2:**
+- `id`: 2
+- `name`: `"paracetamol"`
+- `description`: `"Paracetamol, known as acetaminophen in the United States and Canada, is a widely used over-the-counter (OTC) medication with analgesic (pain-relieving) and antipyretic (fever-reducing) properties."`
+- `medication`: 800
+- `startDate`: 3/12/2024
+- `endDate`: 15/12/2024
+
+> El formato para introducir fechas en SQL que debe usar es similar al que expresa esta cadena: `'2020-12-30'`.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.disease.Medicine;
+import org.springframework.samples.petclinic.disease.Symptom;
+
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest()
+public class Test2A extends ReflexiveTest {    
+    
+    @Autowired
+    EntityManager em;    
+    
+    @Test
+    public void test3InitialMedicine(){                        
+        Medicine m1=em.find(Medicine.class,1);
+        assertNotNull(m1,"There should exist a Medicine with id:1");
+        assertEquals("aspirin",getFieldValueReflexively(m1, "name"));
+        assertEquals("Aspirin, also known by its generic name acetylsalicylic acid, is a widely used medication with analgesic (pain-relieving), antipyretic (fever-reducing), and anti-inflammatory properties.",m1.getDescription());
+        assertEquals(500,m1.getMedication());
+        assertEquals(LocalDate.of(2024, 12, 17), m1.getStartDate());
+        assertEquals(LocalDate.of(2024, 12, 25),m1.getEndDate());
+
+
+        Medicine m2=em.find(Medicine.class,2); 
+        assertNotNull(m2,"There should exist a Medicine with id:2");       
+        assertEquals("paracetamol",getFieldValueReflexively(m2, "name"));
+        assertEquals("Paracetamol, known as acetaminophen in the United States and Canada, is a widely used over-the-counter (OTC) medication with analgesic (pain-relieving) and antipyretic (fever-reducing) properties.",m2.getDescription());
+        assertEquals(800,m2.getMedication());
+        assertEquals(LocalDate.of(2024, 12, 03), m2.getStartDate());
+        assertEquals(LocalDate.of(2024, 12, 15),m2.getEndDate());
+        
+
+    }
+    @Test
+    public void test3InitialSymptoms()
+    {
+        Symptom symptom1 = em.find(Symptom.class, 1);
+        assertNotNull(symptom1,"Cannot find sypmtom with id "+1);
+        assertEquals("Cough",getFieldValueReflexively(symptom1,"name"));
+        assertEquals(null,symptom1.getDescription());
+        
+        Symptom symptom2 = em.find(Symptom.class, 2);        
+        assertNotNull(symptom2,"Cannot find sypmtom with id "+2);
+        assertEquals("Hair loss",getFieldValueReflexively(symptom2,"name"));
+        assertEquals("Hair loss in animals, also known as alopecia, can be a common and concerning symptom with various potential underlying causes.",symptom2.getDescription());
+        
+    }        
+}
+```
+
+### Parte 2B: Relacionar las medicaciones y los síntomas con las visitas y enfermedades *(1 punto)*
+
+Modificar el script de inicialización de la base de datos para que:
+
+- La `Medicine` cuyo id es 1 (Aspirin) se asocie con la `Disease` cuyo id es 3 (Flu).
+- La `Medicine` cuyo id es 2 (Paracetamol) se asocie con la `Disease` cuyo id es 1 (Rabies).
+- El `Symptom` cuyo id es 1 tenga como posibles enfermedades incluidas las `Disease` con ids 3 y 5.
+- El `Symptom` cuyo id es 2 tenga como posibles enfermedades incluidas las `Disease` con ids 4 y 5.
+- El `Symptom` cuyo id es 1 excluya como posibles enfermedades las `Disease` con id 1 y 2.
+- El `Symptom` cuyo id es 2 excluya como posible enfermedad la `Disease` con id 3.
+- La `Visit` cuyo id es 1 tenga asociados los síntomas 1 y 2.
+
+> El orden en que aparecen los INSERT en el script de inicialización de la base de datos es relevante al definir las asociaciones.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.disease.Medicine;
+import org.springframework.samples.petclinic.disease.Symptom;
+
+import org.springframework.samples.petclinic.visit.Visit;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest
+public class Test2B extends ReflexiveTest {
+   
+    @Autowired
+    EntityManager em;
+    
+    @Test
+    public void test2BMedicinetLinks() {        
+        checkContainsById(Medicine.class,1,"getPrescribedfor",3,em);
+        checkContainsById(Medicine.class,2,"getPrescribedfor",1,em);        
+    }
+
+    @Test
+    public void test2BSymptomsLinks() {        
+        checkContainsById(Symptom.class,1,"getIncludedDiseases",3,em);
+        checkContainsById(Symptom.class,1,"getIncludedDiseases",5,em);
+        checkContainsById(Symptom.class,2,"getIncludedDiseases",4,em);
+        checkContainsById(Symptom.class,2,"getIncludedDiseases",5,em);
+
+        checkContainsById(Symptom.class,1,"getExcludedDiseases",1,em);
+        checkContainsById(Symptom.class,1,"getExcludedDiseases",2,em);
+        checkContainsById(Symptom.class,2,"getExcludedDiseases",3,em);
+    }
+
+    @Test
+    public void test2BVisitsLinks() {
+                         
+        checkContainsById(Visit.class,1,"getSymptoms",1,em);
+        checkContainsById(Visit.class,1,"getSymptoms",2,em);
+        
+    }   
+}
+```
+
+---
+
+## Test 3 – Creación y modificación de un controlador y un componente frontend de visualización de la historia clínica de las mascotas
+
+### Parte 3A – Creación de controlador de historia clínica de las mascotas *(1 punto)*
+
+Modificar la clase `HistoryController` para que responda a peticiones tipo `GET` en la URL:
+```
+http://localhost:8080/api/v1/pets/{petID}/history
+```
+
+Para ello, el controlador debe usar el servicio de gestión de visitas (`VisitService`). Es importante que dicho controlador devuelva los datos de las visitas y las enfermedades asociadas a la mascota en el siguiente formato:
+```json
+{
+  "petName": "Leo",
+  "visits": [
+    { "visitDate": "12/10/2024", "disease": null },
+    { "visitDate": "18/11/2024", "disease": "Flu" }
+  ]
+}
+```
+
+Este endpoint de la API debe estar accesible únicamente para usuarios de tipo `Vet` o de tipo `Owner` (que tengan la authority `"VET"` o bien la authority `"OWNER"`). Si se pide la historia de un pet cuyo id no está en la BD se deberá devolver un código de respuesta **404**.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+public class Test3a {
+    @Autowired
+	private WebApplicationContext context;
+	
+	private MockMvc mockMvc;
+
+    private String url = "/api/v1/pets/12/history";
+	@BeforeEach
+	public void setup() {
+		mockMvc = MockMvcBuilders
+		.webAppContextSetup(context)
+		.apply(SecurityMockMvcConfigurers.springSecurity())
+		.build();
+	}    	
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test3aVetsCanGetDiseaseHistory() throws JsonProcessingException, Exception{
+        mockMvc.perform(get(url))
+			.andExpect(status().isOk());			
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "owner1", authorities = {"OWNER"})
+    public void test3aOwnersCanGetDiseaseHistory() throws JsonProcessingException, Exception{
+        mockMvc.perform(get(url))
+			.andExpect(status().isOk());			
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test3aDiseaseHistoryStructure() throws JsonProcessingException, Exception{
+        mockMvc.perform(get(url))
+			.andExpect(status().isOk())			
+            .andExpect(jsonPath("$.petName", is("Lucky")))
+            .andExpect(jsonPath("$.visits", hasSize(2)))
+            .andExpect(jsonPath("$.visits[0].visitDate", is("2024-12-10")))
+            .andExpect(jsonPath("$.visits[0].disease", is("Rabies Shot")));        
+    }
+
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test3aCannotGetHistoryOfNonExistentPet() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/pets/999/history"))
+			.andExpect(status().isNotFound());	        
+    }
+
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "clinic_owner1", authorities = {"CLINIC_OWNER"})
+    public void test3aClinicOwnersCannotGetDisease() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get(url))
+			.andExpect(status().isForbidden());	        
+    }
+}
+```
+
+### Parte 3B – Creación de un componente frontend para la visualización de la historia clínica *(1 punto)*
+
+Modificar el componente React proporcionado en el fichero `frontend/src/disease/history/index.js` para que muestre un listado de las visitas y enfermedades diagnosticadas para una mascota. Para ello debe hacer uso de la API lanzando una petición tipo `GET` contra la URL `api/v1/pets/{petID}/history`.
+
+Este componente debe:
+- Tomar como propiedad llamada `id` el identificador de la mascota.
+- Mostrar el nombre de la mascota como título de nivel 1 (`<h1>`).
+- Mostrar una tabla con las fechas de las visitas (columna `"Date"`) y los nombres de las enfermedades diagnosticadas (columna `"Disease"`). Se recomienda usar el componente `Table` de reactstrap.
+- **No incluir etiquetas adicionales** como listas, divs, spans, etc.
+
+> Para poder lanzar esta prueba puede colocarse en la carpeta de frontend y ejecutar el comando `npm test` y pulsar `a` en el menú de comandos de jest. Nótese que previamente debe haber lanzado al menos una vez el comando `npm install`.
+
+
+---
+
+## Test 4 – Anotar el repositorio de Enfermedades con una consulta compleja
+
+Modificar la consulta personalizada que puede invocarse a través del método `findEpidemicDiseases` del repositorio `DiseaseRepository` (alojado en el paquete `org.springframework.samples.petclinic.disease`) que reciba como parámetros:
+- Un conjunto de tipos de mascotas.
+- Dos fechas que definen un rango (la primera es anterior a la segunda).
+- Un entero que representa un número de diagnósticos.
+
+El objetivo es que devuelva todas las enfermedades diagnosticadas entre los tipos de mascotas especificados en alguna visita durante el periodo especificado, tales que estas enfermedades han sido diagnosticadas como mínimo el número de veces que indica el último parámetro. Este método permitirá encontrar enfermedades con visos de epidemia entre la población de una serie de tipos de mascotas durante un periodo indicado.
+
+**Ejemplo:** Sea la siguiente tabla de visitas y diagnósticos entre el 12 de noviembre de 2024 y el 17 de diciembre de 2024:
+
+| Pet | PetType | Date (from Visit) | Diagnose |
+|-----|---------|-------------------|----------|
+| {id:1, name:"Leo"} | {id:1, name:"Cat"} | 13/11/2024 | {id:4, name:"Toxoplasmosis"} |
+| {id:3, name:"Rosy"} | {id:2, name:"Dog"} | 14/11/2024 | {id:1, name:"Rabies Shot"} |
+| {id:2, name:"Basil"} | {id:6, name:"Hamster"} | 17/11/2024 | {id:1, name:"Rabies Shot"} |
+| {id:4, name:"Jewel"} | {id:2, name:"Dog"} | 18/11/2024 | {id:1, name:"Rabies Shot"} |
+| {id:10, name:"Mulligan"} | {id:2, name:"Dog"} | 29/11/2024 | {id:5, name:"Lyme Disease"} |
+| {id:12, name:"Lucky"} | {id:2, name:"Dog"} | 05/12/2024 | {id:3, name:"Flu"} |
+| {id:12, name:"Lucky"} | {id:2, name:"Dog"} | 10/12/2024 | {id:1, name:"Rabies Shot"} |
+| {id:8, name:"Max"} | {id:1, name:"Cat"} | 16/12/2024 | {id:1, name:"Rabies Shot"} |
+
+Si invocamos al método con los parámetros: `petTypes={"dog","cat"}`, `startDate=12 de noviembre de 2024`, `endDate=16 de diciembre de 2024`, `diagnoses=2`. El resultado debería ser un conjunto que contenga la enfermedad `"Rabies Shot"` puesto que para perros y gatos en esas fechas hubo siete visitas con diagnóstico, y cuatro de ellas fueron de dicha enfermedad. Las enfermedades `"Flu"`, `"Toxoplasmosis"` y `"Lyme Disease"` no aparecerían puesto que durante el periodo indicado solamente se diagnosticaron una vez para el tipo de mascotas analizados.
+
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.disease.Disease;
+import org.springframework.samples.petclinic.disease.DiseaseRepository;
+import org.springframework.samples.petclinic.pet.PetType;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest
+public class Test4 {
+    
+    @Autowired
+    DiseaseRepository dr;
+        
+    @Autowired
+    EntityManager em;
+    @Test
+    public void test() {
+        validatefindByComplexCriteria();
+    }    
+
+    private void 
+    validatefindByComplexCriteria() {
+        PetType cats=em.find(PetType.class, 1);
+        PetType dogs=em.find(PetType.class, 2);
+        PetType hamsters=em.find(PetType.class, 6);
+        Set<Disease> diseases = dr.findEpidemicDiseases(            
+            Set.of(dogs,cats),    
+            LocalDateTime.of(2024,11,12,0,0,0),
+            LocalDateTime.of(2024, 12,17,0,0,0),
+            2
+        );
+        assertNotNull(diseases);
+        assertEquals(1, diseases.size());
+        assertEquals("Rabies Shot",diseases.iterator().next().getName());
+
+        diseases = dr.findEpidemicDiseases(            
+            Set.of(dogs,cats),    
+            LocalDateTime.of(2024,11,12,0,0,0),
+            LocalDateTime.of(2024, 12, 17,0,0,0),
+            1
+        );
+        assertNotNull(diseases);
+        assertEquals(4, diseases.size());
+        
+        diseases = dr.findEpidemicDiseases(            
+            Set.of(dogs,cats),    
+            LocalDateTime.of(2024,11,12,0,0,0),
+            LocalDateTime.of(2024, 12, 17,0,0,0),
+            5
+        );
+        assertNotNull(diseases);
+        assertEquals(0, diseases.size());
+
+        diseases = dr.findEpidemicDiseases(            
+            Set.of(dogs,cats),    
+            LocalDateTime.of(2000,11,12,0,0,0),
+            LocalDateTime.of(2000, 12, 11,0,0,0),
+            1
+        );
+        assertNotNull(diseases);
+        assertEquals(0, diseases.size());
+
+        diseases = dr.findEpidemicDiseases(            
+            Set.of(dogs),    
+            LocalDateTime.of(2024,11,12,0,0,0),
+            LocalDateTime.of(2024, 12, 17,0,0,0),
+            2
+        );
+        assertNotNull(diseases);
+        assertEquals(1, diseases.size());
+        assertEquals("Rabies Shot",diseases.iterator().next().getName());
+
+        diseases = dr.findEpidemicDiseases(            
+            Set.of(cats),    
+            LocalDateTime.of(2024,11,12,0,0,0),
+            LocalDateTime.of(2024, 12, 17,0,0,0),
+            1
+        );
+        assertNotNull(diseases);
+        assertEquals(2, diseases.size());  
+        
+        diseases = dr.findEpidemicDiseases(            
+            Set.of(hamsters),    
+            LocalDateTime.of(2024,11,12,0,0,0),
+            LocalDateTime.of(2024, 12, 17,0,0,0),
+            1
+        );
+        assertNotNull(diseases);
+        assertEquals(1, diseases.size());
+        assertEquals("Rabies Shot",diseases.iterator().next().getName());    
+
+    }       
+}
+```
+
+---
+
+## Test 5 – Implementar una prueba para un algoritmo de validación de la aplicación de la medicación
+
+En la clínica se ha decidido crear un sistema informático que permita validar la medicación a aplicar a las mascotas por el personal antes de suministrarlo. El algoritmo tomará como parámetros:
+- Un valor de dosis de medicación máxima a aplicar.
+- Una mascota.
+- Una enfermedad.
+- La medicina concreta que se aplicará (que incluirá la cantidad de medicación y fecha de fin del tratamiento).
+
+El algoritmo debe comprobar que, para **dosis de medicación superiores a lo indicado por el primer parámetro del método** (por ejemplo, 600), para **perros con enfermedades contagiosas**, a día del suministro de la dosis inicial (usar el día actual como día de comienzo de la toma de la primera dosis) al animal **no se le puede pautar más de 7 días de medicación** (tomar como día de finalización del tratamiento la fecha de fin del tratamiento especificada en la medicina). En caso contrario, se lanzará una excepción de tipo `IncorrectDoseException`.
+
+La interfaz del algoritmo está especificada en la interfaz `MedicineValidatorAlgorithm` que se encuentra en el paquete `org.springframework.samples.petclinic.disease.medicinevalidator`. Se proporcionan **cinco implementaciones** del algoritmo (una correcta y cuatro incorrectas).
+
+Modifique la clase de pruebas llamada `MedicineValidatorTest` que se encuentra en la carpeta `scr/main/test/disease` y especifique tantos métodos con casos de prueba como considere necesarios para validar el correcto funcionamiento del algoritmo. La clase tiene un atributo de tipo `MedicineValidatorAlgorithm` llamado `algorithm`; use dicho atributo como sujeto bajo prueba en todos sus métodos de prueba.
+
+> Su implementación del test **no debe usar** mocks, ni anotaciones de pruebas de Spring (`@DataJpaTest`, `@SpringBootTest`, etc.), ni tests parametrizados. Todos los métodos anotados con `@Test` deben ser sin parámetros.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.samples.petclinic.disease.MedicineValidatorTest;
+import org.springframework.samples.petclinic.disease.medicinevalidator.AllwaysThrowsIncorrectMedicineExceptionDetectionAlgorithm;
+import org.springframework.samples.petclinic.disease.medicinevalidator.InvertedIncorrectMedicineDetectionRuleValidatorAlgorithm;
+import org.springframework.samples.petclinic.disease.medicinevalidator.IncorrectPeriodMedicineDetectionRuleValidatorAlgorithm;
+import org.springframework.samples.petclinic.disease.medicinevalidator.IncorrectPetTypeAndDiseaseValidatorAlgorithm; 
+import org.springframework.samples.petclinic.disease.medicinevalidator.InvertedIncorrectMedicineDetectionRuleValidatorAlgorithm;
+import org.springframework.samples.petclinic.disease.medicinevalidator.MedicineValidatorAlgorithm;
+
+import org.springframework.samples.petclinic.disease.medicinevalidator.ValidMedicineValidatorAlgorithm;
+import junit.framework.AssertionFailedError;
+
+public class Test5 extends ReflexiveTest{    
+ 
+    @ParameterizedTest    
+    @MethodSource("provideAlgorithmsAndExpectedResults")
+    public void testCampaignDesignAlgorithm(MedicineValidatorAlgorithm alg, boolean shouldFail){
+        // Configure SUT:
+        MedicineValidatorTest cdaTest=new MedicineValidatorTest();
+        cdaTest.setAlgorithm(alg);
+        int numberOfExecutedTestMethods=0;
+        // ExecuteTests        
+        numberOfExecutedTestMethods=executeTests(cdaTest, shouldFail);             
+        if(numberOfExecutedTestMethods<1)  
+            fail("You have not specified any test method!");    
+    }
+
+    private void executeAfterEach(MedicineValidatorTest cdaTest) {
+        Method[] methods=cdaTest.getClass().getDeclaredMethods();
+        for(Method method:methods){
+            if(isMethodAnnotatedWithAfterEach(method)){
+                try {                    
+                    method.invoke(cdaTest);                    
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    System.out.println("Error while trying to invoke method:"+method.getName());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private int executeTests(MedicineValidatorTest cdaTest, boolean shouldFail) {
+        int executed=0;
+        Method[] methods=cdaTest.getClass().getDeclaredMethods();
+        boolean failDetected=false;
+        String message="No test method detected the faulty implementation of the algorithm";
+        for(Method method:methods){
+            if(isMethodAnnotatedWithTest(method)){
+                try {                                        
+                    executed++;
+                    executeBeforeEach(cdaTest);
+                    method.invoke(cdaTest);     
+                    executeAfterEach(cdaTest);
+                }catch(AssertionError assertionError){
+                    failDetected=true;
+                    message="The test method named "+method.getName()+" failed (and should not)! AsssertionError: "+assertionError.getMessage();
+                } catch(InvocationTargetException e){
+                    if(e.getTargetException() instanceof org.opentest4j.AssertionFailedError){
+                        failDetected=true;
+                        message="The test method named "+method.getName()+" failed (and should not)! AsssertionError: "
+                                    +((org.opentest4j.AssertionFailedError)e.getTargetException()).getMessage();
+                    }else
+                        System.out.println("Error while trying to invoke method:"+method.getName());                    
+                }catch (IllegalAccessException | IllegalArgumentException  e) {                    
+                    System.out.println("Error while trying to invoke method:"+method.getName());                    
+                }
+            }
+        }
+        if(failDetected!=shouldFail)
+            fail(message);
+        return executed;
+    }
+
+    private void executeBeforeEach(MedicineValidatorTest cdaTest) {
+        Method[] methods=cdaTest.getClass().getDeclaredMethods();
+        for(Method method:methods){
+            if(isMethodAnnotatedWithBeforeEach(method)){
+                try {
+                    method.invoke(cdaTest);
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    System.out.println("Error while trying to invoke method:"+method.getName());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }    
+
+    public static Stream<Arguments> provideAlgorithmsAndExpectedResults(){
+        return Stream.of(
+            Arguments.of(new ValidMedicineValidatorAlgorithm(), false),
+            Arguments.of(new AllwaysThrowsIncorrectMedicineExceptionDetectionAlgorithm(), true),
+            Arguments.of(new IncorrectPeriodMedicineDetectionRuleValidatorAlgorithm(), true),
+            Arguments.of(new InvertedIncorrectMedicineDetectionRuleValidatorAlgorithm(), true),
+            Arguments.of(new IncorrectPetTypeAndDiseaseValidatorAlgorithm(), true),
+            Arguments.of(new InvertedIncorrectMedicineDetectionRuleValidatorAlgorithm(), true)
+        );
+    }
+        
+}
+```
+
+# Control práctico de DP1 2024-2025 (Control check 2)
+
+## Enunciado
+
+En este ejercicio, añadiremos la funcionalidad de ofrecer servicios de belleza a las mascotas (en inglés pet grooming) de forma combinada junto a las visitas a los veterinarios. Esto lo modelaremos con una clase llamada `GroomingType` que incluye una descripción. Ejemplos de `GroomingType` pueden ser “cepillado”, “baño”, “baño con masaje” o “corte de uñas”. Los `GroomingType` se agrupan en `GroomingPackage`, que incluyen, además del nombre, una descripción y su coste. Los `GroomingType` están disponibles para un determinado tipo de mascotas (`PetType`). Por ejemplo, el “corte de uñas” está disponibles para gatos y perros, pero no para serpientes. Un `GroomingPackage` puede constar únicamente de un GroomingType como “baño con masaje” o de varios `GroomingType` como “cepillado + baño + corte de uñas”. Finalmente, los usuarios compran un Coupon de un determinado `GroomingPackage` que van consumiendo (`GroomingConsumed`) en una o varias visitas. Los `Coupon` además tiene una fecha de validez determinada por los atributos `startDate` (inicio) y `expirationDate` (caducidad). Cuando un servicio de belleza es consumido (`GroomingConsumed`) en una visita, se debe indicar el nombre del esteticista de mascotas que realizó el servicio, el número de minutos invertidos y, además, es posible agregar un comentario sobre el servicio.
+
+El diagrama UML que describe estas clases y relaciones es el siguiente:
+
+```mermaid
+classDiagram
+    class PetType {
+        <<Blue Class>>
+    }
+    
+    class Visit {
+        <<Blue Class>>
+    }
+    
+    class GroomingType {
+        <<Blue Class>>
+        -String description
+        -Boolean premium
+    }
+    
+    class GroomingPackage {
+        <<Blue Class>>
+        -String name
+        -String description
+        -Double cost
+    }
+    
+    class Coupon {
+        <<Red Class - Entity>>
+        -Integer id
+        -LocalDate startDate
+        -LocalDate expirationDate
+    }
+    
+    class GroomingConsumed {
+        <<Red Class - Entity>>
+        -Integer id
+        -String petBeautician
+        -Integer minutes
+        -String comment
+    }
+
+    GroomingType "*" --> "1" PetType : available for
+    GroomingPackage "*" --> "1..*" GroomingType : contents
+    Coupon "*" --> "1" GroomingPackage : groomingPackage
+    GroomingConsumed "*" --> "1" Visit : appliedDuring
+    GroomingConsumed "*" --> "1" GroomingType : typeConsumed
+    GroomingConsumed "*" --> "0..1" Coupon : consumed
+```
+
+Las clases para las que realizaremos el mapeo objeto-relacional como entidades JPA se han señalado en rojo. Las clases en azul son clases que se proporcionan ya mapeadas pero con las que se trabajará durante el control de laboratorio.
+
+Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Si desea ver el resultado que arrojarían las pruebas en backend, puede ejecutarlas (bien mediante su entorno de desarrollo favorito, bien mediante el comando `mvnw test` en la carpeta raíz del proyecto). Cada ejercicio correctamente resuelto valdrá dos puntos, el número de casos de prueba de cada ejercicio puede variar entre uno y otro y la nota se calculará en base al porcentaje de casos de prueba que pasan. Por ejemplo, si pasan la mitad (50%) de los casos de prueba de un ejercicio, usted obtendrá un punto (2*0,5=1), y si pasan un 10% obtendrá 0,2 puntos.
+
+Para comenzar el control debe aceptar la tarea de este control práctico a través del siguiente enlace: https://classroom.github.com/a/XYaucvyc
+
+Al aceptar dicha tarea, se creará un repositorio único individual para usted, debe usar dicho repositorio para realizar el control práctico. Debe entregar la actividad en EV asociada al control check proporcionando como texto la dirección url de su repositorio personal. Recuerde que además debe entregar su solución del control.
+
+La entrega de su solución al control se realizará mediante un único comando `git push` a su repositorio individual. Recuerde que debe hacer push antes de cerrar sesión en el ordenador y abandonar el aula, de lo contrario, su intento se evaluará como no presentado. Su primera tarea en este control será clonar (recuerde que si va a usar los equipos del aula para realizar el control necesitará usar un token de autenticación de GitHub como clave. Tiene un documento de ayuda a la configuración en el propio repositorio del control). A continuación, deberá importar el proyecto en su entorno de desarrollo favorito y comenzar los ejercicios abajo listados. Al importar el proyecto, el mismo puede presentar errores de compilación. No se preocupe, si existen, dichos errores irán despareciendo conforme usted vaya implementando los distintos ejercicios del control.
+
+**Notas Importantes**
+
+> **Nota importante 1:** No modifique los nombres de las clases ni la signatura (nombre, tipo de respuesta y parámetros) de los métodos proporcionados como material de base para el control. Las pruebas que se usan para la evaluación dependen de que las clases y los métodos tengan dicha estructura y nombres proporcionados. Si los modifica probablemente no pueda hacer que pasen las pruebas, y obtendrá una mala calificación.
+
+> **Nota importante 2:** No modifique las pruebas unitarias proporcionadas como parte del proyecto bajo ningún concepto. Aunque modifique las pruebas en su copia local del proyecto, éstas serán restituidas mediante un comando git previamente a la ejecución de las pruebas para la emisión de la nota final, por lo que sus modificaciones en las pruebas no serán tenidas en cuenta en ningún momento.
+
+> **Nota importante 3:** Mientras haya ejercicios no resueltos habrá tests que no funcionan y, por tanto, el comando `mvnw install` finalizará con error. Esto es normal debido a la forma en la que está planteado el control y no hay que preocuparse por ello. Si se quiere probar la aplicación se puede ejecutar de la forma habitual pese a que mvn install finalice con error.
+
+> **Nota importante 4:** La descarga del material de la prueba usando git, y la entrega de su solución con git a través del repositorio GitHub creado a tal efecto forman parte de las competencias evaluadas durante el examen, por lo que no se aceptarán entregas que no hagan uso de este medio, y no se podrá solicitar ayuda a los profesores para realizar estas tareas.
+
+> **Nota importante 5:** No se aceptarán como soluciones válidas proyectos cuyo código fuente no compile correctamente o que provoquen fallos al arrancar la aplicación en la inicialización del contexto de Spring. Las soluciones cuyo código fuente no compile o incapaces de arrancar el contexto de Spring serán evaluadas con una nota de 0.
+
+> **Nota importante 6:** Los ejercicios del examen son todos independientes salvo el 2 que depende del 1.
+
+## Test 1 – Creación de las entidades GroomingConsumed y Coupon y sus relaciones (2 puntos)
+
+Modifique las clases `GroomingConsumed` y `Coupon` alojadas en el paquete `org.springframework.samples.petclinic.grooming` para que sean una entidad y elimine las anotaciones `@Transient` de estas clases. Estas entidades deben tener los siguientes atributos y restricciones:
+
+**Para la clase `GroomingConsumed`:**
+
+- Un atributo de tipo entero `Integer` llamado `id` que actúe como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
+
+- Un atributo de tipo cadena `String` llamado `petBeautician` obligatorio que debe tener una longitud mínima de 5 caracteres y máximo de 60 y no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.).
+
+- Un atributo de tipo entero `Integer` llamado `minutes` obligatorio que debe ser un número estrictamente positivo.
+
+- Un atributo opcional de tipo cadena `String` llamado `comment` para registrar los comentarios sobre el servicio realizado.
+
+**Para la clase `Coupon`:**
+
+- El atributo de tipo entero `Integer` llamado `id` actuará como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
+
+- Un atributo de tipo fecha `LocalDate` llamado `startDate`, que representa la fecha en que comienza la oferta. Seguirá el formato `dd/MM/yyyy` (puede usar como ejemplo la clase `Pet` y su fecha de nacimiento para ver cómo se especifica dicho formato, pero nótese que el patrón del formato es distinto). Este atributo debe ser obligatorio y se almacenará en la base de datos con el nombre de columna `start`.
+
+- El atributo de tipo fecha `LocalDate` llamado `expiryDate`, que representa la fecha en que termina la oferta, seguirá el formato `dd/MM/yyyy`. Este atributo debe ser obligatorio. En la base de datos se almacenará con el nombre de columna `finish`.
+
+Además, se pide crear las siguientes relaciones entre las entidades.
+
+1. Cree tres relaciones unidireccionales desde `GroomingConsumed` hacia `Visit` utilizando el atributo `appliedDuring`, de `GroomingConsumed` hacia `GroomingType` utilizando el atributo `typeConsumed` y de `GroomingConsumed` hacia Coupon utilizando el atributo consumed, que expresen las relaciones que aparecen en el diagrama UML (mostrado en la primera página de este enunciado) respetando sus cardinalidades.
+
+2. Cree una relación unidireccional desde `Coupon` hacia `GroomingPackage` que represente la que aparece en el diagrama UML, teniendo en cuenta la cardinalidad y usando el atributo `groomingPackage` en la clase `Coupon`.
+
+Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, el atributo `groomingPackage` no puede ser nulo puesto que la cardinalidad es 1.
+
+Finalmente, modifique las interfaces `GroomingConsumedRepository` y `CouponRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic.grooming;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.visit.Visit;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+
+@DataJpaTest
+public class Test1 extends ReflexiveTest {
+    
+    @Autowired(required = false)
+    GroomingConsumedRepository repogc;
+    
+    @Autowired(required = false)
+    CouponRepository repo;    
+    
+    @Autowired(required = false)
+    EntityManager em;    
+
+    @Test
+    public void test1Entities() {
+        assertTrue(classIsAnnotatedWith(GroomingConsumed.class,Entity.class));
+        assertTrue(classIsAnnotatedWith(Coupon.class,Entity.class));
+    }
+
+
+    @Test
+    public void test1CouponAttributes() {
+        Coupon c = createCoupon();
+
+        checkThatFieldsAreMandatory(c, em, "startDate", "expiryDate");
+
+        checkThatFieldIsAnnotatedWith(Coupon.class, "startDate", Column.class);
+        checkThatFieldIsAnnotatedWithDateTimeFormat(Coupon.class,"startDate","dd/MM/yyyy");
+        checkThatFieldIsAnnotatedWith(Coupon.class, "expiryDate", Column.class);
+        checkThatFieldIsAnnotatedWithDateTimeFormat(Coupon.class,"expiryDate","dd/MM/yyyy");
+    }
+
+    @Test
+    @Transactional
+    public void test1CouponRelationships() {
+        Coupon c = createCoupon();
+        checkThatFieldIsAnnotatedWith(Coupon.class, "groomingPackage", ManyToOne.class);
+        checkThatFieldsAreMandatory(c, em, "groomingPackage");
+    }
+
+    @Test
+    public void test1GroomingConsumedAttributes() {
+        GroomingConsumed gc = createGroomingConsumed();
+        Map<String, List<Object>> invalidValues = Map.of(
+            "petBeautician", List.of("Juan", "       ", LONGER_THAN_60_STRING),
+            "minutes", List.of(-5, 0)
+        );
+
+        checkThatFieldsAreMandatory(gc, em, "petBeautician", "minutes");
+        checkThatValuesAreNotValid(gc, invalidValues, em);
+    }
+
+    @Test
+    public void test1GroomingConsumedRelationships() {
+        GroomingConsumed gc = createGroomingConsumed();
+
+        checkThatFieldIsAnnotatedWith(GroomingConsumed.class, "appliedDuring", ManyToOne.class);
+        checkThatFieldIsAnnotatedWith(GroomingConsumed.class, "typeConsumed", ManyToMany.class);
+        checkThatFieldIsAnnotatedWith(GroomingConsumed.class, "consumed", ManyToOne.class);
+
+        checkThatFieldsAreMandatory(gc, em, "appliedDuring", "consumed");
+    }
+
+    @Test
+    public void test1RepositoriesExist(){
+        assertNotNull(repogc,"The GroomingConsumed repository was not injected into the tests, its autowired value was null");
+        Object v = repogc.findById(120);
+        assertFalse(null!=v && ((Optional<?>)v).isPresent(), "No result (null) should be returned for a GroomingConsumed that does not exist");
+
+        assertNotNull(repo,"The Coupon repository was not injected into the tests, its autowired value was null");
+        v = repo.findById(120);
+        assertFalse(null!=v && ((Optional<?>)v).isPresent(), "No result (null) should be returned for a Coupon that does not exist");
+    }
+
+
+    private GroomingConsumed createGroomingConsumed() {
+        GroomingConsumed gc = new GroomingConsumed();
+        gc.setPetBeautician("Juan Saimaza");
+        gc.setMinutes(60);
+        gc.setAppliedDuring(createVisit());
+        gc.setConsumed(createCoupon());
+        gc.setTypeConsumed(createListTypeConsumed());
+        return gc;
+    }
+
+
+    private Coupon createCoupon() {
+        Coupon c = new Coupon();
+        c.setStartDate(LocalDate.of(2024, 12, 10));
+        c.setExpiryDate(LocalDate.of(2024, 12, 20));
+        c.setGroomingPackage(createGroomingPackage());
+        return c;
+    }
+
+    private GroomingPackage createGroomingPackage() {
+        return em.find(GroomingPackage.class, 1);
+    }
+
+    private Visit createVisit() {
+        return em.find(Visit.class, 5);
+    }
+
+    private List<GroomingType> createListTypeConsumed() {
+        GroomingType t1=em.find(GroomingType.class, 1);
+        GroomingType t2=em.find(GroomingType.class, 2);
+        GroomingType t3=em.find(GroomingType.class,3);
+
+        return List.of(t1,t2,t3);
+    }
+}
+```
+
+## Test 2 – Modificación del script de inicialización de la base de datos (2 puntos)
+
+Modifique el script de inicialización de la base de datos, para que se creen los siguientes Coupon:
+
+**Coupon 1:**
+
+- `id`: 1
+
+- `startDate`: 05-01-2024
+
+- `expiryDate`: 21-02-2024
+
+- `grooming package`: 1
+
+**Coupon 2:**
+
+- `id`: 2
+
+- `startDate`: 01-12-2024
+
+- `expiryDate`: 31-1-2025
+
+- `grooming package`: 3
+
+
+Modifique el script de inicialización de la base de datos, para que se creen los siguientes `GroomingConsumed`:
+
+**GroomingConsumed 1:**
+
+- `id`: 1
+
+- `petBeautician`: "Mariano Rojas"
+
+- `minutes`: 20
+
+- `comments`: `"A new visit is recommended in 15 days."`
+
+
+**GroomingConsumed 2:**
+
+- `id`: 2
+
+- `petBeautician`: `"Felipe Pineda"`
+
+- `minutes`: 30
+
+- `comments`: `"Anti-allergy shampoo was used."`
+
+**Relaciones a definir:**
+
+- En el `GroomingConsumed` cuyo `id` es 1 se consume `GroomingType 1` y `GroomingType 3`.
+
+- En el `GroomingConsumed` cuyo `id` es 2 se consume `GroomingType 7`.
+
+- El `GroomingConsumed` cuyo `id` es 1 se asocia con el `Coupon 1` y con la `Visit 1`.
+
+- El `GroomingConsumed` cuyo `id` es 2 se asocia con el `Coupon 2` y con la `Visit 10`.
+
+Tenga en cuenta que el orden en que aparecen los INSERT en el script de inicialización de la base de datos es relevante al definir las asociaciones.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic.grooming;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDate;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest
+public class Test2 extends ReflexiveTest {
+    @Autowired(required = false)
+    GroomingPackageRepository gr;
+    @Autowired(required = false)
+    CouponRepository cr;
+    @Autowired
+    EntityManager em;
+
+    @Test
+    public void test2InitialCoupon1() {
+        Coupon c1 = em.find(Coupon.class, 1);
+        assertNotNull(c1, "There should exist a Coupon with id: 1");
+        assertEquals(LocalDate.of(2024,01,05),c1.getStartDate(), "incorrect starting date for id:1");
+        assertEquals(LocalDate.of(2024,02,21),c1.getExpiryDate(), "incorrect expiry date for id:1");
+        assertNotNull(c1.getGroomingPackage());
+        assertEquals(1, c1.getGroomingPackage().getId());
+    }
+
+    @Test
+    public void test2InitialCoupon2() {
+        Coupon c2 = em.find(Coupon.class, 2);
+        assertNotNull(c2, "There should exist a Coupon with id: 2");
+        assertEquals(LocalDate.of(2024,12,1),c2.getStartDate(), "incorrect starting date for id:2");
+        assertEquals(LocalDate.of(2025,1,31),c2.getExpiryDate(), "incorrect end date for id:2");
+        assertNotNull(c2.getGroomingPackage());
+        assertEquals(3, c2.getGroomingPackage().getId());
+    }
+    
+
+    @Test
+    public void test2InitialGroomingConsumed1() {
+        GroomingConsumed gc = em.find(GroomingConsumed.class, 1);
+        assertNotNull(gc, "There should exist a GroomingConsumed with id: 1");
+        assertEquals("Mariano Rojas", gc.getPetBeautician());
+        assertEquals(20, gc.getMinutes());
+        assertEquals("A new visit is recommended in 15 days.", gc.getComment());
+        assertNotNull(gc.getAppliedDuring());
+        assertEquals(1, gc.getAppliedDuring().getId());
+        assertNotNull(gc.getConsumed());
+        Object id = getFieldValueReflexively(gc.getConsumed(), "id");
+        assertEquals(1, id);
+        assertNotNull(gc.getTypeConsumed());
+        Set<Integer> values = Set.of(1, 3);
+        assertTrue(gc.getTypeConsumed().stream().allMatch((GroomingType t) -> values.contains(t.getId())), "Type Consumed does not match the expected values");
+    }
+
+    @Test
+    public void test2InitialGroomingConsumed2() {
+        GroomingConsumed gc = em.find(GroomingConsumed.class, 2);
+        assertNotNull(gc, "There should exist a GroomingConsumed with id: 2");
+        assertEquals("Felipe Pineda", gc.getPetBeautician());
+        assertEquals(30, gc.getMinutes());
+        assertEquals("Anti-allergy shampoo was used.", gc.getComment());
+        assertNotNull(gc.getAppliedDuring());
+        assertEquals(10, gc.getAppliedDuring().getId());
+        assertNotNull(gc.getConsumed());
+        Object id = getFieldValueReflexively(gc.getConsumed(), "id");
+        assertEquals(2, id);
+        assertNotNull(gc.getTypeConsumed());
+        Set<Integer> values = Set.of(7);
+        assertTrue(gc.getTypeConsumed().stream().allMatch((GroomingType t) -> values.contains(t.getId())), "Type Consumed does not match the expected values");
+    }
+
+}
+```
+
+## Test 3 – Creación de controlador y componente frontend para GroomingTypes *(2 puntos)*
+
+### Test 3A – Creación del controlador para devolver los Grooming Types disponibles
+Crear un método en el controlador `GroomingTypeController` (alojada en el paquete `org.springframework.samples.petclinic.grooming`) que permita devolver todos los `GroomingType` disponibles para el `petType` y los nombres de los paquetes donde se puede encontrar estos `GroomingType`. El método debe responder a peticiones tipo GET en la URL:
+
+http://localhost:8080/api/v1/groomingtypes/pettype/{petTypeID}
+
+Es importante que dicho controlador devuelva los datos en el siguiente formato:
+```json
+{
+    "petType": "cat",
+    "groomingTypes": [
+        {"name": "Hair cut", "packages": ["Hair cut + Nails", "Bath + Legs massage", "Luxury package"]},
+        ...,
+        {"name": "Walk session", "packages": ["Hair cut + Nails"]}
+    ]
+}
+```
+En caso de que el `petTypeId` proporcionado no exista, debe devolver el código de estado `404 (NOT_FOUND)`. Este endpoint de la API debería estar accesibles únicamente para usuarios de tipo `Vet` o de tipo `Owner` (que tengan la authority `"VET"` o bien la authority `"OWNER"`).
+
+Para implementar esta funcionalidad puede hacer uso del método `findPetTypeById` de `PetService` que devuelve un `PetType` dado su `id`, del método `findGroomingTypesByPetType` de `GroomingTypeService` que devuelve los `GroomingType` de un `petType` pasado por parámetro y del método `findPackageByGroomingType` de `GroomingPackageService` que devuelve los `GroomingPackage` de un `groomingType` pasado por parámetro.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic.grooming;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)	
+public class Test3A {
+
+	@Autowired
+	private WebApplicationContext context;
+	
+	private MockMvc mockMvc;
+
+	@BeforeEach
+	public void setup() {
+		mockMvc = MockMvcBuilders
+                    .webAppContextSetup(context)
+                    .apply(SecurityMockMvcConfigurers.springSecurity())
+                    .build();
+	}    	
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test2bVetsCanGettypeThatExist() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/groomingtypes/pettype/1"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.petType", is("cat")))
+		    .andExpect(jsonPath("$.groomingTypes[?(@.name=='Hair cut')].packages[*]", 
+                           containsInAnyOrder("Hair cut + Nails", "Bath + Legs massage", "Luxury package")))
+       		.andExpect(jsonPath("$.groomingTypes[?(@.name=='Nail brushing')].packages[*]", 
+                           containsInAnyOrder("Hair cut + Nails", "Bath + Legs massage", "Luxury package")))
+	        .andExpect(jsonPath("$.groomingTypes[?(@.name=='Legs massage')].packages[*]", 
+                           containsInAnyOrder("Hair cut + Nails", "Bath + Legs massage")))
+     	    .andExpect(jsonPath("$.groomingTypes[?(@.name=='Walk session')].packages[*]", 
+                           containsInAnyOrder("Hair cut + Nails")))
+            .andExpect(jsonPath("$.groomingTypes[?(@.name=='Nap')].packages[*]", 
+                           containsInAnyOrder("Luxury package")));
+    }
+
+	@Test
+	@Transactional
+	@WithMockUser(username = "vet1", authorities = {"VET"})
+	public void test3aPetTypeNotFound() throws Exception {
+        mockMvc.perform(get("/api/v1/groomingtypes/pettype/1"))
+	        .andExpect(status().isOk());
+		mockMvc.perform(get("/api/v1/groomingtypes/pettype/50"))
+			.andExpect(status().isNotFound());
+	}
+
+	@Test
+    @Transactional
+    @WithMockUser(username = "clinicOwner1", authorities = {"CLINIC_OWNER"})
+    public void test2bClinicOwnersCannotGettypes() throws JsonProcessingException, Exception{        
+       mockMvc.perform(get("/api/v1/groomingtypes/pettype/1"))
+			.andExpect(status().isForbidden());	        
+    }
+
+}
+```
+
+### Test 3B – Creación de un componente React de listado de servicios de belleza
+
+Modificar el componente React proporcionado en el fichero `frontend/src/grooming/index.js` para que muestre un listado de los tipos de servicios de belleza disponibles en el sistema para un tipo de mascota.
+
+Para ello debe hacer uso de la API lanzando una petición tipo `GET` contra la URL `api/v1/groomingtypes/pettype/{petTypeId}` creada en el apartado anterior[1].
+
+Este componente debe tomar como propiedad llamada `petTypeId` el identificador del tipo de mascota para el que se debe mostrar los tipos de servicios de belleza. Tras realizar la llamada a la API, el componente debe mostrar el nombre de la mascota como título de nivel 1 (`<h1>`) y los tipos de servicios de belleza (`GroomingType`) en una tabla (se recomienda usar el componente `Table de reactstrap`) incluyendo una columna para el nombre del tipo de servicio de belleza (`GroomingType`), y otra columna para el conjunto de paquetes de belleza (`GroomingPackage`) en las que aparece este tipo de servicio. Para esto último, el componente debe mostrar en la celda asociada una lista (preferiblemente no ordenada `<ul>`) con los nombres de los paquetes en la celda correspondiente.
+
+Para poder lanzar este test y comprobar su resultado puede colocarse en la carpeta de frontend y ejecutar el comando `npm test` y pulsar `'a'` en el menú de comandos de jest. Nótese que previamente debe haber lanzado al menos una vez el comando `npm install` para que todas las librerías de node estén instaladas.
+
+---
+
+## Test 4 – Anotar el repositorio de Grooming Packages con una consulta compleja `(2 puntos)`
+Crear una consulta personalizada que pueda invocarse a través del método `findPackagesByCostGroomingTypes` del repositorio `GroomingPackageRepository` (alojado en el paquete `org.springframework.samples.petclinic.grooming`) que reciba dos parámetros: un valor double para representar el coste máximo del `GroomingPackage` (`maxCost`), y un valor `Integer` llamado `minServices` que represente un número mínimo de servicios de belleza asociados a un `GroomingPackage`.
+
+El objetivo es devolver todos los `GroomingPackage` que tengan un precio menor o igual que maxCost, siempre que el número de tipos de servicios (`GroomingType`) que contengan los `GroomingPackage` sea igual o mayor a `minServices`.
+
+A continuación, se muestra un ejemplo, sea la siguiente tabla de grooming packages y grooming types relacionados con esos paquetes:
+
+| GroomingPackage | contents GroomingType |
+| :--- | :--- |
+| {id:1, cost:50.0} | {id: 1, name: "Hair cut"} |
+| {id:1, cost:50.0} | {id: 2, name: "Nail brushing"} |
+| {id:1, cost:50.0} | {id: 3, name: "Legs massage"} |
+| {id:1, cost:50.0} | {id: 4, name: "Walk session"} |
+| {id:1, cost:50.0} | {id: 5, name: "Wash"} |
+| {id:2, cost:30.0} | {id: 1, name: "Hair cut"} |
+| {id:2, cost:30.0} | {id: 2, name: "Nail brushing"} |
+| {id:2, cost:30.0} | {id: 3, name: "Legs massage"} |
+| {id:3, cost:20.0} | {id: 7, name: "Clipping wings"} |
+| {id:4, cost:45.0} | {id: 1, name: "Hair cut"} |
+| {id:4, cost:45.0} | {id: 2, name: "Nail brushing"} |
+| {id:4, cost:45.0} | {id: 6, name: "Nap"} |
+
+Si invocamos al método con los parámetros `maxCost=45`, `minServices=3`, el resultado debería ser el conjunto de `GroomingPackages` con `id=2` e `id=4`. Dado que el `GroomingPackage` con `id=2` tiene un cost menor que 60.0 (30.0), está asociado a 3 grooming types (1,2,3). El `GroomingPackage` con `id=4` tiene un `cost` menor que 60.0 (45.0), está asociado a 3 grooming types (1,2,6) por lo que también aparecería en el resultado.
+
+Finalmente, cree un método en la clase `GroomingPackageService` llamado `findPackagesByCostGroomingTypes` con dos parámetros: `maxCost` y `minService` (en este orden), que realice la llamada al método del repositorio y devuelva el resultado obtenido por éste.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic.grooming;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest
+public class Test4 extends ReflexiveTest {
+
+    @Autowired
+    GroomingPackageRepository gp;
+
+    @Autowired
+    EntityManager em;
+
+    @Test
+    public void testExample() {
+        List<GroomingPackage> result = gp.findPackagesByCostGroomingTypes(45, 3);
+        assertEquals(2, result.size());
+        assertEquals(2, result.get(0).getId());
+        assertEquals(4, result.get(1).getId());
+    }
+
+    @Test
+    public void testCheckMinServices() {
+        List<GroomingPackage> result = gp.findPackagesByCostGroomingTypes(60, 10);
+        assertEquals(0, result.size(), "Min services is 10, so it should not return any package");
+        result = gp.findPackagesByCostGroomingTypes(60, 1);
+        assertThat(result.stream().map((GroomingPackage p)->p.getId()).toList(), containsInAnyOrder(1,2,3,4));        
+    }
+
+    @Test
+    public void testCheckMaxCost() {
+        List<GroomingPackage> result = gp.findPackagesByCostGroomingTypes(15, 1);
+        assertEquals(0, result.size(), "Max cost is 15, so it should not return any package");
+        result = gp.findPackagesByCostGroomingTypes(35, 1);
+        assertThat(result.stream().map((GroomingPackage p)->p.getId()).toList(), containsInAnyOrder(2, 3));        
+    }
+
+    @Test
+    public void testCheckPetTypes() {
+        List<GroomingPackage> result = gp.findPackagesByCostGroomingTypes(49, 1);
+        assertEquals(3, result.size());
+        List<Integer> v = result.stream().map((GroomingPackage p)->p.getId()).toList();
+        assertThat(v, containsInAnyOrder(2, 3,4));
+        
+    }
+
+    @Test
+    public void testService() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        GroomingPackageService gs = new GroomingPackageService(gp);
+        Method findPackages = null;
+        for (Method m : gs.getClass().getMethods()) {
+            if(m.getName().equals("findPackagesByCostGroomingTypes")) {
+                findPackages = m;
+            }
+        }
+
+        if (findPackages == null) {
+            fail("Method findPackagesByCostGroomingTypes not added to service");
+        } else {
+            Object result = findPackages.invoke(gs, 60.0, 1);
+            assertNotNull(result);
+            assertEquals(gp.findPackagesByCostGroomingTypes(60, 1), result);
+        }
+    }
+
+}
+```
+
+## Test 5 – Implementar una prueba para un algoritmo de validación del coste de paquetes *(2 puntos)*
+
+En la clínica se ha decidido crear un sistema informático que permita validar el coste fijado a `GroomingPackages`. Para ello el algoritmo tomará como parámetros la instancia de `GroomingPackage` que queremos validar, el precio base de un `GroomingType` básico (atributo premium de `GroomingType` igual a falso) y el precio base de un `GroomingType` premium (atributo premium de `GroomingType` igual a verdadero).
+
+El algoritmo debe comprobar que el coste fijado para el `GroomingPackage` (es decir, su atributo cost) es superior o igual al número de `GroomingType` básicos[2] del `GroomingPackage` multiplicado por el precio base de un básico más el número de `GroomingType` premium del `GroomingPackage` multiplicado por el precio base del premium. Además, si el paquete sólo incluye `GroomingType` premium, el precio base de un `GroomingType` premium recibido por parámetro debe multiplicarse por 1,10 (es decir, tiene un suplemento del 10%). En caso contrario, se lanzará una excepción del tipo `WrongPriceException`.
+
+La interfaz del algoritmo está especificada en la interfaz `PackageCostAlgorithm` que se encuentra en el paquete `org.springframework.samples.petclinic.groomingpackages.packagecost`. Se proporcionan cinco implementaciones del algoritmo (una correcta y cuatro incorrectas).
+
+Modifique la clase de pruebas llamada `PackageCostAlgorithmTest` que se encuentra en la carpeta `src/main/test/groomingpackages` y especifique tantos métodos con casos de prueba como considere necesarios para validar el correcto funcionamiento del algoritmo. Nótese que la clase tiene un atributo de tipo `PackageCostAlgorithm` llamado `algorithm`, use dicho atributo como sujeto bajo prueba en todos sus métodos de prueba.
+
+Su implementación del test no debe usar mocks, ni anotaciones de pruebas de spring (@DataJpaTest, @SpringBootTest, etc.), ni tests parametrizados, y todos los métodos anotados con `@Test` deben ser sin parámetros.
+
+#### Notas a pie de página:
+[1] Aunque se usa la misma URL, no hace falta que el apartado anterior esté completo para poder probar este.
+
+[2] Un `GroomingType básico` es aquel cuyo atributo premium es igual a false. Un `GroomingType premium` es aquel cuyo atributo premium es igual a true.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic.grooming;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.samples.petclinic.grooming.packagecost.AlwaysExtraAlgorithm;
+import org.springframework.samples.petclinic.grooming.packagecost.DoNothingAlgorithm;
+import org.springframework.samples.petclinic.grooming.packagecost.ExceptionAlgorithm;
+import org.springframework.samples.petclinic.grooming.packagecost.MissingPremiumAlgorithm;
+import org.springframework.samples.petclinic.grooming.packagecost.PackageCostAlgorithm;
+import org.springframework.samples.petclinic.grooming.packagecost.PackageCostAlgorithmTest;
+import org.springframework.samples.petclinic.grooming.packagecost.ValidAlgorithm;
+import org.springframework.samples.petclinic.grooming.packagecost.WrongPriceException;
+
+public class Test5 extends ReflexiveTest{    
+
+    public class WrapperAlgorithm implements PackageCostAlgorithm {
+        private PackageCostAlgorithm algorithm;
+        private int numRuns;
+
+        public WrapperAlgorithm(PackageCostAlgorithm algorithm) {
+            this.algorithm = algorithm;
+            this.numRuns = 0;
+        }
+
+        @Override
+        public void validatePackageCost(GroomingPackage gp, double basicCost, double premiumCost)
+                throws WrongPriceException {
+                    numRuns++;
+                    algorithm.validatePackageCost(gp, basicCost, premiumCost);
+        }
+
+        public int getNumRuns() {
+            return numRuns;
+        }
+
+    }
+
+    @ParameterizedTest    
+    @MethodSource("provideAlgorithmsAndExpectedResults")
+    public void testAwardAlgorithm(PackageCostAlgorithm alg, boolean shouldFail){
+        // Configure SUT:
+        PackageCostAlgorithmTest cdaTest=new PackageCostAlgorithmTest();
+        WrapperAlgorithm wrapper = new WrapperAlgorithm(alg);
+        cdaTest.setAlgorithm(wrapper);
+        int numberOfExecutedTestMethods=0;
+        // ExecuteTests        
+        numberOfExecutedTestMethods=executeTests(cdaTest, shouldFail, alg);             
+        if(numberOfExecutedTestMethods<1)  
+            fail("You have not specified any test method or have used the wrong annotation!");
+        if(wrapper.getNumRuns() < 1)
+            fail("The SUT has not been executed in the test!");    
+
+    }
+
+    private void executeAfterEach(PackageCostAlgorithmTest cdaTest) {
+        Method[] methods=cdaTest.getClass().getDeclaredMethods();
+        for(Method method:methods){
+            if(isMethodAnnotatedWithAfterEach(method)){
+                try {
+                    method.invoke(cdaTest);
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    System.out.println("Error while trying to invoke method:"+method.getName());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private int executeTests(PackageCostAlgorithmTest cdaTest, boolean shouldFail, PackageCostAlgorithm alg) {
+        int executed=0;
+        Method[] methods=cdaTest.getClass().getDeclaredMethods();
+        boolean failDetected=false;
+        String message="Test methods could not detect the faulty implementation of the algorithm in class "+alg.getClass().getSimpleName();
+        for(Method method:methods){
+            if(isMethodAnnotatedWithTest(method)){
+                try {                                        
+                    executed++;
+                    executeBeforeEach(cdaTest);
+                    method.invoke(cdaTest); 
+                    executeAfterEach(cdaTest);                                                           
+                }catch(AssertionError assertionError){
+                    failDetected=true;
+                    message="The test method named "+method.getName()+" failed (and should not)! AsssertionError: "+assertionError.getMessage();
+                } catch(InvocationTargetException e){
+                    if(e.getTargetException() instanceof org.opentest4j.AssertionFailedError){
+                        failDetected=true;
+                        message="The test method named "+method.getName()+" failed (and should not)! AsssertionError: "
+                                    +((org.opentest4j.AssertionFailedError)e.getTargetException()).getMessage();
+                    }else
+                        System.out.println("Error while trying to invoke method:"+method.getName());                    
+                }catch (IllegalAccessException | IllegalArgumentException  e) {                    
+                    System.out.println("Error while trying to invoke method:"+method.getName());                    
+                }
+            }
+        }
+        if(failDetected!=shouldFail)
+            fail(message);
+        return executed;
+    }
+
+    private void executeBeforeEach(PackageCostAlgorithmTest cdaTest) {
+        Method[] methods=cdaTest.getClass().getDeclaredMethods();
+        for(Method method:methods){
+            if(isMethodAnnotatedWithBeforeEach(method)){
+                try {
+                    method.invoke(cdaTest);
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    System.out.println("Error while trying to invoke method:"+method.getName());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }    
+
+    public static Stream<Arguments> provideAlgorithmsAndExpectedResults(){
+        return Stream.of(
+            Arguments.of(new ValidAlgorithm(), false),
+            Arguments.of(new AlwaysExtraAlgorithm(), true),
+            Arguments.of(new DoNothingAlgorithm(), true),
+            Arguments.of(new ExceptionAlgorithm(), true),
+            Arguments.of(new MissingPremiumAlgorithm(), true)
+        );
+    }
+}
+```
+
+Aquí tienes el documento completo convertido a Markdown, con el diagrama UML representado en Mermaid:
+
+```markdown
+# Control práctico de DP1 2024-2025 (Control-check 2)
+
+## Enunciado
+
+En este ejercicio, añadiremos la funcionalidad de gestión de alergias de las mascotas a principios activos de los medicamentos prescritos en las visitas de las mascotas. Concretamente, se proporciona una clase que representa los medicamentos disponibles que está relacionada con otra clase que representa los principios activos que pueden contener. Como objetivo, tendremos que completar las clases "Allergy" que representa las alergias de las mascotas a los distintos principios activos, así como "Prescription" que representa la prescripción de medicamentos obligatorios y opcionales para una mascota en una visita y que obviamente tendrá que tener en cuenta las alergias de dicha mascota.
+
+El diagrama UML que describe las clases y relaciones con las que vamos a trabajar es el siguiente:
+
+```mermaid
+classDiagram
+    direction LR
+
+    class Pet {
+        +Integer id
+        +String name
+        +List~Allergy~ allergies
+    }
+
+    class Allergy {
+        +Integer id
+        +String information
+        +Integer level
+        +LocalDate diagnosisDate
+        +ActivePrinciple activePrinciple
+    }
+
+    class ActivePrinciple {
+        +Integer id
+        +String name
+    }
+
+    class Visit {
+        +Integer id
+        +LocalDate date
+        +String description
+    }
+
+    class Prescription {
+        +Integer id
+        +String information
+        +Integer dosage
+        +LocalDate treatmentStart
+        +LocalDate treatmentEnd
+        +Integer hoursBetweenDosage
+        +Visit visit
+        +List~Medication~ mandatoryMedications
+        +List~Medication~ optionalMedications
+    }
+
+    class Medication {
+        +Integer id
+        +String name
+        +List~ActivePrinciple~ activePrinciples
+    }
+
+    Pet "1" --> "0..*" Allergy : allergies
+    Allergy "0..*" --> "1" ActivePrinciple : activePrinciple
+    Prescription "0..*" --> "1" Visit : visit
+    Prescription "0..*" --> "0..*" Medication : mandatoryMedications
+    Prescription "0..*" --> "0..*" Medication : optionalMedications
+    Medication "0..*" --> "0..*" ActivePrinciple : activePrinciples
+```
+
+Las clases para las que realizaremos el mapeo como entidades JPA se han señalado en rojo (`Prescription` y `Allergy`). Las clases azules son clases que se proporcionan ya mapeadas pero con las que se trabajará durante el control.
+
+Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Si desea ver el resultado que arrojarían las pruebas en backend, puede ejecutarlas (bien mediante su entorno de desarrollo favorito, bien mediante el comando `mvnw test` en la carpeta raíz del proyecto). Cada ejercicio correctamente resuelto valdrá dos puntos, el número de casos de prueba de cada ejercicio puede variar entre uno y otro y la nota se calculará en base al porcentaje de casos de prueba que pasan. Por ejemplo, si pasan la mitad (50%) de los casos de prueba de un ejercicio, en lugar de dos puntos usted obtendrá un 1.
+
+Para comenzar el control debe aceptar la tarea de este control práctico a través del siguiente enlace:
+
+https://classroom.github.com/a/oSqbyiyk
+
+Al aceptar dicha tarea, se creará un repositorio único individual para usted, debe usar dicho repositorio para realizar el control práctico. Debe entregar la actividad en EV asociada al control check proporcionando como texto la dirección url de su repositorio personal. Recuerde que además debe entregar su solución del control.
+
+La entrega de su solución al control se realizará mediante un único comando `git push` a su repositorio individual. Recuerde que debe hacer push antes de cerrar sesión en la computadora y abandonar el aula, de lo contrario, su intento se evaluará como no presentado. Su primera tarea en este control será clonar (recuerde que si va a usar los equipos del aula para realizar el control necesitará usar un token de autenticación de GitHub como clave, tiene un documento de ayuda a la configuración en el propio repositorio del control). A continuación, deberá importar el proyecto en su entorno de desarrollo favorito y comenzar los ejercicios abajo listados. Al importar el proyecto, el mismo puede presentar errores de compilación. No se preocupe, si existen, dichos errores irán despareciendo conforme usted vaya implementando los distintos ejercicios del control.
+
+> **Nota importante 1:** No modifique los nombres de las clases ni la signatura (nombre, tipo de respuesta y parámetros) de los métodos proporcionados como material de base para el control. Las pruebas que se usan para la evaluación dependen de que las clases y los métodos tengan la estructura y nombres proporcionados. Si los modifica probablemente no pueda hacer que pasen las pruebas, y obtendrá una mala calificación.
+
+> **Nota importante 2:** No modifique las pruebas unitarias proporcionadas como parte del proyecto bajo ningún concepto. Aunque modifique las pruebas en su copia local del proyecto, éstas serán restituidas mediante un comando git previamente a la ejecución de las pruebas para la emisión de la nota final, por lo que sus modificaciones en las pruebas no serán tenidas en cuenta en ningún momento.
+
+> **Nota importante 3:** Mientras haya ejercicios no resueltos habrá tests que no funcionen y, por tanto, el comando `mvnw install` finalizará con error. Esto es normal debido a la forma en la que está planteado el control y no hay que preocuparse por ello. Si se quiere probar la aplicación se puede ejecutar de la forma habitual pese a que `mvnw install` finalice con error.
+
+> **Nota importante 4:** La descarga del material de la prueba usando git, y la entrega de su solución con git a través del repositorio GitHub creado a tal efecto forman parte de las competencias evaluadas durante el examen, por lo que no se aceptarán entregas que no hagan uso de este medio, y no se podrá solicitar ayuda a los profesores para realizar estas tareas.
+
+> **Nota importante 5:** No se aceptarán como soluciones válidas proyectos cuyo código fuente no compile correctamente o que provoquen fallos al arrancar la aplicación en la inicialización del contexto de Spring. Las soluciones cuyo código fuente no compile o sean incapaces de arrancar el contexto de Spring serán evaluadas con una nota de 0.
+
+---
+
+## Test 1 – Creación de las entidades Prescription y Allergy y sus repositorios asociados
+
+### Parte 1A: Entidades Prescription y Allergy y sus repositorios (1 punto)
+
+Modificar las clases `Prescription` y `Allergy` para que sean entidades. Estas clases están alojadas en el paquete `org.springframework.samples.petclinic.medication`, y deben tener los siguientes atributos y restricciones:
+
+**Para ambas clases:**
+
+- El atributo de tipo entero (`Integer`) llamado `id` actuará como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
+- El atributo de tipo cadena de caracteres (`String`) llamado `information` opcional.
+
+**Para la clase `Prescription`:**
+
+- El atributo obligatorio de tipo entero (`Integer`) llamado `dosage`, que representa la cantidad de medicación en miligramos que debe tomar el animal. El atributo será obligatorio y tendrá un valor mínimo de 1 y un valor máximo de 1000.
+- El atributo de tipo fecha (`LocalDate`) llamado `treatmentStart`, que representa la fecha en que comienza la medicación pautada. La fecha seguirá el formato `dd/MM/yyyy` (puede usar como ejemplo la clase `Pet` y su fecha de nacimiento para ver cómo se especifica dicho formato, pero nótese que el patrón del formato es distinto). Este atributo es obligatorio.
+- El atributo de tipo fecha (`LocalDate`) llamado `treatmentEnd`, que representa la fecha en que debe terminar la medicación pautada. Seguirá el formato `dd/MM/yyyy`. Este atributo debe ser obligatorio.
+- El atributo de tipo entero (`Integer`) llamado `hoursBetweenDosage`, que representa el número de horas entre cada dosis a dar al animal. El atributo será obligatorio y tendrá un valor mínimo de 1 y un valor máximo de 24.
+
+**Para la clase `Allergy`:**
+
+- El atributo obligatorio de tipo entero (`Integer`) llamado `level`, que representa la severidad con la que se presenta la alergia en el animal. El atributo será obligatorio y tendrá un valor mínimo de 1 y un valor máximo de 10.
+- El atributo de tipo fecha (`LocalDate`) llamado `diagnosisDate`, que representa la fecha en la que la alergia fue diagnosticada al animal. Seguirá el formato `dd/MM/yyyy`. Este atributo debe ser obligatorio.
+
+No modifique por ahora las anotaciones `@Transient` de las clases. Modificar las interfaces `PrescriptionRepository` y `AllergyRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.samples.petclinic.medication.ActivePrinciple;
+import org.springframework.samples.petclinic.medication.Allergy;
+import org.springframework.samples.petclinic.medication.AllergyRepository;
+import org.springframework.samples.petclinic.medication.Medication;
+import org.springframework.samples.petclinic.medication.Prescription;
+import org.springframework.samples.petclinic.medication.PrescriptionRepository;
+import org.springframework.samples.petclinic.visit.Visit;
+import org.springframework.stereotype.Service;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))
+public class Test1A extends ReflexiveTest{
+
+    @Autowired(required = false)
+    AllergyRepository allergiesRepo;
+    @Autowired(required = false)
+    PrescriptionRepository prescriptionRepo;
+    
+    @Autowired
+    EntityManager em;
+ 
+    @Test
+    public void test1RepositoriesExist(){
+        assertNotNull(allergiesRepo,"The allergies repository was not injected into the tests, its autowired value was null");
+        assertNotNull(prescriptionRepo,"The prescription repository was not injected into the tests, its autowired value was null");
+        test1RepositoriesContainsMethod();
+    }
+
+    public void test1RepositoriesContainsMethod(){
+        if(allergiesRepo!=null){
+            Object v=allergiesRepo.findById(12);
+            assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for an allergy that does not exist");
+        }else
+            fail("The allergies repository was not injected into the tests, its autowired value was null");
+        
+        if(prescriptionRepo!=null){
+            Object v=prescriptionRepo.findById(12);
+            assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a prescription that does not exist");
+        }else
+            fail("The prescription repository was not injected into the tests, its autowired value was null");
+    }
+    
+    
+
+    
+    @Test
+    public void test1CheckPrescriptionConstraints() {
+        Map<String,List<Object>> invalidValues=Map.of(
+                                            "dosage", List.of(0, 1001),
+                                            "hoursBetweenDosage", List.of(0, 25)
+                                            );
+
+
+        Prescription t=createValidPrescription(em);
+        em.persist(t);
+        
+        checkThatFieldsAreMandatory(t, em, "dosage","treatmentStart","treatmentEnd","hoursBetweenDosage");        
+        
+        checkThatValuesAreNotValid(t, invalidValues,em);   
+    }
+
+     @Test
+    public void test1CheckAllergiesContraints() {
+         Map<String,List<Object>> invalidValues=Map.of(
+                                            "level", List.of(0, 11)
+                                            );
+
+                                        
+        Allergy s=createValidAllergy(em);
+        em.persist(s);
+        
+        checkThatFieldsAreMandatory(s, em, "level", "diagnosisDate");        
+        
+        checkThatValuesAreNotValid(s, invalidValues,em);   
+    }
+
+    
+    @Test
+    public void test1CheckPrescriptionAnnotations() {        
+        assertTrue(classIsAnnotatedWith(Prescription.class,Entity.class));
+    }
+
+    @Test
+    public void test1CheckAllergyAnnotations() {
+        assertTrue(classIsAnnotatedWith(Allergy.class,Entity.class));
+    }
+
+    public static Allergy createValidAllergy(EntityManager em){        
+        Allergy o=new Allergy();        
+        o.setInformation("Una descripción alérgica");
+        o.setLevel(5);;
+        o.setDiagnosisDate(LocalDate.of(2024, 12, 1));
+        o.setActivePrinciples(Set.of(em.find(ActivePrinciple.class,1)));
+        return o;
+    }
+
+    public static Prescription createValidPrescription(EntityManager em){
+        
+        Prescription prescription = new Prescription();
+        prescription.setInformation("description of a prescription");
+        prescription.setDosage  (100);  // Valor dentro del rango
+        prescription.setTreatmentStart(LocalDate.of(2024, 12, 1));
+        prescription.setTreatmentEnd(LocalDate.of(2024, 12, 15));
+        prescription.setHoursBetweenDosage(8); // Valor dentro del rango
+        prescription.setVisit(em.find(Visit.class,1));
+        prescription.setMandatoryMedications(Set.of(em.find(Medication.class,1)));
+        return prescription;
+    }
+    
+        
+}
+```
+
+### Parte 1B: Relaciones entre las entidades (1 punto)
+
+Elimine las anotaciones `@Transient` de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior, así como del atributo `allergies` de la clase `Pet`. Se pide crear las siguientes relaciones entre las entidades:
+
+- Cree una relación unidireccional desde `Prescription` hacia `Visit` que exprese la que aparece en el diagrama UML (mostrado en la primera página de este enunciado) respetando sus cardinalidades, usando un atributo `visit` en la clase `Prescription`.
+- Cree dos relaciones unidireccionales desde `Prescription` hacia `Medication` que representen las que aparecen en el diagrama UML, es decir la medicación prescrita tanto obligatoria como opcional. Tenga en cuenta la cardinalidad que tienen (recuerde que en este caso, al tratarse de una doble relación n a n entre las mismas entidades se trata de unas relaciones bastante exóticas vistas en teoría), usando como nombre de los atributos `mandatoryMedications` y `optionalMedications` en la clase `Prescription`. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML.
+- Finalmente, se piden crear dos relaciones para la clase `Allergy`. Una de ellas unidireccional desde `Pet` hacia `Allergy`; y otra desde `Allergy` hacia `ActivePrinciple` que representen las que aparecen en el diagrama. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.medication.Allergy;
+import org.springframework.samples.petclinic.medication.Prescription;
+import org.springframework.samples.petclinic.pet.Pet;
+import org.springframework.samples.petclinic.visit.Visit;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+
+@DataJpaTest()
+public class Test1B extends ReflexiveTest{
+    
+    @Autowired(required = false)
+    EntityManager em;         
+
+    @Test
+    public void test2PrescriptionAnnotations() {
+        checkThatFieldIsAnnotatedWith(Prescription.class, "visit", ManyToOne.class);                          
+        checkThatFieldIsAnnotatedWith(Prescription.class, "mandatoryMedications", ManyToMany.class);        
+        checkThatFieldIsAnnotatedWith(Prescription.class, "optionalMedications", ManyToMany.class);                
+    }
+
+    @Test
+    public void test2AllergyAnnotations() {        
+        checkThatFieldIsAnnotatedWith(Allergy.class, "activePrinciples", ManyToMany.class);        
+    }
+
+    @Test
+    public void test2PetAnnotationsAndConstraints(){
+        checkThatFieldIsAnnotatedWith(Pet.class, "allergies", ManyToMany.class);
+    }
+ 
+    @Test
+    private void test2PrescriptionConstraints() {
+        Prescription t=Test1A.createValidPrescription(em);
+        checkThatFieldsAreMandatory(t, em,"mandatoryMedications", "visit");        
+    }
+
+    @Test
+    private void test2AllergyConstraints() {
+        Allergy s=Test1A.createValidAllergy(em);
+        checkThatFieldsAreMandatory(s, em,"activePrinciples");
+                
+    }
+
+
+}
+```
+
+---
+
+## Test 2 – Modificación del script de inicialización de la base de datos
+
+### Parte 2A: Incluir cuatro alergias y dos prescripciones (1 punto)
+
+Modificar el script de inicialización de la base de datos, para que se creen las siguientes alergias (`Allergy`) y prescripciones (`Prescription`):
+
+**Alergia 1:**
+- id: `1`
+- information: `"potential Hair loss"`
+- level: `4`
+- diagnosisDate: `01/11/2023`
+
+**Alergia 2:**
+- id: `2`
+- information: `"Death danger if no medication is provided in time"`
+- level: `10`
+- diagnosisDate: `15/10/2023`
+
+**Alergia 3:**
+- id: `3`
+- information: `"potential skin irritation"`
+- level: `2`
+- diagnosisDate: `05/08/2023`
+
+**Alergia 4:**
+- id: `4`
+- information: `"stomach inflammation danger if no medication is provided in time"`
+- level: `8`
+- diagnosisDate: `10/03/2023`
+
+**Prescription 1:**
+- id: `1`
+- information: `"Rimadyl and Metacam optionally"`
+- dosage: `500`
+- treatmentStart: `17/12/2024`
+- treatmentEnd: `25/12/2024`
+- hoursBetweenDosage: `12`
+
+**Prescription 2:**
+- id: `2`
+- information: `"Heartgard and Advantage optionally"`
+- dosage: `1000`
+- treatmentStart: `17/12/2024`
+- treatmentEnd: `31/12/2024`
+- hoursBetweenDosage: `8`
+
+Tenga en cuenta que el orden en que aparecen los INSERT en el script de inicialización de la base de datos es relevante al definir las asociaciones. El formato para introducir fechas en SQL que debe usar es similar al que expresa esta cadena: `'2024-12-30'`. Es posible que necesite asociar las prescripciones con una visita (si anotó el atributo `visit` de la clase `Prescription` como `@NotNull`), puede usar los valores especificados en el siguiente ejercicio (Parte 2B).
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.medication.Allergy;
+import org.springframework.samples.petclinic.medication.Prescription;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest()
+public class Test2A extends ReflexiveTest {    
+    
+    @Autowired
+    EntityManager em;    
+    
+    @Test
+    public void test3InitialPrescriptions(){                        
+        Prescription m1=em.find(Prescription.class,1);
+        assertNotNull(m1,"There should exist a Prescription with id:1");
+        assertEquals("Rimadyl and Metacam optionally",m1.getInformation());
+        assertEquals(500,m1.getDosage());
+        assertEquals(LocalDate.of(2024, 12, 17), m1.getTreatmentStart());
+        assertEquals(LocalDate.of(2024, 12, 25),m1.getTreatmentEnd());
+        assertEquals(12,m1.getHoursBetweenDosage());
+
+
+        Prescription m2=em.find(Prescription.class,2); 
+        assertNotNull(m2,"There should exist a Prescription with id:2");
+        assertEquals("Heartgard and Advantage optionally",m2.getInformation());
+        assertEquals(1000,m2.getDosage());
+        assertEquals(LocalDate.of(2024, 12, 17), m2.getTreatmentStart());
+        assertEquals(LocalDate.of(2024, 12, 31),m2.getTreatmentEnd());
+        assertEquals(8,m2.getHoursBetweenDosage());
+    }
+
+    @Test
+    public void test3InitialAllergies()
+    {
+        Allergy allergy1 = em.find(Allergy.class, 1);
+        assertNotNull(allergy1,"Cannot find allergy with id "+1);
+        assertEquals("potential Hair loss", allergy1.getInformation());
+        assertEquals(4,allergy1.getLevel());
+        assertEquals(LocalDate.of(2023, 11, 1),allergy1.getDiagnosisDate());
+        
+        Allergy allergy2 = em.find(Allergy.class, 2);        
+        assertNotNull(allergy2,"Cannot find allergy with id "+2);
+        assertEquals("Death danger if no medication is provided in time", allergy2.getInformation());
+        assertEquals(10,allergy2.getLevel());
+        assertEquals(LocalDate.of(2023, 10, 15),allergy2.getDiagnosisDate());
+
+        Allergy allergy3 = em.find(Allergy.class, 3);        
+        assertNotNull(allergy3,"Cannot find allergy with id "+3);
+        assertEquals("potential skin irritation", allergy3.getInformation());
+        assertEquals(2,allergy3.getLevel());
+        assertEquals(LocalDate.of(2023, 8, 5),allergy3.getDiagnosisDate());
+
+        Allergy allergy4 = em.find(Allergy.class, 4);        
+        assertNotNull(allergy4,"Cannot find allergy with id "+4);
+        assertEquals("stomach inflammation danger if no medication is provided in time", allergy4.getInformation());
+        assertEquals(8,allergy4.getLevel());
+        assertEquals(LocalDate.of(2023, 3, 10),allergy4.getDiagnosisDate());
+    }       
+        
+    
+}
+```
+
+### Parte 2B: Relacionar las prescripciones con visitas y medicación; así como las mascotas con alergias y estas con los principios activos que las causan (1 punto)
+
+Modificar este script de inicialización de la base de datos para que:
+
+- La Mascota con id `1` se asocie con la Alergia cuyo id es `1` y esta se asocie con el Principio activo cuyo id es `1` (ivermectina).
+- La Mascota con id `1` se asocie con la Alergia cuyo id es `2` y esta se asocie con el Principio activo cuyo id es `2` (imidacloprid).
+- La Mascota con id `2` se asocie con la Alergia cuyo id es `3` y esta se asocie con el Principio activo cuyo id es `3` (carprofeno).
+- La Mascota con id `3` se asocie con la Alergia cuyo id es `4` y esta se asocie con el Principio activo cuyo id es `4` (meloxicam).
+- La Prescripción cuyo id es `1` se haga en la Visita con id `1` y tenga como medicación obligatoria (mandatory) la de id `1`; así como medicación opcional la de id `2`.
+- La Prescripción cuyo id es `2` se haga en la Visita con id `2` y tenga como medicación obligatoria (mandatory) la de id `3`; así como medicación opcional la de id `4`.
+
+Tenga en cuenta que el orden en que aparecen los INSERT en el script de inicialización de la base de datos es relevante al definir las asociaciones.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.medication.Allergy;
+import org.springframework.samples.petclinic.medication.Prescription;
+import org.springframework.samples.petclinic.pet.Pet;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest
+public class Test2B extends ReflexiveTest {
+   
+    @Autowired
+    EntityManager em;
+    
+    @Test
+    public void test2BPrescriptionLinks() {        
+        checkLinkedById(Prescription.class,1,"getVisit",1,em);  
+        checkContainsById(Prescription.class,1,"getMandatoryMedications",1,em);  
+        checkContainsById(Prescription.class,1,"getOptionalMedications",2,em);
+        checkLinkedById(Prescription.class,2,"getVisit",2,em);
+        checkContainsById(Prescription.class,2,"getMandatoryMedications",3,em);  
+        checkContainsById(Prescription.class,2,"getOptionalMedications",4,em);        
+    }
+
+    @Test
+    public void test2BAllergyLinks() {        
+        checkContainsById(Allergy.class,1,"getActivePrinciples",1,em);
+        checkContainsById(Allergy.class,2,"getActivePrinciples",2,em);
+        checkContainsById(Allergy.class,3,"getActivePrinciples",3,em);
+        checkContainsById(Allergy.class,4,"getActivePrinciples",4,em);
+    }
+
+    @Test
+    public void test2BPetLinks() {
+        checkContainsById(Pet.class,1,"getAllergies",1,em);
+        checkContainsById(Pet.class,1,"getAllergies",2,em);
+        checkContainsById(Pet.class,2,"getAllergies",3,em);
+        checkContainsById(Pet.class,3,"getAllergies",4,em);
+    }
+    
+}
+```
+---
+
+## Test 3 – Creación y modificación de un controlador y un componente frontend de visualización de un Historial de Prescripciones y alergias de las mascotas
+
+### Parte 3A – Creación de controlador de historial de prescripciones y alergias de las mascotas (1 punto)
+
+Modificar la clase `PrescriptionHistoryController` para que responda a peticiones tipo GET en la url:
+
+```
+http://localhost:8080/api/v1/pets/{petID}/prescriptionhistory
+```
+
+Para ello, el controlador debe usar el servicio de gestión de prescripciones (`PrescriptionService`).
+
+Es importante que dicho controlador devuelva los datos de las prescripciones, medicación asociada, y las alergias de la mascota. Todo ello en el siguiente formato:
+
+```json
+{
+  "petName": "Leo",
+  "prescriptions": [
+    {
+      "visitDate": "2024-12-10",
+      "dosage": 500,
+      "treatmentStart": "2024-12-17",
+      "treatmentEnd": "2024-12-25",
+      "hoursBetweenDosage": 12,
+      "mandatoryMedication": ["Rimadyl"],
+      "optionalMedication": ["Metacam"]
+    }
+  ],
+  "allergies": [
+    { "information": "potential Hair loss", "level": 4 },
+    { "information": "Death danger if no medication is provided in time", "level": 10 }
+  ]
+}
+```
+
+Si se pide el historial de una mascota cuyo id no está en la BD se deberá devolver un código de respuesta `404`.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.samples.petclinic.medication.Allergy;
+import org.springframework.samples.petclinic.medication.HistoryController;
+import org.springframework.samples.petclinic.medication.Medication;
+import org.springframework.samples.petclinic.medication.Prescription;
+import org.springframework.samples.petclinic.medication.PrescriptionService;
+import org.springframework.samples.petclinic.pet.Pet;
+import org.springframework.samples.petclinic.pet.PetRestController;
+import org.springframework.samples.petclinic.pet.PetService;
+import org.springframework.samples.petclinic.pet.PetType;
+import org.springframework.samples.petclinic.visit.Visit;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+@WebMvcTest(controllers = HistoryController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class))
+public class Test3A {   
+	
+    @MockBean
+	private PetService petService;
+
+    @MockBean
+	private PrescriptionService prescriptionService;
+    
+    @Autowired
+	private HistoryController historyController;
+
+	@Autowired
+	private MockMvc mockMvc;
+
+    private String url = "/api/v1/pets/1/prescriptionhistory";
+	@BeforeEach
+	public void setup() {		
+        
+        // Pet
+        PetType turtle = new PetType();
+        turtle.setName("turtle");
+        Pet leo = new Pet();
+        leo.setName("Leo");
+        leo.setType(null);
+        leo.setId(1);
+        leo.setType(turtle);
+        // Medications
+        Medication m1=new Medication();
+        m1.setName("Rimadyl");
+        Medication m2=new Medication();
+        m2.setName("Metacam");
+        // Visits
+        Visit v1 = new Visit();;
+        v1.setPet(leo);
+        v1.setDatetime(LocalDateTime.of(2024,12,10,0,0));
+        // Perscriptions
+        Prescription p=new Prescription();
+        p.setMandatoryMedications(Set.of(m1));
+        p.setOptionalMedications(Set.of(m2));
+        p.setVisit(v1);
+        p.setDosage(500);
+        p.setHoursBetweenDosage(12);
+        p.setTreatmentStart(LocalDate.of(2024,12,17));
+        p.setTreatmentEnd(LocalDate.of(2024,12,25));
+        List<Prescription> history = new ArrayList<>();
+        history.add(p);
+        // Allergies:
+        Allergy a1 = new Allergy();
+        a1.setInformation("potential Hair loss");
+        a1.setLevel(4);
+        Allergy a2=new Allergy();
+        a2.setInformation("Death danger if no medication is provided in time");
+        a2.setLevel(10);
+        leo.setAllergies(Set.of(a1,a2));
+        when(petService.findPetById(1)).thenReturn(leo);
+        when(petService.findPetById(999)).thenReturn(null);
+        when(prescriptionService.getPrescriptionsByPetId(1)).thenReturn(history);
+        when(prescriptionService.getPrescriptionsByPetId(999)).thenReturn(null);
+    }    	
+
+    @Test
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test3aDiseaseHistoryResponse() throws JsonProcessingException, Exception{
+        mockMvc.perform(get(url))
+			.andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test3aDiseaseHistoryResponseKO() throws JsonProcessingException, Exception{
+        mockMvc.perform(get("/api/v1/pets/999/prescriptionhistory"))
+			.andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    @WithMockUser(username = "vet1", authorities = {"VET"})
+    public void test3aDiseaseHistoryStructure() throws JsonProcessingException, Exception{
+        mockMvc.perform(get(url))
+			.andExpect(status().isOk())			
+            .andExpect(jsonPath("$.petName", is("Leo")))
+            .andExpect(jsonPath("$.prescriptions", hasSize(1)))
+            .andExpect(jsonPath("$.prescriptions[0].visitDate", is("2024-12-10")))
+            .andExpect(jsonPath("$.prescriptions[0].dosage", is(500)))
+            .andExpect(jsonPath("$.prescriptions[0].treatmentStart", is("2024-12-17")))
+            .andExpect(jsonPath("$.prescriptions[0].treatmentEnd", is("2024-12-25")))
+            .andExpect(jsonPath("$.prescriptions[0].hoursBetweenDosage", is(12)))
+            .andExpect(jsonPath("$.prescriptions[0].mandatoryMedication", hasSize(1)))
+            .andExpect(jsonPath("$.prescriptions[0].mandatoryMedication[0]", is("Rimadyl")))
+            .andExpect(jsonPath("$.prescriptions[0].optionalMedication", hasSize(1)))
+            .andExpect(jsonPath("$.prescriptions[0].optionalMedication[0]", is("Metacam")))
+            .andExpect(jsonPath("$.allergies", hasSize(2)))
+            .andExpect(jsonPath("$.allergies[0].information", anyOf(is("potential Hair loss"),is("Death danger if no medication is provided in time"))))
+            .andExpect(jsonPath("$.allergies[0].level",anyOf(is(4),is(10))));        
+    }
+
+    
+}
+```
+
+### Parte 3B – Creación de un componente frontend para la visualización del historial de prescripciones y alergias de las mascotas (1 punto)
+
+Modificar el componente React proporcionado en el fichero `frontend/src/disease/prescriptionhistory/index.js` para que muestre las prescripciones y alergias de una mascota. Para ello debe hacer uso de la API lanzando una petición tipo GET contra la URL `api/v1/pets/{petID}/prescriptionhistory`.
+
+Este componente debe tomar como propiedad llamada `id` el identificador de la mascota para la que se debe mostrar el historial. Tras realizar la llamada a la API, el componente debe mostrar el nombre de la mascota como título de nivel 1 (`h1`) y la información de las prescripciones en sendas columnas de una tabla (se recomienda usar el componente `Table` de reactstrap). Además, deberá mostrar las alergias en una segunda tabla.
+
+Para poder lanzar esta prueba y comprobar su resultado puede colocarse en la carpeta de frontend y ejecutar el comando `npm test` y pulsar `a` en el menú de comandos de jest. Nótese que previamente debe haber lanzado al menos una vez el comando `npm install` para que todas las librerías de node estén instaladas.
+
+---
+
+## Test 4 – Anotar el repositorio de Visitas con una consulta compleja
+
+Modificar la consulta personalizada que puede invocarse a través del método `getOr` del repositorio de visitas `VisitRepository` (alojado en el paquete `org.springframework.samples.petclinic.visit`) que reciba como parámetro un tipo de mascota, una fecha de inicio y una fecha de fin, y devuelva la lista ordenada de enfermedades (de más frecuentes a menos frecuentes) diagnosticadas en las visitas realizadas a las mascotas del tipo pasado en el periodo determinado por las fechas de inicio y fin pasadas. El diagnóstico realizado en cada visita se incluye en el campo `description` de la visita.
+
+A continuación, se muestra un ejemplo. Sea la siguiente tabla de visitas de mascotas con alergias a ciertos principios activos y por tanto a los medicamentos mostrados:
+
+| Visit id | PetType | Visit Date | Visit description |
+|----------|---------|------------|-------------------|
+| 1 | `{id: 1, name:"Cat"}` | 13/11/2024 | "Toxoplasmosis" |
+| 2 | `{id: 2, name:"Dog"}` | 14/11/2024 | "Rabies Shot" |
+| 3 | `{id: 6, name:"Hamster"}` | 17/11/2024 | "Rabies Shot" |
+| 4 | `{id: 2, name:"Dog"}` | 18/11/2024 | "Flu" |
+| 5 | `{id: 2, name:"Dog"}` | 29/11/2024 | "Lyme Disease" |
+| 6 | `{id: 2, name:"Dog"}` | 05/12/2024 | "Flu" |
+| 7 | `{id: 2, name:"Dog"}` | 10/12/2024 | "Rabies Shot" |
+| 8 | `{id: 1, name:"Cat"}` | 16/12/2024 | "Rabies Shot" |
+
+Si invocamos al método con los siguientes valores de los parámetros: `petType="dog"`, `startDate=12/11/2024`, `endDate=15/12/2024`; el resultado debería ser una lista con los diagnósticos en el siguiente orden: `{"Rabies Shot", "Flu", "Lyme Disease"}`.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.samples.petclinic.medication.Medication;
+import org.springframework.samples.petclinic.medication.MedicationRepository;
+import org.springframework.samples.petclinic.pet.Pet;
+import org.springframework.samples.petclinic.pet.PetType;
+import org.springframework.samples.petclinic.visit.VisitRepository;
+
+import jakarta.persistence.EntityManager;
+
+@DataJpaTest
+public class Test4 {
+    
+    @Autowired
+    VisitRepository vr;
+        
+    @Autowired
+    EntityManager em;
+    @Test
+    public void test4() {
+        validatefindByComplexCriteria();
+    }    
+
+    private void 
+    validatefindByComplexCriteria() {
+        PetType cats=em.find(PetType.class, 1);
+        PetType dogs=em.find(PetType.class, 2);
+        PetType hamsters=em.find(PetType.class, 6);
+
+        List<String> diseases = vr.getFrequentDiagnoses(            
+            dogs,    
+            LocalDateTime.of(2024,11,12,0,0,0),
+            LocalDateTime.of(2024, 12,15,0,0,0)
+        );
+        assertNotNull(diseases);
+        assertEquals(2, diseases.size());
+        assertEquals("Rabies shot",diseases.iterator().next());
+
+        diseases = vr.getFrequentDiagnoses(            
+            dogs,    
+            LocalDateTime.of(2024,11,17,0,0,0),
+            LocalDateTime.of(2024, 12,15,0,0,0)
+        );
+        assertNotNull(diseases);
+        assertEquals(2, diseases.size());
+        assertEquals("Flu",diseases.iterator().next());
+        
+        diseases = vr.getFrequentDiagnoses(            
+            hamsters,    
+            LocalDateTime.of(2024,11,20,0,0,0),
+            LocalDateTime.of(2024, 12,15,0,0,0)
+        );
+        assertNotNull(diseases);
+        assertEquals(0, diseases.size());
+
+        diseases = vr.getFrequentDiagnoses(            
+            dogs,    
+            LocalDateTime.of(2024,11,17,0,0,0),
+            LocalDateTime.of(2024, 12,6,0,0,0)
+        );
+        assertNotNull(diseases);
+        assertEquals(2, diseases.size());
+        assertEquals("Flu",diseases.iterator().next());
+
+        diseases = vr.getFrequentDiagnoses(            
+            cats,    
+            LocalDateTime.of(2024,11,12,0,0,0),
+            LocalDateTime.of(2024, 12,15,0,0,0)
+        );
+        assertNotNull(diseases);
+        assertEquals(1, diseases.size());
+        assertEquals("Toxoplasmosis",diseases.iterator().next());
+
+    }
+        
+}
+```
+
+---
+
+## Test 5 – Implementar una prueba para un algoritmo que muestra medicamentos con principios activos cuyo nombre empieza por una cadena de texto determinada
+
+En la clínica se ha decidido facilitar la labor de búsqueda de medicamentos con ciertos principios activos. Para ello, se ha decidido crear un algoritmo que realizará una búsqueda dentro de un conjunto de medicamentos pasados como primer parámetro que contengan principios activos cuyo nombre empiece por una cadena de texto especificada como segundo parámetro.
+
+Por ejemplo, si tenemos que el medicamento "Heartgard" contiene el principio activo "ivermectina" y el medicamento "Advantage" contiene el principio activo "imidacloprid", y ambos son los únicos con principios activos que empiezan por "i", el algoritmo devolverá como resultado ambos medicamentos a la búsqueda de medicamentos con principios activos que empiecen por "i".
+
+Además, hay algún caso límite a considerar: cuando el parámetro indicando la cadena de texto está vacía, el algoritmo debe devolver una colección también vacía.
+
+La interfaz del algoritmo está especificada en la interfaz `MedicationSearchAlgorithm` que se encuentra en el paquete `org.springframework.samples.petclinic.medication.searching`. Y se proporcionan tres implementaciones del algoritmo (una correcta y dos incorrectas).
+
+Modifique la clase de pruebas llamada `MedicationSearchAlgorithmTest` que se encuentra en la carpeta `src/main/test/.../medication` y especifique tantos métodos con casos de prueba como considere necesarios para validar el correcto funcionamiento del algoritmo. Nótese que la clase tiene un atributo de tipo `MedicationSearchAlgorithm` llamado `algorithm`, use dicho atributo como sujeto bajo prueba en todos sus métodos de prueba.
+
+Su implementación del test no debe usar mocks, ni anotaciones de pruebas de spring (`@DataJpaTest`, `@SpringBootTest`, etc.), ni tests parametrizados, y todos los métodos anotados con `@Test` deben ser sin parámetros.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.samples.petclinic.medication.MedicationSearchAlgorithmTest;
+import org.springframework.samples.petclinic.medication.searching.AlwaysEmptyResultSearchAlgorithm;
+import org.springframework.samples.petclinic.medication.searching.IncorrectMedicineSearchAlgorithm;
+import org.springframework.samples.petclinic.medication.searching.MedicationSearchAlgorithm;
+import org.springframework.samples.petclinic.medication.searching.ValidMedicationSearchAlgorithm; 
+
+public class Test5 extends ReflexiveTest{    
+ 
+    @ParameterizedTest    
+    @MethodSource("provideAlgorithmsAndExpectedResults")
+    public void test5MedicationSearchAlgorithm(MedicationSearchAlgorithm alg, boolean shouldFail){
+        // Configure SUT:
+        MedicationSearchAlgorithmTest cdaTest=new MedicationSearchAlgorithmTest();
+        cdaTest.setAlgorithm(alg);
+        int numberOfExecutedTestMethods=0;
+        // ExecuteTests        
+        numberOfExecutedTestMethods=executeTests(cdaTest, shouldFail);             
+        if(numberOfExecutedTestMethods<1)  
+            fail("You have not specified any test method!");    
+    }
+
+    private void executeAfterEach(MedicationSearchAlgorithmTest cdaTest) {
+        Method[] methods=cdaTest.getClass().getDeclaredMethods();
+        for(Method method:methods){
+            if(isMethodAnnotatedWithAfterEach(method)){
+                try {                    
+                    method.invoke(cdaTest);                    
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    System.out.println("Error while trying to invoke method:"+method.getName());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private int executeTests(MedicationSearchAlgorithmTest cdaTest, boolean shouldFail) {
+        int executed=0;
+        Method[] methods=cdaTest.getClass().getDeclaredMethods();
+        boolean failDetected=false;
+        String message="No test method detected the faulty implementation of the algorithm";
+        for(Method method:methods){
+            if(isMethodAnnotatedWithTest(method)){
+                try {                                        
+                    executed++;
+                    executeBeforeEach(cdaTest);
+                    method.invoke(cdaTest);     
+                    executeAfterEach(cdaTest);
+                }catch(AssertionError assertionError){
+                    failDetected=true;
+                    message="The test method named "+method.getName()+" failed (and should not)! AsssertionError: "+assertionError.getMessage();
+                } catch(InvocationTargetException e){
+                    if(e.getTargetException() instanceof org.opentest4j.AssertionFailedError){
+                        failDetected=true;
+                        message="The test method named "+method.getName()+" failed (and should not)! AsssertionError: "
+                                    +((org.opentest4j.AssertionFailedError)e.getTargetException()).getMessage();
+                    }else
+                        System.out.println("Error while trying to invoke method:"+method.getName());                    
+                }catch (IllegalAccessException | IllegalArgumentException  e) {                    
+                    System.out.println("Error while trying to invoke method:"+method.getName());                    
+                }
+            }
+        }
+        if(failDetected!=shouldFail)
+            fail(message);
+        return executed;
+    }
+
+    private void executeBeforeEach(MedicationSearchAlgorithmTest cdaTest) {
+        Method[] methods=cdaTest.getClass().getDeclaredMethods();
+        for(Method method:methods){
+            if(isMethodAnnotatedWithBeforeEach(method)){
+                try {
+                    method.invoke(cdaTest);
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    System.out.println("Error while trying to invoke method:"+method.getName());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }    
+
+    public static Stream<Arguments> provideAlgorithmsAndExpectedResults(){
+        return Stream.of(
+            Arguments.of(new ValidMedicationSearchAlgorithm(), false),
+            Arguments.of(new AlwaysEmptyResultSearchAlgorithm(), true),
+            Arguments.of(new IncorrectMedicineSearchAlgorithm(), true)
+        );
+    }
+        
+}
+```
+```
