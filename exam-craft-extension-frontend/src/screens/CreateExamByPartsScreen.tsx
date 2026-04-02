@@ -2,17 +2,17 @@ import React from "react"
 import logoExamCraft from "../../assets/icon512.png"
 
 interface Props {
-  onBack: () => void
-  onWelcome: () => void
-  onFunctionalExtension: () => void
-  onAttributesConstraints: () => void
+  readonly onBack: () => void
+  readonly onWelcome: () => void
+  readonly onFunctionalExtension: () => void
+  readonly onAttributesConstraints: () => void
+  readonly onGenerateTest: () => void
 }
 
-export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints }: Props) {
+export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onGenerateTest }: Props) {
   return (
     <div className="exam-app">
-      
-      {/* --- HEADER --- */}   
+       
       <header className="app-header">
         <div className="header-left">
       
@@ -47,7 +47,6 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
         </div>
       </header>
 
-      {/* --- CONTENIDO CENTRAL --- */}
       <main className="main-content">
         
         <h1 className="main-title">CREAR EXAMEN POR PARTES</h1>
@@ -68,6 +67,10 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
 
           <button className="menu-btn">
             Relaciones entre entidades
+          </button>
+
+          <button className="menu-btn" onClick={onGenerateTest}>
+            Generar tests
           </button>
 
         </div>
