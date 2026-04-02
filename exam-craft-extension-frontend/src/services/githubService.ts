@@ -25,7 +25,6 @@ export const GithubService = {
     }
   },
 
-
   async getMyRepo(owner: string, repoName: string): Promise<GithubRepo | null> {
     try {
       const response = await fetch(`https://api.github.com/repos/${owner}/${repoName}`)
@@ -91,7 +90,7 @@ export const GithubService = {
     }
   },
 
-async createOrUpdateFile(
+  async createOrUpdateFile(
     token: string,
     owner: string,
     repo: string,
@@ -149,6 +148,61 @@ async createOrUpdateFile(
     }
 
     return await response.json();
-  }
+  },
 
+
+  async updateReadmeWithDescription(
+    token: string,
+    owner: string,
+    repo: string,
+    description: string
+  ): Promise<any> {
+    try {
+      const getResponse = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/README.md`,
+        {
+          headers: {
+            "Authorization": `token ${token}`,
+            "Accept": "application/vnd.github+json"
+          }
+        }
+      );
+
+      if (!getResponse.ok) {
+        throw new Error("No se pudo obtener el README.md del repositorio");
+      }
+
+      const fileData = await getResponse.json();
+      
+      const currentContent = decodeURIComponent(escape(atob(fileData.content)));
+
+      const targetHeader = "## Descripción control check a realizar";
+      const placeholderText = "*(Aquí puedes añadir los detalles o la lista de comprobaciones que se deben realizar en el control)*";
+      
+      let newContent = currentContent;
+
+      if (currentContent.includes(placeholderText)) {
+        newContent = currentContent.replace(placeholderText, description);
+      } else if (currentContent.includes(targetHeader)) {
+        newContent = currentContent.replace(
+          targetHeader, 
+          `${targetHeader}\n\n${description}`
+        );
+      } else {
+        newContent = `${currentContent}\n\n${targetHeader}\n${description}`;
+      }
+
+      return await this.createOrUpdateFile(
+        token,
+        owner,
+        repo,
+        "README.md",
+        newContent,
+        "docs: actualiza descripción del control check en README"
+      );
+    } catch (error) {
+      console.error("Error actualizando el README:", error);
+      throw error;
+    }
+  }
 }

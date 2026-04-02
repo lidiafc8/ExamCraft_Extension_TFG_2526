@@ -1,0 +1,55 @@
+name: CI Plasmo Extension
+
+on:
+  pull_request: {}
+  push:
+    branches: ["main", "develop"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-extension:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        working-directory: exam-craft-extension-frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0                        # Obligatorio para SonarCloud
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: exam-craft-extension-frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build (Plasmo)
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarqube-scan-action@v5
+        with:
+          projectBaseDir: exam-craft-extension-frontend
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Subir artefacto
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-extension-build
+          path: exam-craft-extension-frontend/build/
+          retention-days: 7

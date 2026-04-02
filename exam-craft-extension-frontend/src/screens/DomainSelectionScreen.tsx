@@ -5,10 +5,10 @@ import chess from "../../assets/images/chess.png"
 import comingSoon from "../../assets/images/comingSoon.png"
 
 interface Props {
-  onBack: () => void
-  onWelcome: () => void
-  onSelectDomain: (domainName: string) => void
-  onCreateExam: () => void
+  readonly onBack: () => void
+  readonly onWelcome: () => void
+  readonly onSelectDomain: (domainName: string) => void
+  readonly onCreateExam: () => void
 }
 
 export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectDomain, onCreateExam }: Props) {

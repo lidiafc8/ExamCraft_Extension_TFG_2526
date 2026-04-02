@@ -4,10 +4,10 @@ import examIcon from "../../assets/images/exam.png"
 import archiveIcon from "../../assets/images/archive.png"
 
 interface Props {
-  onStart: () => void
-  onCreateExam: () => void
-  onBack: () => void
-  onStorage: () => void
+  readonly onStart: () => void
+  readonly onCreateExam: () => void
+  readonly onBack: () => void
+  readonly onStorage: () => void
 }
 
 export default function WelcomeScreen({ onStart, onCreateExam, onBack, onStorage }: Props) {
