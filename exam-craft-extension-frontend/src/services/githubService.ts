@@ -2,6 +2,26 @@ import type { GithubRepo } from "~src/models/GithubRepo"
 import type { GithubUser } from "../models/GithubUser"
 import { sanitizeMermaidForModal } from "~src/utils/mermaidUtils"
 
+const extractFilesForGitHub = (rawText: string) => {
+    if (!rawText) return [];
+    const filesToUpload: { path: string, content: string }[] = [];
+    
+    const regex = /([a-zA-Z0-9_./\-]+\.java);?\s*```[a-z]*\r?\n([\s\S]*?)```/gi;
+    let match;
+
+    while ((match = regex.exec(rawText)) !== null) {
+        const fullPath = match[1]; 
+        const cleanCode = match[2].trim(); 
+        
+        filesToUpload.push({
+            path: fullPath,
+            content: cleanCode
+        });
+    }
+
+    return filesToUpload;
+};
+
 export const GithubService = {
   
   async getUser(username: string): Promise<GithubUser | null> {
@@ -151,7 +171,6 @@ export const GithubService = {
     return await response.json();
   },
 
-
   async updateReadmeWithDescription(
     token: string,
     owner: string,
@@ -215,7 +234,6 @@ export const GithubService = {
         testBasePath: string
     ): Promise<string> {
         
-        // 1. Validar el token y obtener el usuario de GitHub
         const userResponse = await fetch("https://api.github.com/user", {
             headers: { Authorization: `token ${token}` }
         });
@@ -225,13 +243,11 @@ export const GithubService = {
         const TARGET_OWNER = userData.login;
         const TEMPLATE_OWNER = "lidiafc8";
 
-        // 2. Crear el repositorio desde la plantilla
         const newRepo = await this.createRepoFromTemplate(token, TEMPLATE_OWNER, templateRepo, newRepoName);
         
-        // Esperamos un poco para que GitHub inicialice el repo internamente
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // 3. Preparar el contenido del README
+         // 1. Readme
         const title = `Examen Completo: ${project.customName || project.domainName}`;
         const fullText = project.extensionFinish || '';
         const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
@@ -250,10 +266,9 @@ export const GithubService = {
             `#### 2. Restricciones de Atributos\n${project.attributeConstraints || "No se crearon restricciones de atributos para este examen."}\n\n` +
             `#### 3. Relaciones entre Entidades\n${project.entityRelations || "No se crearon relaciones entre entidades para este examen."}\n`;
 
-        // 4. Actualizar el README en GitHub
         await this.updateReadmeWithDescription(token, TARGET_OWNER, newRepoName, markdownContent);
 
-        // 5. Procesar y subir los Tests de Java
+        // 2. Tests
         if (project.javaTests) {
             const tests = Array.isArray(project.javaTests)
                 ? project.javaTests
@@ -277,8 +292,24 @@ export const GithubService = {
             }
         }
 
-        // 6. Devolver la URL del nuevo repositorio para que la UI pueda abrirla
+        // 3. Clases Base
+        if (project.baseClasses) {
+            const baseClassesFiles = extractFilesForGitHub(project.baseClasses);
+            
+            for (const file of baseClassesFiles) {
+                const fileName = file.path.split('/').pop() || 'clase';
+                
+                await this.createOrUpdateFile(
+                    token,
+                    TARGET_OWNER,
+                    newRepoName,
+                    file.path,
+                    file.content,
+                    `Añadir clase base generada: ${fileName}`
+                );
+            }
+        }
+
         return newRepo.html_url;
     }
-  
-}
+};

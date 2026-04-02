@@ -7,13 +7,13 @@ import DomainSelectionScreen from "../screens/examStatementGeneration/DomainSele
 import DomainWorkflowScreen from "../screens/examStatementGeneration/DomainWorkflowScreen"
 import DiagramUMLScreen from "../screens/examStatementGeneration/DiagramUMLScreen"
 import FinishFunctionalExtensionScreen from "../screens/examStatementGeneration/FinishFunctionalExtensionScreen"
-import StorageExamsScreen from "../screens/storage/StorageExamsScreen"
 import "/assets/main.css"
 import AttributesConstraintsWorkflowScreen from "~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen"
 import GenerationTestAtributesScreen from "../screens/codeGeneration/GenerationTestAtributesScreen"
 import GeneralGenerationTestScreen from "../screens/codeGeneration/GeneralGenerationTestScreen"
 import CodeGenerationScreen from "~src/screens/codeGeneration/CodeGenerationScreen"
 import GenerationBaseClassesScreen from "~src/screens/codeGeneration/GenerationBaseClassesScreen"
+import StorageExamsIndex from "../screens/storage/StorageExamsIndex"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
@@ -170,7 +170,7 @@ export default function IndexTab() {
       )}
 
       {screen === "storage" && (
-        <StorageExamsScreen 
+        <StorageExamsIndex
           onWelcome={() => setScreen("welcome")}
         />
       )}

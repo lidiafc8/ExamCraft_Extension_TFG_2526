@@ -1,4 +1,5 @@
 import React from "react";
+
 import hljs from 'highlight.js/lib/core';
 import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/github.css';
@@ -11,10 +12,32 @@ export interface GeneratedCodeScreenProps {
     logoExamCraft: string;
     
     onWelcome: () => void;
-    onBack: () => void; 
-    onGoToExams: () => void; 
-    onGoToFolders: () => void; 
+    onBack: () => void;
+    onGoToExams: () => void;
+    onGoToFolders: () => void;
 }
+
+const parseBaseClasses = (rawText: string) => {
+    if (!rawText) return [];
+    const results = [];
+    
+    const regex = /([a-zA-Z0-9_./\-]+\.java);?\s*```[a-z]*\r?\n([\s\S]*?)```/gi;
+    let match;
+
+    while ((match = regex.exec(rawText)) !== null) {
+        const path = match[1];
+        const code = match[2].trim();
+        const filename = path.split('/').pop() || 'Archivo.java';
+        
+        results.push({ filename, code });
+    }
+
+    if (results.length === 0 && rawText.trim() !== '') {
+        return [{ filename: 'Código Generado (Formato Irregular)', code: rawText }];
+    }
+
+    return results;
+};
 
 export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     selectedProject,
@@ -27,6 +50,8 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
 }) => {
     const rawTests = selectedProject.javaTests;
     const tests = Array.isArray(rawTests) ? rawTests : rawTests ? [rawTests] : [];
+
+    const parsedBaseClasses = parseBaseClasses(selectedProject.baseClasses || '');
 
     return (
         <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
@@ -58,9 +83,20 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '40px' }}>
                     <div className="content-card" style={{ padding: '20px' }}>
-                        {selectedProject.baseClasses ? (
-                            <textarea className="wf-textarea" readOnly value={selectedProject.baseClasses}
-                                style={{ width: '100%', minHeight: '300px', resize: 'vertical', padding: '15px', fontSize: '14px', backgroundColor: '#f6f8fa', fontFamily: 'monospace' }} />
+                        {parsedBaseClasses.length > 0 ? (
+                            parsedBaseClasses.map((block, i) => {
+                                const highlighted = hljs.highlight(block.code, { language: 'java' }).value;
+                                return (
+                                    <div key={i} style={{ marginBottom: '24px' }}>
+                                        <h4 style={{ marginBottom: '8px', color: '#555', fontFamily: 'monospace' }}>
+                                            {block.filename}
+                                        </h4>
+                                        <pre style={{ margin: 0, borderRadius: '8px', overflow: 'auto', fontSize: '13px', maxHeight: '500px', backgroundColor: '#f6f8fa', padding: '20px', border: '1px solid #e1e4e8' }}>
+                                            <code className="hljs language-java" dangerouslySetInnerHTML={{ __html: highlighted }} />
+                                        </pre>
+                                    </div>
+                                );
+                            })
                         ) : (
                             <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
                                 Aún no se han generado las clases base para este examen.

@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
-
 import logoExamCraft from "../../../assets/icon512.png";
-
 import { GithubService } from "~src/services/githubService";
 import hljs from 'highlight.js/lib/core';
 import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/github.css';
-
 import { downloadProjectAsMarkdown } from "~src/utils/exportUtils";
-
 import { FoldersGridScreen } from "./FoldersGridScreen";
 import { DomainFolderScreen } from "./DomainFolderScreen";
 import { ExamDetailScreen } from "./ExamDetailScreen";
@@ -20,7 +16,7 @@ interface Props {
     readonly onWelcome: () => void;
 }
 
-export default function StorageExamsScreen({ onWelcome }: Props) {
+export default function StorageExamsIndex({ onWelcome }: Props) {
     const [projects, setProjects] = useState<any[]>([]);
     const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null);
     const [selectedProject, setSelectedProject] = useState<any | null>(null);
@@ -111,12 +107,21 @@ export default function StorageExamsScreen({ onWelcome }: Props) {
             localStorage.setItem("github_token", MY_TOKEN);
         }
 
+        let itemsToUpload = ["- README.md (Actualizado con el enunciado)"];
+        if (selectedProject.javaTests && selectedProject.javaTests.length > 0) {
+            itemsToUpload.push("- Todos los tests de Java detectados.");
+        }
+        if (selectedProject.baseClasses && selectedProject.baseClasses.trim() !== "") {
+            itemsToUpload.push("- Clases base para la extensión creada.");
+        }
+
+        const uploadListString = itemsToUpload.join("\n");
         const confirmacion = window.confirm(
             `¿Confirmas la creación del examen?\n\n` +
             `Dominio detectado: ${selectedProject.domainName}\n` +
             `Plantilla seleccionada: lidiafc8/${TEMPLATE_REPO}\n` +
             `Nuevo Repo: ${newRepoName}\n\n` +
-            `Se subirán:\n- README.md (Actualizado con el enunciado)\n- Todos los tests de Java detectados.`
+            `Se subirán:\n${uploadListString}`
         );
         if (!confirmacion) return;
 
