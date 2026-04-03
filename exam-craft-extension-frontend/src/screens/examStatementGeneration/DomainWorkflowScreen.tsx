@@ -112,51 +112,53 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
     }
   };
 
+    const breadcrumbButtonStyle: React.CSSProperties = {
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      margin: 0,
+                      font: 'inherit',
+                      color: '#4a3728',
+                      cursor: 'pointer',
+                      display: 'inline',
+                      outline: 'none'
+                  };
+    
+    const breadcrumbItems = [
+        { label: 'INICIO', action: onWelcome },
+        { label: 'CREAR EXAMEN', action: onCreateExam },
+        { label: 'POR PARTES', action: onCreateExamByParts },
+        { label: 'EXTENSIÓN FUNCIONAL', action: onFunctionalExtension },
+    ];
+
   return (
     <div className="exam-app">
       <header className="app-header">
         <div className="header-left">
       
-            <span className="logo-icon" onClick={onWelcome}>
-                <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-            </span> 
-         
+            <button 
+                type="button"
+                className="logo-icon" 
+                onClick={onWelcome} 
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
+                aria-label="Ir a inicio"
+            >
+                <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
+            </button>
+            
             <nav className="breadcrumb-nav">
-                <span 
-                    className="breadcrumb-link" 
-                    onClick={onWelcome}
-                    title="Volver al inicio"
-                    >
-                    INICIO
-                </span>
-
-                <span className="breadcrumb-separator">{'>'}</span>
-
-                <span className="breadcrumb-link" onClick={onCreateExam}>
-                CREAR EXAMEN
-                </span>
-
-                <span className="breadcrumb-separator">{'>'}</span>
-
-                <span className="breadcrumb-link" onClick={onCreateExamByParts}>
-                POR PARTES
-                </span>
-
-                <span className="breadcrumb-separator">{'>'}</span>
-
-                <span className="breadcrumb-link" onClick={onFunctionalExtension}>
-                    EXTENSIÓN FUNCIONAL
-                </span>
-
-                <span className="breadcrumb-separator">{'>'}</span>
-
-                <span className="breadcrumb-current">
-                {domainName.toUpperCase()}
-                </span>
-                
+                {breadcrumbItems.map((item) => (
+                    <React.Fragment key={item.label}>
+                        <button type="button" style={breadcrumbButtonStyle} onClick={item.action}>
+                            {item.label}
+                        </button>
+                        <span className="breadcrumb-separator">{' > '}</span>
+                    </React.Fragment>
+                ))}
+                <span className="breadcrumb-current">{domainName.toUpperCase()}</span>
             </nav>
-            </div>
-      </header>
+        </div>
+    </header>
 
       <div className="main-content"> 
           <div className="wf-layout-container">

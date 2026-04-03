@@ -5,10 +5,11 @@ export const cleanMermaidCode = (code: string) => {
 
 export const extractMermaidCode = (fullText: string) => {
     if (!fullText) return "";
-    const separatorRegex = /-{5,}|={5,}/;
-    const parts = fullText.split(separatorRegex);
-    const diagramPart = parts.find(p => p.toLowerCase().includes("classdiagram") || p.toLowerCase().includes("graph")) || "";
-    return diagramPart.replace(/.*?(classDiagram|graph)/is, "$1").trim();
+        const separatorRegex = /-{5,}|={5,}/;
+        const parts = fullText.split(separatorRegex);
+        const diagramPart = parts.find(p => p.toLowerCase().includes("classdiagram") || p.toLowerCase().includes("graph")) || "";
+        const match = diagramPart.match(/classDiagram|graph/i);
+    return match ? diagramPart.slice(match.index).trim() : diagramPart.trim();
 };
 
 export const sanitizeMermaidForModal = (code: string) => {

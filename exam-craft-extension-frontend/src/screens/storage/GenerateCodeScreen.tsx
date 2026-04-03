@@ -21,7 +21,7 @@ const parseBaseClasses = (rawText: string) => {
     if (!rawText) return [];
     const results = [];
     
-    const regex = /([a-zA-Z0-9_./\-]+\.java);?\s*```[a-z]*\r?\n([\s\S]*?)```/gi;
+    const regex = /([a-zA-Z0-9_./\-]+\.java);?[ \t]*[\r\n]?[ \t]*```[a-z]*\r?\n([\s\S]*?)```/gi;
     let match;
 
     while ((match = regex.exec(rawText)) !== null) {
@@ -53,22 +53,49 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
 
     const parsedBaseClasses = parseBaseClasses(selectedProject.baseClasses || '');
 
+    const breadcrumbButtonStyle: React.CSSProperties = {
+                                          background: 'none',
+                                          border: 'none',
+                                          padding: 0,
+                                          margin: 0,
+                                          font: 'inherit',
+                                          color: '#4a3728',
+                                          cursor: 'pointer',
+                                          display: 'inline',
+                                          outline: 'none'
+                                      };
+                        
+    const breadcrumbItems = [
+        { label: 'INICIO', action: onWelcome },
+        { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
+        { label: selectedDomainFolder?.toUpperCase(), action: onGoToExams },
+        { label: selectedProject.customName || `Examen de ${selectedProject.domainName}`, action: onBack },
+    ];
+    
+
     return (
         <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
             <header className="app-header" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
                 <div className="header-left">
-                    <span className="logo-icon" onClick={onGoToExams} style={{ cursor: 'pointer' }}>
-                        <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-                    </span>
+                    <button 
+                        type="button"
+                        className="logo-icon" 
+                        onClick={onWelcome} 
+                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
+                        aria-label="Ir a inicio"
+                    >
+                        <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
+                    </button>
+                    
                     <nav className="breadcrumb-nav">
-                        <span className="breadcrumb-link" onClick={onWelcome}>INICIO</span>
-                        <span className="breadcrumb-separator">{'>'}</span>
-                        <span className="breadcrumb-link" onClick={onGoToFolders}>EXÁMENES ANTERIORES</span>
-                        <span className="breadcrumb-separator">{'>'}</span>
-                        <span className="breadcrumb-link" onClick={onGoToExams}>{selectedDomainFolder?.toUpperCase()}</span>
-                        <span className="breadcrumb-separator">{'>'}</span>
-                        <span className="breadcrumb-link" onClick={onBack}>{selectedProject.customName || `Examen de ${selectedProject.domainName}`}</span>
-                        <span className="breadcrumb-separator">{'>'}</span>
+                        {breadcrumbItems.map((item) => (
+                            <React.Fragment key={item.label}>
+                                <button type="button" style={breadcrumbButtonStyle} onClick={item.action}>
+                                    {item.label}
+                                </button>
+                                <span className="breadcrumb-separator">{' > '}</span>
+                            </React.Fragment>
+                        ))}
                         <span className="breadcrumb-current">CÓDIGO GENERADO</span>
                     </nav>
                 </div>

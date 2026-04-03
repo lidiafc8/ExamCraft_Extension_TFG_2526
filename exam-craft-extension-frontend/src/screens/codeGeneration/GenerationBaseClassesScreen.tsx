@@ -227,24 +227,49 @@ export default function GenerationBaseClassesScreen({
       URL.revokeObjectURL(url);
   };
 
+   const breadcrumbButtonStyle: React.CSSProperties = {
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            margin: 0,
+            font: 'inherit',
+            color: '#4a3728',
+            cursor: 'pointer',
+            display: 'inline',
+            outline: 'none'
+        };
+    const breadcrumbItems = [
+        { label: 'INICIO', action: onWelcome },
+        { label: 'CREAR EXAMEN', action: onBack },
+        { label: 'POR PARTES', action: onCreateExamByParts },
+        { label: 'CÓDIGO', action: onCodeGeneration },
+    ];
+
   return (
     <div className="exam-app" style={{ position: 'relative' }}>
 
       <header className="app-header">
         <div className="header-left">
-            <span className="logo-icon" onClick={onWelcome} style={{ cursor: 'pointer' }}>
-                <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-            </span> 
+            <button 
+                type="button"
+                className="logo-icon" 
+                onClick={onWelcome} 
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
+                aria-label="Ir a inicio"
+            >
+                <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
+            </button>
+            
             <nav className="breadcrumb-nav">
-                <span className="breadcrumb-link" onClick={onWelcome}>INICIO</span>
-                <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-link" onClick={onCreateExam}>CREAR EXAMEN</span>
-                <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-link" onClick={onCreateExamByParts}>POR PARTES</span>
-                <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-link" onClick={onCodeGeneration}>CÓDIGO</span>
-                <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-current">CLASES BASE</span>
+                {breadcrumbItems.map((item) => (
+                    <React.Fragment key={item.label}>
+                        <button type="button" style={breadcrumbButtonStyle} onClick={item.action}>
+                            {item.label}
+                        </button>
+                        <span className="breadcrumb-separator">{' > '}</span>
+                    </React.Fragment>
+                ))}
+                <span className="breadcrumb-current">CÓDIGO</span>
             </nav>
         </div>
       </header>
@@ -263,14 +288,24 @@ export default function GenerationBaseClassesScreen({
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
                             {allowedFolders.map((folderName) => (
                                 <div key={folderName} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <img 
-                                        src={carpeta} 
-                                        alt="Carpeta" 
-                                        width="90" 
+                                    <img
+                                        src={carpeta}
+                                        alt="Carpeta"
+                                        width="90"
+                                        role="button"
+                                        tabIndex={0}
                                         style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
                                         onClick={() => setSelectedDomainFolder(folderName)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            setSelectedDomainFolder(folderName);
+                                            }
+                                        }}
                                         onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                        onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'} 
                                         onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                        onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                     />
                                     <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center', textTransform: 'capitalize' }}>
                                         {folderName}
@@ -293,19 +328,41 @@ export default function GenerationBaseClassesScreen({
                             {projectsInFolder.length > 0 ? (
                                 projectsInFolder.map((proj) => (
                                     <div key={proj.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <span 
-                                            className="parts-exam-icon" 
+                                        <span
+                                            className="parts-exam-icon"
+                                            role="button"
+                                            tabIndex={0}
                                             style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', width: '100%' }}
                                             onClick={() => handleSelectProject(proj)}
-                                        >
-                                            <img 
-                                                src={examen} 
-                                                alt="Abrir" 
-                                                width="80" 
-                                                height="80" 
-                                                style={{ transition: 'transform 0.2s' }} 
-                                                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                handleSelectProject(proj);
+                                                }
+                                            }}
+                                            onMouseOver={(e) => {
+                                                const img = e.currentTarget.querySelector('img');
+                                                if (img) img.style.transform = 'scale(1.1)';
+                                            }}
+                                            onFocus={(e) => {
+                                                const img = e.currentTarget.querySelector('img');
+                                                if (img) img.style.transform = 'scale(1.1)';
+                                            }}
+                                            onMouseOut={(e) => {
+                                                const img = e.currentTarget.querySelector('img');
+                                                if (img) img.style.transform = 'scale(1)';
+                                            }}
+                                            onBlur={(e) => {
+                                                const img = e.currentTarget.querySelector('img');
+                                                if (img) img.style.transform = 'scale(1)';
+                                            }}
+                                            >
+                                            <img
+                                                src={examen}
+                                                alt="Abrir"
+                                                width="80"
+                                                height="80"
+                                                style={{ transition: 'transform 0.2s' }}
                                             />
                                         </span>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>

@@ -2,7 +2,9 @@ import { sanitizeMermaidForModal } from "./mermaidUtils";
 
 export const downloadProjectAsMarkdown = (project: any) => {
         if (!project) return;
-        const title = `Examen_Completo_${project.customName}` || `Examen de ${project.domainName}`;
+        const title = project.customName 
+            ? `Examen_Completo_${project.customName}` 
+            : `Examen de ${project.domainName}`;
         const fullText = project.extensionFinish || '';
         const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
         let introText = fullText;
