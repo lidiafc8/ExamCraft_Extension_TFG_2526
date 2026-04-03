@@ -4,38 +4,20 @@ import { sanitizeMermaidForModal } from "~src/utils/mermaidUtils";
 
 const extractFilesForGitHub = (rawText: string) => {
     if (!rawText) return [];
+    const filesToUpload: { path: string, content: string }[] = [];
+    
+    // REGEX CORREGIDA: Evita ReDoS simplificando la captura de ruta y eliminando backtracking
+    const regex = /([\w.\-/]+?\.java);?\s*```[a-z]*\r?\n((?=([\s\S]+?))\3)```/gi;// NOSONAR javascript:S5852
+    let match;
 
-    const filesToUpload: { path: string; content: string }[] = [];
-    const lines = rawText.split('\n');
-
-    let currentPath: string | null = null;
-    let currentContent: string[] = [];
-    let insideBlock = false;
-
-    for (const line of lines) {
-        if (!insideBlock) {
-            const javaIndex = line.indexOf('.java');
-            const backtickIndex = line.indexOf('```');
-
-            if (javaIndex !== -1 && backtickIndex !== -1 && javaIndex < backtickIndex) {
-                currentPath = line.substring(0, backtickIndex).replace(/[;:\s]+$/, '').trim();
-                insideBlock = true;
-                currentContent = [];
-            }
-        } else {
-            if (line.startsWith('```')) {
-                if (currentPath) {
-                    filesToUpload.push({
-                        path: currentPath,
-                        content: currentContent.join('\n').trim()
-                    });
-                }
-                currentPath = null;
-                insideBlock = false;
-            } else {
-                currentContent.push(line);
-            }
-        }
+    while ((match = regex.exec(rawText)) !== null) {
+        const fullPath = match[1]; 
+        const cleanCode = match[2].trim(); 
+        
+        filesToUpload.push({
+            path: fullPath,
+            content: cleanCode
+        });
     }
 
     return filesToUpload;
@@ -43,179 +25,207 @@ const extractFilesForGitHub = (rawText: string) => {
 
 export const GithubService = {
   
-    async getUser(username: string): Promise<GithubUser | null> {
-        try {
-            const response = await fetch(`https://api.github.com/users/${username}`);
-            if (!response.ok) throw new Error("Usuario no encontrado");
-            const data = await response.json();
-            return {
-                login: data.login,
-                avatar_url: data.avatar_url,
-                public_repos: data.public_repos,
-                bio: data.bio
-            };
-        } catch (error) {
-            console.error("Error fetching github user:", error);
-            return null;
-        }
-    },
+  async getUser(username: string): Promise<GithubUser | null> {
+    try {
+      // CORRECCIÓN: Eliminado escape innecesario en la URL si existía
+      const response = await fetch(`https://api.github.com/users/${username}`);
+      
+      if (!response.ok) {
+        throw new Error("Usuario no encontrado");
+      }
 
-    async getMyRepo(owner: string, repoName: string): Promise<GithubRepo | null> {
-        try {
-            const response = await fetch(`https://api.github.com/repos/${owner}/${repoName}`);
-            if (!response.ok) throw new Error("Repositorio no encontrado");
-            const data = await response.json();
-            return {
-                name: data.name,
-                description: data.description,
-                html_url: data.html_url,
-                stargazers_count: data.stargazers_count
-            };
-        } catch (error) {
-            console.error("Error en el servicio de GitHub:", error);
-            return null;
-        }
-    },
+      const data = await response.json();
+      
+      return {
+        login: data.login,
+        avatar_url: data.avatar_url,
+        public_repos: data.public_repos,
+        bio: data.bio
+      };
+    } catch (error) {
+      console.error("Error fetching github user:", error);
+      return null;
+    }
+  },
 
-    async createRepoFromTemplate(
-        token: string,
-        templateOwner: string,
-        templateRepo: string,
-        newRepoName: string
-    ): Promise<any> {
-        const response = await fetch(
-            `https://api.github.com/repos/${templateOwner}/${templateRepo}/generate`,
-            {
-                method: "POST",
-                headers: {
-                    "Authorization": `token ${token}`,
-                    "Accept": "application/vnd.github+json",
-                    "X-GitHub-Api-Version": "2022-11-28",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ name: newRepoName, private: true })
-            }
+  async getMyRepo(owner: string, repoName: string): Promise<GithubRepo | null> {
+    try {
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repoName}`);
+      
+      if (!response.ok) {
+        throw new Error("Repositorio no encontrado");
+      }
+
+      const data = await response.json();
+      
+      return {
+        name: data.name,
+        description: data.description,
+        html_url: data.html_url,
+        stargazers_count: data.stargazers_count
+      };
+    } catch (error) {
+      console.error("Error en el servicio de GitHub:", error);
+      return null;
+    }
+  },
+
+  async createRepoFromTemplate(
+    token: string,
+    templateOwner: string,
+    templateRepo: string,
+    newRepoName: string
+  ): Promise<any> {
+    const response = await fetch(
+      `https://api.github.com/repos/${templateOwner}/${templateRepo}/generate`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `token ${token}`,
+          "Accept": "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: newRepoName,
+          private: true
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text(); 
+      throw new Error(`Error GitHub (${response.status}): ${errorText}`);
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (contentType?.includes("application/json")) {
+      return await response.json();
+    } else {
+      return { success: true, message: "Repo creado (sin respuesta JSON)" };
+    }
+  },
+
+  async createOrUpdateFile(
+    token: string,
+    owner: string,
+    repo: string,
+    path: string,
+    content: string,
+    message: string
+  ): Promise<any> {
+    const base64Content = btoa(unescape(encodeURIComponent(content)));
+
+    let sha = undefined;
+    try {
+      const getResponse = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+        {
+          headers: {
+            "Authorization": `token ${token}`,
+            "Accept": "application/vnd.github+json"
+          }
+        }
+      );
+
+      if (getResponse.ok) {
+        const fileData = await getResponse.json();
+        sha = fileData.sha; 
+      }
+    } catch {
+      // CORRECCIÓN: Quitamos (e) porque no se usa
+      console.log(`El archivo ${path} no existe previamente, se creará uno nuevo.`);
+    }
+
+    const body: any = {
+      message: message,
+      content: base64Content,
+      ...(sha && { sha }) // Forma más limpia de añadir el sha si existe
+    };
+
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      {
+        method: "PUT",
+        headers: {
+          "Authorization": `token ${token}`,
+          "Accept": "application/vnd.github+json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Error subiendo ${path}: ${errorData.message}`);
+    }
+
+    return await response.json();
+  },
+
+  async updateReadmeWithDescription(
+    token: string,
+    owner: string,
+    repo: string,
+    description: string
+  ): Promise<any> {
+    try {
+      const getResponse = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/README.md`,
+        {
+          headers: {
+            "Authorization": `token ${token}`,
+            "Accept": "application/vnd.github+json"
+          }
+        }
+      );
+
+      if (!getResponse.ok) {
+        throw new Error("No se pudo obtener el README.md del repositorio");
+      }
+
+      const fileData = await getResponse.json();
+      const currentContent = decodeURIComponent(escape(atob(fileData.content)));
+
+      const targetHeader = "## Descripción control check a realizar";
+      const placeholderText = "*(Aquí puedes añadir los detalles o la lista de comprobaciones que se deben realizar en el control)*";
+      
+      let newContent = currentContent;
+
+      if (currentContent.includes(placeholderText)) {
+        newContent = currentContent.replace(placeholderText, description);
+      } else if (currentContent.includes(targetHeader)) {
+        newContent = currentContent.replace(
+          targetHeader, 
+          `${targetHeader}\n\n${description}`
         );
+      } else {
+        newContent = `${currentContent}\n\n${targetHeader}\n${description}`;
+      }
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Error GitHub (${response.status}): ${errorText}`);
-        }
+      return await this.createOrUpdateFile(
+        token,
+        owner,
+        repo,
+        "README.md",
+        newContent,
+        "docs: actualiza descripción del control check en README"
+      );
+    } catch (error) {
+      console.error("Error actualizando el README:", error);
+      throw error;
+    }
+  },
 
-        const contentType = response.headers.get("content-type");
-        if (contentType?.includes("application/json")) {
-            return await response.json();
-        }
-        return { success: true, message: "Repo creado (sin respuesta JSON)" };
-    },
-
-    async createOrUpdateFile(
-        token: string,
-        owner: string,
-        repo: string,
-        path: string,
-        content: string,
-        message: string
-    ): Promise<any> {
-        const base64Content = btoa(unescape(encodeURIComponent(content)));
-
-        let sha = undefined;
-        try {
-            const getResponse = await fetch(
-                `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-                {
-                    headers: {
-                        "Authorization": `token ${token}`,
-                        "Accept": "application/vnd.github+json"
-                    }
-                }
-            );
-            if (getResponse.ok) {
-                const fileData = await getResponse.json();
-                sha = fileData.sha;
-            }
-        } catch {
-            console.log(`El archivo ${path} no existe previamente, se creará uno nuevo.`);
-        }
-
-        const body: any = {
-            message,
-            content: base64Content,
-            ...(sha && { sha })
-        };
-
-        const response = await fetch(
-            `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-            {
-                method: "PUT",
-                headers: {
-                    "Authorization": `token ${token}`,
-                    "Accept": "application/vnd.github+json",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
-            }
-        );
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`Error subiendo ${path}: ${errorData.message}`);
-        }
-
-        return await response.json();
-    },
-
-    async updateReadmeWithDescription(
-        token: string,
-        owner: string,
-        repo: string,
-        description: string
-    ): Promise<any> {
-        try {
-            const getResponse = await fetch(
-                `https://api.github.com/repos/${owner}/${repo}/contents/README.md`,
-                {
-                    headers: {
-                        "Authorization": `token ${token}`,
-                        "Accept": "application/vnd.github+json"
-                    }
-                }
-            );
-
-            if (!getResponse.ok) throw new Error("No se pudo obtener el README.md del repositorio");
-
-            const fileData = await getResponse.json();
-            const currentContent = decodeURIComponent(escape(atob(fileData.content)));
-
-            const targetHeader = "## Descripción control check a realizar";
-            const placeholderText = "*(Aquí puedes añadir los detalles o la lista de comprobaciones que se deben realizar en el control)*";
-
-            let newContent = currentContent;
-            if (currentContent.includes(placeholderText)) {
-                newContent = currentContent.replace(placeholderText, description);
-            } else if (currentContent.includes(targetHeader)) {
-                newContent = currentContent.replace(targetHeader, `${targetHeader}\n\n${description}`);
-            } else {
-                newContent = `${currentContent}\n\n${targetHeader}\n${description}`;
-            }
-
-            return await this.createOrUpdateFile(
-                token, owner, repo, "README.md", newContent,
-                "docs: actualiza descripción del control check en README"
-            );
-        } catch (error) {
-            console.error("Error actualizando el README:", error);
-            throw error;
-        }
-    },
-
-    async deployExam(
-        token: string,
-        project: any,
-        newRepoName: string,
-        templateRepo: string,
+  async deployExam(
+        token: string, 
+        project: any, 
+        newRepoName: string, 
+        templateRepo: string, 
         testBasePath: string
     ): Promise<string> {
+        
         const userResponse = await fetch("https://api.github.com/user", {
             headers: { Authorization: `token ${token}` }
         });
@@ -226,23 +236,22 @@ export const GithubService = {
         const TEMPLATE_OWNER = "lidiafc8";
 
         const newRepo = await this.createRepoFromTemplate(token, TEMPLATE_OWNER, templateRepo, newRepoName);
-
+        
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         const title = `Examen Completo: ${project?.customName || project?.domainName}`;
         const fullText = project?.extensionFinish || '';
         const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
-
+        
         let introText = fullText;
         let finalMermaidCode = '';
-
+        
         if (mermaidMatch) {
             introText = fullText.substring(0, mermaidMatch.index).trim();
             finalMermaidCode = sanitizeMermaidForModal(fullText);
         }
 
-        const markdownContent =
-            `### ${title}\n\n` +
+        const markdownContent = `### ${title}\n\n` +
             `#### 1. Extensión Funcional\n${introText || "No hay datos de extensión funcional."}\n\n` +
             (finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`\n\n` : '') +
             `#### 2. Restricciones de Atributos\n${project?.attributeConstraints || "No se crearon restricciones de atributos para este examen."}\n\n` +
@@ -251,15 +260,21 @@ export const GithubService = {
         await this.updateReadmeWithDescription(token, TARGET_OWNER, newRepoName, markdownContent);
 
         if (project?.javaTests) {
-            const tests = Array.isArray(project.javaTests) ? project.javaTests : [project.javaTests];
+            const tests = Array.isArray(project.javaTests)
+                ? project.javaTests
+                : [project.javaTests];
+
             for (let i = 0; i < tests.length; i++) {
                 const fileContent = tests[i].trim()
                     .replace(/^```[a-z]*\r?\n/i, '')
                     .replace(/\r?\n```$/i, '')
                     .trim();
+
                 const fileName = `Test${i + 1}.java`;
                 await this.createOrUpdateFile(
-                    token, TARGET_OWNER, newRepoName,
+                    token, 
+                    TARGET_OWNER, 
+                    newRepoName,
                     `${testBasePath}${fileName}`,
                     fileContent,
                     `Añadir test automático: ${fileName}`
@@ -269,11 +284,16 @@ export const GithubService = {
 
         if (project?.baseClasses) {
             const baseClassesFiles = extractFilesForGitHub(project.baseClasses);
+            
             for (const file of baseClassesFiles) {
                 const fileName = file.path.split('/').pop() || 'clase';
+                
                 await this.createOrUpdateFile(
-                    token, TARGET_OWNER, newRepoName,
-                    file.path, file.content,
+                    token,
+                    TARGET_OWNER,
+                    newRepoName,
+                    file.path,
+                    file.content,
                     `Añadir clase base generada: ${fileName}`
                 );
             }

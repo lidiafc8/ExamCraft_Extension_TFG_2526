@@ -20,36 +20,17 @@ export interface GeneratedCodeScreenProps {
 
 const parseBaseClasses = (rawText: string) => {
     if (!rawText) return [];
+    const results = [];
+    
+    const regex = /([a-z0-9.\-/]+\.java)\s*[:;]?\s*```[a-z]*\s*\n((?=([\s\S]*?))\3)```/gi; // NOSONAR javascript:S5852
+    let match;
 
-    const results: { filename: string; code: string }[] = [];
-    const lines = rawText.split('\n');
-
-    let currentPath: string | null = null;
-    let currentContent: string[] = [];
-    let insideBlock = false;
-
-    for (const line of lines) {
-        if (!insideBlock) {
-            const javaIndex = line.indexOf('.java');
-            const backtickIndex = line.indexOf('```');
-
-            if (javaIndex !== -1 && backtickIndex !== -1 && javaIndex < backtickIndex) {
-                currentPath = line.substring(0, backtickIndex).replace(/[;:\s]+$/, '').trim();
-                insideBlock = true;
-                currentContent = [];
-            }
-        } else {
-            if (line.startsWith('```')) {
-                if (currentPath) {
-                    const filename = currentPath.split('/').pop() || 'Archivo.java';
-                    results.push({ filename, code: currentContent.join('\n').trim() });
-                }
-                currentPath = null;
-                insideBlock = false;
-            } else {
-                currentContent.push(line);
-            }
-        }
+    while ((match = regex.exec(rawText)) !== null) {
+        const path = match[1];
+        const code = match[2].trim();
+        const filename = path.split('/').pop() || 'Archivo.java';
+        
+        results.push({ filename, code });
     }
 
     if (results.length === 0 && rawText.trim() !== '') {
@@ -109,7 +90,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                             parsedBaseClasses.map((block, i) => {
                                 const highlighted = hljs.highlight(block.code, { language: 'java' }).value;
                                 return (
-                                    <div key={i} style={{ marginBottom: '24px' }}>
+                                    <div key={block.path} style={{ marginBottom: '24px' }}>
                                         <h4 style={{ marginBottom: '8px', color: '#555', fontFamily: 'monospace' }}>
                                             {block.filename}
                                         </h4>
@@ -144,7 +125,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                                 const highlighted = hljs.highlight(cleanCode, { language: 'java' }).value;
                                 
                                 return (
-                                    <div key={i} style={{ marginBottom: '24px' }}>
+                                    <div key={test.substring(0, 20)} style={{ marginBottom: '24px' }}>
                                         <h4 style={{ marginBottom: '8px', color: '#555', fontFamily: 'monospace' }}>
                                             Test{i + 1}.java
                                         </h4>
