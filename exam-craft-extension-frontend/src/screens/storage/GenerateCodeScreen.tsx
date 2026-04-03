@@ -21,7 +21,9 @@ const parseBaseClasses = (rawText: string) => {
     if (!rawText) return [];
     const results = [];
     
-    const regex = /([a-zA-Z0-9_.\/\-]+\.java);?[ \t]*(?:\r?\n[ \t]*)?\`\`\`[a-z]*\r?\n([\s\S]*?)\`\`\`/gi;
+    // EXPRESIÓN REGULAR CORREGIDA PARA SONARCLOUD
+    // Se usa +? para evitar el ReDoS en la ruta y \s* para simplificar espacios.
+    const regex = /([a-zA-Z0-9_.\/\-]+?\.java);?\s*\`\`\`[a-z]*\r?\n([\s\S]*?)\`\`\`/gi;
     let match;
 
     while ((match = regex.exec(rawText)) !== null) {
@@ -54,16 +56,16 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     const parsedBaseClasses = parseBaseClasses(selectedProject.baseClasses || '');
 
     const breadcrumbButtonStyle: React.CSSProperties = {
-                                          background: 'none',
-                                          border: 'none',
-                                          padding: 0,
-                                          margin: 0,
-                                          font: 'inherit',
-                                          color: '#4a3728',
-                                          cursor: 'pointer',
-                                          display: 'inline',
-                                          outline: 'none'
-                                      };
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        margin: 0,
+        font: 'inherit',
+        color: '#4a3728',
+        cursor: 'pointer',
+        display: 'inline',
+        outline: 'none'
+    };
                         
     const breadcrumbItems = [
         { label: 'INICIO', action: onWelcome },
