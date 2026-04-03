@@ -20,7 +20,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
     
     const [projects, setProjects] = useState<any[]>([]);
     const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null);
-    const [selectedProject, setSelectedProject] = useState<any | null>(null);
+    const [selectedProject, setSelectedProject] = useState<any>(null);
     
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -33,7 +33,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
     const [savedData, setSavedData] = useState<{ project: any, constraints: string } | null>(null);
 
   useEffect(() => {
-    if (step === 'selection' && typeof chrome !== "undefined" && chrome.storage?.local) {
+    if (typeof chrome !== "undefined" && chrome.storage?.local) {
       chrome.storage.local.get(null, (items) => {
         const projectList = Object.keys(items)
           .filter(key => key.startsWith('project_'))
@@ -64,9 +64,9 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
   };
 
   const handleSaveToChrome = () => {
-    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+    if (typeof chrome !== "undefined" && chrome.storage?.local) {
         
-        if (!selectedProject || !selectedProject.id) {
+        if (!selectedProject?.id) {
             alert("Error: No hay un examen válido seleccionado para actualizar.");
             return;
         }
@@ -139,7 +139,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                 })
             });
         } catch (error) {
-            console.warn("Servidor de logs apagado.");
+            console.warn("Servidor de logs apagado.", error);
         }
 
     } catch (error) {
@@ -178,7 +178,7 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
       document.body.appendChild(link);
       link.click();
       
-      document.body.removeChild(link);
+      link.remove();
       URL.revokeObjectURL(url);
   };
 
@@ -312,46 +312,6 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
             <div className="content-card" style={{ width: '100%', maxWidth: '900px' }}>
                 {!selectedDomainFolder ? (
                     <>
-                        <h2 className="main-title small">Selecciona un dominio</h2>
-                        <p className="wf-instruction-text" style={{ textAlign: 'center' }}>
-                            Para generar el ejercicio "Restricciones de Atributos" es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base para este ejercicio.
-                        </p>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
-                            {allowedFolders.map((folderName) => (
-                                <div key={folderName} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <img
-                                        src={carpeta}
-                                        alt="Carpeta"
-                                        width="90"
-                                        role="button"
-                                        tabIndex={0}
-                                        style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
-                                        onClick={() => setSelectedDomainFolder(folderName)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            setSelectedDomainFolder(folderName);
-                                            }
-                                        }}
-                                        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                        onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'} 
-                                        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                        onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                    />
-                                    <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center', textTransform: 'capitalize' }}>
-                                        {folderName}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="wf-actions-row" style={{ marginTop: '30px' }}>
-                            <button onClick={onBack} className="btn-step secondary">Volver</button>
-                        </div>
-                    </>
-                ) : (
-                    <>
                         <h2 className="main-title small">Exámenes de {selectedDomainFolder.toUpperCase()}</h2>
                         <p className="wf-instruction-text" style={{ textAlign: 'center' }}>
                             Haz clic en el examen específico que deseas utilizar como contexto.
@@ -406,6 +366,55 @@ export default function AttributesConstraintsWorkflowScreen({ onBack, onWelcome,
                             <button onClick={() => setSelectedDomainFolder(null)} className="btn-step secondary">Volver</button>
                         </div>
                     </>
+
+        
+                ) : (
+                    <>
+                        <h2 className="main-title small">Selecciona un dominio</h2>
+                        <p className="wf-instruction-text" style={{ textAlign: 'center' }}>
+                            Para generar el ejercicio "Restricciones de Atributos" es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base para este ejercicio.
+                        </p>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
+                            {allowedFolders.map((folderName) => (
+                                <div key={folderName} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <button
+                                        type="button"
+                                        style={{ 
+                                            background: 'none', 
+                                            border: 'none', 
+                                            padding: 0, 
+                                            cursor: 'pointer',
+                                            transition: 'transform 0.2s',
+                                            outline: 'none',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center'
+                                        }}
+                                        onClick={() => setSelectedDomainFolder(folderName)}
+                                        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                        onFocus={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                        onBlur={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                    >
+                                        <img 
+                                            src={carpeta} 
+                                            alt={`Carpeta del dominio ${folderName}`} 
+                                            width="90" 
+                                        />
+                                    </button>
+                                    <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center', textTransform: 'capitalize' }}>
+                                        {folderName}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="wf-actions-row" style={{ marginTop: '30px' }}>
+                            <button onClick={onBack} className="btn-step secondary">Volver</button>
+                        </div>
+                    </>
+                    
                 )}
             </div>
         )}
