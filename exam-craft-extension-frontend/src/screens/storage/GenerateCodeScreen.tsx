@@ -21,7 +21,7 @@ const parseBaseClasses = (rawText: string) => {
     if (!rawText) return [];
     const results = [];
     
-    const regex = /([a-zA-Z0-9_./\-]+\.java);?[ \t]*[\r\n]?[ \t]*```[a-z]*\r?\n([\s\S]*?)```/gi;
+    const regex = /([a-zA-Z0-9_.\/\-]+\.java);?[ \t]*(?:\r?\n[ \t]*)?\`\`\`[a-z]*\r?\n([\s\S]*?)\`\`\`/gi;
     let match;
 
     while ((match = regex.exec(rawText)) !== null) {
