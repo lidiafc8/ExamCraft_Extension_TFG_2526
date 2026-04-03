@@ -3,6 +3,7 @@ import React from "react";
 import hljs from 'highlight.js/lib/core';
 import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/github.css';
+import { Header } from "~src/components/Header";
 
 hljs.registerLanguage('java', java);
 
@@ -21,9 +22,7 @@ const parseBaseClasses = (rawText: string) => {
     if (!rawText) return [];
     const results = [];
     
-    // EXPRESIÓN REGULAR CORREGIDA PARA SONARCLOUD
-    // Se usa +? para evitar el ReDoS en la ruta y \s* para simplificar espacios.
-    const regex = /([\w.\-\/]+?\.java);?\s*```[a-z]*\r?\n([\s\S]+?)```/gi;
+    const regex = /([a-zA-Z0-9.\-/]+\.java)\s*[:;]?\s*```[a-z]*\s*\n([\s\S]*?)```/gi;
     let match;
 
     while ((match = regex.exec(rawText)) !== null) {
@@ -51,21 +50,15 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     onGoToFolders
 }) => {
     const rawTests = selectedProject.javaTests;
-    const tests = Array.isArray(rawTests) ? rawTests : rawTests ? [rawTests] : [];
+
+    let tests: any[] = [];
+    if (Array.isArray(rawTests)) {
+        tests = rawTests;
+    } else if (rawTests) {
+        tests = [rawTests];
+    }
 
     const parsedBaseClasses = parseBaseClasses(selectedProject.baseClasses || '');
-
-    const breadcrumbButtonStyle: React.CSSProperties = {
-        background: 'none',
-        border: 'none',
-        padding: 0,
-        margin: 0,
-        font: 'inherit',
-        color: '#4a3728',
-        cursor: 'pointer',
-        display: 'inline',
-        outline: 'none'
-    };
                         
     const breadcrumbItems = [
         { label: 'INICIO', action: onWelcome },
@@ -74,34 +67,15 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
         { label: selectedProject.customName || `Examen de ${selectedProject.domainName}`, action: onBack },
     ];
     
+    const currentTitle = "CÓDIGO GENERADO";
 
     return (
         <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
-            <header className="app-header" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
-                <div className="header-left">
-                    <button 
-                        type="button"
-                        className="logo-icon" 
-                        onClick={onWelcome} 
-                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
-                        aria-label="Ir a inicio"
-                    >
-                        <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
-                    </button>
-                    
-                    <nav className="breadcrumb-nav">
-                        {breadcrumbItems.map((item) => (
-                            <React.Fragment key={item.label}>
-                                <button type="button" style={breadcrumbButtonStyle} onClick={item.action}>
-                                    {item.label}
-                                </button>
-                                <span className="breadcrumb-separator">{' > '}</span>
-                            </React.Fragment>
-                        ))}
-                        <span className="breadcrumb-current">CÓDIGO GENERADO</span>
-                    </nav>
-                </div>
-            </header>
+            <Header 
+                onWelcome={onWelcome} 
+                breadcrumbItems={breadcrumbItems} 
+                currentStep={currentTitle} 
+            />
 
             <main className="main-content" style={{ padding: '30px', paddingBottom: '100px', height: 'auto', overflow: 'visible', flex: 1 }}>
                 
@@ -116,7 +90,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                             parsedBaseClasses.map((block, i) => {
                                 const highlighted = hljs.highlight(block.code, { language: 'java' }).value;
                                 return (
-                                    <div key={i} style={{ marginBottom: '24px' }}>
+                                    <div key={block.path} style={{ marginBottom: '24px' }}>
                                         <h4 style={{ marginBottom: '8px', color: '#555', fontFamily: 'monospace' }}>
                                             {block.filename}
                                         </h4>

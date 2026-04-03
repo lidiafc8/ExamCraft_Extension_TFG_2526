@@ -1,5 +1,6 @@
 import React from "react";
 import carpeta from "../../../assets/images/archive.png";
+import { Header } from "~src/components/Header";
 
 
 export interface FoldersGridScreenProps {
@@ -34,33 +35,15 @@ export const FoldersGridScreen: React.FC<FoldersGridScreenProps> = ({
         { label: 'INICIO', action: onWelcome },
     ];
 
+    const currentTitle = "EXÁMENES ANTERIORES";
+
     return (
         <div className="exam-app">
-            <header className="app-header">
-                <div className="header-left">
-                    <button 
-                        type="button"
-                        className="logo-icon" 
-                        onClick={onWelcome} 
-                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
-                        aria-label="Ir a inicio"
-                    >
-                        <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
-                    </button>
-                    
-                    <nav className="breadcrumb-nav">
-                        {breadcrumbItems.map((item) => (
-                            <React.Fragment key={item.label}>
-                                <button type="button" style={breadcrumbButtonStyle} onClick={item.action}>
-                                    {item.label}
-                                </button>
-                                <span className="breadcrumb-separator">{' > '}</span>
-                            </React.Fragment>
-                        ))}
-                        <span className="breadcrumb-current">EXÁMENES ANTERIORES</span>
-                    </nav>
-                </div>
-            </header>
+            <Header 
+                onWelcome={onWelcome} 
+                breadcrumbItems={breadcrumbItems} 
+                currentStep={currentTitle} 
+            />
             
             <main className="main-content">
                 <h1 className="main-title">MIS EXÁMENES</h1>
@@ -68,7 +51,7 @@ export const FoldersGridScreen: React.FC<FoldersGridScreenProps> = ({
                 
                 <div className="cards-container">
                     {allowedFolders.map((folderName) => {
-                        const count = projects.filter(p => p.domainName && p.domainName.toLowerCase() === folderName).length;
+                    const count = projects.filter(p => p.domainName?.toLowerCase() === folderName).length;
                         return (
                             <button 
                                 key={folderName} 

@@ -1,5 +1,6 @@
 import React from "react";
 import examen from "../../../assets/images/exam.png";
+import { Header } from "~src/components/Header";
 
 export interface DomainFolderScreenProps {
     selectedDomainFolder: string;
@@ -30,52 +31,21 @@ export const DomainFolderScreen: React.FC<DomainFolderScreenProps> = ({
     setEditingId,
     setTempName
 }) => {
-
-    const breadcrumbButtonStyle: React.CSSProperties = {
-                              background: 'none',
-                              border: 'none',
-                              padding: 0,
-                              margin: 0,
-                              font: 'inherit',
-                              color: '#4a3728',
-                              cursor: 'pointer',
-                              display: 'inline',
-                              outline: 'none'
-                          };
             
     const breadcrumbItems = [
         { label: 'INICIO', action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onBack },
     ];
 
+    const currentTitle = selectedDomainFolder.toUpperCase();
+
     return (
         <div className="exam-app">
-            <header className="app-header">
-                <div className="header-left">
-                    <button 
-                        type="button"
-                        className="logo-icon" 
-                        onClick={onWelcome} 
-                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
-                        aria-label="Ir a inicio"
-                    >
-                        <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
-                    </button>
-                    
-                    <nav className="breadcrumb-nav">
-                        {breadcrumbItems.map((item) => (
-                            <React.Fragment key={item.label}>
-                                <button type="button" style={breadcrumbButtonStyle} onClick={item.action}>
-                                    {item.label}
-                                </button>
-                                <span className="breadcrumb-separator">{' > '}</span>
-                            </React.Fragment>
-                        ))}
-                        <span className="breadcrumb-current">{selectedDomainFolder.toUpperCase()}</span>
-                    </nav>
-                </div>
-            </header>
-
+            <Header 
+                onWelcome={onWelcome} 
+                breadcrumbItems={breadcrumbItems} 
+                currentStep={currentTitle} 
+            />
             <main className="main-content">
                 <h1 className="main-title">CARPETA: {selectedDomainFolder.toUpperCase()}</h1>
                 <div className="subtitle-badge">

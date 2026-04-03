@@ -1,5 +1,6 @@
 import React from "react"
 import logoExamCraft from "../../../assets/icon512.png"
+import { Header } from "~src/components/Header"
 
 interface Props {
   readonly onBack: () => void
@@ -11,55 +12,23 @@ interface Props {
 
 export default function CreateExamByPartsScreen({ onBack, onWelcome, onGenerateTest, onCreateExamByParts, onGenerateBaseClasses }: Props
 ) {
-  const breadcrumbButtonStyle: React.CSSProperties = {
-          background: 'none',
-          border: 'none',
-          padding: 0,
-          margin: 0,
-          font: 'inherit',
-          color: '#4a3728',
-          cursor: 'pointer',
-          display: 'inline',
-          outline: 'none'
-      };
+  
   const breadcrumbItems = [
       { label: 'INICIO', action: onWelcome },
       { label: 'CREAR EXAMEN', action: onBack },
       { label: 'POR PARTES', action: onCreateExamByParts },
   ];
 
+  const currentTitle = "CÓDIGO";
+
   return (
     <div className="exam-app">
        
-      <header className="app-header">
-        <div className="header-left">
-      
-            <button 
-                type="button"
-                className="logo-icon" 
-                onClick={onWelcome} 
-                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
-                aria-label="Ir a inicio"
-            >
-                <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
-            </button>
-         
-            <nav className="breadcrumb-nav">
-                {breadcrumbItems.map((item) => (
-                    <React.Fragment key={item.label}>
-                        <button type="button" style={breadcrumbButtonStyle} onClick={item.action}>
-                            {item.label}
-                        </button>
-                        <span className="breadcrumb-separator">{' > '}</span>
-                    </React.Fragment>
-                ))}
-                <span className="breadcrumb-current">CÓDIGO</span>
-            </nav>
-                
-            </div>
-        <div className="header-right">
-        </div>
-      </header>
+      <Header 
+          onWelcome={onWelcome} 
+          breadcrumbItems={breadcrumbItems} 
+          currentStep={currentTitle} 
+      />
 
       <main className="main-content">
         

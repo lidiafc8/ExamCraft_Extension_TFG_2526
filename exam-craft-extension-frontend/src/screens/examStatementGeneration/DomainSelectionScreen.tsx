@@ -3,6 +3,7 @@ import logoExamCraft from "../../../assets/icon512.png"
 import petClinic from "../../../assets/images/petclinic.png"
 import chess from "../../../assets/images/chess.png"
 import comingSoon from "../../../assets/images/comingSoon.png"
+import { Header } from "~src/components/Header"
 
 interface Props {
   readonly onBack: () => void
@@ -12,17 +13,6 @@ interface Props {
 }
 
 export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectDomain, onCreateExam }: Props) {
-  const breadcrumbButtonStyle: React.CSSProperties = {
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    margin: 0,
-                    font: 'inherit',
-                    color: '#4a3728',
-                    cursor: 'pointer',
-                    display: 'inline',
-                    outline: 'none'
-                };
   
   const breadcrumbItems = [
       { label: 'INICIO', action: onWelcome },
@@ -30,38 +20,16 @@ export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectD
       { label: 'POR PARTES', action: onBack },
   ];
 
+  const currentTitle = "EXTENSIÓN FUNCIONAL";
+
   return (
     <div className="exam-app">
       
-      {/* --- HEADER --- */}   
-      <header className="app-header">
-        <div className="header-left">
-              
-          <button 
-              type="button"
-              className="logo-icon" 
-              onClick={onWelcome} 
-              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
-              aria-label="Ir a inicio"
-          >
-              <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
-          </button>
-          
-          <nav className="breadcrumb-nav">
-              {breadcrumbItems.map((item) => (
-                  <React.Fragment key={item.label}>
-                      <button type="button" style={breadcrumbButtonStyle} onClick={item.action}>
-                          {item.label}
-                      </button>
-                      <span className="breadcrumb-separator">{' > '}</span>
-                  </React.Fragment>
-              ))}
-              <span className="breadcrumb-current">EXTENSIÓN FUNCIONAL</span>
-          </nav>
-        </div>
-        <div className="header-right">
-        </div>
-      </header>
+      <Header 
+          onWelcome={onWelcome} 
+          breadcrumbItems={breadcrumbItems} 
+          currentStep={currentTitle} 
+      />
 
       {/* --- CONTENIDO CENTRAL --- */}
       <main className="main-content">
