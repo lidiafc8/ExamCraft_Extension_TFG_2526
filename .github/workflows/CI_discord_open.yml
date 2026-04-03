@@ -49,3 +49,12 @@ jobs:
           fi
           
           echo "Mensaje enviado con éxito a Discord. ID: $msg_id"
+      
+      - name: Guardar Discord message ID en comentario de PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api -X POST "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+            -f body="<!-- discord_message_id=${msg_id} -->"

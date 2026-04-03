@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import extensionPromptMarkdown from "bundle-text:../prompts/functional-extension-generation/generation_statement_functional_extension.md"
-import { sendToGemini } from "../services/geminiService"
-import { parseMasterPrompt } from "../utils/promptParser"
+// Importamos el nuevo componente Header
+import { Header } from "~src/components/Header"
+import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md"
+import { sendToGemini } from "../../services/geminiService"
+import { parseMasterPrompt } from "../../utils/promptParser"
 
 interface Props {
   readonly domainName: string;
@@ -27,6 +28,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
   const [previousExtensions, setPreviousExtensions] = useState<string>("");
 
     useEffect(() => {
+        // CORRECCIÓN: Usamos Optional Chaining ?.
         if (typeof chrome !== "undefined" && chrome.storage?.local) {
             chrome.storage.local.get(null, (items) => {
             const extensions = Object.keys(items)
@@ -49,12 +51,12 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
   
   useEffect(() => {
     if (extensionPromptMarkdown) {
-        const { visibleText, hiddenContext } = parseMasterPrompt(extensionPromptMarkdown);
+        const { visibleText, hiddenContext: parsedHidden } = parseMasterPrompt(extensionPromptMarkdown);
 
         const finalVisible = visibleText.replaceAll("{{DOMAIN}}", domainName);
         
         setPromptText(finalVisible);    
-        setHiddenContext(hiddenContext);
+        setHiddenContext(parsedHidden);
     }
   }, [domainName]);
 
@@ -64,7 +66,6 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
     setResponseText("");
 
     try {
-        
         const finalPayload = `
         CONTEXTO Y RECURSOS (Información interna):
         ${hiddenContext}
@@ -101,7 +102,8 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
             });
             console.log("Log enviado al servidor local correctamente.");
         } catch (error) {
-            console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
+            // CORRECCIÓN: Usamos la variable 'error' para que Sonar no se queje
+            console.warn("Servidor de logs apagado. El log no se guardó en el repo.", error);
         }
 
     } catch (error) {
@@ -112,51 +114,20 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
     }
   };
 
+    const breadcrumbItems = [
+        { label: 'INICIO', action: onWelcome },
+        { label: 'CREAR EXAMEN', action: onCreateExam },
+        { label: 'POR PARTES', action: onCreateExamByParts },
+        { label: 'EXTENSIÓN FUNCIONAL', action: onFunctionalExtension },
+    ];
+
   return (
     <div className="exam-app">
-      <header className="app-header">
-        <div className="header-left">
-      
-            <span className="logo-icon" onClick={onWelcome}>
-                <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-            </span> 
-         
-            <nav className="breadcrumb-nav">
-                <span 
-                    className="breadcrumb-link" 
-                    onClick={onWelcome}
-                    title="Volver al inicio"
-                    >
-                    INICIO
-                </span>
-
-                <span className="breadcrumb-separator">{'>'}</span>
-
-                <span className="breadcrumb-link" onClick={onCreateExam}>
-                CREAR EXAMEN
-                </span>
-
-                <span className="breadcrumb-separator">{'>'}</span>
-
-                <span className="breadcrumb-link" onClick={onCreateExamByParts}>
-                POR PARTES
-                </span>
-
-                <span className="breadcrumb-separator">{'>'}</span>
-
-                <span className="breadcrumb-link" onClick={onFunctionalExtension}>
-                    EXTENSIÓN FUNCIONAL
-                </span>
-
-                <span className="breadcrumb-separator">{'>'}</span>
-
-                <span className="breadcrumb-current">
-                {domainName.toUpperCase()}
-                </span>
-                
-            </nav>
-            </div>
-      </header>
+      <Header 
+        onWelcome={onWelcome} 
+        breadcrumbItems={breadcrumbItems} 
+        currentStep={domainName.toUpperCase()} 
+      />
 
       <div className="main-content"> 
           <div className="wf-layout-container">

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import extensionPromptMarkdown from "bundle-text:../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md"
-import { sendToGemini } from "../services/geminiService"
-import { parseMasterPrompt } from "../utils/promptParser"
-import { MermaidViewer } from "../components/MermaidViewer"
+import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md"
+import { sendToGemini } from "../../services/geminiService"
+import { parseMasterPrompt } from "../../utils/promptParser"
+import { MermaidViewer } from "../../components/MermaidViewer"
+import { Header } from "~src/components/Header"
 
 interface Props {
   readonly domainName: string;
@@ -38,10 +38,7 @@ export default function DiagramUMLScreen({
     //esto es en bruto lo que devuelve la IA
     const [responseText, setResponseText] = useState("");
 
-    //esto es cuando está preparado para dibujarlo, quitando todo
-    const [cleanedCode, setCleanedCode] = useState("");
-
-    //esto para que se muestre, que se está cargando, para no dar todo el tiempo y se gaste la cuota
+    //esto para que se muestre, que se está cargando, para no dar siempre el tiempo y se gaste la cuota
     const [isLoading, setIsLoading] = useState(false);
 
     //esto es para unir el codigo mermaid con el contexto del enunciado
@@ -65,16 +62,12 @@ export default function DiagramUMLScreen({
         if (!code) return '';
         
         return code
-            // 1. Elimina etiquetas HTML (<span>, <div>, etc.)
-            .replace(/<[^>]*>?/gm, '') 
-            // 2. Elimina entidades HTML comunes (como &nbsp;)
-            .replace(/&nbsp;/g, ' ')
-            // 3. Limpia líneas que queden vacías o con solo espacios
+            .replaceAll(/<[^>]*>?/gm, '') 
+            .replaceAll('&nbsp;', ' ')
             .split('\n')
             .map(line => line.trimEnd())
             .join('\n');
-    };
-
+    }
     const handleGenerate = async () => {
         setIsLoading(true);
         setResponseText("");
@@ -93,7 +86,7 @@ export default function DiagramUMLScreen({
 
             // --- NUEVA LÓGICA DE LIMPIEZA ---
             // 1. Quitamos primero las etiquetas de bloque de código markdown
-            let cleanResult = result.replace(/```mermaid/g, "").replace(/```/g, "");
+            let cleanResult = result.replaceAll(/```mermaid/g, "").replaceAll(/```/g, "");
 
             // 2. Buscamos dónde empieza realmente el diagrama (ej: classDiagram, graph TD, etc.)
             // Esto ignora cualquier texto introductorio de la IA
@@ -165,29 +158,24 @@ ${responseText.trim()}`.trim();
             alert("Ocurrió un error al procesar la combinación final.");
         }
     };
-  
+
+    const breadcrumbItems = [
+        { label: 'INICIO', action: onWelcome },
+        { label: 'CREAR EXAMEN', action: onCreateExam },
+        { label: 'POR PARTES', action: onCreateExamByParts },
+        { label: 'EXTENSIÓN FUNCIONAL', action: onFunctionalExtension },
+        { label: domainName.toUpperCase(), action: onStatementStep1 },
+    ];
+
+    const currentTitle = "DIAGRAMA UML";
+    
   return (
     <div className="exam-app">
-        <header className="app-header">
-            <div className="header-left">
-            <span className="logo-icon" onClick={onWelcome} style={{cursor: 'pointer'}}>
-                <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-            </span> 
-            <nav className="breadcrumb-nav">
-                <span className="breadcrumb-link" onClick={onWelcome}>INICIO</span>
-                <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-link" onClick={onCreateExam}>CREAR EXAMEN</span>
-                <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-link" onClick={onCreateExamByParts}>POR PARTES</span>
-                <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-link" onClick={onFunctionalExtension}>EXTENSIÓN FUNCIONAL</span>
-                <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-link" onClick={onStatementStep1}>{domainName.toUpperCase()}</span>
-                <span className="breadcrumb-separator">{'>'}</span>
-                <span className="breadcrumb-current">DIAGRAMA UML</span>
-            </nav>
-            </div>
-        </header>
+        <Header 
+            onWelcome={onWelcome} 
+            breadcrumbItems={breadcrumbItems} 
+            currentStep={currentTitle} 
+        />
 
         <main className="main-content"> 
             <div className="wf-layout-container">
@@ -280,7 +268,7 @@ ${responseText.trim()}`.trim();
                                     {context} 
                                 </div>
                                 
-                                {/* ÁREA DEL DIAGRAMA: Ahora sin scale pequeño, usando todo el ancho */}
+                                {/* ÁREA DEL DIAGRAMA: Ahora sin scale pequeño, usando al completo el ancho */}
                                 <div style={{ 
                                     flex: '1', 
                                     overflow: 'auto', 

@@ -3,15 +3,17 @@ import WelcomeScreen from "../screens/WelcomeScreen"
 import GithubScreen from "../screens/GithubScreen"
 import CreateExamScreen from "../screens/CreateExamScreen"
 import CreateExamByPartsScreen from "../screens/CreateExamByPartsScreen"
-import DomainSelectionScreen from "../screens/DomainSelectionScreen"
-import DomainWorkflowScreen from "../screens/DomainWorkflowScreen"
-import DiagramUMLScreen from "../screens/DiagramUMLScreen"
-import FinishFunctionalExtensionScreen from "../screens/FinishFunctionalExtensionScreen"
-import StorageExamsScreen from "../screens/StorageExamsScreen"
+import DomainSelectionScreen from "../screens/examStatementGeneration/DomainSelectionScreen"
+import DomainWorkflowScreen from "../screens/examStatementGeneration/DomainWorkflowScreen"
+import DiagramUMLScreen from "../screens/examStatementGeneration/DiagramUMLScreen"
+import FinishFunctionalExtensionScreen from "../screens/examStatementGeneration/FinishFunctionalExtensionScreen"
 import "/assets/main.css"
-import AttributesConstraintsWorkflowScreen from "~src/screens/AttributesConstraintsWorkflowScreen"
-import GenerationTestAtributesScreen from "../screens/GenerationTestAtributesScreen"
-import GeneralGenerationTestScreen from "../screens/GeneralGenerationTestScreen"
+import AttributesConstraintsWorkflowScreen from "~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen"
+import GenerationTestAtributesScreen from "../screens/codeGeneration/GenerationTestAtributesScreen"
+import GeneralGenerationTestScreen from "../screens/codeGeneration/GeneralGenerationTestScreen"
+import CodeGenerationScreen from "~src/screens/codeGeneration/CodeGenerationScreen"
+import GenerationBaseClassesScreen from "~src/screens/codeGeneration/GenerationBaseClassesScreen"
+import StorageExamsIndex from "../screens/storage/StorageExamsIndex"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
@@ -35,7 +37,9 @@ export default function IndexTab() {
     "storage" |
     "domainSelection" | 
     "testAtributes" |
-    "testGeneral"
+    "testGeneral" |
+    "codeGeneration" |
+    "generateBaseClasses"
   >("welcome")
 
   return (
@@ -63,8 +67,29 @@ export default function IndexTab() {
         onBack={() => setScreen("createExam")} 
         onWelcome={() => setScreen("welcome")} 
         onFunctionalExtension={() => setScreen("domainSelection")}
-        onAttributesConstraints={() => setScreen("attributesConstraints")} 
+        onAttributesConstraints={() => setScreen("attributesConstraints")}
+        onCodeGeneration={() => setScreen("codeGeneration")}
         onGenerateTest={() => setScreen("testGeneral")}
+        />
+      )}
+
+      {screen === "codeGeneration" && (
+        <CodeGenerationScreen 
+        onBack={() => setScreen("createExamByParts")} 
+        onWelcome={() => setScreen("welcome")} 
+        onGenerateTest={() => setScreen("testGeneral")}
+        onCreateExamByParts={() => setScreen("createExamByParts")}
+        onGenerateBaseClasses={() => setScreen("generateBaseClasses")}
+        />
+      )}
+  
+      {screen === "generateBaseClasses" && (
+        <GenerationBaseClassesScreen 
+          onBack={() => setScreen("codeGeneration")} 
+          onWelcome={() => setScreen("welcome")}
+          onCreateExam={() => setScreen("createExam")}
+          onCreateExamByParts={() => setScreen("createExamByParts")}
+          onCodeGeneration={() => setScreen("codeGeneration")}
         />
       )}
 
@@ -97,7 +122,7 @@ export default function IndexTab() {
 
       {screen === "testGeneral" && (
         <GeneralGenerationTestScreen 
-          onBack={() => setScreen("createExamByParts")} 
+          onBack={() => setScreen("codeGeneration")} 
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
@@ -106,6 +131,7 @@ export default function IndexTab() {
             setTestOrigin('general');
             setScreen("testAtributes");
           }}
+        onCodeGeneration={() => setScreen("codeGeneration")}
         />
       )}
 
@@ -144,7 +170,7 @@ export default function IndexTab() {
       )}
 
       {screen === "storage" && (
-        <StorageExamsScreen 
+        <StorageExamsIndex
           onWelcome={() => setScreen("welcome")}
         />
       )}
