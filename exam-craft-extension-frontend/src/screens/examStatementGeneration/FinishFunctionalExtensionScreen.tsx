@@ -1,6 +1,6 @@
-import React, { useState } from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import { MermaidViewer } from "../components/MermaidViewer"
+import React from "react"
+import { MermaidViewer } from "../../components/MermaidViewer"
+import { Header } from "~src/components/Header";
 
 interface Props {
     readonly domainName: string;
@@ -29,13 +29,13 @@ export default function FinishFunctionalExtensionScreen({
     const cleanMermaidCode = (code: string) => {
         if (!code) return '';
         return code
-            .replace(/<[^>]*>?/gm, '') 
-            .replace(/&nbsp;/g, ' ')   
+            .replaceAll(/<[^>]*>?/gm, '') 
+            .replaceAll('&nbsp;', ' ')   
             .trim();
     };
 
     const handleSaveToChrome = () => {
-        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        if (typeof chrome !== "undefined" && chrome.storage?.local) {
             
             const userChosenName = prompt("Introduce el nombre para guardar este examen:", `Examen de ${domainName}`);
             
@@ -65,14 +65,28 @@ export default function FinishFunctionalExtensionScreen({
             alert("Esta funcionalidad solo está disponible dentro de la Extensión de Chrome.");
         }
     };
+        const SEPARATOR_REGEX = /-{5,}|={5,}/;
 
-    const extractMermaidCode = (fullText: string) => {
-        if (!fullText) return "";
-        const separatorRegex = /-{5,}|={5,}/; 
-        const parts = fullText.split(separatorRegex);
-        const diagramPart = parts.find(p => p.toLowerCase().includes("classdiagram") || p.toLowerCase().includes("graph")) || "";
-        return diagramPart.replace(/.*?(classDiagram|graph)/is, "$1").trim();
-    };
+        const extractMermaidCode = (fullText: string): string => {
+            if (!fullText) {
+                return "";
+            }
+
+            const parts = fullText.split(SEPARATOR_REGEX);
+            
+            const diagramPart = parts.find(p => 
+                p.toLowerCase().includes("classdiagram") || 
+                p.toLowerCase().includes("graph")
+            ) || "";
+
+            const match = /classDiagram|graph/i.exec(diagramPart);
+
+            if (match && typeof match.index === 'number') {
+                return diagramPart.slice(match.index).trim();
+            }
+
+            return diagramPart.trim();
+        };
 
     const handleDownload = () => {
         const defaultName = `Extension_Funcional_${domainName}`;
@@ -116,34 +130,30 @@ ${finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`` : '*No se gene
         document.body.appendChild(link);
         link.click();
         
-        document.body.removeChild(link);
+        link.remove();
         URL.revokeObjectURL(url);
     };
 
     const mermaidCode = extractMermaidCode(extensionFinish);
 
+        
+    const breadcrumbItems = [
+        { label: 'INICIO', action: onWelcome },
+        { label: 'CREAR EXAMEN', action: onCreateExam },
+        { label: 'POR PARTES', action: onCreateExamByParts },
+        { label: 'EXTENSIÓN FUNCIONAL', action: onFunctionalExtension },
+        { label: domainName.toUpperCase() , action: onStatementStep1 },
+    ];
+
+    const currentTitle = "EXTENSION FUNCIONAL COMPLETA";
+
     return (
         <div className="exam-app">
-            <header className="app-header">
-                <div className="header-left">
-                    <span className="logo-icon" onClick={onWelcome} style={{cursor: 'pointer'}}>
-                        <img src={logoExamCraft} alt="Logo" width="60" height="60" />
-                    </span> 
-                    <nav className="breadcrumb-nav">
-                        <span className="breadcrumb-link" onClick={onWelcome}>INICIO</span>
-                        <span className="breadcrumb-separator">{'>'}</span>
-                        <span className="breadcrumb-link" onClick={onCreateExam} >CREAR EXAMEN</span>
-                        <span className="breadcrumb-separator">{'>'}</span>
-                        <span className="breadcrumb-link" onClick={onCreateExamByParts} >POR PARTES</span>
-                        <span className="breadcrumb-separator">{'>'}</span>
-                        <span className="breadcrumb-link" onClick={onFunctionalExtension} >EXTENSIÓN FUNCIONAL</span>
-                        <span className="breadcrumb-separator">{'>'}</span>
-                        <span className="breadcrumb-link" onClick={onStatementStep1} >{domainName.toUpperCase()}</span>
-                        <span className="breadcrumb-separator">{'>'}</span>
-                        <span className="breadcrumb-current">EXTENSION FUNCIONAL COMPLETA</span>
-                    </nav>
-                </div>
-            </header>
+            <Header 
+                onWelcome={onWelcome} 
+                breadcrumbItems={breadcrumbItems} 
+                currentStep={currentTitle} 
+            />
 
             <main className="main-content"> 
                 <div className="wf-layout-container">

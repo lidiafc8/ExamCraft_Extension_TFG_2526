@@ -6,10 +6,11 @@ interface Props {
   readonly onWelcome: () => void
   readonly onFunctionalExtension: () => void
   readonly onAttributesConstraints: () => void
+  readonly onCodeGeneration: () => void
   readonly onGenerateTest: () => void
 }
 
-export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onGenerateTest }: Props) {
+export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onGenerateTest, onCodeGeneration }: Props) {
   return (
     <div className="exam-app">
        
@@ -47,12 +48,12 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
         </div>
       </header>
 
-      <main className="main-content">
+      <main className="main-content" style={{ overflowY: 'auto', paddingBottom: '40px', paddingTop: '100px' }}>
         
         <h1 className="main-title">CREAR EXAMEN POR PARTES</h1>
         
         <div className="subtitle-badge">
-          ¿Qué parte le gustaría generar primero?
+          ¿Qué parte te gustaría generar primero?
         </div>
 
         <div className="vertical-menu-container">
@@ -69,8 +70,8 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
             Relaciones entre entidades
           </button>
 
-          <button className="menu-btn" onClick={onGenerateTest}>
-            Generar tests
+          <button className="menu-btn1" onClick={onCodeGeneration}>
+            Generación de código
           </button>
 
         </div>
@@ -84,3 +85,4 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
     </div>
   )
 }
+
