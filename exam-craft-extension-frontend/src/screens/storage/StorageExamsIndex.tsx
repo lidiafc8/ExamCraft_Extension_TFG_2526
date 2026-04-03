@@ -60,7 +60,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
     const handleDelete = (id: string, e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
-        const confirmDelete = window.confirm("¿Estás seguro de que quieres borrar este examen? Esta acción no se puede deshacer.");
+        const confirmDelete = globalThis.confirm("¿Estás seguro de que quieres borrar este examen? Esta acción no se puede deshacer.");
         if (confirmDelete) {
             if (typeof chrome !== "undefined" && chrome.storage?.local) {
                 chrome.storage.local.remove(id, () => {

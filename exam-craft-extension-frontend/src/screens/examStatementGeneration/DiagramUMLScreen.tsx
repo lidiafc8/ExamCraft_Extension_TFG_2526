@@ -4,6 +4,7 @@ import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extens
 import { sendToGemini } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
 import { MermaidViewer } from "../../components/MermaidViewer"
+import { Header } from "~src/components/Header"
 
 interface Props {
   readonly domainName: string;
@@ -38,14 +39,11 @@ export default function DiagramUMLScreen({
     //esto es en bruto lo que devuelve la IA
     const [responseText, setResponseText] = useState("");
 
-    //esto es cuando está preparado para dibujarlo, quitando todo
-    const [cleanedCode, setCleanedCode] = useState("");
-
-    //esto para que se muestre, que se está cargando, para no dar todo el tiempo y se gaste la cuota
+    //esto para que se muestre, que se está cargando, para no dar siempre el tiempo y se gaste la cuota
     const [isLoading, setIsLoading] = useState(false);
 
     //esto es para unir el codigo mermaid con el contexto del enunciado
-    const [extensionComplete, setExtensionComplete] = useState("");
+    const [_, setExtensionComplete] = useState("");
 
     //se ejecuta al principio, y cuando se cambia el enunciado 
     //FUNCIONALIDAD DEL MÉTODO ---> es separar el prompt
@@ -65,16 +63,12 @@ export default function DiagramUMLScreen({
         if (!code) return '';
         
         return code
-            // 1. Elimina etiquetas HTML (<span>, <div>, etc.)
-            .replace(/<[^>]*>?/gm, '') 
-            // 2. Elimina entidades HTML comunes (como &nbsp;)
-            .replace(/&nbsp;/g, ' ')
-            // 3. Limpia líneas que queden vacías o con solo espacios
+            .replaceAll(/<[^>]*>?/gm, '') 
+            .replaceAll('&nbsp;', ' ')
             .split('\n')
             .map(line => line.trimEnd())
             .join('\n');
-    };
-
+    }
     const handleGenerate = async () => {
         setIsLoading(true);
         setResponseText("");
@@ -93,7 +87,7 @@ export default function DiagramUMLScreen({
 
             // --- NUEVA LÓGICA DE LIMPIEZA ---
             // 1. Quitamos primero las etiquetas de bloque de código markdown
-            let cleanResult = result.replace(/```mermaid/g, "").replace(/```/g, "");
+            let cleanResult = result.replaceAll(/```mermaid/g, "").replaceAll(/```/g, "");
 
             // 2. Buscamos dónde empieza realmente el diagrama (ej: classDiagram, graph TD, etc.)
             // Esto ignora cualquier texto introductorio de la IA
@@ -166,18 +160,6 @@ ${responseText.trim()}`.trim();
         }
     };
 
-    const breadcrumbButtonStyle: React.CSSProperties = {
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  margin: 0,
-                  font: 'inherit',
-                  color: '#4a3728',
-                  cursor: 'pointer',
-                  display: 'inline',
-                  outline: 'none'
-              };
-
     const breadcrumbItems = [
         { label: 'INICIO', action: onWelcome },
         { label: 'CREAR EXAMEN', action: onCreateExam },
@@ -185,34 +167,16 @@ ${responseText.trim()}`.trim();
         { label: 'EXTENSIÓN FUNCIONAL', action: onFunctionalExtension },
         { label: domainName.toUpperCase(), action: onStatementStep1 },
     ];
-  
+
+    const currentTitle = "DIAGRAMA UML";
+    
   return (
     <div className="exam-app">
-        <header className="app-header">
-            <div className="header-left">
-            <button 
-                type="button"
-                className="logo-icon" 
-                onClick={onWelcome} 
-                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
-                aria-label="Ir a inicio"
-            >
-                <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
-            </button>
-            
-            <nav className="breadcrumb-nav">
-                {breadcrumbItems.map((item) => (
-                    <React.Fragment key={item.label}>
-                        <button type="button" style={breadcrumbButtonStyle} onClick={item.action}>
-                            {item.label}
-                        </button>
-                        <span className="breadcrumb-separator">{' > '}</span>
-                    </React.Fragment>
-                ))}
-                <span className="breadcrumb-current">DIAGRAMA UML</span>
-            </nav>
-            </div>
-        </header>
+        <Header 
+            onWelcome={onWelcome} 
+            breadcrumbItems={breadcrumbItems} 
+            currentStep={currentTitle} 
+        />
 
         <main className="main-content"> 
             <div className="wf-layout-container">

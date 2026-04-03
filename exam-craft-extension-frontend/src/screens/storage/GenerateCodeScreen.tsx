@@ -23,7 +23,7 @@ const parseBaseClasses = (rawText: string) => {
     
     // EXPRESIÓN REGULAR CORREGIDA PARA SONARCLOUD
     // Se usa +? para evitar el ReDoS en la ruta y \s* para simplificar espacios.
-    const regex = /([a-zA-Z0-9_.\/\-]+?\.java);?\s*\`\`\`[a-z]*\r?\n([\s\S]*?)\`\`\`/gi;
+    const regex = /([\w.\-\/]+?\.java);?\s*```[a-z]*\r?\n([\s\S]+?)```/gi;
     let match;
 
     while ((match = regex.exec(rawText)) !== null) {
