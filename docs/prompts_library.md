@@ -450,7 +450,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
 - **Título:**  Generación de Tests del Examen (*Generation of Exam Tests*).
 
-- **Descripción:** Establece las pautas y reglas que el modelo LLM debe seguir para generar de manera correcta y ordenada el código Java de las clases de tests, encargadas de verificar automáticamente si el código implementado por el alumno, es decir, la respuesta al examen, es correcto.
+- **Descripción:** Establece las pautas y reglas que el modelo LLM debe seguir para generar de manera correcta y ordenada el código Java de las clases de tests para el ejercicio de "Restricciones de atributos", encargadas de verificar automáticamente si el código implementado por el alumno, es decir, la respuesta al examen, es correcto.
 
     Dado que se parte de un examen plantilla, la estructura de dichos tests debe ser estrictamente precisa para garantizar el correcto funcionamiento del sistema de evaluación automática. Previamente, al modelo se le proporciona el contexto completo del examen, con el fin de orientar adecuadamente la generación de los tests.
 
