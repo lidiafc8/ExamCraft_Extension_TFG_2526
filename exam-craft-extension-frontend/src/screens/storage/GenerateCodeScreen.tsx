@@ -22,7 +22,7 @@ const parseBaseClasses = (rawText: string) => {
     if (!rawText) return [];
     const results = [];
     
-    const regex = /([a-z0-9.\-/]+\.java)\s*[:;]?\s*```[a-z]*\s*\n((?=([\s\S]*?))\3)```/gi;
+    const regex = /([a-z0-9.\-/]+\.java)\s*[:;]?\s*```[a-z]*\s*\n((?=([\s\S]*?))\3)```/gi; // NOSONAR javascript:S5852
     let match;
 
     while ((match = regex.exec(rawText)) !== null) {
