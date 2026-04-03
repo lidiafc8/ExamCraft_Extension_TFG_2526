@@ -7,7 +7,7 @@ const extractFilesForGitHub = (rawText: string) => {
     const filesToUpload: { path: string, content: string }[] = [];
     
     // REGEX CORREGIDA: Evita ReDoS simplificando la captura de ruta y eliminando backtracking
-    const regex = /([\w.\-/]+?\.java);?\s*```[a-z]*\r?\n((?:(?!```)[\s\S])+?)```/gi;
+    const regex = /([\w.\-/]+?\.java);?\s*```[a-z]*\r?\n((?=([\s\S]+?))\3)```/gi;
     let match;
 
     while ((match = regex.exec(rawText)) !== null) {
