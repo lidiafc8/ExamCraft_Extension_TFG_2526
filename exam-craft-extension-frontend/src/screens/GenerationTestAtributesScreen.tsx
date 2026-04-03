@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import logoExamCraft from "../../assets/icon512.png";
-import { parseMasterPrompt } from "~src/utils/promptParser";
-import { sendToGemini } from "~src/services/geminiService";
-import testAttributesPromptMarkdown from "bundle-text:../prompts/generation-test-exercice/generation_tests.md";
+import React, { useState, useEffect } from "react"
+import logoExamCraft from "../../assets/icon512.png"
+import { parseMasterPrompt } from "~src/utils/promptParser"
+import { sendToGemini } from "~src/services/geminiService"
+import testAttributesPromptMarkdown from "bundle-text:../prompts/generation-exam-repository/generation_tests.md"
 
 interface Props {
     readonly initialData: { project: any; constraints: string } | null;
@@ -128,7 +128,7 @@ ${restricciones}
 
     const handleDownload = () => {
         if (!responseText) return;
-        const fileName = `Tests_Atributos_${initialData?.project?.domainName || 'examen'}.md`;
+        const fileName = `Tests_Atributos_${initialData?.project?.domainName + '_' + initialData?.project?.customName || 'examen'}.md`;
         const content = `# Tests de Atributos\n\n${responseText}`;
         const blob = new Blob([content], { type: "text/markdown" });
         const url = URL.createObjectURL(blob);
@@ -241,7 +241,7 @@ ${restricciones}
                                         />
                                         <div style={{ display: 'flex', gap: '10px' }}>
                                             <button type="button" onClick={handleDownload} className="btn-step secondary" style={{ flex: 1, backgroundColor: '#4a90e2', color: 'white' }}>
-                                                Descargar .md
+                                                Descargar (.md)
                                             </button>
                                             <button type="button" onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1, backgroundColor: '#28a745' }}>
                                                 Guardar

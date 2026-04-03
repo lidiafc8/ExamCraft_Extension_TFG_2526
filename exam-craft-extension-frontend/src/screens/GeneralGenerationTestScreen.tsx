@@ -3,6 +3,7 @@ import logoExamCraft from "../../assets/icon512.png";
 import carpeta from "../../assets/images/archive.png";
 import specific_exam_part from "../../assets/images/exam_part_storage.png";
 import exam from "../../assets/images/exam.png"
+import { createPortal } from "react-dom";
 
 interface Props {
     readonly onBack: () => void;
@@ -24,6 +25,9 @@ export default function GeneralGenerationTestScreen({
     const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null);
     const [selectedProject, setSelectedProject] = useState<any>(null);
     const [selectedPartKey, setSelectedPartKey] = useState<string>("");
+
+    const [showPartConfirmModal, setShowPartConfirmModal] = useState(false);
+    const [pendingPartKey, setPendingPartKey] = useState(null);
 
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
 
@@ -182,7 +186,10 @@ export default function GeneralGenerationTestScreen({
                                     <div key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                         <button
                                             type="button"
-                                            onClick={() => { setSelectedPartKey(key); setStep('workflow'); }} 
+                                            onClick={() => { 
+                                                setPendingPartKey(key); 
+                                                setShowPartConfirmModal(true); 
+                                            }}
                                             onMouseOver={(e) => handleHover(e, '1.1')}
                                             onMouseOut={(e) => handleHover(e, '1')}
                                             onFocus={(e) => handleHover(e, '1.1')}
@@ -200,6 +207,53 @@ export default function GeneralGenerationTestScreen({
                         <div className="wf-actions-row" style={{ marginTop: '30px' }}>
                             <button type="button" onClick={() => setStep('exams')} className="btn-step secondary">Volver a exámenes</button>
                         </div>
+                        {showPartConfirmModal && pendingPartKey && createPortal(
+                            <div style={{
+                                position: 'fixed', 
+                                top: 0, 
+                                left: 0, 
+                                right: 0, 
+                                bottom: 0,
+                                backgroundColor: 'rgba(0,0,0,0.6)',
+                                display: 'flex', 
+                                justifyContent: 'center', 
+                                alignItems: 'center',
+                                zIndex: 2000 
+                            }}>
+                                <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
+                                    <h3 className="main-title small" style={{ marginBottom: '15px', color: '#4a3728' }}>
+                                        Confirmación de Parte
+                                    </h3>
+                                    
+                                    <p style={{ marginBottom: '25px', color: '#555', fontSize: '15px' }}>
+                                        ¿Deseas utilizar el ejercicio seleccionado como base para generar los tests?
+                                    </p>
+
+                                    <div className="wf-actions-row" style={{ justifyContent: 'center', gap: '15px' }}>
+                                        <button 
+                                            onClick={() => { 
+                                                setShowPartConfirmModal(false); 
+                                                setPendingPartKey(null); 
+                                            }} 
+                                            className="btn-step secondary"
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button 
+                                            onClick={() => {
+                                                setShowPartConfirmModal(false);
+                                                setSelectedPartKey(pendingPartKey);
+                                                setStep('workflow');
+                                            }} 
+                                            className="btn-step primary"
+                                        >
+                                            Comenzar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>,
+                            document.body
+                        )}
                     </div>
                 )}
 
