@@ -1,0 +1,15 @@
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit; /* Copia la letra de INICIO/POR PARTES */
+  color: #4a3728; /* Usa tu color marrón exacto */
+  cursor: pointer;
+  text-decoration: none;
+  display: inline;
+}
+
+.link-button:hover {
+  text-decoration: underline; /* Opcional: para que parezca un link al pasar el ratón */
+}

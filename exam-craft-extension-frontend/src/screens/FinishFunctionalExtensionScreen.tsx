@@ -3,15 +3,15 @@ import logoExamCraft from "../../assets/icon512.png"
 import { MermaidViewer } from "../components/MermaidViewer"
 
 interface Props {
-    domainName: string;
-    extensionFinish: string;
-    onBack: () => void;
-    onWelcome: () => void;
-    onCreateExam: () => void;
-    onCreateExamByParts: () => void;
-    onFunctionalExtension: () => void;
-    onStatementStep1: () => void;
-    onCreateDiagram: (text: string) => void; 
+    readonly domainName: string;
+    readonly extensionFinish: string;
+    readonly onBack: () => void;
+    readonly onWelcome: () => void;
+    readonly onCreateExam: () => void;
+    readonly onCreateExamByParts: () => void;
+    readonly onFunctionalExtension: () => void;
+    readonly onStatementStep1: () => void;
+    readonly onCreateDiagram: (text: string) => void; 
 }
 
 export default function FinishFunctionalExtensionScreen({
