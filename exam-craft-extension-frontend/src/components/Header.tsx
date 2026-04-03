@@ -1,7 +1,7 @@
 import React from 'react';
 // IMPORTANTE: Verifica que esta ruta apunte bien a tu imagen de logo.
 // Como usas alias en tu proyecto (~src), esta ruta debería funcionar desde cualquier lado.
-import logoExamCraft from '~src/assets/icon512.png'; 
+import logoExamCraft from "../../assets/icon512.png"
 
 export interface BreadcrumbItem {
     label: string;
