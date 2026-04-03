@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react"
-import logoExamCraft from "../../assets/icon512.png"
+// IMPORTANTE: Asegúrate de que la ruta sea la correcta donde guardaste tu nuevo componente
+import { Header } from "~src/components/Header" 
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { sendToGemini } from "~src/services/geminiService"
-import testAttributesPromptMarkdown from "bundle-text:../prompts/generation-exam-repository/generation_tests.md"
+import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/generation_tests.md"
 
 interface Props {
     readonly initialData: { project: any; constraints: string } | null;
@@ -98,7 +99,7 @@ ${restricciones}
     };
 
     const handleSaveToChrome = () => {
-        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        if (typeof chrome !== "undefined" && chrome.storage?.local) {
             
             if (!initialData?.project?.id) {
                 alert("Error: No se ha encontrado el ID del proyecto para actualizar.");
@@ -139,18 +140,6 @@ ${restricciones}
         URL.revokeObjectURL(url);
     };
 
-    const breadcrumbButtonStyle: React.CSSProperties = {
-        background: 'none',
-        border: 'none',
-        padding: 0,
-        margin: 0,
-        font: 'inherit',
-        color: '#4a3728',
-        cursor: 'pointer',
-        display: 'inline',
-        outline: 'none'
-    };
-
     const breadcrumbItems = [
         { label: 'INICIO', action: onWelcome },
         { label: 'CREAR EXAMEN', action: onCreateExam },
@@ -163,31 +152,12 @@ ${restricciones}
 
     return (
         <div className="exam-app">
-            <header className="app-header">
-                <div className="header-left">
-                    <button 
-                        type="button"
-                        className="logo-icon" 
-                        onClick={onWelcome} 
-                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
-                        aria-label="Ir a inicio"
-                    >
-                        <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />
-                    </button>
-
-                    <nav className="breadcrumb-nav">
-                        {breadcrumbItems.map((item) => (
-                            <React.Fragment key={item.label}>
-                                <button type="button" style={breadcrumbButtonStyle} onClick={item.action}>
-                                    {item.label}
-                                </button>
-                                <span className="breadcrumb-separator">{' > '}</span>
-                            </React.Fragment>
-                        ))}
-                        <span className="breadcrumb-current">TEST DE ATRIBUTOS</span>
-                    </nav>
-                </div>
-            </header>
+            {/* AQUÍ USAMOS NUESTRO NUEVO COMPONENTE COMPARTIDO */}
+            <Header 
+                onWelcome={onWelcome} 
+                breadcrumbItems={breadcrumbItems} 
+                currentStep="TEST DE ATRIBUTOS" 
+            />
 
             <main className="main-content"> 
                 <div className="wf-layout-container">
@@ -245,6 +215,11 @@ ${restricciones}
                                             </button>
                                             <button type="button" onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1, backgroundColor: '#28a745' }}>
                                                 Guardar
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                                    <polyline points="17 21 17 13 7 13 7 21" />
+                                                    <polyline points="7 3 7 8 15 8" />
+                                                </svg>
                                             </button>
                                             <button type="button" onClick={onWelcome} className="btn-step secondary" style={{ flex: 1 }}>
                                                 Finalizar
