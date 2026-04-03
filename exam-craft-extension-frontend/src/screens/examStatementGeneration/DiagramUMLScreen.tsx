@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react"
-import logoExamCraft from "../../../assets/icon512.png"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md"
 import { sendToGemini } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
@@ -43,7 +42,7 @@ export default function DiagramUMLScreen({
     const [isLoading, setIsLoading] = useState(false);
 
     //esto es para unir el codigo mermaid con el contexto del enunciado
-    const [_, setExtensionComplete] = useState("");
+    const [extensionComplete, setExtensionComplete] = useState("");
 
     //se ejecuta al principio, y cuando se cambia el enunciado 
     //FUNCIONALIDAD DEL MÉTODO ---> es separar el prompt
@@ -269,7 +268,7 @@ ${responseText.trim()}`.trim();
                                     {context} 
                                 </div>
                                 
-                                {/* ÁREA DEL DIAGRAMA: Ahora sin scale pequeño, usando todo el ancho */}
+                                {/* ÁREA DEL DIAGRAMA: Ahora sin scale pequeño, usando al completo el ancho */}
                                 <div style={{ 
                                     flex: '1', 
                                     overflow: 'auto', 

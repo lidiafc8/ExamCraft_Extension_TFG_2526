@@ -15,13 +15,17 @@ export const downloadProjectAsMarkdown = (project: any) => {
         }
 
         const rawTests = project.javaTests;
-        const tests = Array.isArray(rawTests)
-            ? rawTests
-            : rawTests ? [rawTests] : [];
+        let tests;
+
+        if (Array.isArray(rawTests)) {
+            tests = rawTests;
+        } else {
+            tests = rawTests ? [rawTests] : [];
+        }
 
         const testsMarkdown = tests.length > 0
             ? tests.map((t: string, i: number) => {
-                const clean = t.trim().replace(/^```[a-z]*\r?\n/i, '').replace(/\r?\n```$/i, '').trim();
+                const clean = t.trim().replaceAll(/^```[a-z]*\r?\n/i, '').replaceAll(/\r?\n```$/i, '').trim();
                 return `### Test${i + 1}.java\n\`\`\`java\n${clean}\n\`\`\``;
             }).join('\n\n')
             : "// No hay tests generados para este examen.";
@@ -56,6 +60,6 @@ ${testsMarkdown}
         link.download = finalFileName;
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
+        link.remove();
         URL.revokeObjectURL(url);
     };

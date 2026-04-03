@@ -13,7 +13,6 @@ import {
 export interface ExamDetailScreenProps {
     selectedProject: any;
     selectedDomainFolder: string;
-    logoExamCraft: string;
     isCreating: boolean;
     
     onWelcome: () => void;

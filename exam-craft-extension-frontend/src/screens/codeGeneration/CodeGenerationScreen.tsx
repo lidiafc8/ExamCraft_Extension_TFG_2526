@@ -1,5 +1,4 @@
 import React from "react"
-import logoExamCraft from "../../../assets/icon512.png"
 import { Header } from "~src/components/Header"
 
 interface Props {

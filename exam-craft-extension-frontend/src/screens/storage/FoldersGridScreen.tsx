@@ -18,18 +18,6 @@ export const FoldersGridScreen: React.FC<FoldersGridScreenProps> = ({
     onWelcome,
     onSelectFolder
 }) => {
-
-    const breadcrumbButtonStyle: React.CSSProperties = {
-                                      background: 'none',
-                                      border: 'none',
-                                      padding: 0,
-                                      margin: 0,
-                                      font: 'inherit',
-                                      color: '#4a3728',
-                                      cursor: 'pointer',
-                                      display: 'inline',
-                                      outline: 'none'
-                                  };
                     
     const breadcrumbItems = [
         { label: 'INICIO', action: onWelcome },

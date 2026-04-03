@@ -1,5 +1,4 @@
 import React from "react"
-import logoExamCraft from "../../../assets/icon512.png"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import { Header } from "~src/components/Header";
 
@@ -31,7 +30,7 @@ export default function FinishFunctionalExtensionScreen({
         if (!code) return '';
         return code
             .replaceAll(/<[^>]*>?/gm, '') 
-            .replaceAll(/&nbsp;/g, ' ')   
+            .replaceAll('&nbsp;', ' ')   
             .trim();
     };
 

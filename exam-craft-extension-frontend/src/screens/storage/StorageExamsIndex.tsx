@@ -19,7 +19,7 @@ interface Props {
 export default function StorageExamsIndex({ onWelcome }: Props) {
     const [projects, setProjects] = useState<any[]>([]);
     const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null);
-    const [selectedProject, setSelectedProject] = useState<any | null>(null);
+    const [selectedProject, setSelectedProject] = useState<any>(null);
 
     const [editingId, setEditingId] = useState<string | null>(null);
     const [tempName, setTempName] = useState("");
@@ -42,18 +42,24 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     }, []);
 
+    // Extraído para evitar anidamiento excesivo en handleRename
+    const applyRenameToState = (id: string, newName: string) => {
+        setProjects(prevProjects =>
+            prevProjects.map(p => (p.id === id ? { ...p, customName: newName } : p))
+        );
+        setEditingId(null);
+    };
+
     const handleRename = (id: string) => {
         if (!tempName.trim()) { setEditingId(null); return; }
         const projectToUpdate = projects.find(p => p.id === id);
         if (!projectToUpdate) return;
-        const updatedData = { ...projectToUpdate, customName: tempName.trim() };
-        
+        const newName = tempName.trim();
+        const updatedData = { ...projectToUpdate, customName: newName };
+
         if (typeof chrome !== "undefined" && chrome.storage?.local) {
             chrome.storage.local.set({ [id]: updatedData }, () => {
-                setProjects(prevProjects => prevProjects.map(p =>
-                    p.id === id ? { ...p, customName: tempName.trim() } : p
-                ));
-                setEditingId(null);
+                applyRenameToState(id, newName);
             });
         }
     };
@@ -79,13 +85,13 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     const handleGitHubDeploy = async () => {
         const cleanProjectName = selectedProject.domainName
             .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-zA-Z0-9]/g, '-')
+            .replaceAll(/[\u0300-\u036f]/g, "")
+            .replaceAll(/[^a-z0-9]/gi, '-')
             .toLowerCase();
 
         const newRepoName = `examen-${cleanProjectName}-${Date.now()}`;
         const domain = selectedProject.domainName.toLowerCase();
-        
+
         let TEMPLATE_REPO = "DP1-chess-template-exam";
         let TEST_BASE_PATH = "src/test/java/es/us/dp1/chess/tournament/";
 
@@ -96,13 +102,13 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
         let MY_TOKEN = localStorage.getItem("github_token");
         if (!MY_TOKEN) {
-            MY_TOKEN = window.prompt(
+            MY_TOKEN = globalThis.prompt(
                 "Para crear repositorios en GitHub necesitas un Token de acceso (Personal Access Token).\n\n" +
                 "Por favor, pégalo aquí (se guardará de forma segura en tu navegador para la próxima vez):"
             );
-            if (!MY_TOKEN) { 
-                alert("Operación cancelada. Se requiere un token de GitHub para continuar."); 
-                return; 
+            if (!MY_TOKEN) {
+                alert("Operación cancelada. Se requiere un token de GitHub para continuar.");
+                return;
             }
             localStorage.setItem("github_token", MY_TOKEN);
         }
@@ -116,7 +122,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
 
         const uploadListString = itemsToUpload.join("\n");
-        const confirmacion = window.confirm(
+        const confirmacion = globalThis.confirm(
             `¿Confirmas la creación del examen?\n\n` +
             `Dominio detectado: ${selectedProject.domainName}\n` +
             `Plantilla seleccionada: lidiafc8/${TEMPLATE_REPO}\n` +
@@ -129,16 +135,14 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
         try {
             const newRepoUrl = await GithubService.deployExam(
-                MY_TOKEN, 
-                selectedProject, 
-                newRepoName, 
-                TEMPLATE_REPO, 
+                MY_TOKEN,
+                selectedProject,
+                newRepoName,
+                TEMPLATE_REPO,
                 TEST_BASE_PATH
             );
-
             alert("¡Repositorio creado y todos los archivos subidos con éxito!");
-            window.open(newRepoUrl, '_blank');
-
+            globalThis.open(newRepoUrl, '_blank');
         } catch (error: any) {
             console.error("Error al desplegar:", error);
             if (error.message.includes("Bad credentials") || error.message.includes("401") || error.message.includes("Requires authentication")) {
@@ -152,7 +156,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     };
 
- 
     if (selectedProject && showGeneratedCode) {
         return (
             <GeneratedCodeScreen
@@ -183,9 +186,9 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 logoExamCraft={logoExamCraft}
                 onWelcome={onWelcome}
                 onBack={() => setSelectedProject(null)}
-                onGoToFolders={() => { 
-                    setSelectedProject(null); 
-                    setSelectedDomainFolder(null); 
+                onGoToFolders={() => {
+                    setSelectedProject(null);
+                    setSelectedDomainFolder(null);
                 }}
                 onDownload={handleDownload}
                 onGitHubDeploy={handleGitHubDeploy}
@@ -197,13 +200,13 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
     if (selectedDomainFolder) {
         return (
-            <DomainFolderScreen 
+            <DomainFolderScreen
                 selectedDomainFolder={selectedDomainFolder}
                 projectsInFolder={projectsInFolder}
                 logoExamCraft={logoExamCraft}
                 editingId={editingId}
                 tempName={tempName}
-                onWelcome={onWelcome} 
+                onWelcome={onWelcome}
                 onBack={() => setSelectedDomainFolder(null)}
                 onSelectProject={(project) => setSelectedProject(project)}
                 onDeleteProject={handleDelete}
