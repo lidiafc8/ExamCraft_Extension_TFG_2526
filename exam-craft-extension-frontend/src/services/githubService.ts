@@ -14,9 +14,11 @@ const extractFilesForGitHub = (rawText: string) => {
 
     for (const line of lines) {
         if (!insideBlock) {
-            const header = line.match(/([a-z0-9.\-/]+\.java)[;:]?\s*```[a-z]*/i);
-            if (header) {
-                currentPath = header[1];
+            const javaIndex = line.indexOf('.java');
+            const backtickIndex = line.indexOf('```');
+
+            if (javaIndex !== -1 && backtickIndex !== -1 && javaIndex < backtickIndex) {
+                currentPath = line.substring(0, backtickIndex).replace(/[;:\s]+$/, '').trim();
                 insideBlock = true;
                 currentContent = [];
             }
