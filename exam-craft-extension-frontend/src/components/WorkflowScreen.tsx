@@ -81,7 +81,7 @@ export default function WorkflowScreen({
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (step === "selection" && typeof chrome !== "undefined" && chrome.storage?.local) {
+    if (step === "selection" && globalThis.chrome?.storage?.local) {
       chrome.storage.local.get(null, (items) => {
         const projectList = Object.keys(items)
           .filter((key) => key.startsWith("project_"))
@@ -165,7 +165,8 @@ export default function WorkflowScreen({
   }
 
   const handleSaveToChrome = () => {
-    if (typeof chrome !== "undefined" && chrome.storage?.local) {
+    
+    if (globalThis.chrome?.storage?.local) {
       if (!selectedProject?.id) {
         alert("Error: No hay un examen válido seleccionado para actualizar.")
         return

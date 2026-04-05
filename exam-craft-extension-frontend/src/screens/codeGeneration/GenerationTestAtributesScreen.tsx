@@ -100,7 +100,7 @@ ${restricciones}
     };
 
     const handleSaveToChrome = () => {
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (globalThis.chrome?.storage?.local) {
             
             if (!initialData?.project?.id) {
                 alert("Error: No se ha encontrado el ID del proyecto para actualizar.");

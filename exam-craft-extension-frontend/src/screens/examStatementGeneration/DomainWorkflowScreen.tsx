@@ -29,8 +29,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
   const [previousExtensions, setPreviousExtensions] = useState<string>("");
 
     useEffect(() => {
-        // CORRECCIÓN: Usamos Optional Chaining ?.
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.get(null, (items) => {
             const extensions = Object.keys(items)
                 .filter(key => key.startsWith('project_'))

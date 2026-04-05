@@ -37,7 +37,7 @@ export default function FinishFunctionalExtensionScreen({
     };
 
     const handleSaveToChrome = () => {
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (globalThis.chrome?.storage?.local) {
             
             const userChosenName = prompt("Introduce el nombre para guardar este examen:", `Examen de ${domainName}`);
             
