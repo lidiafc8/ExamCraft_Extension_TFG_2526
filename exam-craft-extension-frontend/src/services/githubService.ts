@@ -168,18 +168,34 @@ export const GithubService = {
     description: string
   ): Promise<any> {
     try {
-      const getResponse = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/README.md`,
-        {
-          headers: {
-            "Authorization": `token ${token}`,
-            "Accept": "application/vnd.github+json"
-          }
-        }
-      );
+      let getResponse;
+      let retries = 5; 
 
-      if (!getResponse.ok) {
-        throw new Error("No se pudo obtener el README.md del repositorio");
+      while (retries > 0) {
+        getResponse = await fetch(
+          `https://api.github.com/repos/${owner}/${repo}/contents/README.md`,
+          {
+            headers: {
+              "Authorization": `token ${token}`,
+              "Accept": "application/vnd.github+json"
+            }
+          }
+        );
+
+        if (getResponse.ok) {
+          break;
+        }
+
+        if (getResponse.status === 404) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          retries--;
+        } else {
+          break; 
+        }
+      }
+
+      if (!getResponse || !getResponse.ok) {
+        throw new Error("No se pudo obtener el README.md (GitHub está tardando demasiado en generar la plantilla)");
       }
 
       const fileData = await getResponse.json();
