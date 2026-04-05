@@ -10,6 +10,8 @@ import { DomainFolderScreen } from "./DomainFolderScreen";
 import { ExamDetailScreen } from "./ExamDetailScreen";
 import { GeneratedCodeScreen } from "./GenerateCodeScreen";
 
+declare var chrome: any;
+
 hljs.registerLanguage('java', java);
 
 interface Props {
@@ -183,7 +185,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 selectedProject={selectedProject}
                 selectedDomainFolder={selectedDomainFolder || ""}
                 isCreating={isCreating}
-                logoExamCraft={logoExamCraft}
                 onWelcome={onWelcome}
                 onBack={() => setSelectedProject(null)}
                 onGoToFolders={() => {

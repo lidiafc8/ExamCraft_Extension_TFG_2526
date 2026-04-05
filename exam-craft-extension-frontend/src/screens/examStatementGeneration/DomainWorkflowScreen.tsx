@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react"
-// Importamos el nuevo componente Header
 import { Header } from "~src/components/Header"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md"
 import { sendToGemini } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
+
+declare var chrome: any;
 
 interface Props {
   readonly domainName: string;

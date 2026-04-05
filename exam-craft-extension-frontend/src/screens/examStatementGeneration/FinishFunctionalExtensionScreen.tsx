@@ -2,6 +2,8 @@ import React from "react"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import { Header } from "~src/components/Header";
 
+declare var chrome: any;
+
 interface Props {
     readonly domainName: string;
     readonly extensionFinish: string;

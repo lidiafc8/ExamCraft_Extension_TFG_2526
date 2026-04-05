@@ -4,6 +4,8 @@ import carpeta from "../../assets/images/archive.png"
 import examen from "../../assets/images/exam.png"
 import { sendToGemini } from "~src/services/geminiService"
 
+declare var chrome: any;
+
 export interface WorkflowScreenProps {
   // Navegación
   onBack: () => void
