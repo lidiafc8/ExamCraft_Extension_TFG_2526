@@ -35,6 +35,14 @@ export interface WorkflowScreenProps {
 
   // Callback al guardar
   onSaved?: (savedData: { project: any; result: string }) => void
+
+  // NUEVAS PROPIEDADES PARA EL MODAL DE ÉXITO (Opcionales)
+  successPrimaryButtonLabel?: string
+  successSecondaryButtonLabel?: string
+  onSuccessSecondary?: (savedData: { project: any; result: string }) => void
+
+  // NUEVA PROPIEDAD: Proyecto inicial (para saltar el paso de selección)
+  initialProject?: any
 }
 
 export default function WorkflowScreen({
@@ -61,13 +69,33 @@ export default function WorkflowScreen({
   downloadPrefix,
   downloadTitle,
   onSaved,
+  // Valores por defecto y desestructuración de las nuevas props
+  successPrimaryButtonLabel = "Continuar",
+  successSecondaryButtonLabel,
+  onSuccessSecondary,
+  initialProject, 
 }: WorkflowScreenProps) {
-  const [step, setStep] = useState<"selection" | "workflow">("selection")
+  
+  // Estados iniciales
+  const [step, setStep] = useState<"selection" | "workflow">(initialProject ? "workflow" : "selection")
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
 
   const [projects, setProjects] = useState<any[]>([])
   const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null)
-  const [selectedProject, setSelectedProject] = useState<any>(null)
+  
+  // Inicia con el proyecto inicial si existe
+  const [selectedProject, setSelectedProject] = useState<any>(initialProject || null)
+
+  // 👇 ESTE ES EL ARREGLO CLAVE 👇
+  // Obligamos al componente a actualizarse si el initialProject cambia (por si llega tarde)
+  useEffect(() => {
+    if (initialProject) {
+      setSelectedProject(initialProject);
+      setStep("workflow");
+      setInternalStep("input");
+    }
+  }, [initialProject]);
+  // 👆 👆 👆 👆 👆 👆 👆 👆 👆 👆 👆
 
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -275,16 +303,35 @@ export default function WorkflowScreen({
             <h3 className="main-title small" style={{ marginBottom: "10px", color: "#4a3728" }}>
               {successTitle}
             </h3>
-            <p style={{ marginBottom: "25px", color: "#555", fontSize: "15px" }}>
+            <p style={{ marginBottom: "25px", color: "#555", fontSize: "15px", whiteSpace: "pre-line" }}>
               {successDescription(projectDisplayName(savedData.project))}
             </p>
-            <button
-              onClick={() => { setShowSuccessModal(false); onSaved?.(savedData) }}
-              className="btn-step primary"
-              style={{ width: "100%" }}
-            >
-              Continuar
-            </button>
+            
+            <div className="wf-actions-row" style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              {/* Solo se pinta si existe un label secundario */}
+              {successSecondaryButtonLabel && (
+                <button
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    onSuccessSecondary?.(savedData);
+                  }}
+                  className="btn-step secondary"
+                >
+                  {successSecondaryButtonLabel}
+                </button>
+              )}
+              
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  onSaved?.(savedData);
+                }}
+                className="btn-step primary"
+                style={{ width: successSecondaryButtonLabel ? "auto" : "100%" }}
+              >
+                {successPrimaryButtonLabel}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import logoExamCraft from "../../../assets/icon512.png";
 import carpeta from "../../../assets/images/archive.png";
 import specific_exam_part from "../../../assets/images/exam_part_storage.png";
-import exam from "../../../assets/images/exam.png"
+import exam from "../../../assets/images/exam.png";
 import { createPortal } from "react-dom";
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
     readonly onWelcome: () => void;
     readonly onCreateExam: () => void;
     readonly onCreateExamByParts: () => void;
-    readonly onCreateTest1: (data: { project: any; constraints: string }) => void;
+    readonly onCreateTest1: (data: { project: any; constraints: string; baseClass: string }) => void;
     readonly onCodeGeneration: () => void;
 }
 
@@ -29,9 +29,7 @@ export default function GeneralGenerationTestScreen({
     const [selectedPartKey, setSelectedPartKey] = useState<string>("");
 
     const [showPartConfirmModal, setShowPartConfirmModal] = useState(false);
-    const [pendingPartKey, setPendingPartKey] = useState(null);
-
-    const allowedFolders = ["clínica veterinaria", "ajedrez"];
+    const [pendingPartKey, setPendingPartKey] = useState<string | null>(null);
 
     useEffect(() => {
         if (typeof chrome !== "undefined" && chrome.storage?.local) {
@@ -45,9 +43,22 @@ export default function GeneralGenerationTestScreen({
         }
     }, []);
 
-    const projectsInFolder = projects.filter(p => 
-        p.domainName && selectedDomainFolder && p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
-    );
+    const projectsInFolder = projects.filter(p => {
+        if (!p.domainName || !selectedDomainFolder) return false;
+        
+        const projectDomains = Array.isArray(p.domainName) ? p.domainName : [p.domainName];
+        
+        return projectDomains.some(
+            domain => domain.toLowerCase() === selectedDomainFolder.toLowerCase()
+        );
+    });
+
+    const allowedFolders = Array.from(new Set(
+        projects
+            .filter(p => p.domainName && p.baseClasses) 
+            .flatMap(p => Array.isArray(p.domainName) ? p.domainName : [p.domainName])
+            .map(domain => domain.toLowerCase()) 
+    ));
 
     const getAvailableParts = (project: any) => {
         const forbiddenKeys = new Set(["id", "domainName", "customName", "extensionFinish", "savedAt", "updatedAt"]);
@@ -66,7 +77,6 @@ export default function GeneralGenerationTestScreen({
         outline: 'none'
     };
 
-    // --- REFACTORIZACIÓN PARA ELIMINAR DUPLICADOS ---
     const breadcrumbConfig = [
         { label: 'INICIO', action: onWelcome },
         { label: 'CREAR EXAMEN', action: onCreateExam },
@@ -110,7 +120,6 @@ export default function GeneralGenerationTestScreen({
             </header>
 
             <main className="main-content">
-                {/* STEP: FOLDERS */}
                 {step === 'folders' && (
                     <div className="content-card" style={{ width: '100%', maxWidth: '900px' }}>
                         <h2 className="main-title small">Selecciona un dominio</h2>
@@ -119,24 +128,30 @@ export default function GeneralGenerationTestScreen({
                         </p>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px' }}>
-                            {allowedFolders.map((folderName) => (
-                                <div key={folderName} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <button
-                                        type="button"
-                                        onClick={() => { setSelectedDomainFolder(folderName); setStep('exams'); }}
-                                        onMouseOver={(e) => handleHover(e, '1.1')}
-                                        onMouseOut={(e) => handleHover(e, '1')}
-                                        onFocus={(e) => handleHover(e, '1.1')}
-                                        onBlur={(e) => handleHover(e, '1')}
-                                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', transition: 'transform 0.2s', outline: 'none' }}
-                                    >
-                                        <img src={carpeta} alt={`Carpeta ${folderName}`} width="90" />
-                                    </button>
-                                    <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center', textTransform: 'capitalize' }}>
-                                        {folderName}
-                                    </span>
-                                </div>
-                            ))}
+                            {allowedFolders.length > 0 ? (
+                                allowedFolders.map((folderName) => (
+                                    <div key={folderName} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setSelectedDomainFolder(folderName); setStep('exams'); }}
+                                            onMouseOver={(e) => handleHover(e, '1.1')}
+                                            onMouseOut={(e) => handleHover(e, '1')}
+                                            onFocus={(e) => handleHover(e, '1.1')}
+                                            onBlur={(e) => handleHover(e, '1')}
+                                            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', transition: 'transform 0.2s', outline: 'none' }}
+                                        >
+                                            <img src={carpeta} alt={`Carpeta ${folderName}`} width="90" />
+                                        </button>
+                                        <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center', textTransform: 'capitalize' }}>
+                                            {folderName}
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#888' }}>
+                                    No hay carpetas con código base disponibles.
+                                </p>
+                            )}
                         </div>
                         <div className="wf-actions-row" style={{ marginTop: '30px' }}>
                             <button type="button" onClick={onBack} className="btn-step secondary">Volver</button>
@@ -164,7 +179,7 @@ export default function GeneralGenerationTestScreen({
                                             <img src={exam} alt="Seleccionar examen" width="80" height="80" />
                                         </button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
-                                            {proj.customName || `Examen de ${proj.domainName}`}
+                                            {proj.customName || `Examen de ${Array.isArray(proj.domainName) ? proj.domainName.join(', ') : proj.domainName}`}
                                         </span>
                                     </div>
                                 ))
@@ -260,7 +275,6 @@ export default function GeneralGenerationTestScreen({
                     </div>
                 )}
 
-                {/* STEP: WORKFLOW */}
                 {step === 'workflow' && selectedProject && (
                     <div className="content-card" style={{ width: '100%', maxWidth: '800px', textAlign: 'center' }}>
                         <h2 className="main-title small">{selectedProject.customName || "Revisar Contenido"}</h2>
@@ -282,7 +296,7 @@ export default function GeneralGenerationTestScreen({
                             </button>
                             <button 
                                 type="button"
-                                onClick={() => onCreateTest1({ project: selectedProject, constraints: selectedProject[selectedPartKey] })} 
+                                onClick={() => onCreateTest1({ project: selectedProject, constraints: selectedProject[selectedPartKey], baseClass: selectedProject.baseClasses })} 
                                 disabled={!selectedProject[selectedPartKey]}
                                 className="btn-step primary"
                                 style={{ minWidth: '200px' }}
