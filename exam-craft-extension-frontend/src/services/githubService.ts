@@ -366,7 +366,7 @@ export const GithubService = {
         branch: string
     ): Promise<any> {
 
-      const base64Content = btoa(encodeURIComponent(content).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode(parseInt(p1, 16))));
+      const base64Content = btoa(encodeURIComponent(content).replaceAll(/%([0-9A-F]{2})/g, (_, p1) => String.fromCodePoint(Number.parseInt(p1, 16))));
 
         let sha = undefined;
         try {
