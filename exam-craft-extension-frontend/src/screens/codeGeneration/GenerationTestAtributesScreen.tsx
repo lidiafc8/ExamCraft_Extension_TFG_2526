@@ -4,6 +4,8 @@ import { parseMasterPrompt } from "~src/utils/promptParser"
 import { sendToGemini } from "~src/services/geminiService"
 import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/generation_tests.md"
 
+declare var chrome: any;
+
 interface Props {
     readonly initialData: { project: any; constraints: string } | null;
     readonly source: 'attributes' | 'general'; 

@@ -35,7 +35,6 @@ const CLASES_POR_DEFECTO: Record<string, string> = {
 - NamedEntity
 - Authorities
 - User
-- Tournament
 - ChessMatch
 - ChessBoard
 - Piece`,

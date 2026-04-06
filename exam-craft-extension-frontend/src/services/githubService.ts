@@ -6,8 +6,7 @@ const extractFilesForGitHub = (rawText: string) => {
     if (!rawText) return [];
     const filesToUpload: { path: string, content: string }[] = [];
     
-    // REGEX CORREGIDA: Evita ReDoS simplificando la captura de ruta y eliminando backtracking
-    const regex = /([\w.\-/]+?\.java);?\s*```[a-z]*\r?\n((?=([\s\S]+?))\3)```/gi;// NOSONAR javascript:S5852
+    const regex = /([a-zA-Z0-9_./\-]+\.java);?\s*```[a-z]*\r?\n([\s\S]*?)```/gi; // NOSONAR javascript:S5852
     let match;
 
     while ((match = regex.exec(rawText)) !== null) {
@@ -27,7 +26,6 @@ export const GithubService = {
   
   async getUser(username: string): Promise<GithubUser | null> {
     try {
-      // CORRECCIÓN: Eliminado escape innecesario en la URL si existía
       const response = await fetch(`https://api.github.com/users/${username}`);
       
       if (!response.ok) {
@@ -133,14 +131,13 @@ export const GithubService = {
         sha = fileData.sha; 
       }
     } catch {
-      // CORRECCIÓN: Quitamos (e) porque no se usa
       console.log(`El archivo ${path} no existe previamente, se creará uno nuevo.`);
     }
 
     const body: any = {
       message: message,
       content: base64Content,
-      ...(sha && { sha }) // Forma más limpia de añadir el sha si existe
+      ...(sha && { sha })
     };
 
     const response = await fetch(
@@ -171,18 +168,34 @@ export const GithubService = {
     description: string
   ): Promise<any> {
     try {
-      const getResponse = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/README.md`,
-        {
-          headers: {
-            "Authorization": `token ${token}`,
-            "Accept": "application/vnd.github+json"
-          }
-        }
-      );
+      let getResponse;
+      let retries = 5; 
 
-      if (!getResponse.ok) {
-        throw new Error("No se pudo obtener el README.md del repositorio");
+      while (retries > 0) {
+        getResponse = await fetch(
+          `https://api.github.com/repos/${owner}/${repo}/contents/README.md`,
+          {
+            headers: {
+              "Authorization": `token ${token}`,
+              "Accept": "application/vnd.github+json"
+            }
+          }
+        );
+
+        if (getResponse.ok) {
+          break;
+        }
+
+        if (getResponse.status === 404) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          retries--;
+        } else {
+          break; 
+        }
+      }
+
+      if (!getResponse || !getResponse.ok) {
+        throw new Error("No se pudo obtener el README.md (GitHub está tardando demasiado en generar la plantilla)");
       }
 
       const fileData = await getResponse.json();
@@ -239,6 +252,7 @@ export const GithubService = {
         
         await new Promise(resolve => setTimeout(resolve, 2000));
 
+         // 1. Readme
         const title = `Examen Completo: ${project?.customName || project?.domainName}`;
         const fullText = project?.extensionFinish || '';
         const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
@@ -259,6 +273,7 @@ export const GithubService = {
 
         await this.updateReadmeWithDescription(token, TARGET_OWNER, newRepoName, markdownContent);
 
+        // 2. Tests
         if (project?.javaTests) {
             const tests = Array.isArray(project.javaTests)
                 ? project.javaTests
@@ -282,6 +297,7 @@ export const GithubService = {
             }
         }
 
+        // 3. Clases Base
         if (project?.baseClasses) {
             const baseClassesFiles = extractFilesForGitHub(project.baseClasses);
             
