@@ -38,12 +38,18 @@ export default function GenerationTestAtributesScreen({
             const restricciones = initialData.constraints || "";
             const codigoGenerado = initialData.project.javaCode || "";
 
+            // LIMPIEZA DE CÓDIGO: Quitamos ruido para ahorrar tokens y evitar bloqueos de cuota
+            const codigoLimpio = codigoGenerado
+                .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // Quitar comentarios
+                .replace(/^import .*;$/gm, "")                      // Quitar imports
+                .replace(/^\s*[\r\n]/gm, "")                        // Quitar líneas vacías
+                .trim();
+
             const { visibleText, hiddenContext: parsedHidden } = parseMasterPrompt(testAttributesPromptMarkdown || "");
 
-            // Inyectamos el código base real en el contexto oculto
             const contextoOculto = `
-=== CÓDIGO FUENTE REAL DEL PROYECTO (USAR ESTOS PAQUETES) ===
-${codigoGenerado}
+=== CÓDIGO FUENTE REAL (CLASES Y ATRIBUTOS) ===
+${codigoLimpio}
 
 === ENUNCIADO Y RESTRICCIONES ===
 ${enunciadoGeneral}
@@ -65,42 +71,32 @@ ${restricciones}
         setResponseText("");
 
         try {
-            // 1. Extraemos el dominio actual (ajedrez, clinic, etc.)
-            const isAjedrez = initialData?.project?.domainName?.toLowerCase().includes("chess") || 
-                            initialData?.project?.name?.toLowerCase().includes("chess");
-
-            // 2. Definimos las reglas según el dominio
-            const reglasPaquetes = isAjedrez 
-                ? `1. El paquete debe ser: package es.us.dp1.chess.tournament.club;
-                2. Importa: es.us.dp1.chess.tournament.club.* y es.us.dp1.chess.tournament.membership.*;`
-                : `1. El paquete debe ser: package org.springframework.samples.petclinic.model;
-                2. Importa: org.springframework.samples.petclinic.model.*;`;
-
-            // 3. Montamos el Payload SIN valores fijos globales
+            // Construcción del payload limpia: usamos el prompt que ya tiene las reglas de paquetes
             const finalPayload = `
-            OBLIGACIÓN TÉCNICA DE ESTRUCTURA:
-            ${reglasPaquetes}
-            
-            CONTEXTO ESPECÍFICO DEL PROYECTO:
-            ${hiddenContext}
+${hiddenContext}
 
-            INSTRUCCIONES DEL EXAMEN:
-            ${promptText}
+${promptText}
 
-            Genera el código completo de Test1.java respetando los paquetes indicados arriba.
-            `;
+Genera el código de Test1.java siguiendo las instrucciones anteriores.
+NO incluyas bloques de código markdown (\`\`\`java).
+`.trim();
 
             const result = await sendToGemini(finalPayload);
             
-            // Usamos replaceAll para limpiar todo el markdown sobrante
-            const cleanResult = result.replace(/```java/gi, "").replace(/```/gi, "").trim();
+            if (!result) throw new Error("La IA devolvió una respuesta vacía");
+
+            const cleanResult = result
+                .replace(/```java/gi, "")
+                .replace(/```/gi, "")
+                .replace(/^java/i, "") 
+                .trim();
             
             setResponseText(cleanResult);
             setInternalStep('result');
 
-        } catch (error) {
-            console.error("Error Gemini:", error);
-            alert("Error al conectar con la IA.");
+        } catch (error: any) {
+            console.error("DEBUG Gemini Error:", error);
+            alert(`Error de conexión: ${error.message || "Consulta la consola"}`);
         } finally {
             setIsLoading(false);
         }
@@ -113,7 +109,6 @@ ${restricciones}
         if (typeof chrome !== "undefined" && chrome.storage?.local) {
             chrome.storage.local.get([projectId], (result) => {
                 const existingProject = result[projectId] || {};
-
                 const updatedData = {
                     ...existingProject,
                     ...initialData.project,
@@ -122,7 +117,7 @@ ${restricciones}
                 };
 
                 chrome.storage.local.set({ [projectId]: updatedData }, () => {
-                    alert("¡Tests guardados con los paquetes correctos!");
+                    alert("¡Tests guardados!");
                     onWelcome(); 
                 });
             });
@@ -181,7 +176,7 @@ ${restricciones}
                                 <div className="wf-actions-row" style={{ marginTop: '20px' }}>
                                     <button onClick={onBack} className="btn-step secondary">Volver</button>
                                     <button onClick={handleGenerateClick} className="btn-step primary" disabled={isLoading}>
-                                        {isLoading ? "Sincronizando paquetes..." : 'Generar Test1.java'}
+                                        {isLoading ? "Generando" : 'Generar'}
                                     </button>
                                 </div>
                             </div>
@@ -212,7 +207,7 @@ ${restricciones}
                 <div className="modal-overlay">
                     <div className="content-card" style={{ maxWidth: "400px", textAlign: "center" }}>
                         <h3>⚠️ Aviso</h3>
-                        <p>Ya existen tests. ¿Deseas regenerarlos con el nuevo contexto de Ajedrez?</p>
+                        <p>Ya existen tests. ¿Deseas regenerarlos con el nuevo contexto?</p>
                         <div className="wf-actions-row" style={{ justifyContent: "center" }}>
                             <button onClick={() => setShowOverwriteWarning(false)} className="btn-step secondary">No</button>
                             <button onClick={() => { setShowOverwriteWarning(false); executeGeneration(); }} className="btn-step primary">Sí, sobrescribir</button>

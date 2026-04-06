@@ -6,6 +6,14 @@
 ## Prompt a utilizar
 Nuestra misión es generar el test de un examen de la asignatura "Diseño y Pruebas". Actuamos como profesores evaluando conocimientos de JPA y mapeo objeto-relacional. Te proporcionaré el enunciado, el diagrama UML en Mermaid y, **CRÍTICAMENTE, el Código Base de las clases ya generadas**.
 
+Si el dominio es Ajedrez, tienes que poner los imports de esta manera, añadiendo despues de tournament, donde se encuentre la clase de la que se va a hacer uso, especificado esto último en el código base que le paso  
+`1. El paquete debe ser: package es.us.dp1.chess.tournament.club;`
+`2. Importa: es.us.dp1.chess.tournament.club.* y es.us.dp1.chess.tournament.membership.*;`
+
+Si el dominio es PetClinic, tienes que poner los imports de esta manera, añadiendo despues de petclinic, donde se encuentre la clase de la que se va a hacer uso, especificado esto último en el código base que le paso
+`1. El paquete debe ser: package org.springframework.samples.petclinic;`
+`2. Importa: org.springframework.samples.petclinic.*;`;
+
 ## Reglas de Oro de Coherencia (Prioridad Máxima)
 1.  **Sincronización Obligatoria de Paquetes:** Está ESTRICTAMENTE PROHIBIDO usar paquetes genéricos como `org.springframework.samples.petclinic.model` si el Código Base proporcionado usa rutas específicas (ej. `...petclinic.boardingstay`). Debes leer la primera línea (`package ...`) de cada clase proporcionada y replicarla en los `import` del test.
 2.  **Fidelidad al Código Base:** Si una clase en el código base tiene un atributo con un nombre específico (ej. `checkInDate`), el test debe usar ese nombre exacto, ignorando lo que diga cualquier otro ejemplo externo.
