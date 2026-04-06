@@ -63,30 +63,35 @@ ${restricciones}
         setResponseText("");
 
         try {
-            // EXPLICITACIÓN DE PAQUETES: Forzamos a la IA a que no use PetClinic
+            // 1. Extraemos el dominio actual (ajedrez, clinic, etc.)
+            const isAjedrez = initialData?.project?.domainName?.toLowerCase().includes("chess") || 
+                            initialData?.project?.name?.toLowerCase().includes("chess");
+
+            // 2. Definimos las reglas según el dominio
+            const reglasPaquetes = isAjedrez 
+                ? `1. El paquete debe ser: package es.us.dp1.chess.tournament.club;
+                2. Importa: es.us.dp1.chess.tournament.club.* y es.us.dp1.chess.tournament.membership.*;`
+                : `1. El paquete debe ser: package org.springframework.samples.petclinic.model;
+                2. Importa: org.springframework.samples.petclinic.model.*;`;
+
+            // 3. Montamos el Payload SIN valores fijos globales
             const finalPayload = `
-            OBLIGACIÓN TÉCNICA:
-            1. El paquete debe ser: package es.us.dp1.chess.tournament.club;
-            2. Debes importar:
-               import es.us.dp1.chess.tournament.club.Club;
-               import es.us.dp1.chess.tournament.club.ClubRepository;
-               import es.us.dp1.chess.tournament.membership.Membership;
-               import es.us.dp1.chess.tournament.membership.MembershipRepository;
-            3. NO USES nada relacionado con 'org.springframework.samples.petclinic'.
+            OBLIGACIÓN TÉCNICA DE ESTRUCTURA:
+            ${reglasPaquetes}
             
-            CONTEXTO DEL PROYECTO:
+            CONTEXTO ESPECÍFICO DEL PROYECTO:
             ${hiddenContext}
 
             INSTRUCCIONES DEL EXAMEN:
             ${promptText}
 
-            Genera el código completo de Test1.java (incluyendo package e imports).
+            Genera el código completo de Test1.java respetando los paquetes indicados arriba.
             `;
 
             const result = await sendToGemini(finalPayload);
             
-            // Limpieza de etiquetas de bloque de código
-            const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").trim();
+            // Usamos replaceAll para limpiar todo el markdown sobrante
+            const cleanResult = result.replace(/```java/gi, "").replace(/```/gi, "").trim();
             
             setResponseText(cleanResult);
             setInternalStep('result');
