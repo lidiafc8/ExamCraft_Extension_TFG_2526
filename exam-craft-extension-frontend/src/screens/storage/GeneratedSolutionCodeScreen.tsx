@@ -7,7 +7,7 @@ import { Header } from "~src/components/Header";
 
 hljs.registerLanguage('java', java);
 
-export interface GeneratedCodeScreenProps {
+export interface GeneratedSolutionCodeScreenProps {
     selectedProject: any;
     selectedDomainFolder: string;
     logoExamCraft: string;
@@ -18,7 +18,7 @@ export interface GeneratedCodeScreenProps {
     onGoToFolders: () => void;
 }
 
-const parseBaseClasses = (rawText: string) => {
+const parseAttributesConstraintsSolutionCode = (rawText: string) => {
     if (!rawText) return [];
     const results = [];
     
@@ -40,7 +40,7 @@ const parseBaseClasses = (rawText: string) => {
     return results;
 };
 
-export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
+export const GeneratedSolutionCodeScreen: React.FC<GeneratedSolutionCodeScreenProps> = ({
     selectedProject,
     selectedDomainFolder,
     logoExamCraft,
@@ -58,7 +58,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
         tests = [rawTests];
     }
 
-    const parsedBaseClasses = parseBaseClasses(selectedProject.baseClasses || '');
+    const parsedAttributesConstraintsSolution = parseAttributesConstraintsSolutionCode(selectedProject.attributeConstraintsSolution || '');
                         
     const breadcrumbItems = [
         { label: 'INICIO', action: onWelcome },
@@ -67,7 +67,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
         { label: selectedProject.customName || `Examen de ${selectedProject.domainName}`, action: onBack },
     ];
     
-    const currentTitle = "CÓDIGO EXAMEN";
+    const currentTitle = "CÓDIGO SOLUCIÓN";
 
     return (
         <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
@@ -81,13 +81,13 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                 
                 <div className="section-block" style={{ marginBottom: '1px', marginTop: '20px' }}>
                     <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
-                        Clases Base
+                        Solución de Restricciones de Atributos
                     </h2>
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '40px' }}>
                     <div className="content-card" style={{ padding: '20px' }}>
-                        {parsedBaseClasses.length > 0 ? (
-                            parsedBaseClasses.map((block, i) => {
+                        {parsedAttributesConstraintsSolution.length > 0 ? (
+                            parsedAttributesConstraintsSolution.map((block, i) => {
                                 const highlighted = hljs.highlight(block.code, { language: 'java' }).value;
                                 return (
                                     <div key={block.path} style={{ marginBottom: '24px' }}>
@@ -102,47 +102,13 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                             })
                         ) : (
                             <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
-                                Aún no se han generado las clases base para este examen.
+                                Aún no se han generado la solución del ejercicio "Restricciones de Atributos" para este examen.
                             </p>
                         )}
                     </div>
                 </div>
 
-                <div className="section-block" style={{ marginBottom: '1px' }}>
-                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
-                        Tests de Java
-                    </h2>
-                </div>
-                <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
-                    <div className="content-card" style={{ padding: '20px' }}>
-                        {tests.length > 0 ? (
-                            tests.map((test, i) => {
-                                const cleanCode = test.trim()
-                                    .replace(/^```[a-z]*\r?\n/i, '')
-                                    .replace(/\r?\n```$/i, '')
-                                    .trim();
-                                
-                                const highlighted = hljs.highlight(cleanCode, { language: 'java' }).value;
-                                
-                                return (
-                                    <div key={test.substring(0, 20)} style={{ marginBottom: '24px' }}>
-                                        <h4 style={{ marginBottom: '8px', color: '#555', fontFamily: 'monospace' }}>
-                                            Test{i + 1}.java
-                                        </h4>
-                                        <pre style={{ margin: 0, borderRadius: '8px', overflow: 'auto', fontSize: '13px', maxHeight: '500px', backgroundColor: '#f6f8fa', padding: '20px', border: '1px solid #e1e4e8' }}>
-                                            <code className="hljs language-java" dangerouslySetInnerHTML={{ __html: highlighted }} />
-                                        </pre>
-                                    </div>
-                                );
-                            })
-                        ) : (
-                            <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
-                                Aún no se han generado los tests para este examen.
-                            </p>
-                        )}
-                    </div>
-                </div>
-
+            
                 <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '15px' }}>
                     <button onClick={onBack} className="btn-back" style={{ position: 'relative', margin: 0 }}>
                         Volver

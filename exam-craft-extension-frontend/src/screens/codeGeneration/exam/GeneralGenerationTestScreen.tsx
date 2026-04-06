@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import logoExamCraft from "../../../assets/icon512.png";
-import carpeta from "../../../assets/images/archive.png";
-import specific_exam_part from "../../../assets/images/exam_part_storage.png";
-import exam from "../../../assets/images/exam.png"
+import logoExamCraft from "../../../../assets/icon512.png";
+import carpeta from "../../../../assets/images/archive.png";
+import specific_exam_part from "../../../../assets/images/exam_part_storage.png";
+import exam from "../../../../assets/images/exam.png"
 import { createPortal } from "react-dom";
 
 declare var chrome: any;
@@ -14,6 +14,7 @@ interface Props {
     readonly onCreateExamByParts: () => void;
     readonly onCreateTest1: (data: { project: any; constraints: string }) => void;
     readonly onCodeGeneration: () => void;
+    readonly onExamCodeGeneration: () => void;
 }
 
 export default function GeneralGenerationTestScreen({ 
@@ -22,7 +23,8 @@ export default function GeneralGenerationTestScreen({
     onCreateExam, 
     onCreateExamByParts, 
     onCreateTest1,
-    onCodeGeneration
+    onCodeGeneration,
+    onExamCodeGeneration
 }: Props) {
     const [step, setStep] = useState<'folders' | 'exams' | 'parts' | 'workflow'>('folders');
     const [projects, setProjects] = useState<any[]>([]);
@@ -73,7 +75,8 @@ export default function GeneralGenerationTestScreen({
         { label: 'INICIO', action: onWelcome },
         { label: 'CREAR EXAMEN', action: onCreateExam },
         { label: 'POR PARTES', action: onCreateExamByParts },
-        { label: 'CÓDIGO', action: onCodeGeneration }
+        { label: 'CÓDIGO', action: onCodeGeneration },
+        { label: 'EXAMEN', action: onExamCodeGeneration },
     ];
 
     const handleHover = (e: React.MouseEvent | React.FocusEvent, scale: string) => {

@@ -232,89 +232,197 @@ export const GithubService = {
   },
 
   async deployExam(
-        token: string, 
-        project: any, 
-        newRepoName: string, 
-        templateRepo: string, 
-        testBasePath: string
-    ): Promise<string> {
-        
-        const userResponse = await fetch("https://api.github.com/user", {
-            headers: { Authorization: `token ${token}` }
-        });
-        if (!userResponse.ok) throw new Error("Token inválido o caducado (Requires authentication)");
+    token: string,
+    project: any,
+    newRepoName: string,
+    templateRepo: string,
+    testBasePath: string
+  ): Promise<string> {
 
-        const userData = await userResponse.json();
-        const TARGET_OWNER = userData.login;
-        const TEMPLATE_OWNER = "lidiafc8";
+      const userResponse = await fetch("https://api.github.com/user", {
+          headers: { Authorization: `token ${token}` }
+      });
+      if (!userResponse.ok) throw new Error("Token inválido o caducado (Requires authentication)");
 
-        const newRepo = await this.createRepoFromTemplate(token, TEMPLATE_OWNER, templateRepo, newRepoName);
-        
-        await new Promise(resolve => setTimeout(resolve, 2000));
+      const userData = await userResponse.json();
+      const TARGET_OWNER = userData.login;
+      const TEMPLATE_OWNER = "lidiafc8";
 
-         // 1. Readme
-        const title = `Examen Completo: ${project?.customName || project?.domainName}`;
-        const fullText = project?.extensionFinish || '';
-        const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
-        
-        let introText = fullText;
-        let finalMermaidCode = '';
-        
-        if (mermaidMatch) {
-            introText = fullText.substring(0, mermaidMatch.index).trim();
-            finalMermaidCode = sanitizeMermaidForModal(fullText);
-        }
+      const newRepo = await this.createRepoFromTemplate(token, TEMPLATE_OWNER, templateRepo, newRepoName);
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-        const markdownContent = `### ${title}\n\n` +
-            `#### 1. Extensión Funcional\n${introText || "No hay datos de extensión funcional."}\n\n` +
-            (finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`\n\n` : '') +
-            `#### 2. Restricciones de Atributos\n${project?.attributeConstraints || "No se crearon restricciones de atributos para este examen."}\n\n` +
-            `#### 3. Relaciones entre Entidades\n${project?.entityRelations || "No se crearon relaciones entre entidades para este examen."}\n`;
+      // 1. README
+      const title = `Examen Completo: ${project?.customName || project?.domainName}`;
+      const fullText = project?.extensionFinish || '';
+      const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
+      let introText = fullText;
+      let finalMermaidCode = '';
+      if (mermaidMatch) {
+          introText = fullText.substring(0, mermaidMatch.index).trim();
+          finalMermaidCode = sanitizeMermaidForModal(fullText);
+      }
+      const markdownContent = `### ${title}\n\n` +
+          `#### 1. Extensión Funcional\n${introText || "No hay datos de extensión funcional."}\n\n` +
+          (finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`\n\n` : '') +
+          `#### 2. Restricciones de Atributos\n${project?.attributeConstraints || "No se crearon restricciones de atributos para este examen."}\n\n` +
+          `#### 3. Relaciones entre Entidades\n${project?.entityRelations || "No se crearon relaciones entre entidades para este examen."}\n`;
 
-        await this.updateReadmeWithDescription(token, TARGET_OWNER, newRepoName, markdownContent);
+      await this.updateReadmeWithDescription(token, TARGET_OWNER, newRepoName, markdownContent);
 
-        // 2. Tests
-        if (project?.javaTests) {
-            const tests = Array.isArray(project.javaTests)
-                ? project.javaTests
-                : [project.javaTests];
+      // 2. Tests
+      if (project?.javaTests) {
+          const tests = Array.isArray(project.javaTests) ? project.javaTests : [project.javaTests];
+          for (let i = 0; i < tests.length; i++) {
+              const fileContent = tests[i].trim()
+                  .replace(/^```[a-z]*\r?\n/i, '')
+                  .replace(/\r?\n```$/i, '')
+                  .trim();
+              const fileName = `Test${i + 1}.java`;
+              await this.createOrUpdateFile(token, TARGET_OWNER, newRepoName,
+                  `${testBasePath}${fileName}`, fileContent, `Añadir test automático: ${fileName}`);
+          }
+      }
 
-            for (let i = 0; i < tests.length; i++) {
-                const fileContent = tests[i].trim()
-                    .replace(/^```[a-z]*\r?\n/i, '')
-                    .replace(/\r?\n```$/i, '')
-                    .trim();
+      // 3. Clases base
+      if (project?.baseClasses) {
+          const baseClassesFiles = extractFilesForGitHub(project.baseClasses);
+          for (const file of baseClassesFiles) {
+              const fileName = file.path.split('/').pop() || 'clase';
+              await this.createOrUpdateFile(token, TARGET_OWNER, newRepoName,
+                  file.path, file.content, `Añadir clase base generada: ${fileName}`);
+          }
+      }
 
-                const fileName = `Test${i + 1}.java`;
-                await this.createOrUpdateFile(
-                    token, 
-                    TARGET_OWNER, 
-                    newRepoName,
-                    `${testBasePath}${fileName}`,
-                    fileContent,
-                    `Añadir test automático: ${fileName}`
+        // 4. Rama solution con clases resueltas
+        if (project?.attributeConstraintsSolution?.trim() && project?.baseClasses) {
+        const baseFiles = extractFilesForGitHub(project.baseClasses);
+        const solutionFiles = extractFilesForGitHub(project.attributeConstraintsSolution);
+
+        if (solutionFiles.length > 0 && baseFiles.length > 0) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            const mainSha = await this.getMainBranchSha(token, TARGET_OWNER, newRepoName);
+            await this.createBranch(token, TARGET_OWNER, newRepoName, "solution", mainSha);
+
+            for (let i = 0; i < solutionFiles.length; i++) {
+                const path = baseFiles[i]?.path || solutionFiles[i].path;
+                const fileName = path.split('/').pop() || 'solution';
+
+                await this.createOrUpdateFileOnBranch(
+                    token, TARGET_OWNER, newRepoName,
+                    path,
+                    solutionFiles[i].content,
+                    `solution: clase resuelta: ${fileName}`,
+                    "solution"
                 );
             }
         }
-
-        // 3. Clases Base
-        if (project?.baseClasses) {
-            const baseClassesFiles = extractFilesForGitHub(project.baseClasses);
-            
-            for (const file of baseClassesFiles) {
-                const fileName = file.path.split('/').pop() || 'clase';
-                
-                await this.createOrUpdateFile(
-                    token,
-                    TARGET_OWNER,
-                    newRepoName,
-                    file.path,
-                    file.content,
-                    `Añadir clase base generada: ${fileName}`
-                );
-            }
-        }
-
-        return newRepo.html_url;
     }
+
+      return newRepo.html_url;
+  },
+
+    async getMainBranchSha(
+        token: string,
+        owner: string,
+        repo: string
+    ): Promise<string> {
+        const response = await fetch(
+            `https://api.github.com/repos/${owner}/${repo}/git/ref/heads/main`,
+            {
+                headers: {
+                    "Authorization": `token ${token}`,
+                    "Accept": "application/vnd.github+json"
+                }
+            }
+        );
+        if (!response.ok) throw new Error("No se pudo obtener el SHA de main");
+        const data = await response.json();
+        return data.object.sha;
+    },
+
+    async createBranch(
+        token: string,
+        owner: string,
+        repo: string,
+        branchName: string,
+        fromSha: string
+    ): Promise<void> {
+        const response = await fetch(
+            `https://api.github.com/repos/${owner}/${repo}/git/refs`,
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `token ${token}`,
+                    "Accept": "application/vnd.github+json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    ref: `refs/heads/${branchName}`,
+                    sha: fromSha
+                })
+            }
+        );
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(`Error creando rama ${branchName}: ${err.message}`);
+        }
+    },
+
+    async createOrUpdateFileOnBranch(
+        token: string,
+        owner: string,
+        repo: string,
+        path: string,
+        content: string,
+        message: string,
+        branch: string
+    ): Promise<any> {
+        const base64Content = btoa(unescape(encodeURIComponent(content)));
+
+        let sha = undefined;
+        try {
+            const getResponse = await fetch(
+                `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
+                {
+                    headers: {
+                        "Authorization": `token ${token}`,
+                        "Accept": "application/vnd.github+json"
+                    }
+                }
+            );
+            if (getResponse.ok) {
+                const fileData = await getResponse.json();
+                sha = fileData.sha;
+            }
+        } catch {
+          
+        }
+
+        const response = await fetch(
+            `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${token}`,
+                    "Accept": "application/vnd.github+json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message,
+                    content: base64Content,
+                    branch,
+                    ...(sha && { sha })
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Error subiendo ${path} a rama ${branch}: ${errorData.message}`);
+        }
+
+        return await response.json();
+    }
+
 };
+

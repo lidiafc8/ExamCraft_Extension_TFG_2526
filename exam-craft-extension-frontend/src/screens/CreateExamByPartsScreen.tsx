@@ -7,10 +7,9 @@ interface Props {
   readonly onFunctionalExtension: () => void
   readonly onAttributesConstraints: () => void
   readonly onCodeGeneration: () => void
-  readonly onGenerateTest: () => void
 }
 
-export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onGenerateTest, onCodeGeneration }: Props) {
+export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onCodeGeneration }: Props) {
   return (
     <div className="exam-app">
        
