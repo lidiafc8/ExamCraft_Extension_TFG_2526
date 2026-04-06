@@ -49,14 +49,6 @@ export const GeneratedSolutionCodeScreen: React.FC<GeneratedSolutionCodeScreenPr
     onGoToExams,
     onGoToFolders
 }) => {
-    const rawTests = selectedProject.javaTests;
-
-    let tests: any[] = [];
-    if (Array.isArray(rawTests)) {
-        tests = rawTests;
-    } else if (rawTests) {
-        tests = [rawTests];
-    }
 
     const parsedAttributesConstraintsSolution = parseAttributesConstraintsSolutionCode(selectedProject.attributeConstraintsSolution || '');
                         

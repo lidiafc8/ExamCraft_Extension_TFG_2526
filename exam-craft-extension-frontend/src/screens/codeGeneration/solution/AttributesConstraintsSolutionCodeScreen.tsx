@@ -63,7 +63,7 @@ export default function GenerationAttributeConstraintsSolutionScreen({
       successDescription={(name) =>
         `El código solución de restricciones para ${name} ha sido guardado exitosamente.`
       }
-      saveButtonLabel="Guardar Solución"
+      saveButtonLabel="Guardar"
 
       allowedFolders={["clínica veterinaria", "ajedrez"]}
       storageKey="attributeConstraintsSolution" 

@@ -231,92 +231,80 @@ export const GithubService = {
     }
   },
 
-  async deployExam(
-    token: string,
-    project: any,
-    newRepoName: string,
-    templateRepo: string,
-    testBasePath: string
-  ): Promise<string> {
+  async _uploadTests(token: string, owner: string, repo: string, javaTests: any, testBasePath: string) {
+      const tests = Array.isArray(javaTests) ? javaTests : [javaTests];
+      for (let i = 0; i < tests.length; i++) {
+          const fileContent = tests[i].trim()
+              .replace(/^```[a-z]*\r?\n/i, '')
+              .replace(/\r?\n```$/i, '')
+              .trim();
+          const fileName = `Test${i + 1}.java`;
+          await this.createOrUpdateFile(token, owner, repo,
+              `${testBasePath}${fileName}`, fileContent, `Añadir test automático: ${fileName}`);
+      }
+  },
 
+  async _uploadBaseClasses(token: string, owner: string, repo: string, baseClasses: string) {
+      const files = extractFilesForGitHub(baseClasses);
+      for (const file of files) {
+          const fileName = file.path.split('/').pop() || 'clase';
+          await this.createOrUpdateFile(token, owner, repo,
+              file.path, file.content, `Añadir clase base generada: ${fileName}`);
+      }
+  },
+
+  async _uploadSolutionBranch(token: string, owner: string, repo: string, baseClasses: string, solutionRaw: string) {
+      const baseFiles = extractFilesForGitHub(baseClasses);
+      const solutionFiles = extractFilesForGitHub(solutionRaw);
+      if (solutionFiles.length === 0 || baseFiles.length === 0) return;
+
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const mainSha = await this.getMainBranchSha(token, owner, repo);
+      await this.createBranch(token, owner, repo, "solution", mainSha);
+
+      for (let i = 0; i < solutionFiles.length; i++) {
+          const path = baseFiles[i]?.path || solutionFiles[i].path;
+          const fileName = path.split('/').pop() || 'solution';
+          await this.createOrUpdateFileOnBranch(token, owner, repo,
+              path, solutionFiles[i].content, `solution: clase resuelta: ${fileName}`, "solution");
+      }
+  },
+
+  async deployExam(token, project, newRepoName, templateRepo, testBasePath): Promise<string> {
       const userResponse = await fetch("https://api.github.com/user", {
           headers: { Authorization: `token ${token}` }
       });
       if (!userResponse.ok) throw new Error("Token inválido o caducado (Requires authentication)");
 
-      const userData = await userResponse.json();
-      const TARGET_OWNER = userData.login;
-      const TEMPLATE_OWNER = "lidiafc8";
-
-      const newRepo = await this.createRepoFromTemplate(token, TEMPLATE_OWNER, templateRepo, newRepoName);
+      const { login: TARGET_OWNER } = await userResponse.json();
+      const newRepo = await this.createRepoFromTemplate(token, "lidiafc8", templateRepo, newRepoName);
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // 1. README
-      const title = `Examen Completo: ${project?.customName || project?.domainName}`;
       const fullText = project?.extensionFinish || '';
       const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
-      let introText = fullText;
-      let finalMermaidCode = '';
-      if (mermaidMatch) {
-          introText = fullText.substring(0, mermaidMatch.index).trim();
-          finalMermaidCode = sanitizeMermaidForModal(fullText);
-      }
-      const markdownContent = `### ${title}\n\n` +
+      const introText = mermaidMatch ? fullText.substring(0, mermaidMatch.index).trim() : fullText;
+      const finalMermaidCode = mermaidMatch ? sanitizeMermaidForModal(fullText) : '';
+
+      const markdownContent =
+          `### Examen Completo: ${project?.customName || project?.domainName}\n\n` +
           `#### 1. Extensión Funcional\n${introText || "No hay datos de extensión funcional."}\n\n` +
           (finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`\n\n` : '') +
-          `#### 2. Restricciones de Atributos\n${project?.attributeConstraints || "No se crearon restricciones de atributos para este examen."}\n\n` +
-          `#### 3. Relaciones entre Entidades\n${project?.entityRelations || "No se crearon relaciones entre entidades para este examen."}\n`;
+          `#### 2. Restricciones de Atributos\n${project?.attributeConstraints || "No se crearon restricciones de atributos."}\n\n` +
+          `#### 3. Relaciones entre Entidades\n${project?.entityRelations || "No se crearon relaciones entre entidades."}\n`;
 
       await this.updateReadmeWithDescription(token, TARGET_OWNER, newRepoName, markdownContent);
 
       // 2. Tests
-      if (project?.javaTests) {
-          const tests = Array.isArray(project.javaTests) ? project.javaTests : [project.javaTests];
-          for (let i = 0; i < tests.length; i++) {
-              const fileContent = tests[i].trim()
-                  .replace(/^```[a-z]*\r?\n/i, '')
-                  .replace(/\r?\n```$/i, '')
-                  .trim();
-              const fileName = `Test${i + 1}.java`;
-              await this.createOrUpdateFile(token, TARGET_OWNER, newRepoName,
-                  `${testBasePath}${fileName}`, fileContent, `Añadir test automático: ${fileName}`);
-          }
-      }
+      if (project?.javaTests) await this._uploadTests(token, TARGET_OWNER, newRepoName, project.javaTests, testBasePath);
 
       // 3. Clases base
-      if (project?.baseClasses) {
-          const baseClassesFiles = extractFilesForGitHub(project.baseClasses);
-          for (const file of baseClassesFiles) {
-              const fileName = file.path.split('/').pop() || 'clase';
-              await this.createOrUpdateFile(token, TARGET_OWNER, newRepoName,
-                  file.path, file.content, `Añadir clase base generada: ${fileName}`);
-          }
+      if (project?.baseClasses) await this._uploadBaseClasses(token, TARGET_OWNER, newRepoName, project.baseClasses);
+
+      // 4. Rama solution
+      if (project?.attributeConstraintsSolution?.trim() && project?.baseClasses) {
+          await this._uploadSolutionBranch(token, TARGET_OWNER, newRepoName, project.baseClasses, project.attributeConstraintsSolution);
       }
-
-        // 4. Rama solution con clases resueltas
-        if (project?.attributeConstraintsSolution?.trim() && project?.baseClasses) {
-        const baseFiles = extractFilesForGitHub(project.baseClasses);
-        const solutionFiles = extractFilesForGitHub(project.attributeConstraintsSolution);
-
-        if (solutionFiles.length > 0 && baseFiles.length > 0) {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            const mainSha = await this.getMainBranchSha(token, TARGET_OWNER, newRepoName);
-            await this.createBranch(token, TARGET_OWNER, newRepoName, "solution", mainSha);
-
-            for (let i = 0; i < solutionFiles.length; i++) {
-                const path = baseFiles[i]?.path || solutionFiles[i].path;
-                const fileName = path.split('/').pop() || 'solution';
-
-                await this.createOrUpdateFileOnBranch(
-                    token, TARGET_OWNER, newRepoName,
-                    path,
-                    solutionFiles[i].content,
-                    `solution: clase resuelta: ${fileName}`,
-                    "solution"
-                );
-            }
-        }
-    }
 
       return newRepo.html_url;
   },
@@ -377,7 +365,8 @@ export const GithubService = {
         message: string,
         branch: string
     ): Promise<any> {
-        const base64Content = btoa(unescape(encodeURIComponent(content)));
+
+      const base64Content = btoa(encodeURIComponent(content).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode(parseInt(p1, 16))));
 
         let sha = undefined;
         try {
