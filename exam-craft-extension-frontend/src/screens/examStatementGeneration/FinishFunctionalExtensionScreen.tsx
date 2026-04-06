@@ -2,6 +2,8 @@ import React from "react"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import { Header } from "~src/components/Header";
 
+declare var chrome: any;
+
 interface Props {
     readonly domainName: string;
     readonly extensionFinish: string;
@@ -35,7 +37,7 @@ export default function FinishFunctionalExtensionScreen({
     };
 
     const handleSaveToChrome = () => {
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (globalThis.chrome?.storage?.local) {
             
             const userChosenName = prompt("Introduce el nombre para guardar este examen:", `Examen de ${domainName}`);
             

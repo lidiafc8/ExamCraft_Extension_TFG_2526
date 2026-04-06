@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react"
-// IMPORTANTE: Asegúrate de que la ruta sea la correcta donde guardaste tu nuevo componente
 import { Header } from "~src/components/Header" 
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { sendToGemini } from "~src/services/geminiService"
 import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/generation_tests.md"
+
+declare var chrome: any;
 
 interface Props {
     readonly initialData: { project: any; constraints: string } | null;
@@ -99,7 +100,7 @@ ${restricciones}
     };
 
     const handleSaveToChrome = () => {
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (globalThis.chrome?.storage?.local) {
             
             if (!initialData?.project?.id) {
                 alert("Error: No se ha encontrado el ID del proyecto para actualizar.");

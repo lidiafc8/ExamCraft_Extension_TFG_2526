@@ -4,3 +4,4 @@ declare module "bundle-text:*" {
 }
 
 declare module '*.png';
+declare module '*.css';

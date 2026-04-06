@@ -10,6 +10,8 @@ import { DomainFolderScreen } from "./DomainFolderScreen";
 import { ExamDetailScreen } from "./ExamDetailScreen";
 import { GeneratedCodeScreen } from "./GenerateCodeScreen";
 
+declare var chrome: any;
+
 hljs.registerLanguage('java', java);
 
 interface Props {
@@ -32,7 +34,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     );
 
     useEffect(() => {
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.get(null, (items) => {
                 const projectList = Object.keys(items)
                     .filter(key => key.startsWith('project_'))
@@ -57,7 +59,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         const newName = tempName.trim();
         const updatedData = { ...projectToUpdate, customName: newName };
 
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.set({ [id]: updatedData }, () => {
                 applyRenameToState(id, newName);
             });
@@ -68,7 +70,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         if (e) e.stopPropagation();
         const confirmDelete = globalThis.confirm("¿Estás seguro de que quieres borrar este examen? Esta acción no se puede deshacer.");
         if (confirmDelete) {
-            if (typeof chrome !== "undefined" && chrome.storage?.local) {
+            if (globalThis.chrome?.storage?.local) {
                 chrome.storage.local.remove(id, () => {
                     setProjects(prevProjects => prevProjects.filter(p => p.id !== id));
                     if (selectedProject?.id === id) setSelectedProject(null);
@@ -183,7 +185,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 selectedProject={selectedProject}
                 selectedDomainFolder={selectedDomainFolder || ""}
                 isCreating={isCreating}
-                logoExamCraft={logoExamCraft}
                 onWelcome={onWelcome}
                 onBack={() => setSelectedProject(null)}
                 onGoToFolders={() => {

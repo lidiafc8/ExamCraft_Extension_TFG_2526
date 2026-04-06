@@ -1,4 +1,6 @@
 export {}
+
+declare var chrome: any;
  
 console.log("Background service worker cargado.")
  

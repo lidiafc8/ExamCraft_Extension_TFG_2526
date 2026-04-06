@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react"
-// Importamos el nuevo componente Header
 import { Header } from "~src/components/Header"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md"
 import { sendToGemini } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
+
+declare var chrome: any;
 
 interface Props {
   readonly domainName: string;
@@ -28,8 +29,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
   const [previousExtensions, setPreviousExtensions] = useState<string>("");
 
     useEffect(() => {
-        // CORRECCIÓN: Usamos Optional Chaining ?.
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.get(null, (items) => {
             const extensions = Object.keys(items)
                 .filter(key => key.startsWith('project_'))
