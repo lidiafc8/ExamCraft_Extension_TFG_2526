@@ -86,7 +86,7 @@ ${restricciones}
             const result = await sendToGemini(finalPayload);
             
             // Limpieza de etiquetas de bloque de código
-            const cleanResult = result.replace(/```java/gi, "").replace(/```/gi, "").trim();
+            const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").trim();
             
             setResponseText(cleanResult);
             setInternalStep('result');
