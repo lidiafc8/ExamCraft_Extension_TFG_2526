@@ -12,6 +12,8 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 5. [Generación de Examen Completo](#prompt-5-)  
 6. [Generación de Clases Base del Examen](#prompt-6-)  
 7. [Generación de Tests del Examen](#prompt-7-)
+8. [Generación de Código Solución para el Ejercicio Restricciones de Atributos](#prompt-8-)
+
 
 ## PROMPTS
 
@@ -23,7 +25,9 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
     Una extensión funcional es la información que recibe el alumno como contextualización del examen, donde se le presenta la nueva funcionalidad que se deberá añadir al proyecto base del que se parte (Clínica Veterinaria o Ajedrez), contando tanto con un enunciado (el texto) y un diagrama UML que explica a nivel técnico la funcionalidad introducida.
 
-- **Recursos Necesarios:** Ejemplos de extensiones funcionales de exámenes anteriores.
+- **Recursos Necesarios:** 
+    - Ejemplos de extensiones funcionales de exámenes anteriores.
+    - Dominio para el que se va a crear el enunciado de la extensión funcional (Clínica Veterinaria o Ajedrez)
 
 - **Prompt:**  
     ```text
@@ -96,7 +100,10 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
 - **Descripción:** Define las pautas y reglas a seguir por el modelo LLM para poder generar correctamente el código en formato Mermaid del diagrama UML de la extensión funcional del examen. Entre dichas pautas se define el formato y el estilo de las entidades y del código a devolver, aportando contexto previamente del examen que queremos crear e indicando las partes que el alumno deberá implementar y cuáles no.
 
-- **Recursos Necesarios:** Ejemplos de extensiones funcionales de exámenes anteriores.
+- **Recursos Necesarios:** 
+    - Ejemplos de extensiones funcionales de exámenes anteriores.
+    - Dominio del proyecto.
+    - Enunciado de extensión funcional en el cual basará su creación.
 
 - **Prompt:**  
     ```text
@@ -131,7 +138,10 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
 - **Descripción:** Define las pautas y reglas a seguir por el modelo LLM para poder generar correctamente las instrucciones del ejercicio "Restricciones de Atributos" del examen a crear, a partir de una extensión funcional (Enunciado y Diagrama UML) dada internamente como contexto. En este ejercicio se definen las diferentes restricciones que deberán tener los atributos de las entidades a implementar por el alumno.
 
-- **Recursos Necesarios:** Ejemplos de restricciones de atributos de exámenes anteriores.
+- **Recursos Necesarios:** 
+    - Ejemplos de restricciones de atributos de exámenes anteriores.
+    - Extensión funcional en la que se basará para la generación.
+    - Dominio del proyecto.
 
 - **Prompt:**  
     ```text
@@ -197,7 +207,10 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
 - **Descripción:** Define las pautas y reglas a seguir por el modelo LLM para poder generar correctamente las instrucciones del ejercicio "Relaciones entre Entidades" del examen a crear, a partir de una extensión funcional (Enunciado y Diagrama UML) dada internamente como contexto. En este ejercicio se definen las diferentes relaciones que deberán tener las entidades a implementar por el alumno.
 
-- **Recursos Necesarios:** Ejemplos de relaciones entre entidades de exámenes anteriores.
+- **Recursos Necesarios:** 
+    - Ejemplos de relaciones entre entidades de exámenes anteriores.
+    - Extensión funcional en la que se basará para la generación.
+    - Dominio del proyecto.
 
 - **Prompt:**  
     ```text
@@ -414,6 +427,8 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
 - **Recursos Necesarios:** 
     - Ejemplos de estructura de clases base de exámenes anteriores. 
+    - Dominio del proyecto elegido (Clínica Veterinaria o Ajedrez).
+    - Clases ya existentes en el repositorio plantilla correspondiente.
 
 - **Prompt:**  
     ```text
@@ -523,4 +538,42 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     Tampoco pongas nada de ```java y ``` 
 
     Genera el código completo de Test1.java aplicando estas reglas a la entidad principal descrita en el UML de este examen en particular.
+    ```
+
+### Prompt 8 📝
+
+- **Título:**  Generación de Código Solución para el Ejercicio Restricciones de Atributos (*Generation of Solution Code for Attribute Constraints Exercise*).
+
+- **Descripción:** Establece las pautas y reglas que el modelo LLM debe seguir para generar de manera correcta y estructurada la solución en código correspondiente al ejercicio de restricción de atributos. En este contexto, el modelo deberá partir del código base previamente generado en el [prompt 6](#prompt-6-) y aplicar las modificaciones necesarias para implementar la solución completa del ejercicio, conforme a los requisitos del examen. Dicha solución representa la respuesta oficial del profesor, la cual se pretende automatizar dentro del sistema, garantizando coherencia, precisión y adecuación a las especificaciones planteadas.
+
+- **Recursos Necesarios:** 
+    - Enunciado del ejercicio "Restricciones de Atributos".
+    - Código de los tests que validan dicho ejercicio.
+    - Código base del examen concreto generado en la extensión previamente.
+
+- **Prompt:**  
+    ```text
+   # PROMPT PARA LA GENERACIÓN DE CÓDIGO SOLUCIÓN DEL EJERCICIO "RESTRICCIONES DE ATRIBUTOS"
+
+    Actúa como un desarrollador Senior de Java y Spring Boot experto en la resolución de ejercicios universitarios. 
+
+    Tu tarea es tomar un código base (esqueletos de clases) y completarlo aplicando estrictamente las restricciones de atributos definidas en el enunciado del ejercicio. Además, tu implementación debe garantizar que pase con éxito todos los tests de validación proporcionados.
+
+    ### DATOS DE ENTRADA
+    - Enunciado de Restricciones (Attribute Constraints): {enunciado_restricciones}
+    - Tests de Validación (JUnit): {codigo_tests}
+    - Código Base Actual: {codigo_base_localstorage}
+
+    ### REGLAS DE GENERACIÓN (ESTRICTAS)
+    1. ANÁLISIS DE RESTRICCIONES: Lee detenidamente el enunciado y los tests. Aplica las validaciones de Jakarta/Javax Validation (ej. `@NotNull`, `@Min`, `@Max`, `@Size`, `@Pattern`, etc.), anotaciones JPA (`@Column(unique=true, nullable=false)`) o lógica en los setters/métodos según sea estrictamente necesario para cumplir con el enunciado y hacer que los tests pasen.
+    2. MODIFICACIÓN MÍNIMA: Completa únicamente el código de las clases proporcionadas en el "Código Base Actual". EVITA crear entidades, repositorios o servicios que no existan ya en el código base. Tu objetivo es *completar*, no reestructurar.
+    3. ALINEACIÓN CON LOS TESTS: Los tests proporcionados son la fuente de la verdad. Si un test espera que se lance una excepción específica (ej. `ConstraintViolationException`) o busca un nombre de campo concreto, tu código debe coincidir exactamente con esa expectativa.
+    4. CERO EXPLICACIONES: Devuelve ÚNICAMENTE el código fuente modificado, en el mismo orden en el que recibes las clases base. EVITA hacer saludos, explicaciones de tus decisiones, comentarios finales o bloques de texto fuera del formato requerido.
+
+    ### FORMATO DE SALIDA OBLIGATORIO
+    Para que el sistema automatizado pueda procesar tu respuesta, debes devolver CADA ARCHIVO siguiendo este formato estricto. La ruta debe ser la ruta completa del sistema de archivos que corresponde a la clase (ej: src/main/java/com/example/model/Clase.java):
+
+    [RUTA_EXTRAIDA_DEL_CODIGO_BASE];
+    ```java
+    // Contenido completo de la clase con la solución aplicada
     ```
