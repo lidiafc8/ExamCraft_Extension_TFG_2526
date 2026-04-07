@@ -6,6 +6,9 @@
 ## Prompt a utilizar
 Nuestra misión es generar el test de un examen de la asignatura "Diseño y Pruebas". Actuamos como profesores evaluando conocimientos de JPA y mapeo objeto-relacional. Te proporcionaré el enunciado, el diagrama UML en Mermaid y, **CRÍTICAMENTE, el Código Base de las clases ya generadas**.
 
+## Prompt a utilizar
+Nuestra misión es generar el test de un examen de la asignatura "Diseño y Pruebas". Actuamos como profesores evaluando conocimientos de JPA y mapeo objeto-relacional. Te proporcionaré el enunciado, el diagrama UML en Mermaid y, **CRÍTICAMENTE, el Código Base de las clases ya generadas**.
+
 Por favor, no uses Wildcard Imports (asteriscos). Genera todos los imports de forma explícita, uno por cada clase utilizada. IMPORTANTE CENTRARSE EN LAS CLASES QUE SE PROPORCIONA COMO CÓDIGO BASE, DE SU LOCALIZACIÓN PARA PODER PONER CORRECTAMENTE LOS IMPORTS DE DONDE SE SACAN LAS CLASES.
 
 ---
@@ -53,12 +56,39 @@ Si una clase (como `ReflexiveTest`, `NamedEntity`, etc.) no aparece en el códig
 - **Herencia:** La clase de test DEBE extender de `ReflexiveTest`.
 
 ---
+---
 
+## Estructura Requerida para Test1.java
 ## Estructura Requerida para Test1.java
 
 ### 1. Configuración e Inyección
 - Inyecta los Repositorios de las entidades rojas y el `EntityManager` mediante `@Autowired`.
 - Usa `@ComponentScan` apuntando a los paquetes reales detectados en el Código Base (ver Regla Absoluta Nº 1).
+
+### 2. Verificación de Repositorios
+- **test1RepositoriesExist():** Verifica `assertNotNull`. Al final, debe llamar a `test1RepositoriesContainsMethod()` solo si el repo no es nulo.
+- **test1RepositoriesContainsMethod():** (SIN @Test) Verifica que el repo tiene el método `.count()` o similar mediante reflexión/interfaz.
+
+### 3. Validación de Restricciones (Constraints)
+- **test1Check[NOMBRE_ENTIDAD]Constraints():**
+    - Invoca `checkThatFieldsAreMandatory` con los campos `NotNull/NotBlank` identificados.
+    - Crea el mapa `invalidValues` usando `Map.of(...)`. **PROHIBIDO usar `new HashMap()`**.
+    - Los valores de prueba deben ser coherentes con el tipo de dato del Código Base (si es `Double`, usa `0.0`; si es `Integer`, `0`).
+    - Invoca `checkThatValuesAreNotValid`.
+
+### 4. Verificación de Anotaciones
+- **test1Check[NOMBRE_ENTIDAD]Annotations():**
+    - Verifica `@Entity` con `classIsAnnotatedWith`.
+    - Verifica `@Enumerated(EnumType.STRING)` si hay Enums.
+    - Verifica `@Size`, `@Positive`, `@FutureOrPresent`, etc., según el UML.
+
+### 5. Métodos Auxiliares y Persistencia
+- **createValid[NOMBRE_ENTIDAD](EntityManager em):** Método estático que construye una instancia válida.
+- **IMPORTANTE:** Usa EXCLUSIVAMENTE `setValue(objeto, "atributo", Tipo.class, valor)` para asignar datos, evitando fallos si no existen setters.
+- **test1Valid[NOMBRE_ENTIDAD]IsPersisted():** Verifica que `repo.save()` no lanza excepciones (`assertDoesNotThrow`) y haz `.flush()`.
+
+---
+
 
 ### 2. Verificación de Repositorios
 - **test1RepositoriesExist():** Verifica `assertNotNull`. Al final, debe llamar a `test1RepositoriesContainsMethod()` solo si el repo no es nulo.
