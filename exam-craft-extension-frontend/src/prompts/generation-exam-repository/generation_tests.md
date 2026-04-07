@@ -1,4 +1,4 @@
-# PROMPT COMPLETO PARA GENERACIÓN DE TESTS DE LOS DISTITNOS EJERCICIOS
+# PROMPT COMPLETO PARA GENERACIÓN DE TESTS DE LOS DISTINTOS EJERCICIOS
 
 ## Recursos a proporcionar:
 * `generation_test.md`
@@ -6,18 +6,44 @@
 ## Prompt a utilizar
 Nuestra misión es generar el test de un examen de la asignatura "Diseño y Pruebas". Actuamos como profesores evaluando conocimientos de JPA y mapeo objeto-relacional. Te proporcionaré el enunciado, el diagrama UML en Mermaid y, **CRÍTICAMENTE, el Código Base de las clases ya generadas**.
 
-Si el dominio es Ajedrez, tienes que poner los imports de esta manera, añadiendo despues de tournament, donde se encuentre la clase de la que se va a hacer uso, especificado esto último en el código base que le paso  
-`1. El paquete debe ser: package es.us.dp1.chess.tournament.club;`
-`2. Importa: es.us.dp1.chess.tournament.club.* y es.us.dp1.chess.tournament.membership.*;`
+Por favor, no uses Wildcard Imports (asteriscos). Genera todos los imports de forma explícita, uno por cada clase utilizada. IMPORTANTE CENTRARSE EN LAS CLASES QUE SE PROPORCIONA COMO CÓDIGO BASE, DE SU LOCALIZACIÓN PARA PODER PONER CORRECTAMENTE LOS IMPORTS DE DONDE SE SACAN LAS CLASES.
 
-Si el dominio es PetClinic, tienes que poner los imports de esta manera, añadiendo despues de petclinic, donde se encuentre la clase de la que se va a hacer uso, especificado esto último en el código base que le paso
-`1. El paquete debe ser: package org.springframework.samples.petclinic;`
-`2. Importa: org.springframework.samples.petclinic.*;`;
+---
 
-## Reglas de Oro de Coherencia (Prioridad Máxima)
-1.  **Sincronización Obligatoria de Paquetes:** Está ESTRICTAMENTE PROHIBIDO usar paquetes genéricos como `org.springframework.samples.petclinic.model` si el Código Base proporcionado usa rutas específicas (ej. `...petclinic.boardingstay`). Debes leer la primera línea (`package ...`) de cada clase proporcionada y replicarla en los `import` del test.
+## ⚠️ REGLA ABSOLUTA Nº 1 — PAQUETES: LEE EL CÓDIGO BASE, NO INVENTES
+
+Esta es la regla más importante del prompt. Debes seguirla antes que cualquier otra cosa.
+Además, para las clases que no estén implementadas en el código base, buscarla en el repositorio pasado
+
+**Procedimiento obligatorio antes de escribir un solo import:**
+
+1. Localiza la sección `=== PAQUETES REALES DETECTADOS EN EL CÓDIGO BASE ===` del contexto.
+2. Para cada clase que necesites importar, busca su `package` en el código base proporcionado.
+3. Construye el import como: `import <package_de_esa_clase>.<NombreClase>;`
+- Pero ten en cuenta en poner los nombres de las clases nueva generadas, no es siempre Achievement; sino q coja las clases del contexto que se le pase de la extensión funcional.
+
+**Ejemplo concreto:**
+- Si el código base de `Achievement.java` empieza con `package es.us.dp1.chess.tournament.achievement;`
+- El import correcto en el test es: `import es.us.dp1.chess.tournament.achievement.Achievement;`
+- Teniendo en cuenta las mayúsculas y minúsculas de las clases para evitar el error en los tests
+- ❌ NUNCA: `import org.springframework.samples.chessgame.model.Achievement;`
+- ❌ NUNCA: `import org.springframework.samples.petClinic.model.Achievement;`
+
+**Aplica lo mismo para `@ComponentScan`:**
+- ✅ CORRECTO: `@ComponentScan(basePackages = {"es.us.dp1.chess.tournament.achievement", "es.us.dp1.chess.tournament.userAchievement"})`
+- ❌ INCORRECTO: `@ComponentScan(basePackages = {"org.springframework.samples.chessgame.repository", "org.springframework.samples.chessgame.model"})`
+
+**El paquete del propio test (`package ...` en la primera línea) también debe derivarse del código base**, usando el prefijo raíz común detectado más el sufijo `.test`. Ejemplo: si el prefijo raíz es `es.us.dp1.chess.tournament`, el paquete del test será `es.us.dp1.chess.tournament.test`.
+
+Si una clase (como `ReflexiveTest`, `NamedEntity`, etc.) no aparece en el código base proporcionado, usa el mismo prefijo raíz detectado para inferir su paquete. Nunca uses `org.springframework.samples.*` salvo que ese prefijo aparezca explícitamente en el código base.
+
+---
+
+## Reglas de Coherencia Adicionales
 2.  **Fidelidad al Código Base:** Si una clase en el código base tiene un atributo con un nombre específico (ej. `checkInDate`), el test debe usar ese nombre exacto, ignorando lo que diga cualquier otro ejemplo externo.
 3.  **Manejo de Relaciones:** Si en el Código Base una relación está marcada como `@Transient`, el test debe tratarla según las instrucciones del enunciado, pero siempre importando la clase desde su paquete real.
+
+---
 
 ## Especificaciones del Examen
 - **Clases Negras:** Núcleo estable (Contexto). No se testea su implementación interna, pero se usan para crear objetos válidos (ej. `Owner`, `Pet`).
@@ -32,7 +58,7 @@ Si el dominio es PetClinic, tienes que poner los imports de esta manera, añadie
 
 ### 1. Configuración e Inyección
 - Inyecta los Repositorios de las entidades rojas y el `EntityManager` mediante `@Autowired`.
-- Usa `@ComponentScan` apuntando a los paquetes reales detectados en el Código Base.
+- Usa `@ComponentScan` apuntando a los paquetes reales detectados en el Código Base (ver Regla Absoluta Nº 1).
 
 ### 2. Verificación de Repositorios
 - **test1RepositoriesExist():** Verifica `assertNotNull`. Al final, debe llamar a `test1RepositoriesContainsMethod()` solo si el repo no es nulo.
@@ -63,4 +89,3 @@ Si el dominio es PetClinic, tienes que poner los imports de esta manera, añadie
 - **PROHIBIDO** envolver el código en bloques de código markdown (sin \`\`\`java).
 - **PROHIBIDO** incluir texto antes o después del código.
 - Entrega el código listo para ser copiado y pegado en un archivo `.java`.
-
