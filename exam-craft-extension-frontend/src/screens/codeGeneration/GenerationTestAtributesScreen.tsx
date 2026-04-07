@@ -3,7 +3,7 @@ import { Header } from "~src/components/Header"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { sendToGemini } from "~src/services/geminiService"
 import { GithubService } from "~src/services/githubService"
-import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/generation_tests.md"
+import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests.md"
 
 declare var chrome: any;
 
