@@ -16,7 +16,7 @@ Por favor, no uses Wildcard Imports (asteriscos). Genera todos los imports de fo
 ## ⚠️ REGLA ABSOLUTA Nº 1 — PAQUETES: LEE EL CÓDIGO BASE, NO INVENTES
 
 Esta es la regla más importante del prompt. Debes seguirla antes que cualquier otra cosa.
-Además, para las clases que no estén implementadas en el código base, buscarla en el repositorio pasado
+Además, para las clases que no estén implementadas en el código base, buscarla en el repositorio pasado, como Pet, viene de pet.Pet
 
 **Procedimiento obligatorio antes de escribir un solo import:**
 
