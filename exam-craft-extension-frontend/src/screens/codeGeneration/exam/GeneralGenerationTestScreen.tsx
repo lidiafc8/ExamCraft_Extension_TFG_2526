@@ -14,7 +14,6 @@ interface Props {
     readonly onCreateExamByParts: () => void;
     readonly onCreateTest1: (data: { project: any; constraints: string }) => void;
     readonly onCodeGeneration: () => void;
-    readonly onExamCodeGeneration: () => void;
 }
 
 export default function GeneralGenerationTestScreen({ 
@@ -23,8 +22,7 @@ export default function GeneralGenerationTestScreen({
     onCreateExam, 
     onCreateExamByParts, 
     onCreateTest1,
-    onCodeGeneration,
-    onExamCodeGeneration
+    onCodeGeneration
 }: Props) {
     const [step, setStep] = useState<'folders' | 'exams' | 'parts' | 'workflow'>('folders');
     const [projects, setProjects] = useState<any[]>([]);
@@ -75,8 +73,7 @@ export default function GeneralGenerationTestScreen({
         { label: 'INICIO', action: onWelcome },
         { label: 'CREAR EXAMEN', action: onCreateExam },
         { label: 'POR PARTES', action: onCreateExamByParts },
-        { label: 'CÓDIGO', action: onCodeGeneration },
-        { label: 'EXAMEN', action: onExamCodeGeneration },
+        { label: 'CÓDIGO', action: onCodeGeneration }
     ];
 
     const handleHover = (e: React.MouseEvent | React.FocusEvent, scale: string) => {

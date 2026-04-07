@@ -9,7 +9,6 @@ interface Props {
   readonly onCreateExam: () => void
   readonly onCreateExamByParts: () => void
   readonly onCodeGeneration: () => void
-  readonly onExamCodeGeneration: () => void
 }
 
 const CLASES_POR_DEFECTO: Record<string, string> = {
@@ -44,7 +43,6 @@ export default function GenerationBaseClassesScreen({
   onCreateExam,
   onCreateExamByParts,
   onCodeGeneration,
-  onExamCodeGeneration
 }: Props) {
   return (
     <WorkflowScreen
@@ -56,9 +54,8 @@ export default function GenerationBaseClassesScreen({
         { label: "CREAR EXAMEN", action: onCreateExam },
         { label: "POR PARTES", action: onCreateExamByParts },
         { label: "CÓDIGO", action: onCodeGeneration },
-        { label: "EXAMEN", action: onExamCodeGeneration },
       ]}
-      currentStep="CLASES BASE"
+      currentStep="CÓDIGO"
 
       // ── Textos ────────────────────────────────────────────────────────────
       selectionTitle="Selecciona un dominio"
@@ -75,14 +72,6 @@ export default function GenerationBaseClassesScreen({
       confirmTitle="Confirmar Examen"
       confirmDescription={(name) =>
         `¿Deseas utilizar ${name} como base para generar las clases base del examen?`
-      }
-      confirmWarning={(project) =>
-        project.baseClasses
-          ? "Este examen ya tiene clases base generadas.\nSi continúas, las clases anteriores serán reemplazadas por las nuevas."
-          : null
-      }
-      confirmButtonLabel={(project) =>
-        project.baseClasses ? "Continuar y reemplazar" : "Confirmar"
       }
       successTitle="¡Guardado correctamente!"
       successDescription={(name) =>
