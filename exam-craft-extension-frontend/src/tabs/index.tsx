@@ -112,7 +112,7 @@ export default function IndexTab() {
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
-          onFunctionalExtension={() => setScreen("functionalExtension")}
+          onFunctionalExtension={() => setScreen("domainSelection")}
           onCreateDiagram={(context) => {
             setContextResponse(context)
             setScreen("diagramUML")
