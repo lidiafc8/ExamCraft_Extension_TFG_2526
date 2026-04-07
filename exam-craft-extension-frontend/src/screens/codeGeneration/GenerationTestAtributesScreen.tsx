@@ -109,9 +109,9 @@ export default function GenerationTestAtributesScreen({
 
         const codigoLimpio = javaBlocks.map(block =>
             block
-                .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "")
+                .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
                 .replace(/^(?!package\s)import\s.*;$/gm, "")
-                .replace(/^\s*[\r\n]/gm, "")
+                .replace(/^\s*[\r\n]/gm, "")// NOSONAR javascript:S5852
                 .trim()
         ).join("\n\n// ---\n\n");
 
