@@ -9,6 +9,7 @@ import { FoldersGridScreen } from "./FoldersGridScreen";
 import { DomainFolderScreen } from "./DomainFolderScreen";
 import { ExamDetailScreen } from "./ExamDetailScreen";
 import { GeneratedCodeScreen } from "./GenerateCodeScreen";
+import { GeneratedSolutionCodeScreen } from "./GeneratedSolutionCodeScreen";
 
 declare var chrome: any;
 
@@ -27,6 +28,8 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     const [tempName, setTempName] = useState("");
     const [isCreating, setIsCreating] = useState(false);
     const [showGeneratedCode, setShowGeneratedCode] = useState(false);
+    const [showSolutionGeneratedCode, setShowSolutionGeneratedCode] = useState(false);
+
 
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
     const projectsInFolder = projects.filter(p =>
@@ -44,7 +47,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     }, []);
 
-    // Extraído para evitar anidamiento excesivo en handleRename
     const applyRenameToState = (id: string, newName: string) => {
         setProjects(prevProjects =>
             prevProjects.map(p => (p.id === id ? { ...p, customName: newName } : p))
@@ -122,6 +124,10 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         if (selectedProject.baseClasses && selectedProject.baseClasses.trim() !== "") {
             itemsToUpload.push("- Clases base para la extensión creada.");
         }
+        
+        if (selectedProject.attributeConstraintsSolution && selectedProject.attributeConstraintsSolution.trim() !== "") {
+            itemsToUpload.push("- Rama 'solution' con las clases resueltas (restricciones de atributos).");
+        }
 
         const uploadListString = itemsToUpload.join("\n");
         const confirmacion = globalThis.confirm(
@@ -179,6 +185,27 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         );
     }
 
+    if (selectedProject && showSolutionGeneratedCode) {
+        return (
+            <GeneratedSolutionCodeScreen
+                selectedProject={selectedProject}
+                selectedDomainFolder={selectedDomainFolder || ""}
+                logoExamCraft={logoExamCraft}
+                onWelcome={onWelcome}
+                onBack={() => setShowSolutionGeneratedCode(false)}
+                onGoToExams={() => {
+                    setShowSolutionGeneratedCode(false);
+                    setSelectedProject(null);
+                }}
+                onGoToFolders={() => {
+                    setShowSolutionGeneratedCode(false);
+                    setSelectedProject(null);
+                    setSelectedDomainFolder(null);
+                }}
+            />
+        );
+    }
+
     if (selectedProject && !showGeneratedCode) {
         return (
             <ExamDetailScreen
@@ -194,10 +221,12 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 onDownload={handleDownload}
                 onGitHubDeploy={handleGitHubDeploy}
                 onShowGeneratedCode={() => setShowGeneratedCode(true)}
+                onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
                 onDeleteProject={handleDelete}
             />
         );
     }
+
 
     if (selectedDomainFolder) {
         return (

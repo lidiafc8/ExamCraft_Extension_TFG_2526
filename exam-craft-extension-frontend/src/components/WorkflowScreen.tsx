@@ -37,6 +37,7 @@ export interface WorkflowScreenProps {
 
   // Callback al guardar
   onSaved?: (savedData: { project: any; result: string }) => void
+  filterProject?: (project: any) => boolean
 }
 
 export default function WorkflowScreen({
@@ -63,6 +64,7 @@ export default function WorkflowScreen({
   downloadPrefix,
   downloadTitle,
   onSaved,
+  filterProject,
 }: WorkflowScreenProps) {
   const [step, setStep] = useState<"selection" | "workflow">("selection")
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
@@ -99,12 +101,20 @@ export default function WorkflowScreen({
     }
   }, [selectedProject])
 
-  const projectsInFolder = projects.filter(
-    (p) =>
+  const projectsInFolder = projects.filter((p) => {
+    const matchesFolder = 
       p.domainName &&
       selectedDomainFolder &&
       p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
-  )
+
+    if (!matchesFolder) return false
+
+    if (filterProject) {
+      return filterProject(p)
+    }
+
+    return true
+  })
 
   const projectDisplayName = (proj: any) =>
     proj?.customName || `Examen de ${proj?.domainName}`
