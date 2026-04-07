@@ -10,10 +10,13 @@ import FinishFunctionalExtensionScreen from "../screens/examStatementGeneration/
 import "/assets/main.css"
 import AttributesConstraintsWorkflowScreen from "~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen"
 import GenerationTestAtributesScreen from "../screens/codeGeneration/GenerationTestAtributesScreen"
-import GeneralGenerationTestScreen from "../screens/codeGeneration/GeneralGenerationTestScreen"
+import GeneralGenerationTestScreen from "../screens/codeGeneration/exam/GeneralGenerationTestScreen"
 import CodeGenerationScreen from "~src/screens/codeGeneration/CodeGenerationScreen"
-import GenerationBaseClassesScreen from "~src/screens/codeGeneration/GenerationBaseClassesScreen"
+import ExamCodeGenerationScreen from "~src/screens/codeGeneration/exam/ExamCodeGenerationScreen"
+import GenerationBaseClassesScreen from "~src/screens/codeGeneration/exam/GenerationBaseClassesScreen"
 import StorageExamsIndex from "../screens/storage/StorageExamsIndex"
+import SolutionCodeGenerationScreen from "~src/screens/codeGeneration/solution/SolutionCodeGenerationScreen"
+import AttributesConstraintsSolutionCodeScreen from "~src/screens/codeGeneration/solution/AttributesConstraintsSolutionCodeScreen"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
@@ -39,7 +42,11 @@ export default function IndexTab() {
     "testAtributes" |
     "testGeneral" |
     "codeGeneration" |
-    "generateBaseClasses"
+    "generateBaseClasses" |
+    "examCodeGeneration" |
+    "solutionCodeGeneration" |
+    "attributesConstraintsSolutionCode"
+    
   >("welcome")
 
   return (
@@ -69,7 +76,6 @@ export default function IndexTab() {
         onFunctionalExtension={() => setScreen("domainSelection")}
         onAttributesConstraints={() => setScreen("attributesConstraints")}
         onCodeGeneration={() => setScreen("codeGeneration")}
-        onGenerateTest={() => setScreen("testGeneral")}
         />
       )}
 
@@ -77,19 +83,52 @@ export default function IndexTab() {
         <CodeGenerationScreen 
         onBack={() => setScreen("createExamByParts")} 
         onWelcome={() => setScreen("welcome")} 
+        onCreateExamByParts={() => setScreen("createExamByParts")}
+        onExamCodeGeneration={() => setScreen("examCodeGeneration")}
+        onSolutionCodeGeneration={() => setScreen("solutionCodeGeneration")}
+        />
+      )}
+
+      {screen === "examCodeGeneration" && (
+        <ExamCodeGenerationScreen 
+        onBack={() => setScreen("codeGeneration")} 
+        onWelcome={() => setScreen("welcome")}
         onGenerateTest={() => setScreen("testGeneral")}
         onCreateExamByParts={() => setScreen("createExamByParts")}
         onGenerateBaseClasses={() => setScreen("generateBaseClasses")}
+        onCodeGeneration={() => setScreen("codeGeneration")}
+        />
+      )} 
+
+      {screen === "solutionCodeGeneration" && (
+        <SolutionCodeGenerationScreen 
+        onBack={() => setScreen("codeGeneration")} 
+        onWelcome={() => setScreen("welcome")}
+        onCreateExamByParts={() => setScreen("createExamByParts")}
+        onGenerateAttributesConstraintsSolutionCode={() => setScreen("attributesConstraintsSolutionCode")}
+        onCodeGeneration={() => setScreen("codeGeneration")}
+        />
+      )} 
+
+      {screen === "attributesConstraintsSolutionCode" && (
+        <AttributesConstraintsSolutionCodeScreen 
+        onBack={() => setScreen("solutionCodeGeneration")}
+        onWelcome ={() => setScreen("welcome")}
+        onCreateExam={() => setScreen("createExam")}
+        onCreateExamByParts={() => setScreen("createExamByParts")}
+        onCodeGeneration={() => setScreen("codeGeneration")}
+        onSolutionCodeGeneration={() => setScreen("solutionCodeGeneration")}
         />
       )}
-  
+
       {screen === "generateBaseClasses" && (
         <GenerationBaseClassesScreen 
-          onBack={() => setScreen("codeGeneration")} 
+          onBack={() => setScreen("examCodeGeneration")} 
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onCodeGeneration={() => setScreen("codeGeneration")}
+          onExamCodeGeneration={() => setScreen("examCodeGeneration")}
         />
       )}
 
@@ -122,7 +161,7 @@ export default function IndexTab() {
 
       {screen === "testGeneral" && (
         <GeneralGenerationTestScreen 
-          onBack={() => setScreen("codeGeneration")} 
+          onBack={() => setScreen("examCodeGeneration")} 
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
@@ -132,6 +171,7 @@ export default function IndexTab() {
             setScreen("testAtributes");
           }}
         onCodeGeneration={() => setScreen("codeGeneration")}
+        onExamCodeGeneration={() => setScreen("examCodeGeneration")}
         />
       )}
 

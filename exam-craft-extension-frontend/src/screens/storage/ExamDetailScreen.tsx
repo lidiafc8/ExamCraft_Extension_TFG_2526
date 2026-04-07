@@ -3,7 +3,7 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
 import { MermaidViewer } from "../../components/MermaidViewer";
-import { Header } from "../../components/Header"; // Importamos el Header común
+import { Header } from "../../components/Header";
 import { 
     extractMermaidCode, 
     sanitizeMermaidForModal, 
@@ -23,6 +23,7 @@ export interface ExamDetailScreenProps {
     onGitHubDeploy: () => void;
     onShowGeneratedCode: () => void;
     onDeleteProject: (id: string, e?: React.MouseEvent) => void;
+    onShowSolutionGeneratedCode: () => void;
 }
 
 export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
@@ -35,12 +36,12 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     onDownload,
     onGitHubDeploy,
     onShowGeneratedCode,
+    onShowSolutionGeneratedCode,
     onDeleteProject
 }) => {
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
 
-    // CORRECCIÓN: Uso de Optional Chaining para evitar errores de lectura
     const mermaidCode = extractMermaidCode(selectedProject?.extensionFinish);
     const fullText = selectedProject?.extensionFinish || '';
     const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
@@ -70,7 +71,6 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
     const rawHtml = marked.parse(examFullMarkdown) as string;
     const safeHtml = DOMPurify.sanitize(rawHtml);
                 
-    // CORRECCIÓN: Configuración para el componente Header
     const breadcrumbItems = [
         { label: 'INICIO', action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
@@ -170,14 +170,28 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
                 </div>
 
                 <div className="section-block" style={{ marginBottom: '1px' }}>
-                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>Código</h2>
+                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>Código Generado</h2>
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
-                    <div className="content-card" style={{ padding: '20px' }}>
+                    <div className="content-card" style={{ 
+                        padding: '30px 20px', 
+                        display: 'flex', 
+                        flexDirection: 'row', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        gap: '20px' 
+                    }}>
+                        
                         <button type="button" onClick={onShowGeneratedCode} className="btn-back" 
-                            style={{ width: 'fit-content', alignSelf: 'center', margin: 20, backgroundColor: '#b08968', color: 'white', padding: '12px 30px', fontWeight: 'bold' }}>
-                            Ver Código Generado
+                            style={{ margin: 0, width: 'fit-content', backgroundColor: '#b08968', color: 'white', padding: '12px 30px', fontWeight: 'bold' }}>
+                            Ver Código Examen
                         </button>
+
+                        <button type="button" onClick={onShowSolutionGeneratedCode} className="btn-back" 
+                            style={{ margin: 0, width: 'fit-content', backgroundColor: '#b08968', color: 'white', padding: '12px 30px', fontWeight: 'bold' }}>
+                            Ver Código Solución
+                        </button>
+                        
                     </div>
                 </div>
 
