@@ -68,7 +68,6 @@ export default function GenerationTestAtributesScreen({
                 setTemplatePackagesInfo(info);
             })
             .catch((err) => {
-                console.error("Error al leer paquetes de plantilla:", err);
                 setTemplateLoadError("No se pudieron leer los paquetes de la plantilla de GitHub.");
             })
             .finally(() => {
@@ -203,7 +202,6 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
     };
 
     const handleGenerateClick = () => {
-        if (isLoadingTemplate) return alert("Cargando plantilla...");
         const projectId = initialData?.project?.id;
         if (typeof chrome !== "undefined" && chrome.storage?.local && projectId) {
             chrome.storage.local.get([projectId], (result) => {
@@ -239,7 +237,6 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
                             <div className="content-card">
                                 <h2 className="main-title small">Configuración del Test</h2>
                                 {isLoadingTemplate && <div style={{ padding: '8px', marginBottom: '12px', backgroundColor: '#fff3cd', borderRadius: '6px' }}>⏳ Cargando paquetes de GitHub...</div>}
-                                {!isLoadingTemplate && templatePackagesInfo && <div style={{ padding: '8px', marginBottom: '12px', backgroundColor: '#d4edda', borderRadius: '6px' }}>✅ Plantilla lista.</div>}
                                 {!isLoadingTemplate && templateLoadError && <div style={{ padding: '8px', marginBottom: '12px', backgroundColor: '#f8d7da', borderRadius: '6px' }}>⚠️ Error en GitHub (404), pero se generarán los tests usando el paquete raíz inferido.</div>}
                                 <textarea className="wf-textarea" style={{ height: '400px', fontFamily: 'monospace' }} value={promptText} onChange={(e) => setPromptText(e.target.value)} />
                                 <div className="wf-actions-row" style={{ marginTop: '20px' }}>
