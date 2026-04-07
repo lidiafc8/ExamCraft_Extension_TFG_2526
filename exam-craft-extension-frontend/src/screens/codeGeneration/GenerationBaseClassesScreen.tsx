@@ -4,9 +4,6 @@ import { parseMasterPrompt } from "~src/utils/promptParser"
 import WorkflowScreen from "../../components/WorkflowScreen"
 
 interface Props {
-  readonly initialProject?: any; 
-  readonly fromAttributes?: boolean; 
-  readonly onGoToTests?: (projectData: any) => void; 
   readonly onBack: () => void
   readonly onWelcome: () => void
   readonly onCreateExam: () => void
@@ -41,46 +38,35 @@ const CLASES_POR_DEFECTO: Record<string, string> = {
 }
 
 export default function GenerationBaseClassesScreen({
-  initialProject,
-  fromAttributes,
-  onGoToTests,
   onBack,
   onWelcome,
   onCreateExam,
   onCreateExamByParts,
   onCodeGeneration,
 }: Props) {
-
-  const breadcrumbs = fromAttributes
-    ? [
-        { label: "INICIO", action: onWelcome },
-        { label: "CREAR EXAMEN", action: onCreateExam },
-        { label: "POR PARTES", action: onCreateExamByParts },
-        { label: "ATRIBUTOS", action: onBack },
-      ]
-    : [
+  return (
+    <WorkflowScreen
+      // ── Navegación ────────────────────────────────────────────────────────
+      onBack={onBack}
+      onWelcome={onWelcome}
+      breadcrumbItems={[
         { label: "INICIO", action: onWelcome },
         { label: "CREAR EXAMEN", action: onCreateExam },
         { label: "POR PARTES", action: onCreateExamByParts },
         { label: "CÓDIGO", action: onCodeGeneration },
-      ];
+      ]}
+      currentStep="CÓDIGO"
 
-  return (
-    <WorkflowScreen
-      initialProject={initialProject}
-      onBack={onBack}
-      onWelcome={onWelcome}
-      breadcrumbItems={breadcrumbs}
-      currentStep="CLASES BASE"
+      // ── Textos ────────────────────────────────────────────────────────────
       selectionTitle="Selecciona un dominio"
-      selectionDescription="Para generar las clases base es necesario elegir un examen ya creado."
+      selectionDescription="Para generar las clases base es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base."
       workflowInputTitle="Clases Base del Examen"
       workflowResultTitle={(name) => `Generar Clases Base: ${name}`}
       instructionText={
         <>
-          Este es el prompt que se usará para generar las clases base del examen seleccionado.
-          Puedes revisar o modificar cualquier información que veas conveniente.
-          Al terminar, pulsa en <strong>"Generar"</strong>.
+          Este es el prompt que se usará para generar las clases base del examen seleccionado,
+          puede revisar o modificar cualquier información que vea conveniente.
+          Al terminar, pulse en <strong>"Generar"</strong>.
         </>
       }
       confirmTitle="Confirmar Examen"
@@ -89,66 +75,29 @@ export default function GenerationBaseClassesScreen({
       }
       successTitle="¡Guardado correctamente!"
       successDescription={(name) =>
-        `Las clases base de ${name} han sido actualizadas correctamente.\n\n¿Qué deseas hacer ahora?`
+        `Las clases base de ${name} han sido actualizadas correctamente.`
       }
       saveButtonLabel="Guardar"
-      successPrimaryButtonLabel={fromAttributes ? "Ir a Generación de Tests" : "Volver al menú de código"}
-      successSecondaryButtonLabel="Ir al Inicio"
-      onSuccessSecondary={() => onWelcome()}
-      
-      onSaved={(projectData) => {
-        // Mantenemos tu lógica de rescate de ID para que no falle el guardado
-        const finalProjectData = {
-          ...projectData,
-          id: projectData.id || initialProject?.id 
-        };
-
-        if (fromAttributes && onGoToTests) {
-          onGoToTests(finalProjectData);
-        } else {
-          onCodeGeneration();
-        }
-      }}
 
       allowedFolders={["clínica veterinaria", "ajedrez"]}
       storageKey="baseClasses"
       buildPrompt={(project) => {
-        try {
-          // 1. Extraemos el texto del MD
-          const { visibleText, hiddenContext } = parseMasterPrompt(generationExamBaseClassesPrompt);
-          
-          // 2. Buscamos el dominio de forma ultra-flexible (por si viene de un flujo u otro)
-          // Buscamos en domainName, si no en name, si no en customName
-          const rawDominio = project?.domainName || project?.name || project?.customName || "";
-          const dominioNormalizado = rawDominio.trim();
-          
-          // 3. Buscamos las clases por defecto (con fallback por si no hay coincidencia exacta)
-          const clasesExistentes = CLASES_POR_DEFECTO[dominioNormalizado.toLowerCase()] || 
-                                  "No hay clases base registradas para este dominio.";
-
-          // 4. FALLBACK CRÍTICO: Si visibleText está vacío por error de carga del MD, 
-          // creamos un prompt mínimo para que la IA no devuelva error.
-          const baseTemplate = visibleText && visibleText.trim().length > 0 
-            ? visibleText 
-            : "Genera las clases base en Java para el dominio {dominio}. Clases a incluir: {clases_existentes}";
-
-          return {
-            visibleText: baseTemplate
-              .replaceAll(/{dominio}/g, dominioNormalizado || "el examen")
-              .replaceAll(/{clases_existentes}/g, clasesExistentes),
-            hiddenContext: hiddenContext || "",
-          };
-        } catch (error) {
-          console.error("Error en buildPrompt:", error);
-          return { 
-            visibleText: "Error al preparar el prompt. Por favor, revisa el dominio seleccionado.", 
-            hiddenContext: "" 
-          };
+        const { visibleText, hiddenContext } = parseMasterPrompt(generationExamBaseClassesPrompt)
+        const dominio = project.domainName || "Dominio no especificado"
+        const clasesExistentes =
+          CLASES_POR_DEFECTO[dominio.toLowerCase()] ??
+          "No hay clases base registradas para este dominio."
+        return {
+          visibleText: visibleText
+            .replace("{dominio}", dominio)
+            .replace("{clases_existentes}", clasesExistentes),
+          hiddenContext,
         }
       }}
       logExerciseName="base_classes_code_generation"
       downloadPrefix="Clases_Base"
       downloadTitle={(p) => `Clases Base - ${p.customName || p.domainName}`}
+      onSaved={() => onWelcome()}
     />
   )
 }

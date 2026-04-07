@@ -141,6 +141,8 @@ ${templatePackagesSummary}
 ${codigoLimpio}
 === ENUNCIADO ===
 ${enunciadoGeneral}
+
+=== RESTRICCIONES DE ATRIBUTOS ===
 ${restricciones}
 `;
 
@@ -216,7 +218,7 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "Test1.java";
+        link.download = fileName;
         link.click();
     };
 
@@ -224,7 +226,10 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
         { label: 'INICIO', action: onWelcome },
         { label: 'CREAR EXAMEN', action: onCreateExam },
         { label: 'POR PARTES', action: onCreateExamByParts },
-        { label: source === 'attributes' ? 'RESTRICCIONES' : 'TESTS', action: onBack }
+        { 
+            label: source === 'attributes' ? 'RESTRICCIONES DE ATRIBUTOS' : 'TESTS GENERALES', 
+            action: onBack 
+        }
     ];
 
     return (
@@ -262,8 +267,12 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
                                         </div>
                                     </div>
                                 </div>
+                                <div className="wf-actions-row" style={{ marginTop: '20px' }}>
+                                    <button type="button" onClick={() => setInternalStep('input')} className="btn-step secondary">Volver al editor</button>
+                                </div>
                             </div>
                         )}
+
                     </div>
                 </div>
             </main>

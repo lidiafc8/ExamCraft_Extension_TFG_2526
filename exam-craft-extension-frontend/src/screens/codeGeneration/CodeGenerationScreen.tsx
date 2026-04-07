@@ -6,7 +6,7 @@ interface Props {
   readonly onWelcome: () => void
   readonly onGenerateTest: () => void
   readonly onCreateExamByParts: () => void
-  readonly onGenerateBaseClasses: (project?: any) => void
+  readonly onGenerateBaseClasses: () => void
 }
 
 export default function CreateExamByPartsScreen({ onBack, onWelcome, onGenerateTest, onCreateExamByParts, onGenerateBaseClasses }: Props
