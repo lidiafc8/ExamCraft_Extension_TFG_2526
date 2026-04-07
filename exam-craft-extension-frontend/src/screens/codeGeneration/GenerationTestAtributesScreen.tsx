@@ -110,7 +110,7 @@ ${EXTRA_PACKAGES.join("\n")}
 REGLA CRÍTICA DE IMPORTS:
 - Usa EXACTAMENTE estos paquetes para las clases que NO son base.
 - Paquete raíz: ${ROOT_PACKAGE}
-- El paquete de ESTE test (Test1.java) debe ser: ${baseRootPackage}.test;
+- El paquete de ESTE test (Test1.java) debe ser: ${baseRootPackage};
 
 === CÓDIGO FUENTE REAL ===
 ${codigoLimpio}
@@ -197,7 +197,7 @@ Genera Test1.java sin bloques markdown.
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "Test1.java";
+        link.download = `Test1-${initialData?.project?.customName}.java`;
         link.click();
     };
 

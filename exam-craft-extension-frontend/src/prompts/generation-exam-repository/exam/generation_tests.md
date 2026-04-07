@@ -36,9 +36,11 @@ Además, para las clases que no estén implementadas en el código base, buscarl
 - ✅ CORRECTO: `@ComponentScan(basePackages = {"es.us.dp1.chess.tournament.achievement", "es.us.dp1.chess.tournament.userAchievement"})`
 - ❌ INCORRECTO: `@ComponentScan(basePackages = {"org.springframework.samples.chessgame.repository", "org.springframework.samples.chessgame.model"})`
 
-**El paquete del propio test (`package ...` en la primera línea) también debe derivarse del código base**, usando el prefijo raíz común detectado más el sufijo `.test`. Ejemplo: si el prefijo raíz es `es.us.dp1.chess.tournament`, el paquete del test será `es.us.dp1.chess.tournament.test`.
+**El paquete del propio test (`package ...` en la primera línea) también debe derivarse del código base**, usando el prefijo de donde se crean los test. Ejemplo: si el prefijo raíz es `es.us.dp1.chess.tournament`, el paquete del test será `es.us.dp1.chess.tournament`.
 
 Si una clase (como `ReflexiveTest`, `NamedEntity`, etc.) no aparece en el código base proporcionado, usa el mismo prefijo raíz detectado para inferir su paquete. Nunca uses `org.springframework.samples.*` salvo que ese prefijo aparezca explícitamente en el código base.
+
+Tienes que tener en cuenta como los métodos se llaman en ReflexiveTest
 
 ---
 
@@ -56,9 +58,7 @@ Si una clase (como `ReflexiveTest`, `NamedEntity`, etc.) no aparece en el códig
 - **Herencia:** La clase de test DEBE extender de `ReflexiveTest`.
 
 ---
----
 
-## Estructura Requerida para Test1.java
 ## Estructura Requerida para Test1.java
 
 ### 1. Configuración e Inyección
