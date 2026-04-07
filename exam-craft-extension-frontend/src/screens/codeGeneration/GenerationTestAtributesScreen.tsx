@@ -91,9 +91,11 @@ export default function GenerationTestAtributesScreen({
             .filter(Boolean) as string[];
         const uniqueBasePackages = [...new Set(packageLines)];
 
+        // CORRECCIÓN: Uso de .replace() en vez de .replaceAll() para regex sin flag global
         const basePackageNames = uniqueBasePackages.map(p =>
-            p.replaceAll(/^package\s+/, "").replaceAll(/;$/, "")
+            p.replace(/^package\s+/, "").replace(/;$/, "")
         );
+        
         const baseRootPackage = basePackageNames.length > 0
             ? basePackageNames.reduce((a, b) => {
                 const partsA = a.split(".");
@@ -104,14 +106,14 @@ export default function GenerationTestAtributesScreen({
                     else break;
                 }
                 return common.join(".");
-            }, basePackageNames[0]) // <-- AQUÍ ESTÁ EL VALOR INICIAL AÑADIDO
+            }, basePackageNames[0])
             : "";
 
         const codigoLimpio = javaBlocks.map(block =>
             block
-                .replaceAll(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
-                .replaceAll(/^(?!package\s)import\s.*;$/gm, "")
-                .replaceAll(/^\s*[\r\n]/gm, "")// NOSONAR javascript:S5852
+                .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
+                .replace(/^(?!package\s)import\s.*;$/gm, "")
+                .replace(/^\s*[\r\n]/gm, "")// NOSONAR javascript:S5852
                 .trim()
         ).join("\n\n// ---\n\n");
 
@@ -163,7 +165,6 @@ ${restricciones}
         const templateInfo = getTemplateInfo(domainName);
 
         try {
-            // REGLAS CORREGIDAS: Genéricas, explícitas sobre el dominio y el camelCase.
             const finalPayload = `
 ${hiddenContext}
 
@@ -182,7 +183,8 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
             const result = await sendToGemini(finalPayload);
             if (!result) throw new Error("Respuesta vacía");
 
-            const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").replaceAll(/^java/i, "").trim();
+            // CORRECCIÓN: Uso de .replace en vez de .replaceAll para evitar fallos con RegExp
+            const cleanResult = result.replace(/```java/gi, "").replace(/```/gi, "").replace(/^java/i, "").trim();
             setResponseText(cleanResult);
             setInternalStep('result');
         } catch (error: any) {
@@ -195,7 +197,8 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
     const handleSaveToChrome = () => {
         const projectId = initialData?.project?.id;
         if (!projectId) return;
-        if (chrome !== "undefined" && chrome.storage?.local) {
+        // CORRECCIÓN: Se elimina el typeof o las comillas para comprobar directamente
+        if (chrome !== undefined && chrome.storage?.local) {
             chrome.storage.local.get([projectId], (result) => {
                 const updatedData = { ...result[projectId], ...initialData.project, javaTests: responseText, updatedAt: new Date().toISOString() };
                 chrome.storage.local.set({ [projectId]: updatedData }, () => { alert("¡Guardado!"); onWelcome(); });
@@ -205,7 +208,8 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
 
     const handleGenerateClick = () => {
         const projectId = initialData?.project?.id;
-        if (chrome !== "undefined" && chrome.storage?.local && projectId) {
+        // CORRECCIÓN: Se elimina las comillas de "undefined"
+        if (chrome !== undefined && chrome.storage?.local && projectId) {
             chrome.storage.local.get([projectId], (result) => {
                 if (result[projectId]?.javaTests?.trim()) setShowOverwriteWarning(true);
                 else executeGeneration();
@@ -218,7 +222,8 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = fileName;
+        // CORRECCIÓN: fileName no existía, se pasa el nombre del fichero directamente como string
+        link.download = "Test1.java";
         link.click();
     };
 
@@ -241,7 +246,6 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
                         {internalStep === 'input' ? (
                             <div className="content-card">
                                 <h2 className="main-title small">Configuración del Test</h2>
-                                {isLoadingTemplate && <div style={{ padding: '8px', marginBottom: '12px', backgroundColor: '#fff3cd', borderRadius: '6px' }}>⏳ Cargando paquetes de GitHub...</div>}
                                 {!isLoadingTemplate && templateLoadError && <div style={{ padding: '8px', marginBottom: '12px', backgroundColor: '#f8d7da', borderRadius: '6px' }}>⚠️ Error en GitHub (404), pero se generarán los tests usando el paquete raíz inferido.</div>}
                                 <textarea className="wf-textarea" style={{ height: '400px', fontFamily: 'monospace' }} value={promptText} onChange={(e) => setPromptText(e.target.value)} />
                                 <div className="wf-actions-row" style={{ marginTop: '20px' }}>
