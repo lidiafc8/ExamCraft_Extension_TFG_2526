@@ -92,7 +92,7 @@ export default function GenerationTestAtributesScreen({
         const uniqueBasePackages = [...new Set(packageLines)];
 
         const basePackageNames = uniqueBasePackages.map(p =>
-            p.replace(/^package\s+/, "").replace(/;$/, "")
+            p.replaceAll(/^package\s+/, "").replaceAll(/;$/, "")
         );
         const baseRootPackage = basePackageNames.length > 0
             ? basePackageNames.reduce((a, b) => {
@@ -104,14 +104,14 @@ export default function GenerationTestAtributesScreen({
                     else break;
                 }
                 return common.join(".");
-            })
+            }, basePackageNames[0]) // <-- AQUÍ ESTÁ EL VALOR INICIAL AÑADIDO
             : "";
 
         const codigoLimpio = javaBlocks.map(block =>
             block
-                .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
-                .replace(/^(?!package\s)import\s.*;$/gm, "")
-                .replace(/^\s*[\r\n]/gm, "")// NOSONAR javascript:S5852
+                .replaceAll(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
+                .replaceAll(/^(?!package\s)import\s.*;$/gm, "")
+                .replaceAll(/^\s*[\r\n]/gm, "")// NOSONAR javascript:S5852
                 .trim()
         ).join("\n\n// ---\n\n");
 
@@ -182,7 +182,7 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
             const result = await sendToGemini(finalPayload);
             if (!result) throw new Error("Respuesta vacía");
 
-            const cleanResult = result.replace(/```java/gi, "").replace(/```/gi, "").replace(/^java/i, "").trim();
+            const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").replaceAll(/^java/i, "").trim();
             setResponseText(cleanResult);
             setInternalStep('result');
         } catch (error: any) {
@@ -195,7 +195,7 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
     const handleSaveToChrome = () => {
         const projectId = initialData?.project?.id;
         if (!projectId) return;
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (chrome !== "undefined" && chrome.storage?.local) {
             chrome.storage.local.get([projectId], (result) => {
                 const updatedData = { ...result[projectId], ...initialData.project, javaTests: responseText, updatedAt: new Date().toISOString() };
                 chrome.storage.local.set({ [projectId]: updatedData }, () => { alert("¡Guardado!"); onWelcome(); });
@@ -205,7 +205,7 @@ Genera Test1.java respetando estos paquetes y reglas sin excepción. NO uses blo
 
     const handleGenerateClick = () => {
         const projectId = initialData?.project?.id;
-        if (typeof chrome !== "undefined" && chrome.storage?.local && projectId) {
+        if (chrome !== "undefined" && chrome.storage?.local && projectId) {
             chrome.storage.local.get([projectId], (result) => {
                 if (result[projectId]?.javaTests?.trim()) setShowOverwriteWarning(true);
                 else executeGeneration();
