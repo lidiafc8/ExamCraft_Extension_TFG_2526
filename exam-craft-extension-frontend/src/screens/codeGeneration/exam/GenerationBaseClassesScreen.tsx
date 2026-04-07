@@ -138,8 +138,8 @@ export default function GenerationBaseClassesScreen({
 
           return {
             visibleText: baseTemplate
-              .replace(/{dominio}/g, dominioNormalizado || "el examen")
-              .replace(/{clases_existentes}/g, clasesExistentes),
+              .replaceAll(/{dominio}/g, dominioNormalizado || "el examen")
+              .replaceAll(/{clases_existentes}/g, clasesExistentes),
             hiddenContext: hiddenContext || "",
           };
         } catch (error) {
