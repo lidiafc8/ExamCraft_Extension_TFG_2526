@@ -7,6 +7,30 @@ interface Props {
 
 let mermaidInitialized = false
 
+/**
+ * Última barrera de limpieza justo antes de renderizar.
+ * Corrige los problemas más comunes que genera Gemini:
+ *  - Multiplicidades entre comillas: "1" --> "0..n"  →  1 --> 0..n
+ *  - Comentarios %% que rompen el parser dentro de bloques de relaciones
+ */
+function sanitizeForRender(code: string): string {
+  if (!code) return ""
+
+  let result = code
+
+  // Quitar comillas alrededor de multiplicidades
+  // Ejemplos: "1", "0..n", "0..*", "1..*"
+  result = result.replace(/"(\d[\d.*]*(?:\.\.[*\d]+)?)"/g, "$1")
+
+  // Quitar líneas de comentario %%
+  result = result
+    .split("\n")
+    .filter(line => !line.trim().startsWith("%%"))
+    .join("\n")
+
+  return result.trim()
+}
+
 export function MermaidViewer({ chartCode }: Props) {
   const [svg, setSvg] = useState("")
   const [error, setError] = useState("")
@@ -17,15 +41,12 @@ export function MermaidViewer({ chartCode }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!chartCode || !containerRef.current) return
+    if (!chartCode) return
     setError("")
     setSvg("")
 
     const render = async () => {
       try {
-        console.log("=== MERMAID CODE ===")
-        console.log(JSON.stringify(chartCode)) // JSON.stringify para ver caracteres ocultos
-        console.log("===================")
         if (!mermaidInitialized) {
           mermaid.initialize({
             startOnLoad: false,
@@ -35,20 +56,16 @@ export function MermaidViewer({ chartCode }: Props) {
           mermaidInitialized = true
         }
 
-        // Creamos un div temporal DENTRO del DOM real
-        const tempId = "merm-" + Date.now()
-        const tempDiv = document.createElement("div")
-        tempDiv.id = tempId
-        tempDiv.style.position = "absolute"
-        tempDiv.style.visibility = "hidden"
-        tempDiv.style.top = "-9999px"
-        tempDiv.textContent = chartCode
-        document.body.appendChild(tempDiv)
+        // Sanitizamos aquí como última barrera, por si el código
+        // llega con comillas en multiplicidades o comentarios %%
+        const safeCode = sanitizeForRender(chartCode)
 
-        await mermaid.init(undefined, `#${tempId}`)
+        console.log("=== MermaidViewer recibe ===")
+        console.log(safeCode)
+        console.log("============================")
 
-        const renderedSvg = tempDiv.querySelector("svg")?.outerHTML ?? ""
-        document.body.removeChild(tempDiv)
+        const id = "mermaid-render-" + Date.now()
+        const { svg: renderedSvg } = await mermaid.render(id, safeCode)
 
         if (!renderedSvg) throw new Error("No se generó SVG")
 
@@ -56,7 +73,8 @@ export function MermaidViewer({ chartCode }: Props) {
         setScale(1)
         setPan({ x: 0, y: 0 })
       } catch (e: any) {
-        setError("Error renderizando: " + e.message)
+        console.error("Mermaid render error:", e)
+        setError("Error renderizando: " + (e?.message ?? String(e)))
       }
     }
 
@@ -99,7 +117,6 @@ export function MermaidViewer({ chartCode }: Props) {
         </button>
       </div>
 
-      {/* div oculto que mermaid necesita para renderizar en v9 */}
       <div ref={containerRef} style={{ display: "none" }} />
 
       <div
@@ -120,7 +137,15 @@ export function MermaidViewer({ chartCode }: Props) {
         }}
       >
         {error ? (
-          <div style={{ color: "red", padding: 16, fontSize: 13 }}>{error}</div>
+          <div style={{ color: "red", padding: 16, fontSize: 13 }}>
+            <div>{error}</div>
+            <details style={{ marginTop: 12 }}>
+              <summary style={{ cursor: "pointer", color: "#888" }}>Ver código que falló</summary>
+              <pre style={{ fontSize: 11, color: "#555", marginTop: 8, overflow: "auto", whiteSpace: "pre-wrap" }}>
+                {sanitizeForRender(chartCode)}
+              </pre>
+            </details>
+          </div>
         ) : svg ? (
           <div
             style={{

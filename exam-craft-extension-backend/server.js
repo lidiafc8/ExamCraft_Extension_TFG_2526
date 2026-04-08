@@ -57,11 +57,19 @@ app.post('/generate', async (req, res) => {
         }
       }
 
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!text) {
         throw new Error("Respuesta de Gemini vacía");
       }
+
+      // Gemini 2.5-flash a veces devuelve saltos de línea como texto literal
+      // en lugar de caracteres reales, lo que rompe parsers como Mermaid.
+      // Lo normalizamos aquí antes de enviarlo al cliente.
+      text = text
+        .replace(/\\r\\n/g, '\n')
+        .replace(/\\n/g, '\n')
+        .replace(/\\r/g, '\n')
 
       return res.json({ text }); 
 
