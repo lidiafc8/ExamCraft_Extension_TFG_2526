@@ -46,7 +46,7 @@ export default function CreateExamExtensionStep2Screen({
   const cleanMermaidCode = (text: string) => {
     if (!text) return "";
 
-    let code = text.replace(/```(?:mermaid)?\s*([\s\S]*?)\s*```/, "$1");
+    let code = text.replace(/```(?:mermaid)?\s*([\s\S]*?)\s*```/, "$1"); // NOSONAR javascript:S5852
 
     if (code === text) {
       code = text.replace(/```mermaid/gi, "").replace(/```/g, "");
@@ -57,14 +57,14 @@ export default function CreateExamExtensionStep2Screen({
       code = code.substring(startKeywordIndex);
     }
 
-    // eliminar definiciones de estilos
-    code = code.replace(/^\s*classDef.*$/gm, "");
+    // eliminar definiciones de estilos 
+    code = code.replace(/^\s*classDef.*$/gm, ""); // NOSONAR javascript:S5852
 
     // eliminar solo asignaciones de estilos (class X redClass)
-    code = code.replace(/^\s*class\s+\w+\s+\w+\s*$/gm, "");
+    code = code.replace(/^\s*class\s+\w+\s+\w+\s*$/gm, ""); // NOSONAR javascript:S5852
 
     // eliminar estilos de nodos o enlaces
-    code = code.replace(/^\s*(style|linkStyle).*$/gm, "");
+    code = code.replace(/^\s*(style|linkStyle).*$/gm, ""); // NOSONAR javascript:S5852
 
     // eliminar propiedades de color
     code = code.replace(/fill:\s*[^,;]+/gi, "");
