@@ -80,7 +80,7 @@ Person <|-- Vet
 Person <|-- Owner
 
 %% --- Asociaciones y Relaciones ---
-Owner "1" -- "0..n" Pet : owns >
+Owner "1" --> "0..n" Pet : owns 
 Vet "0..n" --> "0..1" Specialty
 Vet "1" <-- "0..n" Visit
 Pet "0..n" --> "1" PetType
@@ -188,7 +188,7 @@ Person <|-- Vet
 Person <|-- Owner
 
 %% --- Asociaciones y Relaciones ---
-Owner "1" -- "0..n" Pet : owns >
+Owner "1" --> "0..n" Pet : owns 
 Vet "0..n" --> "0..1" Specialty
 Pet "0..n" --> "1" PetType
 Visit "0..n" --> "1" Pet
@@ -283,7 +283,7 @@ Person <|-- Owner
 
 %% --- Asociaciones y Relaciones ---
 
-Owner "1" -- "0..n" Pet : owns >
+Owner "1" --> "0..n" Pet : owns 
 Vet "0..n" --> "0..1" Speciality
 Pet "0..n" --> "1" PetType
 PetType "0..n" <--> "0..n" Course : <font color=blue>< is about</font>
@@ -414,7 +414,7 @@ Person <|-- Owner
 
 %% --- Asociaciones y Relaciones ---
 
-Owner "1" -- "0..n" Pet : owns >
+Owner "1" --> "0..n" Pet : owns 
 
 Vet "0..n" --> "0..1" Specialty
 
@@ -573,7 +573,7 @@ Vet "0..n" --> "0..1" Specialty
 
 Vet "1" <-- "0..n" Visit
 
-Owner "1" -- "0..n" Pet : owns >
+Owner "1" --> "0..n" Pet : owns 
 
 Pet "" --> "" PetType
 Pet "1" -- "0..n" Visit
@@ -698,7 +698,7 @@ Vet "1" <-- "0..n" Visit
 
 Pet "1" <-- "0..n" Visit
 
-Owner "1" -- "0..n" Pet : owns >
+Owner "1" --> "0..n" Pet : owns 
 
 Pet "0..n" --> "0..n" Allergy: <font color=red>has</font>
 

@@ -20,3 +20,25 @@ Quiero que en base a la lógica de la extensión funcional que me has pasado, me
 -	Para las relaciones, si estas tienen un nombre asignado, este debe constar en el diagrama.
 
 -    REGLA ESTRICTA DE FORMATO: Genera código Mermaid válido y estándar. Bajo ninguna circunstancia utilices comandos de estilo (como style, classDef o linkStyle). Limítate exclusivamente a definir las clases, sus atributos, métodos y las relaciones entre ellas. Separa cada instrucción con un salto de línea.
+
+REGLAS ESTRICTAS DE SINTAXIS MERMAID (obligatorio cumplir todas):
+
+1. Usa SIEMPRE `-->` para asociaciones. NUNCA escribas `--` con `>` separado al final.
+   - CORRECTO: `Owner "1" --> "0..n" Pet : owns`
+   - INCORRECTO: `Owner "1" -- "0..n" Pet : owns >`
+
+2. NUNCA uses comillas escapadas. Las comillas de multiplicidad van sin barra invertida.
+   - CORRECTO: `Owner "1" --> "0..n" Pet : owns`
+   - INCORRECTO: `Owner \"1\" --> \"0..n\" Pet : owns`
+
+3. NUNCA uses `style`, `classDef` ni `linkStyle`.
+
+4. NUNCA pongas texto introductorio ni explicaciones antes o después del código.
+   El resultado debe empezar DIRECTAMENTE con `classDiagram` y nada más.
+
+5. Cada clase, atributo y relación en su propia línea. Sin líneas vacías dentro de una clase.
+
+6. Formato exacto de relaciones:
+   - Herencia:    `NamedEntity <|-- Pet`
+   - Asociación:  `Owner "1" --> "0..n" Pet : owns`
+   - Sin nombre:  `Visit "0..n" --> "1" Vet`

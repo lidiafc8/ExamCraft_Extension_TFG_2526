@@ -58,16 +58,41 @@ export default function DiagramUMLScreen({
         }
     }, [context, domainName]);
 
-    const cleanMermaidCode = (code) => {
+    const cleanMermaidCode = (code: string): string => {
         if (!code) return '';
         
-        return code
-            .replaceAll(/<[^>]*>?/gm, '') 
+        // Paso 1: limpieza básica
+        let result = code
+            .replaceAll(/```mermaid/g, '')
+            .replaceAll(/```/g, '')
+            .replaceAll(/<[^>]*>/gm, '')
             .replaceAll('&nbsp;', ' ')
+
+        // Paso 2: desescapado agresivo de comillas (todas las variantes)
+        result = result
+            .replaceAll('\\\\"', '"')   // \\" → "
+            .replaceAll('\\"', '"')     // \" → "
+            .replaceAll('\\u0022', '"') // unicode escape → "
+
+        // Paso 3: línea por línea
+        result = result
             .split('\n')
-            .map(line => line.trimEnd())
+            .map(line => {
+            let l = line.trimEnd();
+            l = l.replace(/\s+>\s*$/, '');                              // quita > suelto al final
+            l = l.replace(/("[\d.*]+"\s*)--(\s*"[\d.*]+")/, '$1-->$2') // -- → -->
+            l = l.replace(/\*-->/g, '-->')                             // *--> → -->
+            l = l.replace(/\*--\|>/g, '<|--')                          // *--|> → <|--
+            return l;
+            })
+            .filter(line => line.trim() !== '')
             .join('\n');
-    }
+
+        // Paso 4: extraer solo el diagrama
+        const match = result.match(/(classDiagram|graph|sequenceDiagram|erDiagram|stateDiagram)[\s\S]*/);
+        return match ? match[0].trim() : result.trim();
+        }
+    
     const handleGenerate = async () => {
         setIsLoading(true);
         setResponseText("");
@@ -97,6 +122,11 @@ export default function DiagramUMLScreen({
             } else {
                 cleanResult = cleanResult.trim(); // Fallback por si no encuentra el match
             }
+
+            cleanResult = cleanResult
+                .replaceAll('\\n', '\n')
+                .replaceAll('\\"', '"')
+                .replaceAll("\\'", "'")
 
             setResponseText(cleanResult);
             setInternalStep('result');
