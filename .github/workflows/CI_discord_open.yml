@@ -1,0 +1,60 @@
+name: PR Discord Notification
+
+on:
+  pull_request:
+    branches: ["develop"]
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-discord-open-${{ github.ref }} 
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post message to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_TITLE: ${{ github.event.pull_request.title || github.event.head_commit.message }}
+          PR_URL: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}
+          AUTHOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+
+          CONTENT="🚀 **Notificación de ExamCraft**
+          **Acción:** ${EVENT_NAME}
+          **Título/Commit:** ${PR_TITLE}
+          **Autor:** ${AUTHOR}
+          **Enlace:** ${PR_URL}
+          ---"
+
+          payload=$(jq -n --arg content "$CONTENT" '{content: $content}')
+          resp=$(curl -sS -X POST "${DISCORD_WEBHOOK_URL}?wait=true" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+
+          msg_id=$(echo "$resp" | jq -r '.id // empty')
+
+          if [ -z "$msg_id" ] || [ "$msg_id" == "null" ]; then
+            echo "Error: Discord no devolvió un ID de mensaje."
+            exit 1
+          fi
+
+          echo "Mensaje enviado. ID: $msg_id"
+          echo "DISCORD_MSG_ID=${msg_id}" >> $GITHUB_ENV   # ← NUEVO
+
+      - name: Guardar Discord message ID en comentario de PR   # ← NUEVO STEP
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api -X POST "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+            -f body="<!-- discord_message_id=${DISCORD_MSG_ID} -->"
+          echo "ID guardado en comentario de la PR."

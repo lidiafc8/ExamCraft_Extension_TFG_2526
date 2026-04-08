@@ -1,0 +1,76 @@
+name: PR Discord Notification (Close)
+
+on:
+  pull_request:
+    branches: ["develop"]
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-discord-close-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Eliminar mensaje de Discord y limpiar comentario
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          MARKER="discord_message_id="
+
+          echo "Buscando el comentario oculto en la PR #${PR_NUMBER}..."
+          comments=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --paginate)
+
+          # Extraer el cuerpo y el ID del comentario que tiene el marcador
+          marker_body=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].body // empty
+          ')
+          marker_comment_id=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].id // empty
+          ')
+
+          echo "DEBUG marker_body: $marker_body"
+          echo "DEBUG marker_comment_id: $marker_comment_id"
+
+          if [ -z "$marker_comment_id" ] || [ "$marker_comment_id" == "null" ]; then
+            echo "No se encontró el comentario con el ID de Discord. Nada que borrar."
+            exit 0
+          fi
+
+          # Extraer el ID del mensaje de Discord
+          msg_id=$(echo "$marker_body" | grep -oP 'discord_message_id=\K[0-9]+' || true)
+
+          echo "DEBUG msg_id: '$msg_id'"
+
+          if [ -z "$msg_id" ] || [ "$msg_id" == "null" ]; then
+            echo "No se pudo extraer el discord_message_id del comentario. Revisa el formato del marcador."
+          else
+            # Borrar el mensaje en Discord
+            delete_url="${DISCORD_WEBHOOK_URL}/messages/${msg_id}"
+            echo "Borrando el mensaje en Discord: $delete_url"
+
+            status=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$delete_url")
+            echo "Respuesta de Discord: $status"
+
+            if [ "$status" == "204" ]; then
+              echo "Mensaje de Discord borrado correctamente."
+            elif [ "$status" == "404" ]; then
+              echo "El mensaje ya no existía en Discord (404), continuando..."
+            else
+              echo "Error inesperado al borrar el mensaje en Discord (HTTP $status)."
+            fi
+          fi
+
+          # Borrar el comentario de GitHub para dejar la PR limpia
+          echo "Limpiando el comentario oculto de GitHub..."
+          gh api -X DELETE "repos/${REPO}/issues/comments/${marker_comment_id}" >/dev/null || true
+          echo "¡Proceso terminado!"
