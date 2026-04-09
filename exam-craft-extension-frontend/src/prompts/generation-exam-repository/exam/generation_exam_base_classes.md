@@ -3,7 +3,6 @@
 ## Recursos a proporcionar:
 * `base_classes_structure_examples.md`
 
-
 ## Prompt a utilizar:
 
 Actúa como un desarrollador Senior de Java y Spring Boot experto en la creación de esqueletos de código para exámenes universitarios. 

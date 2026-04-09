@@ -1,15 +1,17 @@
 import React from "react"
 import { Header } from "~src/components/Header"
+import studentIcon from "~assets/images/student.png"
+import teacherIcon from "~assets/images/teacher.png"
 
 interface Props {
   readonly onBack: () => void
   readonly onWelcome: () => void
-  readonly onGenerateTest: () => void
   readonly onCreateExamByParts: () => void
-  readonly onGenerateBaseClasses: () => void
+  readonly onExamCodeGeneration: () => void
+  readonly onSolutionCodeGeneration: () => void
 }
 
-export default function CreateExamByPartsScreen({ onBack, onWelcome, onGenerateTest, onCreateExamByParts, onGenerateBaseClasses }: Props
+export default function CodeGenerationScreen({ onBack, onWelcome, onCreateExamByParts, onExamCodeGeneration, onSolutionCodeGeneration }: Props
 ) {
   
   const breadcrumbItems = [
@@ -34,17 +36,19 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onGenerateT
         <h1 className="main-title">GENERACIÓN DE CÓDIGO</h1>
         
         <div className="subtitle-badge">
-          Elige la parte del código que quieres generar primero
+          Elige si quieres generar el código de un examen o bien el código de la solución del mismo
         </div>
 
-        <div className="vertical-menu-container">
-
-          <button className="menu-btn" onClick={onGenerateBaseClasses}>
-            Generación clases base
+        <div className="cards-container">
+          
+          <button className="action-card" onClick={onExamCodeGeneration}>
+            <span className="exam-icon"><img src={studentIcon} alt="Icono estudiante" width="120" height="130" /></span> 
+            <span className="card-label">Código examen</span>
           </button>
 
-          <button className="menu-btn" onClick={onGenerateTest}>
-            Generación tests
+          <button className="action-card" onClick={onSolutionCodeGeneration}>
+              <span className="archive-icon"><img src={teacherIcon} alt="Icono profesor" width="130" height="130" /></span>
+            <span className="card-label">Código solución</span>
           </button>
 
         </div>

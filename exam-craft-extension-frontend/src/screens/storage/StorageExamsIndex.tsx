@@ -9,6 +9,9 @@ import { FoldersGridScreen } from "./FoldersGridScreen";
 import { DomainFolderScreen } from "./DomainFolderScreen";
 import { ExamDetailScreen } from "./ExamDetailScreen";
 import { GeneratedCodeScreen } from "./GenerateCodeScreen";
+import { GeneratedSolutionCodeScreen } from "./GeneratedSolutionCodeScreen";
+
+declare var chrome: any;
 
 hljs.registerLanguage('java', java);
 
@@ -25,6 +28,8 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     const [tempName, setTempName] = useState("");
     const [isCreating, setIsCreating] = useState(false);
     const [showGeneratedCode, setShowGeneratedCode] = useState(false);
+    const [showSolutionGeneratedCode, setShowSolutionGeneratedCode] = useState(false);
+
 
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
     const projectsInFolder = projects.filter(p =>
@@ -32,7 +37,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     );
 
     useEffect(() => {
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.get(null, (items) => {
                 const projectList = Object.keys(items)
                     .filter(key => key.startsWith('project_'))
@@ -42,7 +47,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     }, []);
 
-    // Extraído para evitar anidamiento excesivo en handleRename
     const applyRenameToState = (id: string, newName: string) => {
         setProjects(prevProjects =>
             prevProjects.map(p => (p.id === id ? { ...p, customName: newName } : p))
@@ -57,7 +61,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         const newName = tempName.trim();
         const updatedData = { ...projectToUpdate, customName: newName };
 
-        if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.set({ [id]: updatedData }, () => {
                 applyRenameToState(id, newName);
             });
@@ -68,7 +72,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         if (e) e.stopPropagation();
         const confirmDelete = globalThis.confirm("¿Estás seguro de que quieres borrar este examen? Esta acción no se puede deshacer.");
         if (confirmDelete) {
-            if (typeof chrome !== "undefined" && chrome.storage?.local) {
+            if (globalThis.chrome?.storage?.local) {
                 chrome.storage.local.remove(id, () => {
                     setProjects(prevProjects => prevProjects.filter(p => p.id !== id));
                     if (selectedProject?.id === id) setSelectedProject(null);
@@ -119,6 +123,10 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
         if (selectedProject.baseClasses && selectedProject.baseClasses.trim() !== "") {
             itemsToUpload.push("- Clases base para la extensión creada.");
+        }
+        
+        if (selectedProject.attributeConstraintsSolution && selectedProject.attributeConstraintsSolution.trim() !== "") {
+            itemsToUpload.push("- Rama 'solution' con las clases resueltas (restricciones de atributos).");
         }
 
         const uploadListString = itemsToUpload.join("\n");
@@ -177,13 +185,33 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         );
     }
 
+    if (selectedProject && showSolutionGeneratedCode) {
+        return (
+            <GeneratedSolutionCodeScreen
+                selectedProject={selectedProject}
+                selectedDomainFolder={selectedDomainFolder || ""}
+                logoExamCraft={logoExamCraft}
+                onWelcome={onWelcome}
+                onBack={() => setShowSolutionGeneratedCode(false)}
+                onGoToExams={() => {
+                    setShowSolutionGeneratedCode(false);
+                    setSelectedProject(null);
+                }}
+                onGoToFolders={() => {
+                    setShowSolutionGeneratedCode(false);
+                    setSelectedProject(null);
+                    setSelectedDomainFolder(null);
+                }}
+            />
+        );
+    }
+
     if (selectedProject && !showGeneratedCode) {
         return (
             <ExamDetailScreen
                 selectedProject={selectedProject}
                 selectedDomainFolder={selectedDomainFolder || ""}
                 isCreating={isCreating}
-                logoExamCraft={logoExamCraft}
                 onWelcome={onWelcome}
                 onBack={() => setSelectedProject(null)}
                 onGoToFolders={() => {
@@ -193,10 +221,12 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 onDownload={handleDownload}
                 onGitHubDeploy={handleGitHubDeploy}
                 onShowGeneratedCode={() => setShowGeneratedCode(true)}
+                onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
                 onDeleteProject={handleDelete}
             />
         );
     }
+
 
     if (selectedDomainFolder) {
         return (

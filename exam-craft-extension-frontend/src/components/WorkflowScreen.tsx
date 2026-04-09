@@ -4,6 +4,8 @@ import carpeta from "../../assets/images/archive.png"
 import examen from "../../assets/images/exam.png"
 import { sendToGemini } from "~src/services/geminiService"
 
+declare var chrome: any;
+
 export interface WorkflowScreenProps {
   // Navegación
   onBack: () => void
@@ -35,6 +37,7 @@ export interface WorkflowScreenProps {
 
   // Callback al guardar
   onSaved?: (savedData: { project: any; result: string }) => void
+  filterProject?: (project: any) => boolean
 }
 
 export default function WorkflowScreen({
@@ -61,6 +64,7 @@ export default function WorkflowScreen({
   downloadPrefix,
   downloadTitle,
   onSaved,
+  filterProject,
 }: WorkflowScreenProps) {
   const [step, setStep] = useState<"selection" | "workflow">("selection")
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
@@ -79,7 +83,7 @@ export default function WorkflowScreen({
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (step === "selection" && typeof chrome !== "undefined" && chrome.storage?.local) {
+    if (step === "selection" && globalThis.chrome?.storage?.local) {
       chrome.storage.local.get(null, (items) => {
         const projectList = Object.keys(items)
           .filter((key) => key.startsWith("project_"))
@@ -97,12 +101,20 @@ export default function WorkflowScreen({
     }
   }, [selectedProject])
 
-  const projectsInFolder = projects.filter(
-    (p) =>
+  const projectsInFolder = projects.filter((p) => {
+    const matchesFolder = 
       p.domainName &&
       selectedDomainFolder &&
       p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
-  )
+
+    if (!matchesFolder) return false
+
+    if (filterProject) {
+      return filterProject(p)
+    }
+
+    return true
+  })
 
   const projectDisplayName = (proj: any) =>
     proj?.customName || `Examen de ${proj?.domainName}`
@@ -163,7 +175,8 @@ export default function WorkflowScreen({
   }
 
   const handleSaveToChrome = () => {
-    if (typeof chrome !== "undefined" && chrome.storage?.local) {
+    
+    if (globalThis.chrome?.storage?.local) {
       if (!selectedProject?.id) {
         alert("Error: No hay un examen válido seleccionado para actualizar.")
         return
