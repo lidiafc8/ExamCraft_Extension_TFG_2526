@@ -8,7 +8,6 @@ interface Props {
   readonly onWelcome: () => void
   readonly onCreateExam: () => void
   readonly onCreateTest: (data: { project: any; constraints: string, baseClass: string }) => void
-  // 👇 1. AHORA RECIBE EL PROYECTO POR PARÁMETRO
   readonly onGoToBaseClass: (project?: any) => void 
 }
 
@@ -58,7 +57,6 @@ export default function AttributesConstraintsWorkflowScreen({
           project.attributeConstraints ? "Continuar y reemplazar" : "Confirmar"
         }
         
-        // --- CONFIGURACIÓN DEL MODAL DE ÉXITO ---
         successTitle="¡Guardado correctamente!"
         successDescription={(name) =>
           `Las restricciones de atributos de ${name} han sido actualizadas correctamente.\n\n¿Deseas continuar y generar los tests para estas restricciones ahora mismo?`
@@ -66,18 +64,14 @@ export default function AttributesConstraintsWorkflowScreen({
         successPrimaryButtonLabel="Sí, generar tests"
         successSecondaryButtonLabel="No, volver al inicio"
         
-        // --- INTERCEPTAMOS EL GUARDADO AQUÍ ---
         onSaved={(data) => {
-          // Comprobamos si el proyecto tiene la clase base generada
           if (data.project.baseClasses) {
             onCreateTest({ project: data.project, constraints: data.result, baseClass: data.project.baseClasses });
           } else {
-            // 👇 3. GUARDAMOS EL PROYECTO EN EL ESTADO PARA QUE EL MODAL LO RECUERDE
             setPendingProjectForBaseClass(data.project);
           }
         }}
         onSuccessSecondary={() => onWelcome()}
-        // ------------------------------------------
 
         saveButtonLabel="Guardar"
         allowedFolders={["clínica veterinaria", "ajedrez"]}
@@ -90,7 +84,6 @@ export default function AttributesConstraintsWorkflowScreen({
         }
       />
 
-      {/* 👇 4. EL MODAL SE MUESTRA SI HAY UN PROYECTO GUARDADO */}
       {pendingProjectForBaseClass && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
@@ -103,10 +96,10 @@ export default function AttributesConstraintsWorkflowScreen({
           }}>
             <div style={{ fontSize: "48px", marginBottom: "15px" }}>⚠️</div>
             <h3 className="main-title small" style={{ marginBottom: "10px", color: "#4a3728" }}>
-              Falta la Clase Base
+              Faltan las Clases Base
             </h3>
             <p style={{ marginBottom: "25px", color: "#555", fontSize: "15px" }}>
-              Para poder generar los tests de restricciones, primero es necesario generar la <strong>Clase Base</strong> del examen.
+              Para poder generar los tests de restricciones, primero es necesario generar las <strong>Clases Base</strong> del examen.
             </p>
             <div className="wf-actions-row" style={{ justifyContent: "center", gap: "15px" }}>
               <button
@@ -117,14 +110,13 @@ export default function AttributesConstraintsWorkflowScreen({
               </button>
               <button
                 onClick={() => {
-                  // 👇 5. LE PASAMOS EL PROYECTO A LA FUNCIÓN Y LUEGO CERRAMOS EL MODAL
                   const projectToPass = pendingProjectForBaseClass;
                   setPendingProjectForBaseClass(null);
                   onGoToBaseClass(projectToPass); 
                 }}
                 className="btn-step primary"
               >
-                Ir a Clase Base
+                Ir a crear Clases Base
               </button>
             </div>
           </div>

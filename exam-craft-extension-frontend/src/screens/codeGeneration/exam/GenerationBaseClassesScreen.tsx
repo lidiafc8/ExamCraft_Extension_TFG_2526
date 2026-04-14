@@ -96,7 +96,7 @@ export default function GenerationBaseClassesScreen({
       }
       saveButtonLabel="Guardar"
 
-      successPrimaryButtonLabel={fromAttributes ? "Ir a Generación de Tests" : "Volver al menú de código"}
+      successPrimaryButtonLabel={fromAttributes ? "Continuar con Generación de Tests" : "Volver al menú de código"}
       successSecondaryButtonLabel="Ir al Inicio"
       onSuccessSecondary={() => onWelcome()}
       
