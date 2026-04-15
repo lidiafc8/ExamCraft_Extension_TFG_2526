@@ -1,6 +1,6 @@
 # Política de Desarrollo y Colaboración - ExamCraft Extension
 
-Este documento define los estándares, herramientas y flujos de trabajo acordados por el equipo para el desarrollo del TFG.
+Este parrafo define los estándares, herramientas y flujos de trabajo acordados por el equipo para el desarrollo del TFG.
 
 ## 1. Stack Tecnológico y Herramientas
 
