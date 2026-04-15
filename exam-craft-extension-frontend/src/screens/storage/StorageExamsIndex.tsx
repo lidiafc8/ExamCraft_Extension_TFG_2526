@@ -30,7 +30,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     const [showGeneratedCode, setShowGeneratedCode] = useState(false);
     const [showSolutionGeneratedCode, setShowSolutionGeneratedCode] = useState(false);
 
-
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
     const projectsInFolder = projects.filter(p =>
         p.domainName && selectedDomainFolder && p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
@@ -78,6 +77,21 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                     if (selectedProject?.id === id) setSelectedProject(null);
                 });
             }
+        }
+    };
+
+    const handleDeleteSection = (sectionKey: string) => {
+        if (!selectedProject) return;
+
+        const updatedProject = { ...selectedProject, [sectionKey]: "" };
+
+        if (globalThis.chrome?.storage?.local) {
+            chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
+                setProjects(prevProjects =>
+                    prevProjects.map(p => (p.id === selectedProject.id ? updatedProject : p))
+                );
+                setSelectedProject(updatedProject);
+            });
         }
     };
 
@@ -181,6 +195,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                     setSelectedProject(null);
                     setSelectedDomainFolder(null);
                 }}
+                onDeleteSection={handleDeleteSection}
             />
         );
     }
@@ -202,6 +217,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                     setSelectedProject(null);
                     setSelectedDomainFolder(null);
                 }}
+                onDeleteSection={handleDeleteSection}
             />
         );
     }
@@ -223,10 +239,10 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 onShowGeneratedCode={() => setShowGeneratedCode(true)}
                 onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
                 onDeleteProject={handleDelete}
+                onDeleteSection={handleDeleteSection}
             />
         );
     }
-
 
     if (selectedDomainFolder) {
         return (

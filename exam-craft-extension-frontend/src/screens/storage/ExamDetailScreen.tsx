@@ -9,6 +9,7 @@ import {
     sanitizeMermaidForModal, 
     cleanMermaidCode 
 } from "~src/utils/mermaidUtils";
+import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
 
 export interface ExamDetailScreenProps {
     selectedProject: any;
@@ -24,6 +25,7 @@ export interface ExamDetailScreenProps {
     onShowGeneratedCode: () => void;
     onDeleteProject: (id: string, e?: React.MouseEvent) => void;
     onShowSolutionGeneratedCode: () => void;
+    onDeleteSection: (sectionKey: string) => void;
 }
 
 export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
@@ -37,10 +39,15 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     onGitHubDeploy,
     onShowGeneratedCode,
     onShowSolutionGeneratedCode,
-    onDeleteProject
+    onDeleteProject,
+    onDeleteSection 
 }) => {
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
+    
+    const [sectionToDelete, setSectionToDelete] = useState<{ key: string, name: string } | null>(null);
+    
 
     const mermaidCode = extractMermaidCode(selectedProject?.extensionFinish);
     const fullText = selectedProject?.extensionFinish || '';
@@ -79,6 +86,22 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
 
     const currentTitle = selectedProject?.customName || `Examen de ${selectedProject?.domainName}`;
 
+    const handleDeletePart = (sectionKey: string, sectionName: string) => {
+        setSectionToDelete({ key: sectionKey, name: sectionName });
+    };
+
+    const confirmDeletePart = () => {
+        if (sectionToDelete) {
+            onDeleteSection(sectionToDelete.key);
+            setSectionToDelete(null); 
+        }
+    };
+
+    const confirmDeleteProject = () => {
+        onDeleteProject(selectedProject?.id);
+        setShowDeleteProjectModal(false);
+    };
+
     return (
         <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
             
@@ -112,15 +135,34 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
                                 {isCreating ? "Generando Repositorio..." : "Crear repositorio GitHub"}
                             </button>
                             <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '5px 0' }} />
-                            <button type="button" onClick={(e) => { onDeleteProject(selectedProject?.id, e); setShowActionsMenu(false); }} className="btn-back" style={{ margin: 0, width: '100%', backgroundColor: '#ff4d4f', color: 'white', fontSize: '14px', padding: '10px' }}>
+                            <button 
+                                type="button" 
+                                onClick={() => { 
+                                    setShowDeleteProjectModal(true); 
+                                    setShowActionsMenu(false); 
+                                }} 
+                                className="btn-back" 
+                                style={{ margin: 0, width: '100%', backgroundColor: '#ff4d4f', color: 'white', fontSize: '14px', padding: '10px' }}
+                            >
                                 Eliminar
                             </button>
                         </div>
                     )}
                 </div>
 
-                <div className="section-block" style={{ marginBottom: '1px', marginTop: '40px' }}>
-                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '20px', width: 'calc(100% - 40px)' }}>Extensión Funcional</h2>
+                {/* SECCIÓN 1: EXTENSIÓN FUNCIONAL */}
+                <div className="section-block" style={{ marginBottom: '20px', marginTop: '40px', borderBottom: '2px solid #b08968', paddingBottom: '10px', width: 'fit-content', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <h2 style={{ margin: 0, border: 'none', padding: 0 }}>Extensión Funcional</h2>
+                    {selectedProject?.extensionFinish && (
+                        <button 
+                            type="button" 
+                            onClick={() => handleDeletePart('extensionFinish', 'Extensión Funcional')} 
+                            style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0', display: 'flex', alignItems: 'center' }} 
+                            title="Eliminar Extensión Funcional"
+                        >
+                            ✕
+                        </button>
+                    )}
                 </div>
                 <div className="section-block" style={{ width: '80%', marginBottom: '0px' }}>
                     <div style={{ display: 'flex', gap: '10px', height: '600px' }}>
@@ -137,38 +179,51 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
                     </div>
                 </div>
 
-                <div className="section-block" style={{ marginBottom: '1px', marginTop: '40px' }}>
-                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>Restricciones de Atributos</h2>
+                {/* SECCIÓN 2: RESTRICCIONES DE ATRIBUTOS */}
+                <div className="section-block" style={{ marginBottom: '20px', marginTop: '40px', borderBottom: '2px solid #b08968', paddingBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                    <h2 style={{ margin: 0, border: 'none', padding: 0 }}>Restricciones de Atributos</h2>
+                    {selectedProject?.attributeConstraints && (
+                        <button type="button" onClick={() => handleDeletePart('attributeConstraints', 'Restricciones de Atributos')} style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 5px' }} title="Eliminar Restricciones de Atributos">
+                            ✕
+                        </button>
+                    )}
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
-                        <div className="content-card" style={{ padding: '20px' }}>
-                            {selectedProject?.attributeConstraints ? (
-                                <textarea className="wf-textarea" readOnly value={selectedProject.attributeConstraints}
-                                    style={{ width: '100%', minHeight: '500px', resize: 'vertical', padding: '15px', fontSize: '14px' }} />
-                            ) : (
-                                <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
-                                    Aún no se han creado las restricciones de atributos para este examen.
-                                </p>
-                            )}
-                        </div>
+                    <div className="content-card" style={{ padding: '20px' }}>
+                        {selectedProject?.attributeConstraints ? (
+                            <textarea className="wf-textarea" readOnly value={selectedProject.attributeConstraints}
+                                style={{ width: '100%', minHeight: '500px', resize: 'vertical', padding: '15px', fontSize: '14px' }} />
+                        ) : (
+                            <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
+                                Aún no se han creado las restricciones de atributos para este examen.
+                            </p>
+                        )}
                     </div>
+                </div>
 
-                <div className="section-block" style={{ marginBottom: '1px' }}>
-                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>Relaciones entre Entidades</h2>
+                {/* SECCIÓN 3: RELACIONES ENTRE ENTIDADES */}
+                <div className="section-block" style={{ marginBottom: '20px', marginTop: '40px', borderBottom: '2px solid #b08968', paddingBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                    <h2 style={{ margin: 0, border: 'none', padding: 0 }}>Relaciones entre Entidades</h2>
+                    {selectedProject?.entityRelations && (
+                        <button type="button" onClick={() => handleDeletePart('entityRelations', 'Relaciones entre Entidades')} style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 5px' }} title="Eliminar Relaciones entre Entidades">
+                            ✕
+                        </button>
+                    )}
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
-                        <div className="content-card" style={{ padding: '20px' }}>
-                            {selectedProject?.entityRelations ? (
-                                <textarea className="wf-textarea" readOnly value={selectedProject.entityRelations}
-                                    style={{ width: '100%', minHeight: '200px', resize: 'vertical', padding: '15px', fontSize: '14px' }} />
-                            ) : (
-                                <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
-                                    Aún no se han creado las relaciones entre entidades para este examen.
-                                </p>
-                            )}
-                        </div>
+                    <div className="content-card" style={{ padding: '20px' }}>
+                        {selectedProject?.entityRelations ? (
+                            <textarea className="wf-textarea" readOnly value={selectedProject.entityRelations}
+                                style={{ width: '100%', minHeight: '200px', resize: 'vertical', padding: '15px', fontSize: '14px' }} />
+                        ) : (
+                            <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
+                                Aún no se han creado las relaciones entre entidades para este examen.
+                            </p>
+                        )}
+                    </div>
                 </div>
 
+                {/* CÓDIGO */}
                 <div className="section-block" style={{ marginBottom: '1px' }}>
                     <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>Código Generado</h2>
                 </div>
@@ -212,6 +267,22 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
                         </div>
                     </div>
                 )}
+
+                <DeleteConfirmationModal 
+                    isOpen={!!sectionToDelete}
+                    itemName={sectionToDelete?.name || ''}
+                    onConfirm={confirmDeletePart}
+                    onCancel={() => setSectionToDelete(null)}
+                />
+
+                <DeleteConfirmationModal 
+                    isOpen={showDeleteProjectModal}
+                    itemName={currentTitle} 
+                    isExam={true}
+                    onConfirm={confirmDeleteProject}
+                    onCancel={() => setShowDeleteProjectModal(false)}
+                />
+
             </main>
         </div>
     );

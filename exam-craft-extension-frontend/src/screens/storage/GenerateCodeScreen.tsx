@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import 'highlight.js/styles/github.css';
 import { Header } from "~src/components/Header";
 import { parseJavaFiles } from "~src/utils/codeUtils";
 import { JavaCodeBlock } from "~src/components/JavaCodeBlock";
+import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal"; // Ajusta la ruta si es necesario
 
 export interface GeneratedCodeScreenProps {
     selectedProject: any;
@@ -13,6 +14,7 @@ export interface GeneratedCodeScreenProps {
     onBack: () => void;
     onGoToExams: () => void;
     onGoToFolders: () => void;
+    onDeleteSection: (sectionKey: string) => void;
 }
 
 export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
@@ -22,8 +24,11 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     onWelcome,
     onBack,
     onGoToExams,
-    onGoToFolders
+    onGoToFolders,
+    onDeleteSection
 }) => {
+    const [sectionToDelete, setSectionToDelete] = useState<{ key: string, name: string } | null>(null);
+
     const rawTests = selectedProject.javaTests;
 
     let tests: any[] = [];
@@ -44,6 +49,13 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     
     const currentTitle = "CÓDIGO EXAMEN";
 
+    const confirmDelete = () => {
+        if (sectionToDelete) {
+            onDeleteSection(sectionToDelete.key);
+            setSectionToDelete(null);
+        }
+    };
+
     return (
         <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
             <Header 
@@ -54,10 +66,16 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
 
             <main className="main-content" style={{ padding: '30px', paddingBottom: '100px', height: 'auto', overflow: 'visible', flex: 1 }}>
                 
-                <div className="section-block" style={{ marginBottom: '1px', marginTop: '20px' }}>
-                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
+                {/* SECCIÓN: CLASES BASE */}
+                <div className="section-block" style={{ marginBottom: '1px', marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #b08968', paddingBottom: '10px' }}>
+                    <h2 style={{ borderBottom: 'none', paddingBottom: '0', marginBottom: '0' }}>
                         Clases Base
                     </h2>
+                    {parsedBaseClasses.length > 0 && (
+                        <button type="button" onClick={() => setSectionToDelete({ key: 'baseClasses', name: 'Clases Base' })} style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 5px' }} title="Eliminar Clases Base">
+                            ✕
+                        </button>
+                    )}
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '40px' }}>
                     <div className="content-card" style={{ padding: '20px' }}>
@@ -77,10 +95,16 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                     </div>
                 </div>
 
-                <div className="section-block" style={{ marginBottom: '1px' }}>
-                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
+                {/* SECCIÓN: TESTS DE JAVA */}
+                <div className="section-block" style={{ marginBottom: '1px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #b08968', paddingBottom: '10px' }}>
+                    <h2 style={{ borderBottom: 'none', paddingBottom: '0', marginBottom: '0' }}>
                         Tests de Java
                     </h2>
+                    {tests.length > 0 && (
+                        <button type="button" onClick={() => setSectionToDelete({ key: 'javaTests', name: 'Tests de Java' })} style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 5px' }} title="Eliminar Tests de Java">
+                            ✕
+                        </button>
+                    )}
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
                     <div className="content-card" style={{ padding: '20px' }}>
@@ -112,6 +136,14 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                         Volver
                     </button>
                 </div>
+
+                <DeleteConfirmationModal 
+                    isOpen={!!sectionToDelete}
+                    itemName={sectionToDelete?.name || ''}
+                    onConfirm={confirmDelete}
+                    onCancel={() => setSectionToDelete(null)}
+                />
+
             </main>
         </div>
     );
