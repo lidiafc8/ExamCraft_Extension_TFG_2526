@@ -75,7 +75,7 @@ export default function GenerationTestAtributesScreen({
             .filter(Boolean) as string[];
 
         const basePackageNames = packageLines.map(p =>
-            p.replaceAll(/^package\s+/, "").replaceAll(/;$/, "")
+            p.replace(/^package\s+/, "").replace(/;$/, "") // CORREGIDO AQUÍ
         );
 
         const baseRootPackage = basePackageNames.length > 0
@@ -94,12 +94,12 @@ export default function GenerationTestAtributesScreen({
         // Busca esta parte dentro del useEffect:
             const codigoLimpio = javaBlocks.map(block =>
                 block
-                    .replaceAll(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
+                    .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
                     // MODIFICACIÓN AQUÍ:
                     // Solo borramos imports que NO sean del proyecto (como los de JUnit, Mockito, etc.)
                     // Queremos que los imports de 'org.springframework.samples.petclinic' se queden.
-                    .replaceAll(/^(?!package\s|import\s+org\.springframework\.samples\.petclinic)import\s.*;$/gm, "")
-                    .replaceAll(/^\s*[\r\n]/gm, "") // NOSONAR javascript:S5852
+                    .replace(/^(?!package\s|import\s+org\.springframework\.samples\.petclinic)import\s.*;$/gm, "")
+                    .replace(/^\s*[\r\n]/gm, "") // NOSONAR javascript:S5852
                     .trim()
             ).join("\n\n// ---\n\n");
 
@@ -153,7 +153,7 @@ Genera Test1.java sin bloques markdown.
             const result = await sendToGemini(finalPayload);
             if (!result) throw new Error("Respuesta vacía");
 
-            const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").replaceAll(/^java/i, "").trim();
+            const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").replace(/^java/i, "").trim(); // CORREGIDO AQUÍ
             setResponseText(cleanResult);
             setInternalStep('result');
         } catch (error: any) {
