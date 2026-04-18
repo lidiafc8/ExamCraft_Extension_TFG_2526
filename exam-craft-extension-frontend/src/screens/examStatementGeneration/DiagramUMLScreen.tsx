@@ -4,6 +4,7 @@ import { sendToGemini } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import { Header } from "~src/components/Header"
+import { cleanMermaidCode } from "../../components/mermaidCleaner";
 
 interface Props {
   readonly domainName: string;
@@ -14,7 +15,7 @@ interface Props {
   readonly onCreateExamByParts: () => void;
   readonly onFunctionalExtension: () => void;
   readonly onStatementStep1: () => void;
-  readonly onFinishExtension: (text:string) => void;
+  readonly onFinishExtension: (statement: string, mermaidCode: string) => void;
 }
 
 export default function DiagramUMLScreen({ 
@@ -31,29 +32,16 @@ export default function DiagramUMLScreen({
 
     const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
     const [promptText, setPromptText] = useState("");
-    
-    // esto es lo que ve el usuario
     const [hiddenContext, setHiddenContext] = useState("");
-
-    // esto es en bruto lo que devuelve la IA (se muestra en la columna de código)
     const [responseText, setResponseText] = useState("");
-
-    // esto es el código ya limpio que se pasa al MermaidViewer
     const [cleanCode, setCleanCode] = useState("");
-
-    // esto para que se muestre que se está cargando
     const [isLoading, setIsLoading] = useState(false);
-
-    // esto es para unir el codigo mermaid con el contexto del enunciado
     const [extensionComplete, setExtensionComplete] = useState("");
 
-    // se ejecuta al principio, y cuando se cambia el enunciado
     useEffect(() => {
         if (extensionPromptMarkdown && domainName) {
             const { visibleText, hiddenContext } = parseMasterPrompt(extensionPromptMarkdown);
-            
             const finalVisible = visibleText.replaceAll("{{DOMAIN}}", domainName);
-            
             setPromptText(finalVisible);    
             setHiddenContext(hiddenContext);
         }
@@ -75,27 +63,8 @@ export default function DiagramUMLScreen({
             ${promptText}
         `;
             const result = await sendToGemini(finalPayload);
+            const cleanResult = cleanMermaidCode(result);
 
-            // 1. Quitamos las etiquetas de bloque de código markdown
-            let cleanResult = result.replaceAll(/```mermaid/g, "").replaceAll(/```/g, "");
-
-            // 2. Buscamos dónde empieza realmente el diagrama
-            const diagramMatch = cleanResult.match(/(classDiagram|graph|sequenceDiagram|erDiagram|stateDiagram|kanban)[\s\S]*/);
-            
-            if (diagramMatch) {
-                cleanResult = diagramMatch[0].trim();
-            } else {
-                cleanResult = cleanResult.trim();
-            }
-
-            cleanResult = cleanResult
-                .replaceAll('\\n', '\n')
-                .replaceAll('\\"', '"')
-                .replaceAll("\\'", "'")
-
-            // Guardamos el código limpio en ambos estados:
-            // - responseText: para mostrarlo en la columna de "Código Mermaid"
-            // - cleanCode: para pasarlo DIRECTAMENTE al MermaidViewer sin re-procesar
             setResponseText(cleanResult);
             setCleanCode(cleanResult);
             setInternalStep('result');
@@ -125,28 +94,8 @@ export default function DiagramUMLScreen({
             setIsLoading(false);
         }
     };
-
-    const handleCombinationExtension = async (context: string, responseText: string) => {
-        setExtensionComplete("");
-
-        try {
-            if (!context || !responseText) {
-                console.warn("Falta contexto o código del diagrama");
-            }
-
-            const combinedResult = `
-${context.trim()}
-
-## Diagrama UML (Código Mermaid):
-${responseText.trim()}`.trim();
-
-            setExtensionComplete(combinedResult);
-            onFinishExtension(combinedResult);
-
-        } catch (error) {
-            console.error("Error al combinar contexto y diagrama UML:", error);
-            alert("Ocurrió un error al procesar la combinación final.");
-        }
+    const handleCombinationExtension = (context: string, responseText: string) => {
+        onFinishExtension(context.trim(), responseText.trim());
     };
 
     const breadcrumbItems = [
@@ -241,7 +190,7 @@ ${responseText.trim()}`.trim();
                                 borderRadius: '15px', 
                                 display: 'flex',
                                 flexDirection: 'column', 
-                                overflow: 'hidden', 
+                                overflow: 'auto',
                                 boxShadow: '0 8px 25px rgba(0,0,0,0.1)' 
                             }}>
                                 {/* ENUNCIADO */}
@@ -251,7 +200,6 @@ ${responseText.trim()}`.trim();
                                     background: '#f8f9fa', 
                                     borderBottom: '1px solid #eee', 
                                     color: '#333',
-                                    height: 'auto',
                                     flexShrink: 0 
                                 }}>
                                     <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#666' }}>📌 Enunciado completo:</div>
@@ -261,23 +209,11 @@ ${responseText.trim()}`.trim();
                                 {/* ÁREA DEL DIAGRAMA */}
                                 <div style={{ 
                                     flex: '1', 
-                                    overflow: 'auto', 
-                                    padding: '10px', 
-                                    display: 'flex', 
-                                    flexDirection: 'column',
-                                    justifyContent: 'flex-start',
-                                    alignItems: 'center',
-                                    backgroundColor: '#fff'
+                                    overflow: 'auto',
+                                    padding: '10px',
                                 }}>
                                     {cleanCode ? (
-                                        <div style={{ 
-                                            width: '100%', 
-                                            transform: 'scale(1)', 
-                                            transformOrigin: 'top center'
-                                        }}>
-                                            {/* ✅ Se usa cleanCode directamente, sin re-limpiar */}
-                                            <MermaidViewer chartCode={cleanCode} />
-                                        </div>
+                                        <MermaidViewer chartCode={cleanCode} />
                                     ) : (
                                         <div style={{fontSize: '13px', color: '#aaa', marginTop: '20px'}}>Renderizando...</div>
                                     )}
@@ -286,6 +222,7 @@ ${responseText.trim()}`.trim();
                                 {/* BOTÓN CONFIRMAR */}
                                 <button  
                                     className="btn-step primary"
+                                    style={{ flexShrink: 0 }}
                                     onClick={() => handleCombinationExtension(context, responseText)}
                                 >
                                     Confirmar Diagrama UML

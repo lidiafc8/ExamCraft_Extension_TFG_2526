@@ -22,6 +22,8 @@ export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
   const [contextResponse, setContextResponse] = useState<string>("")
   const [functionalExtensionCompleted, setFunctionalExtensionCompleted] = useState<string>("")
+  const [extensionStatement, setExtensionStatement] = useState<string>("")
+  const [extensionMermaid, setExtensionMermaid] = useState<string>("")
   
   const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string } | null>(null)
 
@@ -185,9 +187,10 @@ export default function IndexTab() {
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onFunctionalExtension={() => setScreen("domainSelection")}
           onStatementStep1={() => setScreen("domainWorkflow")}
-          onFinishExtension={(extensionFinish) => {
-            setFunctionalExtensionCompleted(extensionFinish)
-            setScreen("finishFunctionalExtension")
+          onFinishExtension={(statement, mermaid) => {
+              setExtensionStatement(statement);
+              setExtensionMermaid(mermaid);
+              setScreen("finishFunctionalExtension");
           }}
         />
       )}
@@ -195,12 +198,13 @@ export default function IndexTab() {
       {screen === "finishFunctionalExtension" && (
         <FinishFunctionalExtensionScreen 
           domainName={selectedDomain}
-          extensionFinish={functionalExtensionCompleted}
-          onBack={() => setScreen("domainWorkflow")} 
+          extensionStatement={extensionStatement}
+          extensionMermaid={extensionMermaid}
+          onBack={() => setScreen("diagramUML")} 
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
-          onFunctionalExtension={() => setScreen("functionalExtension")}
+          onFunctionalExtension={() => setScreen("domainSelection")}
           onStatementStep1={() => setScreen("domainWorkflow")}
           onCreateDiagram={(context) => {
             setContextResponse(context)

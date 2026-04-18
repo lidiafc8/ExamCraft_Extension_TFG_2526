@@ -7,28 +7,73 @@ interface Props {
 
 let mermaidInitialized = false
 
-/**
- * Última barrera de limpieza justo antes de renderizar.
- * Corrige los problemas más comunes que genera Gemini:
- *  - Multiplicidades entre comillas: "1" --> "0..n"  →  1 --> 0..n
- *  - Comentarios %% que rompen el parser dentro de bloques de relaciones
- */
 function sanitizeForRender(code: string): string {
   if (!code) return ""
-
   let result = code
 
-  // Quitar comillas alrededor de multiplicidades
-  // Ejemplos: "1", "0..n", "0..*", "1..*"
-  result = result.replace(/"(\d[\d.*]*(?:\.\.[*\d]+)?)"/g, "$1")
+  // 1. Limpieza base de escapes (por si vienen del JSON/LLM)
+  result = result
+    .replaceAll('\\n', '\n')
+    .replaceAll('\\"', '"')
+    .replaceAll("\\'", "'")
 
-  // Quitar líneas de comentario %%
+  // ¡ATENCIÓN! Hemos ELIMINADO la regla que borraba las comillas de las multiplicidades.
+  // Mermaid necesita las comillas obligatoriamente (ej: "1" --> "0..n")
+
+  // 2. Limpieza Crítica Estructural (Previene errores de parser y llaves pegadas)
+  result = result
+    .replace(/{\s*}/g, '')                   // ELIMINA llaves vacías: "class Vet {}" -> "class Vet"
+    .replace(/{/g, ' {\n')                   // Fuerza salto de línea DESPUÉS de abrir llave
+    .replace(/}/g, '\n}\n')                  // Fuerza salto de línea ANTES y DESPUÉS de cerrar llave
+    .replace(/<\|--/g, ' <|-- ')             // Asegura espacios en herencias
+    .replace(/-->/g, ' --> ')                // Asegura espacios en asociaciones
+    .replace(/<--/g, ' <-- ')                // Asegura espacios en asociaciones inversas
+
+  // 3. Procesamiento línea a línea (elimina vacías y comentarios)
   result = result
     .split("\n")
-    .filter(line => !line.trim().startsWith("%%"))
+    .map(line => line.trim())
+    // Filtramos líneas que estén vacías o que sean comentarios de Mermaid (%%)
+    .filter(line => line.length > 0 && !line.startsWith("%%"))
     .join("\n")
 
   return result.trim()
+}
+
+/**
+ * Mermaid renderiza el SVG con width/height absolutos basados en el tamaño
+ * del contenedor en el momento del render. Si el contenedor es pequeño o
+ * está oculto, el SVG sale mal dimensionado y las clases aparecen separadas.
+ *
+ * Esta función extrae el viewBox real del SVG generado y elimina los
+ * atributos width/height absolutos, dejando que el SVG escale libremente.
+ */
+function fixSvgDimensions(svgString: string): string {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(svgString, "image/svg+xml")
+  const svg = doc.querySelector("svg")
+  if (!svg) return svgString
+
+  // Si no tiene viewBox, lo construimos desde width/height
+  if (!svg.getAttribute("viewBox")) {
+    const w = svg.getAttribute("width")
+    const h = svg.getAttribute("height")
+    if (w && h) {
+      svg.setAttribute("viewBox", `0 0 ${parseFloat(w)} ${parseFloat(h)}`)
+    }
+  }
+
+  // Quitamos width/height absolutos para que el SVG se adapte al contenedor
+  svg.removeAttribute("width")
+  svg.removeAttribute("height")
+
+  // Añadimos estos atributos para que ocupe el 100% del ancho disponible
+  svg.setAttribute("width", "100%")
+  svg.setAttribute("height", "auto")
+  svg.style.maxWidth = "none"
+  svg.style.display = "block"
+
+  return new XMLSerializer().serializeToString(svg)
 }
 
 export function MermaidViewer({ chartCode }: Props) {
@@ -38,7 +83,6 @@ export function MermaidViewer({ chartCode }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const isPanning = useRef(false)
   const startPos = useRef({ mx: 0, my: 0, px: 0, py: 0 })
-  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!chartCode) return
@@ -56,8 +100,6 @@ export function MermaidViewer({ chartCode }: Props) {
           mermaidInitialized = true
         }
 
-        // Sanitizamos aquí como última barrera, por si el código
-        // llega con comillas en multiplicidades o comentarios %%
         const safeCode = sanitizeForRender(chartCode)
 
         console.log("=== MermaidViewer recibe ===")
@@ -69,7 +111,10 @@ export function MermaidViewer({ chartCode }: Props) {
 
         if (!renderedSvg) throw new Error("No se generó SVG")
 
-        setSvg(renderedSvg)
+        // Arreglamos las dimensiones del SVG antes de mostrarlo
+        const fixedSvg = fixSvgDimensions(renderedSvg)
+
+        setSvg(fixedSvg)
         setScale(1)
         setPan({ x: 0, y: 0 })
       } catch (e: any) {
@@ -117,8 +162,6 @@ export function MermaidViewer({ chartCode }: Props) {
         </button>
       </div>
 
-      <div ref={containerRef} style={{ display: "none" }} />
-
       <div
         onWheel={handleWheel}
         onMouseDown={onMouseDown}
@@ -126,8 +169,8 @@ export function MermaidViewer({ chartCode }: Props) {
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
         style={{
-          overflow: "hidden",
-          cursor: "grab",
+          overflow: "auto",
+          cursor: isPanning.current ? "grabbing" : "grab",
           border: "1px solid #e0e0e0",
           borderRadius: 10,
           background: "#fafafa",
@@ -153,6 +196,7 @@ export function MermaidViewer({ chartCode }: Props) {
               transformOrigin: "top left",
               display: "inline-block",
               padding: 16,
+              minWidth: "100%",
             }}
             dangerouslySetInnerHTML={{ __html: svg }}
           />
