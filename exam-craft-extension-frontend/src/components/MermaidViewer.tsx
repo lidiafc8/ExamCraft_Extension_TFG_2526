@@ -6,55 +6,40 @@ interface Props {
 }
 
 let mermaidInitialized = false
+let currentTheme = ""
 
 function sanitizeForRender(code: string): string {
   if (!code) return ""
   let result = code
 
-  // 1. Limpieza base de escapes (por si vienen del JSON/LLM)
   result = result
     .replaceAll('\\n', '\n')
     .replaceAll('\\"', '"')
     .replaceAll("\\'", "'")
 
-  // ¡ATENCIÓN! Hemos ELIMINADO la regla que borraba las comillas de las multiplicidades.
-  // Mermaid necesita las comillas obligatoriamente (ej: "1" --> "0..n")
-
-  // 2. Limpieza Crítica Estructural (Previene errores de parser y llaves pegadas)
   result = result
-    .replace(/{\s*}/g, '')                   // ELIMINA llaves vacías: "class Vet {}" -> "class Vet"
-    .replace(/{/g, ' {\n')                   // Fuerza salto de línea DESPUÉS de abrir llave
-    .replace(/}/g, '\n}\n')                  // Fuerza salto de línea ANTES y DESPUÉS de cerrar llave
-    .replace(/<\|--/g, ' <|-- ')             // Asegura espacios en herencias
-    .replace(/-->/g, ' --> ')                // Asegura espacios en asociaciones
-    .replace(/<--/g, ' <-- ')                // Asegura espacios en asociaciones inversas
+    .replace(/{\s*}/g, '')
+    .replace(/{/g, ' {\n')
+    .replace(/}/g, '\n}\n')
+    .replace(/<\|--/g, ' <|-- ')
+    .replace(/-->/g, ' --> ')
+    .replace(/<--/g, ' <-- ')
 
-  // 3. Procesamiento línea a línea (elimina vacías y comentarios)
   result = result
     .split("\n")
     .map(line => line.trim())
-    // Filtramos líneas que estén vacías o que sean comentarios de Mermaid (%%)
     .filter(line => line.length > 0 && !line.startsWith("%%"))
     .join("\n")
 
   return result.trim()
 }
 
-/**
- * Mermaid renderiza el SVG con width/height absolutos basados en el tamaño
- * del contenedor en el momento del render. Si el contenedor es pequeño o
- * está oculto, el SVG sale mal dimensionado y las clases aparecen separadas.
- *
- * Esta función extrae el viewBox real del SVG generado y elimina los
- * atributos width/height absolutos, dejando que el SVG escale libremente.
- */
 function fixSvgDimensions(svgString: string): string {
   const parser = new DOMParser()
   const doc = parser.parseFromString(svgString, "image/svg+xml")
   const svg = doc.querySelector("svg")
   if (!svg) return svgString
 
-  // Si no tiene viewBox, lo construimos desde width/height
   if (!svg.getAttribute("viewBox")) {
     const w = svg.getAttribute("width")
     const h = svg.getAttribute("height")
@@ -63,11 +48,8 @@ function fixSvgDimensions(svgString: string): string {
     }
   }
 
-  // Quitamos width/height absolutos para que el SVG se adapte al contenedor
   svg.removeAttribute("width")
   svg.removeAttribute("height")
-
-  // Añadimos estos atributos para que ocupe el 100% del ancho disponible
   svg.setAttribute("width", "100%")
   svg.setAttribute("height", "auto")
   svg.style.maxWidth = "none"
@@ -91,13 +73,26 @@ export function MermaidViewer({ chartCode }: Props) {
 
     const render = async () => {
       try {
-        if (!mermaidInitialized) {
+        if (!mermaidInitialized || currentTheme !== "beige") {
           mermaid.initialize({
             startOnLoad: false,
             theme: "base",
+            themeVariables: {
+              primaryColor: "#fff3e0",
+              primaryBorderColor: "#d4a96a",
+              primaryTextColor: "#333333",
+              lineColor: "#333333",
+              background: "#ffffff",
+              mainBkg: "#fff3e0",
+              nodeBorder: "#d4a96a",
+              clusterBkg: "#fff8f0",
+              titleColor: "#333333",
+              edgeLabelBackground: "#ffffff",
+          },
             securityLevel: "loose",
           })
           mermaidInitialized = true
+          currentTheme = "beige"
         }
 
         const safeCode = sanitizeForRender(chartCode)
@@ -111,7 +106,6 @@ export function MermaidViewer({ chartCode }: Props) {
 
         if (!renderedSvg) throw new Error("No se generó SVG")
 
-        // Arreglamos las dimensiones del SVG antes de mostrarlo
         const fixedSvg = fixSvgDimensions(renderedSvg)
 
         setSvg(fixedSvg)
