@@ -201,20 +201,22 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
                     </div>
                 </div>
 
+
                 {/* SECCIÓN 3: RELACIONES ENTRE ENTIDADES */}
                 <div className="section-block" style={{ marginBottom: '20px', marginTop: '40px', borderBottom: '2px solid #b08968', paddingBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <h2 style={{ margin: 0, border: 'none', padding: 0 }}>Relaciones entre Entidades</h2>
-                    {selectedProject?.entityRelations && (
+                    {selectedProject?.entityRelationships && (
                         <button type="button" onClick={() => handleDeletePart('entityRelations', 'Relaciones entre Entidades')} style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 5px' }} title="Eliminar Relaciones entre Entidades">
                             ✕
                         </button>
                     )}
                 </div>
+              
                 <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
                     <div className="content-card" style={{ padding: '20px' }}>
-                        {selectedProject?.entityRelations ? (
-                            <textarea className="wf-textarea" readOnly value={selectedProject.entityRelations}
-                                style={{ width: '100%', minHeight: '200px', resize: 'vertical', padding: '15px', fontSize: '14px' }} />
+                        {selectedProject?.entityRelationships ? (
+                            <textarea className="wf-textarea" readOnly value={selectedProject.entityRelationships}
+                                style={{ width: '100%', minHeight: '500px', resize: 'vertical', padding: '15px', fontSize: '14px' }} />
                         ) : (
                             <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
                                 Aún no se han creado las relaciones entre entidades para este examen.

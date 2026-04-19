@@ -6,10 +6,11 @@ interface Props {
   readonly onWelcome: () => void
   readonly onFunctionalExtension: () => void
   readonly onAttributesConstraints: () => void
+  readonly onEntityRelationships: () => void
   readonly onCodeGeneration: () => void
 }
 
-export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onCodeGeneration }: Props) {
+export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints,onEntityRelationships, onCodeGeneration }: Props) {
   return (
     <div className="exam-app">
        
@@ -65,7 +66,7 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
             Restricciones de atributos
           </button>
 
-          <button className="menu-btn">
+          <button className="menu-btn" onClick={onEntityRelationships}>
             Relaciones entre entidades
           </button>
 

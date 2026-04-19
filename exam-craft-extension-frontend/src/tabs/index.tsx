@@ -17,6 +17,7 @@ import GenerationBaseClassesScreen from "~src/screens/codeGeneration/exam/Genera
 import StorageExamsIndex from "../screens/storage/StorageExamsIndex"
 import SolutionCodeGenerationScreen from "~src/screens/codeGeneration/solution/SolutionCodeGenerationScreen"
 import AttributesConstraintsSolutionCodeScreen from "~src/screens/codeGeneration/solution/AttributesConstraintsSolutionCodeScreen"
+import EntityRelationshipsWorkflowScreen from "~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
@@ -33,6 +34,7 @@ export default function IndexTab() {
     "createExam" | 
     "createExamByParts" | 
     "attributesConstraints" |
+    "entityRelationships" |
     "functionalExtension" | 
     "domainWorkflow" |
     "diagramUML" |
@@ -75,6 +77,7 @@ export default function IndexTab() {
         onWelcome={() => setScreen("welcome")} 
         onFunctionalExtension={() => setScreen("domainSelection")}
         onAttributesConstraints={() => setScreen("attributesConstraints")}
+        onEntityRelationships={() => setScreen("entityRelationships")}
         onCodeGeneration={() => setScreen("codeGeneration")}
         />
       )}
@@ -225,6 +228,14 @@ export default function IndexTab() {
             setTestOrigin('attributes');
             setScreen("testAtributes");
           }}
+        />
+      )}
+
+      {screen === "entityRelationships" && (
+        <EntityRelationshipsWorkflowScreen 
+          onBack={() => setScreen("createExamByParts")} 
+          onWelcome={() => setScreen("welcome")} 
+          onCreateExam={() => setScreen("createExam")}
         />
       )}
 
