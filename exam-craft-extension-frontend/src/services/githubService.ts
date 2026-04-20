@@ -6,17 +6,44 @@ const extractFilesForGitHub = (rawText: string) => {
     if (!rawText) return [];
     const filesToUpload: { path: string, content: string }[] = [];
     
-    const regex = /([a-zA-Z0-9_./\-]+\.java);?\s*```[a-z]*\r?\n([\s\S]*?)```/gi; // NOSONAR javascript:S5852
+    const blockRegex = /```[a-zA-Z]*\r?\n([\s\S]*?)```/gi; // NOSONAR javascript:S5852
     let match;
+    let lastIndex = 0;
 
-    while ((match = regex.exec(rawText)) !== null) {
-        const fullPath = match[1]; 
-        const cleanCode = match[2].trim(); 
+    while ((match = blockRegex.exec(rawText)) !== null) {
+        const blockStart = match.index;
+        let rawCode = match[1];
+        let fullPath = '';
+
+        const textBefore = rawText.slice(lastIndex, blockStart);
+        const pathsBefore = [...textBefore.matchAll(/([a-zA-Z0-9_./\-]+\.java)/g)]; // NOSONAR javascript:S5852
         
-        filesToUpload.push({
-            path: fullPath,
-            content: cleanCode
-        });
+        if (pathsBefore.length > 0) {
+            fullPath = pathsBefore[pathsBefore.length - 1][1];
+        } else {
+            const pathInsideMatch = rawCode.match(/^[\s*/]*([a-zA-Z0-9_./\-]+\.java)/); // NOSONAR javascript:S5852
+            
+            if (pathInsideMatch) {
+                fullPath = pathInsideMatch[1];
+                const matchedStr = pathInsideMatch[0];
+                rawCode = rawCode.substring(matchedStr.length).trim();
+            }
+        }
+
+        if (fullPath) {
+            filesToUpload.push({
+                path: fullPath,
+                content: rawCode.trim()
+            });
+        } else {
+            const fallbackName = `src/main/java/generated/ClaseGenerada_${Date.now()}.java`;
+            filesToUpload.push({
+                path: fallbackName,
+                content: rawCode.trim()
+            });
+        }
+
+        lastIndex = blockRegex.lastIndex;
     }
 
     return filesToUpload;
