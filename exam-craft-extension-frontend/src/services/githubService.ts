@@ -1,7 +1,7 @@
 import type { GithubRepo } from "~src/models/GithubRepo";
 import type { GithubUser } from "../models/GithubUser";
 
-const extractFilesForGitHub = (rawText: string) => {
+export const extractFilesForGitHub = (rawText: string) => {
     if (!rawText) return [];
     const filesToUpload: { path: string, content: string }[] = [];
     
@@ -15,12 +15,14 @@ const extractFilesForGitHub = (rawText: string) => {
         let fullPath = '';
 
         const textBefore = rawText.slice(lastIndex, blockStart);
-        const pathsBefore = [...textBefore.matchAll(/([a-zA-Z0-9_./\-]+\.java)/g)]; // NOSONAR javascript:S5852
+      
+        const pathsBefore = [...textBefore.matchAll(/(?:\/\/[\s\wáéíóú]*[:\s-]*)?([a-zA-Z0-9_./\-]+\.java)/gi)]; // NOSONAR javascript:S5852
         
         if (pathsBefore.length > 0) {
             fullPath = pathsBefore[pathsBefore.length - 1][1];
         } else {
-            const pathInsideMatch = rawCode.match(/^[\s*/]*([a-zA-Z0-9_./\-]+\.java)/); // NOSONAR javascript:S5852
+
+            const pathInsideMatch = rawCode.match(/^[\s*/]*(?:Archivo|Path)?[\s:]*([a-zA-Z0-9_./\-]+\.java)/i); // NOSONAR javascript:S5852
             
             if (pathInsideMatch) {
                 fullPath = pathInsideMatch[1];
@@ -29,9 +31,11 @@ const extractFilesForGitHub = (rawText: string) => {
             }
         }
 
-        if (fullPath) {
+        const cleanPath = fullPath.trim();
+
+        if (cleanPath) {
             filesToUpload.push({
-                path: fullPath,
+                path: cleanPath,
                 content: rawCode.trim()
             });
         } else {

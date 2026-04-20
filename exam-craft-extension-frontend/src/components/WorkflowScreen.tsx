@@ -172,6 +172,7 @@ export default function WorkflowScreen({
         INSTRUCCIONES PRINCIPALES:
         ${promptText}
       `
+      console.log(finalPayload);
       const result = await sendToGemini(finalPayload)
       setResponseText(result)
       setInternalStep("result")

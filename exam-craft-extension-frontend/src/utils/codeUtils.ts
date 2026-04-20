@@ -12,12 +12,14 @@ export const parseJavaFiles = (rawText: string) => {
         let path = '';
 
         const textBefore = rawText.slice(lastIndex, blockStart);
-        const pathsBefore = [...textBefore.matchAll(/([a-zA-Z0-9_./\-]+\.java)/g)]; // NOSONAR javascript:S5852
+      
+        const pathsBefore = [...textBefore.matchAll(/(?:\/\/[\s\wáéíóú]*[:\s-]*)?([a-zA-Z0-9_./\-]+\.java)/gi)]; // NOSONAR javascript:S5852
         
         if (pathsBefore.length > 0) {
             path = pathsBefore[pathsBefore.length - 1][1];
         } else {
-            const pathInsideMatch = rawCode.match(/^[\s*/]*([a-zA-Z0-9_./\-]+\.java)/); // NOSONAR javascript:S5852
+        
+            const pathInsideMatch = rawCode.match(/^[\s*/]*(?:Archivo|Path)?[\s:]*([a-zA-Z0-9_./\-]+\.java)/i); // NOSONAR javascript:S5852
             
             if (pathInsideMatch) {
                 path = pathInsideMatch[1];
@@ -26,9 +28,15 @@ export const parseJavaFiles = (rawText: string) => {
             }
         }
 
-        const filename = path ? path.split('/').pop() || 'Archivo.java' : 'Archivo.java';
+        const cleanPath = path.trim();
+        const filename = cleanPath ? cleanPath.split('/').pop() || 'Archivo.java' : 'Archivo.java';
         
-        results.push({ filename, code: rawCode.trim() });
+        results.push({ 
+            filename, 
+            path: cleanPath, 
+            code: rawCode.trim() 
+        });
+        
         lastIndex = blockRegex.lastIndex;
     }
 
