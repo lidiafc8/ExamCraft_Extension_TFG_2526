@@ -9,14 +9,51 @@ Una vez que tenemos la extensión funcional completa del nuevo examen, pasaremos
 
 Quiero que en base a la lógica de la extensión funcional que me has pasado, me generes un diagrama UML en código Mermaid similar al de los ejemplos que te he pasado en el documento md “functional_extension_examples”. Ten en cuenta estos requisitos:
 
--	Recuerda todo el contexto dado en la anterior petición.
+-  Recuerda todo el contexto dado en la anterior petición.
 
--	De los enunciados de ejemplo, céntrate en la estructura del código Mermaid de los del proyecto {{DOMAIN}}
+-  De los enunciados de ejemplo, céntrate en la estructura del código Mermaid de los del proyecto {{DOMAIN}}
 
+     - IMPORTANTE: Ignora si los ejemplos están compactados; tú debes aplicar siempre las reglas de saltos de línea estrictas mencionadas abajo.
      - De ellos, mantendrás la estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), de las clases base, es decir, las de color negro.
 
--	Para las nuevas clases a implementar por el alumno, es decir, clases rojas, añadirás toda su estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), acorde a la extensión funcional generada.
+-  Para las nuevas clases a implementar por el alumno, es decir, clases rojas, añadirás toda su estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), acorde a la extensión funcional generada.
 
--	Para las relaciones, si estas tienen un nombre asignado, este debe constar en el diagrama.
+-  Para las relaciones, si estas tienen un nombre asignado, este debe constar en el diagrama.
 
 -    REGLA ESTRICTA DE FORMATO: Genera código Mermaid válido y estándar. Bajo ninguna circunstancia utilices comandos de estilo (como style, classDef o linkStyle). Limítate exclusivamente a definir las clases, sus atributos, métodos y las relaciones entre ellas. Separa cada instrucción con un salto de línea.
+
+REGLAS ESTRICTAS DE SINTAXIS MERMAID (obligatorio cumplir todas):
+
+1. Usa SIEMPRE `-->` para asociaciones. NUNCA escribas `--` con `>` separado al final.
+   - CORRECTO: `Owner "1" --> "0..n" Pet : owns`
+   - INCORRECTO: `Owner "1" -- "0..n" Pet : owns >`
+
+2. NUNCA uses comillas escapadas. Las comillas de multiplicidad van sin barra invertida.
+   - CORRECTO: `Owner "1" --> "0..n" Pet : owns`
+   - INCORRECTO: `Owner \"1\" --> \"0..n\" Pet : owns`
+
+3. NUNCA uses `style`, `classDef` ni `linkStyle`.
+
+4. NUNCA pongas texto introductorio ni explicaciones antes o después del código.
+   El resultado debe empezar DIRECTAMENTE con `classDiagram` y nada más.
+
+5. Cada clase, atributo y relación en su propia línea. Sin líneas vacías dentro de una clase.
+
+6. Formato exacto de relaciones:
+   - Herencia:    `NamedEntity <|-- Pet`
+   - Asociación:  `Owner "1" --> "0..n" Pet : owns`
+   - Sin nombre:  `Visit "0..n" --> "1" Vet`
+
+7. ESTRUCTURA DE LLAVES OBLIGATORIA: Incluso si una clase no tiene atributos, NO uses el formato compacto `{}`. Usa siempre saltos de línea.
+   - CORRECTO:
+     class Vet {
+     }
+   - INCORRECTO: class Vet {}
+
+8. PROHIBIDO PEGAR CLASES: Está TERMINANTEMENTE PROHIBIDO pegar el cierre de una clase `}` con el inicio de otra `class` en la misma línea. Siempre debe haber un salto de línea real después de cada `}`.
+   - CORRECTO:
+     }
+     class Owner {
+   - INCORRECTO: }class Owner {
+
+9. ESPACIADO DE RELACIONES: Añade una línea en blanco entre la última clase definida y la primera relación (flecha) para asegurar la correcta lectura del parser.
