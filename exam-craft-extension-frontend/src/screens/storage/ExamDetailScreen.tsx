@@ -4,11 +4,7 @@ import DOMPurify from 'dompurify';
 
 import { MermaidViewer } from "../../components/MermaidViewer";
 import { Header } from "../../components/Header";
-import { 
-    extractMermaidCode, 
-    sanitizeMermaidForModal, 
-    cleanMermaidCode 
-} from "~src/utils/mermaidUtils";
+import { cleanMermaidCode } from "../../components/mermaidCleaner";
 
 export interface ExamDetailScreenProps {
     selectedProject: any;
@@ -42,16 +38,8 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
 
-    const mermaidCode = extractMermaidCode(selectedProject?.extensionFinish);
-    const fullText = selectedProject?.extensionFinish || '';
-    const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
-    let introText = fullText;
-    let modalMermaidCode = '';
-    
-    if (mermaidMatch) {
-        introText = fullText.substring(0, mermaidMatch.index).trim();
-        modalMermaidCode = sanitizeMermaidForModal(fullText);
-    }
+    const mermaidCode = selectedProject?.extensionMermaid || '';
+    const introText = selectedProject?.extensionStatement || '';
 
     const examFullMarkdown = `
 # Examen ${selectedProject?.domainName}: ${selectedProject?.customName || `Examen de ${selectedProject?.domainName}`}
@@ -59,7 +47,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 ## 1. Extensión Funcional y Diagrama UML
 ${introText || '*Sin extensión funcional*'}
 
-${modalMermaidCode ? `\`\`\`mermaid\n${modalMermaidCode}\n\`\`\`` : ''}
+${mermaidCode ? `\`\`\`mermaid\n${mermaidCode}\n\`\`\`` : ''}
 
 ## 2. Restricciones de Atributos
 ${selectedProject?.attributeConstraints || '*Sin restricciones para atributos definidas*'}
@@ -101,7 +89,7 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
                     </button>
 
                     {showActionsMenu && (
-                        <div style={{ position: 'absolute', top: '100%', right: '0', marginTop: '10px', backgroundColor: 'white', border: '1px solid #e1e4e8', borderRadius: '20px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '240px', transition: 'opacity 0.2s ease, transform 0.2s ease', transformOrigin: 'top right' }}>
+                        <div style={{ position: 'absolute', top: '100%', right: '0', marginTop: '10px', backgroundColor: 'white', border: '1px solid #e1e4e8', borderRadius: '20px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '240px' }}>
                             <button type="button" onClick={() => { setShowPreviewModal(true); setShowActionsMenu(false); }} className="btn-back" style={{ margin: 0, width: '100%', backgroundColor: '#2e7d32', color: 'white', fontSize: '14px', padding: '10px' }}>
                                 Previsualizar
                             </button>
@@ -126,7 +114,12 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
                     <div style={{ display: 'flex', gap: '10px', height: '600px' }}>
                         <div className="content-card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                             <h3 style={{ marginBottom: '10px' }}>ENUNCIADO Y CÓDIGO DIAGRAMA UML</h3>
-                            <textarea className="wf-textarea" readOnly value={selectedProject?.extensionFinish} style={{ flex: 1, resize: 'none', padding: '15px', fontSize: '14px' }} />
+                            <textarea 
+                                className="wf-textarea" 
+                                readOnly 
+                                value={`${introText}\n\n${mermaidCode}`}
+                                style={{ flex: 1, resize: 'none', padding: '15px', fontSize: '14px' }} 
+                            />
                         </div>
                         <div className="content-card" style={{ flex: 1.5, backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }}>
                             <h3 style={{ marginBottom: '10px' }}>ILUSTRACIÓN DIAGRAMA UML</h3>
@@ -141,57 +134,47 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
                     <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>Restricciones de Atributos</h2>
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
-                        <div className="content-card" style={{ padding: '20px' }}>
-                            {selectedProject?.attributeConstraints ? (
-                                <textarea className="wf-textarea" readOnly value={selectedProject.attributeConstraints}
-                                    style={{ width: '100%', minHeight: '500px', resize: 'vertical', padding: '15px', fontSize: '14px' }} />
-                            ) : (
-                                <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
-                                    Aún no se han creado las restricciones de atributos para este examen.
-                                </p>
-                            )}
-                        </div>
+                    <div className="content-card" style={{ padding: '20px' }}>
+                        {selectedProject?.attributeConstraints ? (
+                            <textarea className="wf-textarea" readOnly value={selectedProject.attributeConstraints}
+                                style={{ width: '100%', minHeight: '500px', resize: 'vertical', padding: '15px', fontSize: '14px' }} />
+                        ) : (
+                            <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
+                                Aún no se han creado las restricciones de atributos para este examen.
+                            </p>
+                        )}
                     </div>
+                </div>
 
                 <div className="section-block" style={{ marginBottom: '1px' }}>
                     <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>Relaciones entre Entidades</h2>
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
-                        <div className="content-card" style={{ padding: '20px' }}>
-                            {selectedProject?.entityRelations ? (
-                                <textarea className="wf-textarea" readOnly value={selectedProject.entityRelations}
-                                    style={{ width: '100%', minHeight: '200px', resize: 'vertical', padding: '15px', fontSize: '14px' }} />
-                            ) : (
-                                <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
-                                    Aún no se han creado las relaciones entre entidades para este examen.
-                                </p>
-                            )}
-                        </div>
+                    <div className="content-card" style={{ padding: '20px' }}>
+                        {selectedProject?.entityRelations ? (
+                            <textarea className="wf-textarea" readOnly value={selectedProject.entityRelations}
+                                style={{ width: '100%', minHeight: '200px', resize: 'vertical', padding: '15px', fontSize: '14px' }} />
+                        ) : (
+                            <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
+                                Aún no se han creado las relaciones entre entidades para este examen.
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 <div className="section-block" style={{ marginBottom: '1px' }}>
                     <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>Código Generado</h2>
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
-                    <div className="content-card" style={{ 
-                        padding: '30px 20px', 
-                        display: 'flex', 
-                        flexDirection: 'row', 
-                        justifyContent: 'center', 
-                        alignItems: 'center', 
-                        gap: '20px' 
-                    }}>
-                        
+                    <div className="content-card" style={{ padding: '30px 20px', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
                         <button type="button" onClick={onShowGeneratedCode} className="btn-back" 
                             style={{ margin: 0, width: 'fit-content', backgroundColor: '#b08968', color: 'white', padding: '12px 30px', fontWeight: 'bold' }}>
                             Ver Código Examen
                         </button>
-
                         <button type="button" onClick={onShowSolutionGeneratedCode} className="btn-back" 
                             style={{ margin: 0, width: 'fit-content', backgroundColor: '#b08968', color: 'white', padding: '12px 30px', fontWeight: 'bold' }}>
                             Ver Código Solución
                         </button>
-                        
                     </div>
                 </div>
 

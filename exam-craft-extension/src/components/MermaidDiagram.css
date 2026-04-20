@@ -1,0 +1,23 @@
+/* Contenedor con scroll */
+.mermaid-outer-container {
+  width: 100%;
+  overflow-x: auto; /* Fuerza la aparición del scroll */
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  padding: 20px;
+}
+
+/* El contenido interno que empuja los bordes */
+.mermaid-inner-content {
+  display: block;
+  min-width: 1500px; /* <--- Aumenta esto si quieres que sea aún más grande */
+}
+
+/* ESTO ES LO MÁS IMPORTANTE */
+.mermaid-inner-content svg {
+  max-width: none !important; /* Evita que Mermaid se auto-ajuste al ancho */
+  width: auto !important;     /* Deja que el SVG use su tamaño real */
+  height: auto !important;
+  transform: scale(1.2);      /* Zoom visual */
+  transform-origin: left top;
+}
