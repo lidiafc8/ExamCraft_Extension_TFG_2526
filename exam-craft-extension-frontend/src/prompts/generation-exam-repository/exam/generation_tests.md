@@ -1,65 +1,121 @@
-# PROMPT COMPLETO PARA GENERACIÓN DE TESTS DE LOS DISTITNOS EJERCICIOS
+# PROMPT COMPLETO PARA GENERACIÓN DE TESTS DE LOS DISTINTOS EJERCICIOS
 
 ## Recursos a proporcionar:
 * `generation_test.md`
 
-## Prompt a utilizar:
+## Prompt a utilizar
+Nuestra misión es generar el test de un examen de la asignatura "Diseño y Pruebas". Actuamos como profesores evaluando conocimientos de JPA y mapeo objeto-relacional. Te proporcionaré el enunciado, el diagrama UML en Mermaid y, **CRÍTICAMENTE, el Código Base de las clases ya generadas**.
 
-Nuestra misión es generar, a partir de un enunciado dado, el test del ejercicio de un examen, tomando el rol de profesores para una asignatura llamada Diseño y Pruebas, para evaluar los conocimientos de los alumnos sobre mapeo objeto relacional en JPA, manejo de estas entidades y base de datos, entre otras más. Concretamente te pasaré el enunciado y el diagrama UML en código Mermaid que lo acompaña, elementos en los que te tendrás que basar para proporcionarme la solución, pero antes, te daré información de contexto que necesitarás como recurso y entender mejor qué características tiene este examen:
+## Prompt a utilizar
+Nuestra misión es generar el test de un examen de la asignatura "Diseño y Pruebas". Actuamos como profesores evaluando conocimientos de JPA y mapeo objeto-relacional. Te proporcionaré el enunciado, el diagrama UML en Mermaid y, **CRÍTICAMENTE, el Código Base de las clases ya generadas**.
 
--	Hay que tomar el rol de profesor siempre, estamos generando un examen, hay que ponerse en los zapatos del profesorado.
--   Tienes que tener en cuenta los imports de las clases para que se escoja según se han creado las clases bases
--	Tenemos dos tipos de exámenes, uno enfocado a una clínica veterinaria y otro al juego del ajedrez.
--	Respecto al diagrama UML:
+Por favor, no uses Wildcard Imports (asteriscos). Genera todos los imports de forma explícita, uno por cada clase utilizada. IMPORTANTE CENTRARSE EN LAS CLASES QUE SE PROPORCIONA COMO CÓDIGO BASE, DE SU LOCALIZACIÓN PARA PODER PONER CORRECTAMENTE LOS IMPORTS DE DONDE SE SACAN LAS CLASES.
 
-     - 	Concepto de colores de clases:  
-         - **Clases negras**: El núcleo del sistema. Clases estables que se usan como contexto, pero que quedan fuera de la tarea de implementación. 
-         - **Clases rojas**: La tarea principal del alumno, se deben crear desde 0. Las clases vienen creadas pero su contenido está vacío.
+---
 
-         - Las clases negras son la base de la que partimos siempre en todos los exámenes, el dominio común a todos los exámenes dependiendo de qué tipo (clínica o ajedrez) de examen estemos generando y las rojas, pueden variar según la extensión funcional que se le añada.
+## ⚠️ REGLA ABSOLUTA Nº 1 — PAQUETES: LEE EL CÓDIGO BASE, NO INVENTES
 
-     -	Relaciones, cardinalidad y direccionalidad:
+Esta es la regla más importante del prompt. Debes seguirla antes que cualquier otra cosa.
+Además, para las clases que no estén implementadas en el código base, buscarla en el repositorio pasado, como Pet, viene de pet.Pet
 
-         - Relaciones rojas entre clases rojas: el alumno deberá añadir el atributo con su anotación de relación correspondiente. 
+**Procedimiento obligatorio antes de escribir un solo import:**
 
-         - Tendremos relaciones únicamente unidireccionales.
+1. Localiza la sección `=== PAQUETES REALES DETECTADOS EN EL CÓDIGO BASE ===` del contexto.
+2. Para cada clase que necesites importar, busca su `package` en el código base proporcionado.
+3. Construye el import como: `import <package_de_esa_clase>.<NombreClase>;`
+- Pero ten en cuenta en poner los nombres de las clases nueva generadas, no es siempre Achievement; sino q coja las clases del contexto que se le pase de la extensión funcional.
 
-         - La cardinalidad podrá ser de 1..1, 1, 0..1, 0..n, 1..n. Las relaciones muchos a muchos se omitirán en todos los casos.
+**Ejemplo concreto:**
+- Si el código base de `Achievement.java` empieza con `package es.us.dp1.chess.tournament.achievement;`
+- El import correcto en el test es: `import es.us.dp1.chess.tournament.achievement.Achievement;`
+- Teniendo en cuenta las mayúsculas y minúsculas de las clases para evitar el error en los tests
+- ❌ NUNCA: `import org.springframework.samples.chessgame.model.Achievement;`
+- ❌ NUNCA: `import org.springframework.samples.petClinic.model.Achievement;`
 
--	Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
+**Aplica lo mismo para `@ComponentScan`:**
+- ✅ CORRECTO: `@ComponentScan(basePackages = {"es.us.dp1.chess.tournament.achievement", "es.us.dp1.chess.tournament.userAchievement"})`
+- ❌ INCORRECTO: `@ComponentScan(basePackages = {"org.springframework.samples.chessgame.repository", "org.springframework.samples.chessgame.model"})`
 
-Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica de los tests que te paso en el archivo md “generation_test”, donde vienen tests de ejemplos que se han realizado para otros enunciado de examenes, quiero que me generes los tests de los distintos ejercicios del examen.
+**El paquete del propio test (`package ...` en la primera línea) también debe derivarse del código base**, usando el prefijo de donde se crean los test. Ejemplo: si el prefijo raíz es `es.us.dp1.chess.tournament`, el paquete del test será `es.us.dp1.chess.tournament`.
 
-Deberá cumplir estos requisitos:
+Si una clase (como `ReflexiveTest`, `NamedEntity`, etc.) no aparece en el código base proporcionado, usa el mismo prefijo raíz detectado para inferir su paquete. Nunca uses `org.springframework.samples.*` salvo que ese prefijo aparezca explícitamente en el código base.
 
--	Para generar los tests de los ejercicios es necesario usar lenguaje y framework: Java 17+, JUnit 5, Spring Boot (@DataJpaTest). 
+Tienes que tener en cuenta como los métodos se llaman en ReflexiveTest
 
--	Los tests tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
+---
 
--	La clase DEBE extender de la clase base ReflexiveTest proporcionada por la asignatura..
+## Reglas de Coherencia Adicionales
+2.  **Fidelidad al Código Base:** Si una clase en el código base tiene un atributo con un nombre específico (ej. `checkInDate`), el test debe usar ese nombre exacto, ignorando lo que diga cualquier otro ejemplo externo.
+3.  **Manejo de Relaciones:** Si en el Código Base una relación está marcada como `@Transient`, el test debe tratarla según las instrucciones del enunciado, pero siempre importando la clase desde su paquete real.
+
+---
+
+## Especificaciones del Examen
+- **Clases Negras:** Núcleo estable (Contexto). No se testea su implementación interna, pero se usan para crear objetos válidos (ej. `Owner`, `Pet`).
+- **Clases Rojas:** Tarea principal del alumno. Son las que debemos testear exhaustivamente (Restricciones, Anotaciones y Persistencia).
+- **Límite:** Máximo 2 entidades rojas por examen.
+- **Framework:** Java 17+, JUnit 5, Spring Boot (@DataJpaTest).
+- **Herencia:** La clase de test DEBE extender de `ReflexiveTest`.
+
+---
+
+## Estructura Requerida para Test1.java
+
+### 1. Configuración e Inyección
+- Inyecta los Repositorios de las entidades rojas y el `EntityManager` mediante `@Autowired`.
+- Usa `@ComponentScan` apuntando a los paquetes reales detectados en el Código Base (ver Regla Absoluta Nº 1).
+
+### 2. Verificación de Repositorios
+- **test1RepositoriesExist():** Verifica `assertNotNull`. Al final, debe llamar a `test1RepositoriesContainsMethod()` solo si el repo no es nulo.
+- **test1RepositoriesContainsMethod():** (SIN @Test) Verifica que el repo tiene el método `.count()` o similar mediante reflexión/interfaz.
+
+### 3. Validación de Restricciones (Constraints)
+- **test1Check[NOMBRE_ENTIDAD]Constraints():**
+    - Invoca `checkThatFieldsAreMandatory` con los campos `NotNull/NotBlank` identificados.
+    - Crea el mapa `invalidValues` usando `Map.of(...)`. **PROHIBIDO usar `new HashMap()`**.
+    - Los valores de prueba deben ser coherentes con el tipo de dato del Código Base (si es `Double`, usa `0.0`; si es `Integer`, `0`).
+    - Invoca `checkThatValuesAreNotValid`.
+
+### 4. Verificación de Anotaciones
+- **test1Check[NOMBRE_ENTIDAD]Annotations():**
+    - Verifica `@Entity` con `classIsAnnotatedWith`.
+    - Verifica `@Enumerated(EnumType.STRING)` si hay Enums.
+    - Verifica `@Size`, `@Positive`, `@FutureOrPresent`, etc., según el UML.
+
+### 5. Métodos Auxiliares y Persistencia
+- **createValid[NOMBRE_ENTIDAD](EntityManager em):** Método estático que construye una instancia válida.
+- **IMPORTANTE:** Usa EXCLUSIVAMENTE `setValue(objeto, "atributo", Tipo.class, valor)` para asignar datos, evitando fallos si no existen setters.
+- **test1Valid[NOMBRE_ENTIDAD]IsPersisted():** Verifica que `repo.save()` no lanza excepciones (`assertDoesNotThrow`) y haz `.flush()`.
+
+---
 
 
-### Para el ejercicio Test1 :
+### 2. Verificación de Repositorios
+- **test1RepositoriesExist():** Verifica `assertNotNull`. Al final, debe llamar a `test1RepositoriesContainsMethod()` solo si el repo no es nulo.
+- **test1RepositoriesContainsMethod():** (SIN @Test) Verifica que el repo tiene el método `.count()` o similar mediante reflexión/interfaz.
 
-Requisitos que debe de cumplir:
+### 3. Validación de Restricciones (Constraints)
+- **test1Check[NOMBRE_ENTIDAD]Constraints():**
+    - Invoca `checkThatFieldsAreMandatory` con los campos `NotNull/NotBlank` identificados.
+    - Crea el mapa `invalidValues` usando `Map.of(...)`. **PROHIBIDO usar `new HashMap()`**.
+    - Los valores de prueba deben ser coherentes con el tipo de dato del Código Base (si es `Double`, usa `0.0`; si es `Integer`, `0`).
+    - Invoca `checkThatValuesAreNotValid`.
 
-- Inyecta el Repositorio de la nueva entidad y el EntityManager usando @Autowired.
-- Crea el método test1RepositoriesExist(), anótalo con @Test y verifica que el repositorio siempre tiene que tener un valor, nunca null (assertNotNull).
-- Crea el método test1RepositoriesContainsMethod(). ESTRICTAMENTE PROHIBIDO anotarlo con @Test. Este método debe ser llamado internamente desde el final de test1RepositoriesExist() dentro de un bloque if (repositorio != null) para evitar un NullPointerException si la inyección falla.
-- Crea el método @Test public void test1Check[NOMBRE_ENTIDAD]Constraints().
-- Analiza el UML proporcionado. Identifica los campos obligatorios e invoca el método heredado checkThatFieldsAreMandatory(entidad, em, "campo1", "campo2", ...).
-- Analiza las restricciones del UML (tamaños, mínimos, máximos, nulos). Construye un mapa con los casos negativos (valores frontera y particiones de equivalencia).
-- ESTRICTAMENTE PROHIBIDO usar new HashMap<>() o .put(). Inicializa el mapa en una sola instrucción con Java moderno: Map<String, List<Object>> invalidValues = Map.of("campo1", List.of(...), "campo2", List.of(...));.
-- Invoca el método heredado checkThatValuesAreNotValid(entidad, invalidValues, em).
-- Crea el método @Test public void test1Check[NOMBRE_ENTIDAD]Annotations().
-- Usa el método heredado classIsAnnotatedWith(Clase.class, Entity.class) para verificar @Entity.
-- Si la entidad tiene algún atributo Enum, usa reflexión para verificar que tiene la anotación @Enumerated(EnumType.STRING).
-- Crea un método public static [Entidad] createValid[NOMBRE_ENTIDAD](EntityManager em).
-- Usa EXCLUSIVAMENTE el método heredado setValue(entidad, "atributo", Tipo.class, valor) para asignar datos válidos a todos los atributos de la entidad, evadiendo así fallos de compilación si el alumno se le ha olvidado crear los setters.
-- Crea el método @Test public void test1Valid[NOMBRE_ENTIDAD]IsPersisted(). Obtén una instancia válida, guárdala con el repositorio y haz un .flush() dentro de un assertDoesNotThrow.
+### 4. Verificación de Anotaciones
+- **test1Check[NOMBRE_ENTIDAD]Annotations():**
+    - Verifica `@Entity` con `classIsAnnotatedWith`.
+    - Verifica `@Enumerated(EnumType.STRING)` si hay Enums.
+    - Verifica `@Size`, `@Positive`, `@FutureOrPresent`, etc., según el UML.
 
-Por favor, bajo ninguna circustnacia generes nada de comentarios, solo los tests para copiar lo que me devuelvas directamente para ejecutarlo.
+### 5. Métodos Auxiliares y Persistencia
+- **createValid[NOMBRE_ENTIDAD](EntityManager em):** Método estático que construye una instancia válida.
+- **IMPORTANTE:** Usa EXCLUSIVAMENTE `setValue(objeto, "atributo", Tipo.class, valor)` para asignar datos, evitando fallos si no existen setters.
+- **test1Valid[NOMBRE_ENTIDAD]IsPersisted():** Verifica que `repo.save()` no lanza excepciones (`assertDoesNotThrow`) y haz `.flush()`.
 
-Tampoco pongas nada de ```java y ``` 
+---
 
-Genera el código completo de Test1.java aplicando estas reglas a la entidad principal descrita en el UML de este examen en particular.
+## Restricciones de Salida (Formato)
+- **PROHIBIDO** generar comentarios explicativos.
+- **PROHIBIDO** envolver el código en bloques de código markdown (sin \`\`\`java).
+- **PROHIBIDO** incluir texto antes o después del código.
+- Entrega el código listo para ser copiado y pegado en un archivo `.java`.

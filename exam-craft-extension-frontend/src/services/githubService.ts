@@ -1,21 +1,52 @@
 import type { GithubRepo } from "~src/models/GithubRepo";
 import type { GithubUser } from "../models/GithubUser";
 
-const extractFilesForGitHub = (rawText: string) => {
+export const extractFilesForGitHub = (rawText: string) => {
     if (!rawText) return [];
     const filesToUpload: { path: string, content: string }[] = [];
     
-    const regex = /([a-zA-Z0-9_./\-]+\.java);?\s*```[a-z]*\r?\n([\s\S]*?)```/gi; // NOSONAR javascript:S5852
+    const blockRegex = /```[a-zA-Z]*\r?\n([\s\S]*?)```/gi; // NOSONAR javascript:S5852
     let match;
+    let lastIndex = 0;
 
-    while ((match = regex.exec(rawText)) !== null) {
-        const fullPath = match[1]; 
-        const cleanCode = match[2].trim(); 
+    while ((match = blockRegex.exec(rawText)) !== null) {
+        const blockStart = match.index;
+        let rawCode = match[1];
+        let fullPath = '';
+
+        const textBefore = rawText.slice(lastIndex, blockStart);
+      
+        const pathsBefore = [...textBefore.matchAll(/(?:\/\/[\s\wáéíóú]*[:\s-]*)?([a-zA-Z0-9_./\-]+\.java)/gi)]; // NOSONAR javascript:S5852
         
-        filesToUpload.push({
-            path: fullPath,
-            content: cleanCode
-        });
+        if (pathsBefore.length > 0) {
+            fullPath = pathsBefore[pathsBefore.length - 1][1];
+        } else {
+
+            const pathInsideMatch = rawCode.match(/^[\s*/]*(?:Archivo|Path)?[\s:]*([a-zA-Z0-9_./\-]+\.java)/i); // NOSONAR javascript:S5852
+            
+            if (pathInsideMatch) {
+                fullPath = pathInsideMatch[1];
+                const matchedStr = pathInsideMatch[0];
+                rawCode = rawCode.substring(matchedStr.length).trim();
+            }
+        }
+
+        const cleanPath = fullPath.trim();
+
+        if (cleanPath) {
+            filesToUpload.push({
+                path: cleanPath,
+                content: rawCode.trim()
+            });
+        } else {
+            const fallbackName = `src/main/java/generated/ClaseGenerada_${Date.now()}.java`;
+            filesToUpload.push({
+                path: fallbackName,
+                content: rawCode.trim()
+            });
+        }
+
+        lastIndex = blockRegex.lastIndex;
     }
 
     return filesToUpload;
@@ -401,11 +432,12 @@ export const GithubService = {
           }
       );
 
-      if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`Error subiendo ${path} a rama ${branch}: ${errorData.message}`);
-      }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Error subiendo ${path} a rama ${branch}: ${errorData.message}`);
+        }
 
-      return await response.json();
-  }
+        return await response.json();
+    }
+
 };

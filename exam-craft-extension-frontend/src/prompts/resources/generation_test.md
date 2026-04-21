@@ -1,7 +1,7 @@
 # TODOS LOS EXAMENES TIENEN QUE TENER ESTA CLASE DE TEST
-
+# CLASE COMÚN REFLEXIVETEST
 ```
-package org.springframework.samples.petclinic;
+package org.springframework.samples.petclinic.grooming;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,10 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -36,6 +33,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
 public abstract class ReflexiveTest {
+
+    protected static final String LONGER_THAN_60_STRING = "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados, lentejas los viernes, algún palomino de añadidura los domingos, consumían las tres partes de su hacienda.";
     
     public void checkThatFieldIsAnnotatedWithDateTimeFormat(Class aClass, String fieldname,String format){
         try{
@@ -48,20 +47,6 @@ public abstract class ReflexiveTest {
         }catch(NoSuchFieldException ex){
             fail("The "+aClass.getName()+" class should have a field that is not present: "+ex.getMessage());
         }
-    }
-
-    protected void checkAtributeIsAnnotatedWith(Class annotatedClass, String attributeName, Class annotationClass,
-            String annotationPropertyName, Object annnotationPropertyValue) {
-                try{
-                    Field myField=annotatedClass.getDeclaredField(attributeName);
-                    Object annotation=myField.getAnnotation(annotationClass);
-                    assertNotNull(annotation,"The "+attributeName+" property is not properly annotated");                    
-                    Object fieldValue=invokeMethodReflexively(annotation,annotationPropertyName);
-                    assertEquals(fieldValue,annnotationPropertyValue); 
-                }catch(NoSuchFieldException ex){
-                    fail("The "+annotatedClass.getName()+" class should have a field that is not present: "+ex.getMessage());
-                }
-
     }
 
     public void checkThatFieldIsAnnotatedWith(Class aClass, String fieldname,Class annotationClass){
@@ -78,7 +63,7 @@ public abstract class ReflexiveTest {
         boolean result=false;
         Field myField=aClass.getDeclaredField(fieldname);
         Object annotation=myField.getAnnotation(annotationClass);
-        result= (annotation != null);
+        result= (annotation == null);
         return result;
     }
 
@@ -86,10 +71,9 @@ public abstract class ReflexiveTest {
         return class1.getAnnotation(class2)!=null;
     }
 
-    public boolean classHasMethod(Object targetObject, String methodName, Class<?>[] parameterTypes){
-        Method method = null;
+    public boolean classHasMethod(Object targetObject, String methodName, Class<?> ... parameterTypes) {
         try {
-            method = targetObject.getClass().getMethod(methodName, parameterTypes);            
+            Method method = targetObject.getClass().getMethod(methodName, parameterTypes);            
             return true;
         } catch (NoSuchMethodException e) {
             return false;
@@ -111,21 +95,6 @@ public abstract class ReflexiveTest {
                 checkThatValueIsNotValid(validEntity, fieldName, invalidValue,null, em);
     }
     
-    public void checkIsValid(Object o){
-        ObjectMapper objectMapper=new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();            
-        if(o!=null){            
-                Set<ConstraintViolation<Object>> violations=validator.validate(o);
-                try {
-                    assertTrue(violations.isEmpty(),"The "+o.getClass().getSimpleName()+":'"+objectMapper.writeValueAsString(o)+" should be valid but the following constraint vionations were found:"+violations);
-                } catch (JsonProcessingException e) {                    
-                    e.printStackTrace();
-                }
-        }        
-    }
-
     public void checkThatValueIsNotValid(Object validEntity,String fieldname,Object value,Class<?> type, EntityManager em){
         try{
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -134,8 +103,12 @@ public abstract class ReflexiveTest {
             Object originalValue=setValue(validEntity,fieldname,type,value);                        
             Set<ConstraintViolation<Object>> violations=validator.validate(validEntity);
             if(violations.isEmpty()){
-                assertThrows(Exception.class,() -> em.persist(validEntity),
-                    "You are not constraining the "+fieldname+", since the value "+value+" was considered valid (and it should not be valid)");
+                if(isEntity(validEntity.getClass())) {
+                    assertThrows(Exception.class,() -> em.persist(validEntity),
+                        "You are not constraining the "+fieldname+", since the value "+value+" was considered valid (and it should not be valid)");
+                } else {
+                    fail("You are not constraining the "+fieldname+", since the value "+value+" was considered valid (and it should not be valid)");
+                }
             }
             setValue(validEntity,fieldname,type, originalValue);
         }catch (IllegalArgumentException e) {
@@ -152,7 +125,8 @@ public abstract class ReflexiveTest {
                 myField.setAccessible(true);
                 originalValue=myField.get(object);
                 myField.set(object, value);
-            } catch (NoSuchFieldException e) {                
+            } catch (NoSuchFieldException e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
                 originalValue=invokeMethodReflexively(object, generateGetterName(fieldname));
                 Class[] paramTypes=generateParameterTypes(type,value,originalValue);
@@ -188,12 +162,8 @@ public abstract class ReflexiveTest {
             method = targetObject.getClass().getMethod(methodName, parameterTypes);
             method.setAccessible(true);
             result = method.invoke(targetObject, parameterValues);
-        } catch (NoSuchMethodException e) {            
-            try{
-                result=tryToInvokeMethodIrrespectivelyOfParameterTypes(targetObject, methodName,parameterValues);
-            }catch(Exception ex){                
-                fail(targetObject.getClass().getName() + " does not have a " + methodName + " method",ex);
-            }
+        } catch (NoSuchMethodException e) {
+            fail(targetObject.getClass().getName() + " does not have a " + methodName + " method");
         } catch (SecurityException e) {
             fail(methodName + " method is not accessible in " + targetObject.getClass().getName());
         } catch (IllegalAccessException e) {
@@ -206,47 +176,6 @@ public abstract class ReflexiveTest {
         }
         return result;
     }
-    
-    public static Object tryToInvokeMethodIrrespectivelyOfParameterTypes(Object targetObject, String methodName, Object... parameterValues) throws Exception {
-        Class<?> clazz = targetObject.getClass();
-        Method[] methods = clazz.getMethods();
-    
-        for (Method method : methods) {
-            if (method.getName().equals(methodName)) {
-                Class<?>[] methodParamTypes = method.getParameterTypes();
-                if (methodParamTypes.length == parameterValues.length) {
-                    boolean isCompatible = true;
-                    for (int i = 0; i < methodParamTypes.length; i++) {
-                        Object paramValue = parameterValues[i];
-                        if (paramValue != null) {
-                            if (!methodParamTypes[i].isAssignableFrom(paramValue.getClass())) {
-                                isCompatible = false;
-                                break;
-                            }
-                        } else {
-                            // If parameter value is null, we cannot determine its type, assume it's compatible
-                            // Alternatively, you might want to skip methods where the parameter type is primitive
-                            if (methodParamTypes[i].isPrimitive()) {
-                                isCompatible = false;
-                                break;
-                            }
-                        }
-                    }
-                    if (isCompatible) {
-                        method.setAccessible(true);
-                        try {
-                            return method.invoke(targetObject, parameterValues);
-                        } catch (Exception e) {
-                            // Continue to the next method if this one fails
-                        }
-                    }
-                }
-            }
-        }
-        throw new NoSuchMethodException("No suitable method named " + methodName + " found in " + clazz.getName());
-    }
-    
-
 
     public static Object invokeMethodReflexively(Object o, String methodName, Object ... params){
         Object result=null;
@@ -364,6 +293,12 @@ public abstract class ReflexiveTest {
         List<Class<? extends Throwable>> exceptionsWithRollbackFor=Arrays.asList(transactionalAnnotation.rollbackFor());
         assertTrue(exceptionsWithRollbackFor.contains(exceptionClass));
     }
+
+    public <T> boolean isEntity(Class<T> clazz) {
+        return classIsAnnotatedWith(clazz, Entity.class);
+    }
+
+
     
 }
 ```

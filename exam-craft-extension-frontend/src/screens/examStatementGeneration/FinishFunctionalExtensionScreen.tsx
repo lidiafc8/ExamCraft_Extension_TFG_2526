@@ -37,11 +37,14 @@ export default function FinishFunctionalExtensionScreen({
             
             const finalName = userChosenName.trim() || `Examen de ${domainName}`;
 
+            const extensionFinish = `${extensionStatement}\n\n${extensionMermaid ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\`` : ''}`.trim();
+
             const dataToSave = {
                 domainName: domainName, 
                 customName: finalName,  
                 extensionStatement,
                 extensionMermaid,
+                extensionFinish,
                 savedAt: new Date().toISOString()
             };
 
