@@ -100,19 +100,17 @@ export default function GenerationBaseClassesScreen({
       successSecondaryButtonLabel="Ir al Inicio"
       onSuccessSecondary={() => onWelcome()}
       
-      onSaved={(projectData) => {
-        // Mantenemos tu lógica de rescate de ID para que no falle el guardado
+      onSaved={(savedData) => {
         const finalProjectData = {
-          ...projectData,
-          id: projectData.id || initialProject?.id 
+            ...savedData.project,
+            id: savedData.project.id || initialProject?.id 
         };
-
         if (fromAttributes && onGoToTests) {
-          onGoToTests(finalProjectData);
+            onGoToTests(finalProjectData);
         } else {
-          onCodeGeneration();
+            onCodeGeneration();
         }
-      }}
+    }}
 
       allowedFolders={["clínica veterinaria", "ajedrez"]}
       storageKey="baseClasses"
