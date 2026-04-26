@@ -4,6 +4,7 @@ import { sendToGemini } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import { Header } from "~src/components/Header"
+import { cleanMermaidCode } from "../../components/mermaidCleaner";
 
 interface Props {
   readonly domainName: string;
@@ -14,7 +15,7 @@ interface Props {
   readonly onCreateExamByParts: () => void;
   readonly onFunctionalExtension: () => void;
   readonly onStatementStep1: () => void;
-  readonly onFinishExtension: (text:string) => void;
+  readonly onFinishExtension: (statement: string, mermaidCode: string) => void;
 }
 
 export default function DiagramUMLScreen({ 
@@ -31,46 +32,25 @@ export default function DiagramUMLScreen({
 
     const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
     const [promptText, setPromptText] = useState("");
-    
-    //esto es lo que ve el usuario
     const [hiddenContext, setHiddenContext] = useState("");
-
-    //esto es en bruto lo que devuelve la IA
     const [responseText, setResponseText] = useState("");
-
-    //esto para que se muestre, que se está cargando, para no dar siempre el tiempo y se gaste la cuota
+    const [cleanCode, setCleanCode] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-
-    //esto es para unir el codigo mermaid con el contexto del enunciado
     const [extensionComplete, setExtensionComplete] = useState("");
-
-    //se ejecuta al principio, y cuando se cambia el enunciado 
-    //FUNCIONALIDAD DEL MÉTODO ---> es separar el prompt
 
     useEffect(() => {
         if (extensionPromptMarkdown && domainName) {
             const { visibleText, hiddenContext } = parseMasterPrompt(extensionPromptMarkdown);
-            
             const finalVisible = visibleText.replaceAll("{{DOMAIN}}", domainName);
-            
             setPromptText(finalVisible);    
             setHiddenContext(hiddenContext);
         }
     }, [context, domainName]);
 
-    const cleanMermaidCode = (code) => {
-        if (!code) return '';
-        
-        return code
-            .replaceAll(/<[^>]*>?/gm, '') 
-            .replaceAll('&nbsp;', ' ')
-            .split('\n')
-            .map(line => line.trimEnd())
-            .join('\n');
-    }
     const handleGenerate = async () => {
         setIsLoading(true);
         setResponseText("");
+        setCleanCode("");
         try {
             const finalPayload = `
             CONTEXTO Y RECURSOS (Información interna):
@@ -83,22 +63,10 @@ export default function DiagramUMLScreen({
             ${promptText}
         `;
             const result = await sendToGemini(finalPayload);
-
-            // --- NUEVA LÓGICA DE LIMPIEZA ---
-            // 1. Quitamos primero las etiquetas de bloque de código markdown
-            let cleanResult = result.replaceAll(/```mermaid/g, "").replaceAll(/```/g, "");
-
-            // 2. Buscamos dónde empieza realmente el diagrama (ej: classDiagram, graph TD, etc.)
-            // Esto ignora cualquier texto introductorio de la IA
-            const diagramMatch = cleanResult.match(/(classDiagram|graph|sequenceDiagram|erDiagram|stateDiagram|kanban)[\s\S]*/);
-            
-            if (diagramMatch) {
-                cleanResult = diagramMatch[0].trim();
-            } else {
-                cleanResult = cleanResult.trim(); // Fallback por si no encuentra el match
-            }
+            const cleanResult = cleanMermaidCode(result);
 
             setResponseText(cleanResult);
+            setCleanCode(cleanResult);
             setInternalStep('result');
 
             try {
@@ -126,37 +94,8 @@ export default function DiagramUMLScreen({
             setIsLoading(false);
         }
     };
-
-    const handleCombinationExtension = async (context, responseText) => {
-        // 1. Limpiamos el estado previo (opcional, dependiendo de tu UI)
-        setExtensionComplete("");
-
-        try {
-            // 2. Validamos que tengamos ambos datos para evitar strings vacíos
-            if (!context || !responseText) {
-                console.warn("Falta contexto o código del diagrama");
-            }
-
-            // 3. Creamos la combinación en una constante local
-            // Usamos .trim() para limpiar espacios innecesarios
-            const combinedResult = `
-${context.trim()}
-
-## Diagrama UML (Código Mermaid):
-${responseText.trim()}`.trim();
-
-            // 4. Actualizamos el estado para la interfaz (si lo necesitas mostrar en pantalla)
-            setExtensionComplete(combinedResult);
-
-            // 5. ¡ESTA ES LA CLAVE! 
-            // Enviamos 'combinedResult' directamente, NO 'extensionComplete'
-            // Así nos aseguramos de que el padre reciba la información nueva al momento.
-            onFinishExtension(combinedResult);
-
-        } catch (error) {
-            console.error("Error al combinar contexto y diagrama UML:", error);
-            alert("Ocurrió un error al procesar la combinación final.");
-        }
+    const handleCombinationExtension = (context: string, responseText: string) => {
+        onFinishExtension(context.trim(), responseText.trim());
     };
 
     const breadcrumbItems = [
@@ -212,16 +151,16 @@ ${responseText.trim()}`.trim();
                     {internalStep === 'result' && (
                         <div style={{ 
                             display: 'flex', 
-                            gap: '20px', //espacio entre cada componente
-                            width: '200%',          // Ocupa la mayoría del ancho disponible
-                            maxWidth: '1600px',    // Pero no se estira infinitamente en monitores 4K
+                            gap: '20px',
+                            width: '200%',
+                            maxWidth: '1600px',
                             height: '105vh', 
-                            alignItems: 'stretch',  //para ponerlos en fila  
+                            alignItems: 'stretch',
                             padding: '0 20px', 
                             boxSizing: 'border-box'
                         }}>
         
-                        {/* COLUMNA 1: PROMPT (Flex 1 para igualdad) */}
+                        {/* COLUMNA 1: PROMPT */}
                         <div className="wf-column" style={{ flex: '1', display: 'flex', flexDirection: 'column', minWidth: '0' }}>
                             <span className="wf-column-title" style={{ fontSize: '16px', fontWeight: '700', marginBottom: '10px', textAlign: 'center' }}>
                                 Prompt de Generación del Diagrama UML
@@ -251,53 +190,39 @@ ${responseText.trim()}`.trim();
                                 borderRadius: '15px', 
                                 display: 'flex',
                                 flexDirection: 'column', 
-                                overflow: 'hidden', 
+                                overflow: 'auto',
                                 boxShadow: '0 8px 25px rgba(0,0,0,0.1)' 
                             }}>
-                                {/* ENUNCIADO: Se ve entero, sin cortes */}
+                                {/* ENUNCIADO */}
                                 <div style={{ 
                                     fontSize: '13px', 
                                     padding: '18px', 
                                     background: '#f8f9fa', 
                                     borderBottom: '1px solid #eee', 
                                     color: '#333',
-                                    height: 'auto',
                                     flexShrink: 0 
                                 }}>
                                     <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#666' }}>📌 Enunciado completo:</div>
                                     {context} 
                                 </div>
                                 
-                                {/* ÁREA DEL DIAGRAMA: Ahora sin scale pequeño, usando al completo el ancho */}
+                                {/* ÁREA DEL DIAGRAMA */}
                                 <div style={{ 
                                     flex: '1', 
-                                    overflow: 'auto', 
-                                    padding: '10px', 
-                                    display: 'flex', 
-                                    flexDirection: 'column', // Cambiado para apilar correctamente
-                                    justifyContent: 'flex-start', // Empieza desde arriba
-                                    alignItems: 'center',
-                                    backgroundColor: '#fff'
+                                    overflow: 'auto',
+                                    padding: '10px',
                                 }}>
-                                    {responseText ? (
-                                        <div style={{ 
-                                            width: '100%', 
-                                            /* Eliminamos el scale(0.6) o (0.8) que lo hacía minúsculo */
-                                            transform: 'scale(1)', 
-                                            transformOrigin: 'top center'
-                                        }}>
-                                            <MermaidViewer 
-                                                chartCode={cleanMermaidCode(responseText)}
-                                            />
-                                        </div>
+                                    {cleanCode ? (
+                                        <MermaidViewer chartCode={cleanCode} />
                                     ) : (
                                         <div style={{fontSize: '13px', color: '#aaa', marginTop: '20px'}}>Renderizando...</div>
                                     )}
                                 </div>
 
-                                {/* BOTÓN: Pegado abajo sin margen blanco */}
+                                {/* BOTÓN CONFIRMAR */}
                                 <button  
                                     className="btn-step primary"
+                                    style={{ flexShrink: 0 }}
                                     onClick={() => handleCombinationExtension(context, responseText)}
                                 >
                                     Confirmar Diagrama UML
@@ -305,7 +230,7 @@ ${responseText.trim()}`.trim();
                             </div>
                         </div>
 
-                        {/* COLUMNA 3: CÓDIGO (Flex 1 para igualdad) */}
+                        {/* COLUMNA 3: CÓDIGO MERMAID */}
                         <div className="wf-column" style={{ flex: '1', display: 'flex', flexDirection: 'column', minWidth: '0' }}>
                             <span className="wf-column-title" style={{ fontSize: '16px', fontWeight: '700', marginBottom: '10px', textAlign: 'center' }}>
                                 Código Mermaid

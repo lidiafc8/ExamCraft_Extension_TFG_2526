@@ -1,22 +1,52 @@
 import type { GithubRepo } from "~src/models/GithubRepo";
 import type { GithubUser } from "../models/GithubUser";
-import { sanitizeMermaidForModal } from "~src/utils/mermaidUtils";
 
-const extractFilesForGitHub = (rawText: string) => {
+export const extractFilesForGitHub = (rawText: string) => {
     if (!rawText) return [];
     const filesToUpload: { path: string, content: string }[] = [];
     
-    const regex = /([a-zA-Z0-9_./\-]+\.java);?\s*```[a-z]*\r?\n([\s\S]*?)```/gi; // NOSONAR javascript:S5852
+    const blockRegex = /```[a-zA-Z]*\r?\n([\s\S]*?)```/gi; // NOSONAR javascript:S5852
     let match;
+    let lastIndex = 0;
 
-    while ((match = regex.exec(rawText)) !== null) {
-        const fullPath = match[1]; 
-        const cleanCode = match[2].trim(); 
+    while ((match = blockRegex.exec(rawText)) !== null) {
+        const blockStart = match.index;
+        let rawCode = match[1];
+        let fullPath = '';
+
+        const textBefore = rawText.slice(lastIndex, blockStart);
+      
+        const pathsBefore = [...textBefore.matchAll(/(?:\/\/[\s\wáéíóú]*[:\s-]*)?([a-zA-Z0-9_./\-]+\.java)/gi)]; // NOSONAR javascript:S5852
         
-        filesToUpload.push({
-            path: fullPath,
-            content: cleanCode
-        });
+        if (pathsBefore.length > 0) {
+            fullPath = pathsBefore[pathsBefore.length - 1][1];
+        } else {
+
+            const pathInsideMatch = rawCode.match(/^[\s*/]*(?:Archivo|Path)?[\s:]*([a-zA-Z0-9_./\-]+\.java)/i); // NOSONAR javascript:S5852
+            
+            if (pathInsideMatch) {
+                fullPath = pathInsideMatch[1];
+                const matchedStr = pathInsideMatch[0];
+                rawCode = rawCode.substring(matchedStr.length).trim();
+            }
+        }
+
+        const cleanPath = fullPath.trim();
+
+        if (cleanPath) {
+            filesToUpload.push({
+                path: cleanPath,
+                content: rawCode.trim()
+            });
+        } else {
+            const fallbackName = `src/main/java/generated/ClaseGenerada_${Date.now()}.java`;
+            filesToUpload.push({
+                path: fallbackName,
+                content: rawCode.trim()
+            });
+        }
+
+        lastIndex = blockRegex.lastIndex;
     }
 
     return filesToUpload;
@@ -281,10 +311,8 @@ export const GithubService = {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // 1. README
-      const fullText = project?.extensionFinish || '';
-      const mermaidMatch = fullText.match(/(classDiagram|graph)[\s\S]*/i);
-      const introText = mermaidMatch ? fullText.substring(0, mermaidMatch.index).trim() : fullText;
-      const finalMermaidCode = mermaidMatch ? sanitizeMermaidForModal(fullText) : '';
+      const introText = project?.extensionStatement || '';
+      const finalMermaidCode = project?.extensionMermaid || '';
 
       const markdownContent =
           `### Examen Completo: ${project?.customName || project?.domainName}\n\n` +
@@ -309,101 +337,100 @@ export const GithubService = {
       return newRepo.html_url;
   },
 
-    async getMainBranchSha(
-        token: string,
-        owner: string,
-        repo: string
-    ): Promise<string> {
-        const response = await fetch(
-            `https://api.github.com/repos/${owner}/${repo}/git/ref/heads/main`,
-            {
-                headers: {
-                    "Authorization": `token ${token}`,
-                    "Accept": "application/vnd.github+json"
-                }
-            }
-        );
-        if (!response.ok) throw new Error("No se pudo obtener el SHA de main");
-        const data = await response.json();
-        return data.object.sha;
-    },
+  async getMainBranchSha(
+      token: string,
+      owner: string,
+      repo: string
+  ): Promise<string> {
+      const response = await fetch(
+          `https://api.github.com/repos/${owner}/${repo}/git/ref/heads/main`,
+          {
+              headers: {
+                  "Authorization": `token ${token}`,
+                  "Accept": "application/vnd.github+json"
+              }
+          }
+      );
+      if (!response.ok) throw new Error("No se pudo obtener el SHA de main");
+      const data = await response.json();
+      return data.object.sha;
+  },
 
-    async createBranch(
-        token: string,
-        owner: string,
-        repo: string,
-        branchName: string,
-        fromSha: string
-    ): Promise<void> {
-        const response = await fetch(
-            `https://api.github.com/repos/${owner}/${repo}/git/refs`,
-            {
-                method: "POST",
-                headers: {
-                    "Authorization": `token ${token}`,
-                    "Accept": "application/vnd.github+json",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    ref: `refs/heads/${branchName}`,
-                    sha: fromSha
-                })
-            }
-        );
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(`Error creando rama ${branchName}: ${err.message}`);
-        }
-    },
+  async createBranch(
+      token: string,
+      owner: string,
+      repo: string,
+      branchName: string,
+      fromSha: string
+  ): Promise<void> {
+      const response = await fetch(
+          `https://api.github.com/repos/${owner}/${repo}/git/refs`,
+          {
+              method: "POST",
+              headers: {
+                  "Authorization": `token ${token}`,
+                  "Accept": "application/vnd.github+json",
+                  "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                  ref: `refs/heads/${branchName}`,
+                  sha: fromSha
+              })
+          }
+      );
+      if (!response.ok) {
+          const err = await response.json();
+          throw new Error(`Error creando rama ${branchName}: ${err.message}`);
+      }
+  },
 
-    async createOrUpdateFileOnBranch(
-        token: string,
-        owner: string,
-        repo: string,
-        path: string,
-        content: string,
-        message: string,
-        branch: string
-    ): Promise<any> {
-
+  async createOrUpdateFileOnBranch(
+      token: string,
+      owner: string,
+      repo: string,
+      path: string,
+      content: string,
+      message: string,
+      branch: string
+  ): Promise<any> {
       const base64Content = btoa(encodeURIComponent(content).replaceAll(/%([0-9A-F]{2})/g, (_, p1) => String.fromCodePoint(Number.parseInt(p1, 16))));
 
-        let sha = undefined;
-        try {
-            const getResponse = await fetch(
-                `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
-                {
-                    headers: {
-                        "Authorization": `token ${token}`,
-                        "Accept": "application/vnd.github+json"
-                    }
-                }
-            );
-            if (getResponse.ok) {
-                const fileData = await getResponse.json();
-                sha = fileData.sha;
-            }
-        } catch {
-          
-        }
+      let sha = undefined;
+      try {
+          const getResponse = await fetch(
+              `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
+              {
+                  headers: {
+                      "Authorization": `token ${token}`,
+                      "Accept": "application/vnd.github+json"
+                  }
+              }
+          );
+          if (getResponse.ok) {
+              const fileData = await getResponse.json();
+              sha = fileData.sha;
+          }
+      } catch {
+        
+      }
 
-        const response = await fetch(
-            `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-            {
-                method: "PUT",
-                headers: {
-                    "Authorization": `token ${token}`,
-                    "Accept": "application/vnd.github+json",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    message,
-                    content: base64Content,
-                    branch,
-                    ...(sha && { sha })
-                })
-            }
-        );
+      const response = await fetch(
+          `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+          {
+              method: "PUT",
+              headers: {
+                  "Authorization": `token ${token}`,
+                  "Accept": "application/vnd.github+json",
+                  "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                  message,
+                  content: base64Content,
+                  branch,
+                  ...(sha && { sha })
+              })
+          }
+      );
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -414,4 +441,3 @@ export const GithubService = {
     }
 
 };
-

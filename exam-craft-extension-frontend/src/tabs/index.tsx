@@ -23,10 +23,16 @@ export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
   const [contextResponse, setContextResponse] = useState<string>("")
   const [functionalExtensionCompleted, setFunctionalExtensionCompleted] = useState<string>("")
+  const [extensionStatement, setExtensionStatement] = useState<string>("")
+  const [extensionMermaid, setExtensionMermaid] = useState<string>("")
   
-  const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string } | null>(null)
+  const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string, baseClass: string } | null>(null)
 
   const [testOrigin, setTestOrigin] = useState<'attributes' | 'general'>('attributes');
+
+  // Estados de control de flujo
+  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [cameFromAttributes, setCameFromAttributes] = useState<boolean>(false);
 
   const [screen, setScreen] = useState<
     "welcome" | 
@@ -55,10 +61,11 @@ export default function IndexTab() {
     <div>
       {screen === "welcome" && (
         <WelcomeScreen 
-        onStart={() => setScreen("github")} 
-        onCreateExam={() => setScreen("createExam")}
-        onBack={() => setScreen("welcome")}
-        onStorage={() => setScreen("storage")}/>
+          onStart={() => setScreen("github")} 
+          onCreateExam={() => setScreen("createExam")}
+          onBack={() => setScreen("welcome")}
+          onStorage={() => setScreen("storage")}
+        />
       )}
 
       {screen === "github" && (
@@ -67,8 +74,9 @@ export default function IndexTab() {
 
       {screen === "createExam" && (
         <CreateExamScreen 
-        onBack={() => setScreen("welcome")} 
-        onCreateExamByParts={() => setScreen("createExamByParts")} />
+          onBack={() => setScreen("welcome")} 
+          onCreateExamByParts={() => setScreen("createExamByParts")} 
+        />
       )}
 
       {screen === "createExamByParts" && (
@@ -77,18 +85,22 @@ export default function IndexTab() {
         onWelcome={() => setScreen("welcome")} 
         onFunctionalExtension={() => setScreen("domainSelection")}
         onAttributesConstraints={() => setScreen("attributesConstraints")}
+        onCodeGeneration={() => {
+          setSelectedProject(null); 
+          setCameFromAttributes(false);
+          setScreen("codeGeneration");
+          }}
         onEntityRelationships={() => setScreen("entityRelationships")}
-        onCodeGeneration={() => setScreen("codeGeneration")}
         />
       )}
 
       {screen === "codeGeneration" && (
         <CodeGenerationScreen 
         onBack={() => setScreen("createExamByParts")} 
-        onWelcome={() => setScreen("welcome")} 
-        onCreateExamByParts={() => setScreen("createExamByParts")}
-        onExamCodeGeneration={() => setScreen("examCodeGeneration")}
-        onSolutionCodeGeneration={() => setScreen("solutionCodeGeneration")}
+          onWelcome={() => setScreen("welcome")} 
+          onCreateExamByParts={() => setScreen("createExamByParts")}
+          onExamCodeGeneration={() => setScreen("examCodeGeneration")}
+          onSolutionCodeGeneration={() => setScreen("solutionCodeGeneration")}
         />
       )}
 
@@ -98,7 +110,11 @@ export default function IndexTab() {
         onWelcome={() => setScreen("welcome")}
         onGenerateTest={() => setScreen("testGeneral")}
         onCreateExamByParts={() => setScreen("createExamByParts")}
-        onGenerateBaseClasses={() => setScreen("generateBaseClasses")}
+        onGenerateBaseClasses={(project) => {
+            setSelectedProject(null);
+            setCameFromAttributes(false); 
+            setScreen("generateBaseClasses");
+          }}
         onCodeGeneration={() => setScreen("codeGeneration")}
         />
       )} 
@@ -126,7 +142,18 @@ export default function IndexTab() {
 
       {screen === "generateBaseClasses" && (
         <GenerationBaseClassesScreen 
-          onBack={() => setScreen("examCodeGeneration")} 
+          initialProject={selectedProject} 
+          fromAttributes={cameFromAttributes} // ✅ Corregido: Ahora pasa el booleano real
+          onGoToTests={(updatedProject) => { 
+            setSharedTestData({
+              project: updatedProject,
+              constraints: updatedProject.attributeConstraints || "",
+              baseClass: updatedProject.baseClasses || updatedProject.baseClass || ""
+            });
+            setTestOrigin('attributes');
+            setScreen("testAtributes");
+          }} 
+          onBack={() => setScreen(cameFromAttributes ? "attributesConstraints" : "codeGeneration")} 
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
@@ -138,12 +165,12 @@ export default function IndexTab() {
       {screen === "domainSelection" && (
         <DomainSelectionScreen 
         onBack={() => setScreen("createExamByParts")} 
-        onWelcome={() => setScreen("welcome")} 
-        onSelectDomain={(domainName) => {
+          onWelcome={() => setScreen("welcome")} 
+          onSelectDomain={(domainName) => {
               setSelectedDomain(domainName)  
               setScreen("domainWorkflow") 
           }}
-        onCreateExam={() => setScreen("createExam")}
+         onCreateExam={() => setScreen("createExam")}
         />
       )}
 
@@ -154,7 +181,7 @@ export default function IndexTab() {
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
-          onFunctionalExtension={() => setScreen("functionalExtension")}
+          onFunctionalExtension={() => setScreen("domainSelection")}
           onCreateDiagram={(context) => {
             setContextResponse(context)
             setScreen("diagramUML")
@@ -173,8 +200,7 @@ export default function IndexTab() {
             setTestOrigin('general');
             setScreen("testAtributes");
           }}
-        onCodeGeneration={() => setScreen("codeGeneration")}
-        onExamCodeGeneration={() => setScreen("examCodeGeneration")}
+          onCodeGeneration={() => setScreen("codeGeneration")}
         />
       )}
 
@@ -188,9 +214,10 @@ export default function IndexTab() {
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onFunctionalExtension={() => setScreen("domainSelection")}
           onStatementStep1={() => setScreen("domainWorkflow")}
-          onFinishExtension={(extensionFinish) => {
-            setFunctionalExtensionCompleted(extensionFinish)
-            setScreen("finishFunctionalExtension")
+          onFinishExtension={(statement, mermaid) => {
+              setExtensionStatement(statement);
+              setExtensionMermaid(mermaid);
+              setScreen("finishFunctionalExtension");
           }}
         />
       )}
@@ -198,12 +225,13 @@ export default function IndexTab() {
       {screen === "finishFunctionalExtension" && (
         <FinishFunctionalExtensionScreen 
           domainName={selectedDomain}
-          extensionFinish={functionalExtensionCompleted}
-          onBack={() => setScreen("domainWorkflow")} 
+          extensionStatement={extensionStatement}
+          extensionMermaid={extensionMermaid}
+          onBack={() => setScreen("diagramUML")} 
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
-          onFunctionalExtension={() => setScreen("functionalExtension")}
+          onFunctionalExtension={() => setScreen("domainSelection")}
           onStatementStep1={() => setScreen("domainWorkflow")}
           onCreateDiagram={(context) => {
             setContextResponse(context)
@@ -213,9 +241,7 @@ export default function IndexTab() {
       )}
 
       {screen === "storage" && (
-        <StorageExamsIndex
-          onWelcome={() => setScreen("welcome")}
-        />
+        <StorageExamsIndex onWelcome={() => setScreen("welcome")} />
       )}
 
       {screen === "attributesConstraints" && (
@@ -223,6 +249,11 @@ export default function IndexTab() {
           onBack={() => setScreen("createExamByParts")} 
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
+          onGoToBaseClass={(project) => {
+            setSelectedProject(project);
+            setCameFromAttributes(true); // ✅ Marcamos que venimos de atributos
+            setScreen("generateBaseClasses");
+          }}
           onCreateTest={(data) => {
             setSharedTestData(data);
             setTestOrigin('attributes');
