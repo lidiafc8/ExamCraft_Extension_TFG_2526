@@ -84,9 +84,33 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 110px;
-    width: 100%;
+    height: 140px;
+    width: 140px;
     background: none;
     border: none;
     padding: 0;
+}
+
+.btn-icon img {
+    width: 140px;
+    height: 140px;
+    object-fit: contain; 
+}
+
+.btn-cross {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 50%; 
+  width: 28px;
+  height: 28px;
+  font-weight: bold; 
+  font-size: 16px; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center;
+  justify-content: center; 
 }
