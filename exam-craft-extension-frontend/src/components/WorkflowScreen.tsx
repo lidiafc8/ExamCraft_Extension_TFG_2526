@@ -35,16 +35,13 @@ export interface WorkflowScreenProps {
   downloadPrefix: string
   downloadTitle: (project: any) => string
 
-  // Callback al guardar
   onSaved?: (savedData: { project: any; result: string }) => void
   filterProject?: (project: any) => boolean
 
-  // NUEVAS PROPIEDADES PARA EL MODAL DE ÉXITO (Opcionales)
   successPrimaryButtonLabel?: string
   successSecondaryButtonLabel?: string
   onSuccessSecondary?: (savedData: { project: any; result: string }) => void
 
-  // NUEVA PROPIEDAD: Proyecto inicial (para saltar el paso de selección)
   initialProject?: any
 }
 
@@ -73,24 +70,20 @@ export default function WorkflowScreen({
   downloadTitle,
   onSaved,
   filterProject,
-  // Valores por defecto y desestructuración de las nuevas props
   successPrimaryButtonLabel = "Continuar",
   successSecondaryButtonLabel,
   onSuccessSecondary,
   initialProject,
 }: WorkflowScreenProps) {
 
-  // Estados iniciales
   const [step, setStep] = useState<"selection" | "workflow">(initialProject ? "workflow" : "selection")
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
 
   const [projects, setProjects] = useState<any[]>([])
   const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null)
 
-  // Inicia con el proyecto inicial si existe
   const [selectedProject, setSelectedProject] = useState<any>(initialProject || null)
 
-  // 👇 Obligamos al componente a actualizarse si el initialProject cambia (por si llega tarde)
   useEffect(() => {
     if (initialProject) {
       setSelectedProject(initialProject);

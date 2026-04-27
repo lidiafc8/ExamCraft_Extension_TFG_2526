@@ -50,7 +50,7 @@ export default function GenerationBaseClassesScreen({
   onCreateExam,
   onCreateExamByParts,
   onCodeGeneration,
-  onExamCodeGeneration,
+  onExamCodeGeneration
 }: Props) {
 
   const breadcrumbs = fromAttributes
@@ -65,6 +65,8 @@ export default function GenerationBaseClassesScreen({
         { label: "CREAR EXAMEN", action: onCreateExam },
         { label: "POR PARTES", action: onCreateExamByParts },
         { label: "CÓDIGO", action: onCodeGeneration },
+        { label: 'EXAMEN', action: onExamCodeGeneration }
+
       ];
 
 

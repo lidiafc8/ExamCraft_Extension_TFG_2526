@@ -12,17 +12,25 @@ interface Props {
     readonly onWelcome: () => void;
     readonly onCreateExam: () => void;
     readonly onCreateExamByParts: () => void;
-    readonly onCreateTest1: (data: { project: any; constraints: string; baseClass: string }) => void;
+    readonly onCreateExamCode: () => void; 
+    readonly onCreateTest1: (data: { 
+        project: any; 
+        constraints: string; 
+        entityRelationships: string; 
+        baseClass: string,
+        targetType?: 'attributes' | 'entityRelationships';
+    }) => void;
     readonly onCodeGeneration: () => void;
 }
 
-export default function GeneralGenerationTestScreen({ 
+export default function ExamSelectionForGenerationTestScreen({ 
     onBack, 
     onWelcome, 
     onCreateExam, 
     onCreateExamByParts, 
     onCreateTest1,
-    onCodeGeneration
+    onCodeGeneration,
+    onCreateExamCode
 }: Props) {
     const [step, setStep] = useState<'folders' | 'exams' | 'parts' | 'workflow'>('folders');
     const [projects, setProjects] = useState<any[]>([]);
@@ -32,6 +40,7 @@ export default function GeneralGenerationTestScreen({
 
     const [showPartConfirmModal, setShowPartConfirmModal] = useState(false);
     const [pendingPartKey, setPendingPartKey] = useState(null);
+    
 
     useEffect(() => {
         if (globalThis.chrome?.storage?.local) {
@@ -39,7 +48,12 @@ export default function GeneralGenerationTestScreen({
                 const projectList = Object.keys(items)
                     .filter(key => key.startsWith('project_'))
                     .map(key => ({ id: key, ...items[key] }))
-                    .filter(p => p.attributeConstraints && p.attributeConstraints.trim().length > 10);
+                    .filter(p => {
+                        const hasBase = p.baseClasses && p.baseClasses.trim().length > 10;
+                        const hasConstraints = p.attributeConstraints && p.attributeConstraints.trim().length > 10;
+                        const hasRelationships = p.entityRelationships && p.entityRelationships.trim().length > 10;
+                        return hasBase && (hasConstraints || hasRelationships);
+                    });
                 setProjects(projectList);
             });
         }
@@ -63,8 +77,8 @@ export default function GeneralGenerationTestScreen({
     ));
 
     const getAvailableParts = (project: any) => {
-        const forbiddenKeys = new Set(["id", "domainName", "customName", "extensionFinish", "savedAt", "updatedAt"]);
-        return Object.keys(project).filter(key => !forbiddenKeys.has(key));
+        const evaluableKeys = new Set(["attributeConstraints", "entityRelationships"]);
+        return Object.keys(project).filter(key => evaluableKeys.has(key));
     };
 
     const breadcrumbButtonStyle: React.CSSProperties = {
@@ -83,7 +97,8 @@ export default function GeneralGenerationTestScreen({
         { label: 'INICIO', action: onWelcome },
         { label: 'CREAR EXAMEN', action: onCreateExam },
         { label: 'POR PARTES', action: onCreateExamByParts },
-        { label: 'CÓDIGO', action: onCodeGeneration }
+        { label: 'CÓDIGO', action: onCodeGeneration },
+        { label: 'EXAMEN', action: onCreateExamCode }
     ];
 
     const handleHover = (e: React.MouseEvent | React.FocusEvent, scale: string) => {
@@ -116,7 +131,7 @@ export default function GeneralGenerationTestScreen({
                                 <span className="breadcrumb-separator">{' > '}</span>
                             </React.Fragment>
                         ))}
-                        <span className="breadcrumb-current">TEST DE ATRIBUTOS</span>
+                        <span className="breadcrumb-current">TESTS</span>
                     </nav>
                 </div>
             </header>
@@ -197,83 +212,106 @@ export default function GeneralGenerationTestScreen({
                 )}
 
                 {/* STEP: PARTS */}
-                {/* STEP: PARTS */}
                 {step === 'parts' && selectedProject && (
                     <div className="content-card" style={{ width: '100%', maxWidth: '900px' }}>
                         <h2 className="main-title small">¿Qué parte quieres evaluar?</h2>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '30px', marginTop: '30px', padding: '20px', justifyContent: 'center' }}>
                             {getAvailableParts(selectedProject)
-                                .filter(key => key.toLowerCase().includes('attribute'))
-                                .map(key => (
-                                    <div key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <button
-                                            type="button"
-                                            onClick={() => { 
-                                                setPendingPartKey(key); 
-                                                setShowPartConfirmModal(true); 
-                                            }}
-                                            onMouseOver={(e) => handleHover(e, '1.1')}
-                                            onMouseOut={(e) => handleHover(e, '1')}
-                                            onFocus={(e) => handleHover(e, '1.1')}
-                                            onBlur={(e) => handleHover(e, '1')}
-                                            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', transition: 'transform 0.2s', outline: 'none' }}
-                                        >
-                                            <img src={specific_exam_part} alt="Ver restricciones" width="100" height="100" />
-                                        </button>
-                                        <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
-                                            Restricciones de Atributos
-                                        </span>
-                                    </div>
-                                ))}
+                                .filter(key => key.toLowerCase().includes('attribute') || key.toLowerCase().includes('entity'))
+                                .map(key => {
+                                    const isAttribute = key.toLowerCase().includes('attribute');
+                                    const partName = isAttribute ? 'Restricciones de Atributos' : 'Relaciones entre Entidades';
+
+                                    return (
+                                        <div key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <button
+                                                type="button"
+                                                onClick={() => { 
+                                                    setPendingPartKey(key); 
+                                                    setShowPartConfirmModal(true); 
+                                                }}
+                                                onMouseOver={(e) => handleHover(e, '1.1')}
+                                                onMouseOut={(e) => handleHover(e, '1')}
+                                                onFocus={(e) => handleHover(e, '1.1')}
+                                                onBlur={(e) => handleHover(e, '1')}
+                                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', transition: 'transform 0.2s', outline: 'none' }}
+                                            >
+                                                <img src={specific_exam_part} alt={partName} width="100" height="100" />
+                                            </button>
+                                            <span style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '14px', color: '#4a3728', textAlign: 'center' }}>
+                                                {partName}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
                         </div>
                         <div className="wf-actions-row" style={{ marginTop: '30px' }}>
                             <button type="button" onClick={() => setStep('exams')} className="btn-step secondary">Volver a exámenes</button>
                         </div>
+                        
+                        {/* MODAL DE CONFIRMACIÓN CON ADVERTENCIA ESPECÍFICA DE PARTE */}
                         {showPartConfirmModal && pendingPartKey && createPortal(
-                            <div style={{
-                                position: 'fixed', 
-                                top: 0, 
-                                left: 0, 
-                                right: 0, 
-                                bottom: 0,
-                                backgroundColor: 'rgba(0,0,0,0.6)',
-                                display: 'flex', 
-                                justifyContent: 'center', 
-                                alignItems: 'center',
-                                zIndex: 2000 
-                            }}>
-                                <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
-                                    <h3 className="main-title small" style={{ marginBottom: '15px', color: '#4a3728' }}>
-                                        Confirmación de Parte
-                                    </h3>
-                                    
-                                    <p style={{ marginBottom: '25px', color: '#555', fontSize: '15px' }}>
-                                        ¿Deseas utilizar el ejercicio seleccionado como base para generar los tests?
-                                    </p>
+                            (() => {
+                                let hasExistingTests = false;
+                                
+                                const testPartsMap = selectedProject?.testPartsMap || {};
 
-                                    <div className="wf-actions-row" style={{ justifyContent: 'center', gap: '15px' }}>
-                                        <button 
-                                            onClick={() => { 
-                                                setShowPartConfirmModal(false); 
-                                                setPendingPartKey(null); 
-                                            }} 
-                                            className="btn-step secondary"
-                                        >
-                                            Cancelar
-                                        </button>
-                                        <button 
-                                            onClick={() => {
-                                                setShowPartConfirmModal(false);
-                                                setSelectedPartKey(pendingPartKey);
-                                                setStep('workflow');
-                                            }} 
-                                            className="btn-step primary"
-                                        >
-                                            Comenzar
-                                        </button>
+                                const isAttributeConstraintsTests = pendingPartKey.toLowerCase().includes('attribute');
+                                const isEntityRelationshipsTests = pendingPartKey.toLowerCase().includes('entity');
+
+                                if (isAttributeConstraintsTests && testPartsMap['test1_attributes']?.code?.trim().length > 0) {
+                                    hasExistingTests = true;
+                                } else if (isEntityRelationshipsTests && testPartsMap['test2_relationships']?.code?.trim().length > 0) {
+                                    hasExistingTests = true;
+                                }
+
+                                return (
+                                    <div style={{
+                                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                                        backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', 
+                                        justifyContent: 'center', alignItems: 'center', zIndex: 2000 
+                                    }}>
+                                        <div className="content-card" style={{ maxWidth: '400px', width: '90%', padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '12px' }}>
+                                            
+                                            <h3 className="main-title small" style={{ marginBottom: '15px', color: '#4a3728' }}>
+                                                {hasExistingTests ? '⚠️ Confirmación de Sobrescritura' : 'Confirmación de Parte'}
+                                            </h3>
+                                            
+                                            {hasExistingTests && (
+                                                <div style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', border: '1px solid #ffeeba' }}>
+                                                    <strong>Atención:</strong> Ya existen tests guardados para la parte de <strong>{isAttributeConstraintsTests ? 'Restricciones de Atributos' : 'Relaciones entre Entidades'}</strong>. Al generar nuevos, se sobrescribirán los anteriores correspondientes a esta parte.
+                                                </div>
+                                            )}
+                                            
+                                            <p style={{ marginBottom: '25px', color: '#555', fontSize: '15px' }}>
+                                                ¿Deseas utilizar el ejercicio seleccionado como base para generar {hasExistingTests ? 'nuevos' : 'los'} tests?
+                                            </p>
+
+                                            <div className="wf-actions-row" style={{ justifyContent: 'center', gap: '15px' }}>
+                                                <button 
+                                                    onClick={() => { 
+                                                        setShowPartConfirmModal(false); 
+                                                        setPendingPartKey(null); 
+                                                    }} 
+                                                    className="btn-step secondary"
+                                                >
+                                                    Cancelar
+                                                </button>
+                                                <button 
+                                                    onClick={() => {
+                                                        setShowPartConfirmModal(false);
+                                                        setSelectedPartKey(pendingPartKey);
+                                                        setStep('workflow'); 
+                                                    }} 
+                                                    className="btn-step primary"
+                                                >
+                                                    {hasExistingTests ? 'Sí, sobrescribir' : 'Comenzar'}
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>,
+                                );
+                            })(),
                             document.body
                         )}
                     </div>
@@ -300,7 +338,13 @@ export default function GeneralGenerationTestScreen({
                             </button>
                             <button 
                                 type="button"
-                                onClick={() => onCreateTest1({ project: selectedProject, constraints: selectedProject[selectedPartKey], baseClass: selectedProject.baseClasses })} 
+                                onClick={() => onCreateTest1({ 
+                                    project: selectedProject, 
+                                    constraints: selectedProject.attributeConstraints || "", 
+                                    entityRelationships: selectedProject.entityRelationships || "",
+                                    baseClass: selectedProject.baseClasses || "",
+                                    targetType: selectedPartKey === 'attributeConstraints' ? 'attributes' : 'entityRelationships' 
+                                })} 
                                 disabled={!selectedProject[selectedPartKey]}
                                 className="btn-step primary"
                                 style={{ minWidth: '200px' }}

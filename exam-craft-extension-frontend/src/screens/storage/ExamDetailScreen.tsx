@@ -4,16 +4,8 @@ import DOMPurify from 'dompurify';
 
 import { MermaidViewer } from "../../components/MermaidViewer";
 import { Header } from "../../components/Header";
-<<<<<<< HEAD
-import { 
-    extractMermaidCode, 
-    sanitizeMermaidForModal, 
-    cleanMermaidCode 
-} from "~src/utils/mermaidUtils";
 import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
-=======
 import { cleanMermaidCode } from "../../components/mermaidCleaner";
->>>>>>> b1b861efc73b5d12909b952b650c2a37f4b95692
 
 export interface ExamDetailScreenProps {
     selectedProject: any;
@@ -149,16 +141,6 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
                 {/* SECCIÓN 1: EXTENSIÓN FUNCIONAL */}
                 <div className="section-block" style={{ marginBottom: '20px', marginTop: '40px', borderBottom: '2px solid #b08968', paddingBottom: '10px', width: 'fit-content', display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <h2 style={{ margin: 0, border: 'none', padding: 0 }}>Extensión Funcional</h2>
-                    {selectedProject?.extensionFinish && (
-                        <button 
-                            type="button" 
-                            onClick={() => handleDeletePart('extensionFinish', 'Extensión Funcional')} 
-                            style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0', display: 'flex', alignItems: 'center' }} 
-                            title="Eliminar Extensión Funcional"
-                        >
-                            ✕
-                        </button>
-                    )}
                 </div>
                 <div className="section-block" style={{ width: '80%', marginBottom: '0px' }}>
                     <div style={{ display: 'flex', gap: '10px', height: '600px' }}>
@@ -204,7 +186,7 @@ ${selectedProject?.entityRelations || '*Sin relaciones entre entidades definidas
 
 
                 {/* SECCIÓN 3: RELACIONES ENTRE ENTIDADES */}
-                <div className="section-block" style={{ marginBottom: '20px', marginTop: '40px', borderBottom: '2px solid #b08968', paddingBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <div className="section-block" style={{ marginBottom: '20px', borderBottom: '2px solid #b08968', paddingBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <h2 style={{ margin: 0, border: 'none', padding: 0 }}>Relaciones entre Entidades</h2>
                     {selectedProject?.entityRelationships && (
                         <button type="button" onClick={() => handleDeletePart('entityRelations', 'Relaciones entre Entidades')} style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 5px' }} title="Eliminar Relaciones entre Entidades">

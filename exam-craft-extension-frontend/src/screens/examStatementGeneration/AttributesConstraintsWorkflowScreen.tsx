@@ -7,7 +7,7 @@ interface Props {
   readonly onBack: () => void
   readonly onWelcome: () => void
   readonly onCreateExam: () => void
-  readonly onCreateTest: (data: { project: any; constraints: string, baseClass: string }) => void
+  readonly onCreateTest: (data: { project: any; constraints: string, entityRelationships: string, baseClass: string }) => void
   readonly onGoToBaseClass: (project?: any) => void 
 }
 
@@ -66,7 +66,12 @@ export default function AttributesConstraintsWorkflowScreen({
         
         onSaved={(data) => {
           if (data.project.baseClasses) {
-            onCreateTest({ project: data.project, constraints: data.result, baseClass: data.project.baseClasses });
+            onCreateTest({ 
+              project: data.project, 
+              constraints: data.result,
+              entityRelationships: data.project.entityRelationships || "", 
+              baseClass: data.project.baseClasses 
+            });
           } else {
             setPendingProjectForBaseClass(data.project);
           }

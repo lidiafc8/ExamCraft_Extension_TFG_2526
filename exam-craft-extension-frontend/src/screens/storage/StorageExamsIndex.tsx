@@ -95,6 +95,26 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     };
 
+    const handleDeleteTest = (testKey: string) => {
+        if (!selectedProject || !selectedProject.id) return;
+
+        const updatedProject = { ...selectedProject };
+        const updatedTestMap = { ...(updatedProject.testPartsMap || {}) };
+
+        delete updatedTestMap[testKey];
+        updatedProject.testPartsMap = updatedTestMap;
+
+        setSelectedProject(updatedProject);
+
+        if (chrome?.storage?.local) {
+            chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
+                console.log(`Test ${testKey} eliminado correctamente.`);
+            });
+        }
+    };
+
+    
+
     const handleDownload = () => {
         if (!selectedProject) return;
         downloadProjectAsMarkdown(selectedProject);
@@ -132,8 +152,13 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
 
         let itemsToUpload = ["- README.md (Actualizado con el enunciado)"];
-        if (selectedProject.javaTests && selectedProject.javaTests.length > 0) {
-            itemsToUpload.push("- Todos los tests de Java detectados.");
+        const testParts = selectedProject.testPartsMap 
+            ? Object.values(selectedProject.testPartsMap as Record<string, { fileName: string; code: string }>)
+                .filter(p => p?.fileName && p?.code)
+            : [];
+
+        if (testParts.length > 0) {
+            itemsToUpload.push(`- Tests de Java: ${testParts.map(p => p.fileName).join(', ')}`);
         }
         if (selectedProject.baseClasses && selectedProject.baseClasses.trim() !== "") {
             itemsToUpload.push("- Clases base para la extensión creada.");
@@ -196,24 +221,25 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                     setSelectedDomainFolder(null);
                 }}
                 onDeleteSection={handleDeleteSection}
+                onDeleteTest={handleDeleteTest}  
             />
         );
     }
 
     if (selectedProject && showSolutionGeneratedCode) {
         return (
-            <GeneratedSolutionCodeScreen
+            <GeneratedSolutionCodeScreen          
                 selectedProject={selectedProject}
                 selectedDomainFolder={selectedDomainFolder || ""}
                 logoExamCraft={logoExamCraft}
                 onWelcome={onWelcome}
-                onBack={() => setShowSolutionGeneratedCode(false)}
+                onBack={() => setShowSolutionGeneratedCode(false)}  
                 onGoToExams={() => {
-                    setShowSolutionGeneratedCode(false);
+                    setShowSolutionGeneratedCode(false);            
                     setSelectedProject(null);
                 }}
                 onGoToFolders={() => {
-                    setShowSolutionGeneratedCode(false);
+                    setShowSolutionGeneratedCode(false);             
                     setSelectedProject(null);
                     setSelectedDomainFolder(null);
                 }}
