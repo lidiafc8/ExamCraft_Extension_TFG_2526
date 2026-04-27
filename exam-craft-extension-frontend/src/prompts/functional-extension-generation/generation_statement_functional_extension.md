@@ -1,7 +1,7 @@
 # PROMPT COMPLETO PARA LA GENERACIÓN DE EXTENSIÓN FUNCIONAL (ENUNCIADO)
 
 ## Recursos a proporcionar:
-* `functional_extension_examples.md`
+* `functional_extension_examples_previous_exams.md`
 
 ## Prompt a utilizar:
 

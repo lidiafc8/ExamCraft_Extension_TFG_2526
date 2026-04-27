@@ -1,7 +1,7 @@
 # PROMPT COMPLETO PARA GENERACIÓN DE TESTS DE RELACIONES ENTRE ENTIDADES
 
 ## Recursos a proporcionar:
-* `generation_test.md`
+* `test_previous_exams.md`
 
 ## Prompt a utilizar
 Nuestra misión es generar el test de un examen de la asignatura "Diseño y Pruebas". Actuamos como profesores evaluando conocimientos de JPA y mapeo objeto-relacional. Te proporcionaré el enunciado, el diagrama UML en Mermaid y, **CRÍTICAMENTE, el Código Base de las clases ya generadas**.

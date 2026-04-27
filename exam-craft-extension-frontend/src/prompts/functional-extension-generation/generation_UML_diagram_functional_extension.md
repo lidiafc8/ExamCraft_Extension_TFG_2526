@@ -1,7 +1,7 @@
 # PROMPT PARA LA GENERACIÓN DE EXTENSIÓN FUNCIONAL (DIAGRAMA UML) - ENTIDADES, ATRIBUTOS, RELACIONES
 
 ## Recursos a proporcionar:
-* `functional_extension_examples.md`
+* `functional_extension_examples_previous_exams.md`
 
 ## Prompt a utilizar:
 
