@@ -28,20 +28,20 @@ export const downloadProjectAsMarkdown = (project: any) => {
 
         const markdownContent = `# ${title}
 
-## 1. Extensión Funcional
-${introText || "No hay datos de extensión funcional."}
+            ## 1. Extensión Funcional
+            ${introText || "No hay datos de extensión funcional."}
 
-${finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`` : ''}
+            ${finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`` : ''}
 
-## 2. Restricciones de Atributos
-${project.attributeConstraints || "No se crearon restricciones de atributos para este examen."}
+            ## 2. Restricciones de Atributos
+            ${project.attributeConstraints || "No se crearon restricciones de atributos para este examen."}
 
-## 3. Relaciones entre Entidades
-${project.entityRelationships || "No se crearon relaciones entre entidades para este examen."}
+            ## 3. Relaciones entre Entidades
+            ${project.entityRelationships || "No se crearon relaciones entre entidades para este examen."}
 
-## 4. Tests de Java (JUnit)
-${testsMarkdown}
-`;
+            ## 4. Tests de Java (JUnit)
+            ${testsMarkdown}
+            `;
 
         const defaultName = title.replace(/[^a-z0-9áéíóúñ]/gi, '_').toLowerCase();
         const userChosenName = prompt("Introduce el nombre para el archivo a descargar:", defaultName);

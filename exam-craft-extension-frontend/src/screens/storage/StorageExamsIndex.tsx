@@ -8,8 +8,8 @@ import { downloadProjectAsMarkdown } from "~src/utils/exportUtils";
 import { FoldersGridScreen } from "./FoldersGridScreen";
 import { DomainFolderScreen } from "./DomainFolderScreen";
 import { ExamDetailScreen } from "./ExamDetailScreen";
-import { GeneratedCodeScreen } from "./GenerateCodeScreen";
-import { GeneratedSolutionCodeScreen } from "./GeneratedSolutionCodeScreen";
+import { GeneratedCodeScreen } from "./GenerationCodeScreen";
+import { GeneratedSolutionCodeScreen } from "./VisualSolutionCodeScreen";
 
 declare var chrome: any;
 

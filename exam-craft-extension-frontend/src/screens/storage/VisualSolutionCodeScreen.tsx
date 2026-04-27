@@ -5,7 +5,7 @@ import { parseJavaFiles } from "~src/utils/codeUtils";
 import { JavaCodeBlock } from "~src/components/JavaCodeBlock";
 import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
 
-export interface GeneratedSolutionCodeScreenProps {
+export interface VisualSolutionCodeScreenProps {
     selectedProject: any;
     selectedDomainFolder: string;
     logoExamCraft: string;
@@ -16,7 +16,7 @@ export interface GeneratedSolutionCodeScreenProps {
     onDeleteSection: (sectionKey: string) => void;
 }
 
-export const GeneratedSolutionCodeScreen: React.FC<GeneratedSolutionCodeScreenProps> = ({
+export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> = ({
     selectedProject,
     selectedDomainFolder,
     onWelcome,
