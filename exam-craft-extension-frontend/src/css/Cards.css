@@ -1,0 +1,88 @@
+.cards-container {
+  display: flex;
+  gap: 50px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-card {
+  background-color: #B48574; 
+  border: none;
+  border-radius: 25px;
+  width: 280px;
+  height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 5px 5px 15px rgba(0,0,0,0.15);
+  position: relative;
+}
+
+.action-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 8px 8px 20px rgba(0,0,0,0.2);
+}
+
+.card-icon-wrapper {
+  background-color: #FDF5E6; 
+  padding: 20px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+}
+
+.card-label {
+  background-color: #FDF5E6; 
+  width: 100%;
+  padding: 10px;
+  border-radius: 15px;
+  color: #3E2723;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.card-icon {
+  width: 130px;
+  height: 130px;
+  object-fit: contain;
+}
+
+.input-rename {
+    margin-top: 10px;
+    text-align: center;
+    width: 100%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 2px solid #b08968;
+    outline: none;
+    background: #f5ede3;
+    color: #3E2723;
+}
+
+.card-label-editable {
+    cursor: text;
+    margin-top: 10px;
+    padding: 5px 10px;
+    width: 100%;
+    display: block;
+    text-align: center;
+    border: 2px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: #f5ede3;
+    border-radius: 20px;
+    color: #3E2723;
+    font-weight: bold;
+    font-size: 1.2rem;
+}

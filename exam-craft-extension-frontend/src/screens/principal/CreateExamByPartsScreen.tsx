@@ -1,5 +1,5 @@
 import React from "react"
-import logoExamCraft from "../../assets/icon512.png"
+import logoExamCraft from "../../../assets/icon512.png"
 
 interface Props {
   readonly onBack: () => void
@@ -85,4 +85,3 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
     </div>
   )
 }
-

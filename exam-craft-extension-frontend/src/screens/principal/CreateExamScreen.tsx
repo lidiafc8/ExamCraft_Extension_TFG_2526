@@ -1,7 +1,7 @@
 import React from "react"
-import logoExamCraft from "../../assets/icon512.png"
-import completeExamIcon from "../../assets/images/complete_exam.png"
-import partsExamIcon from "../../assets/images/parts_exam.png"
+import logoExamCraft from "../../../assets/icon512.png"
+import completeExamIcon from "../../../assets/images/complete_exam.png"
+import partsExamIcon from "../../../assets/images/parts_exam.png"
 
 interface Props {
   readonly onBack: () => void
