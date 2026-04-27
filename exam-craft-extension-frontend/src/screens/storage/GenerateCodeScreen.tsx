@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import 'highlight.js/styles/github.css';
 import { Header } from "~src/components/Header";
 import { parseJavaFiles } from "~src/utils/codeUtils";
 import { JavaCodeBlock } from "~src/components/JavaCodeBlock";
+import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
 
 export interface GeneratedCodeScreenProps {
     selectedProject: any;
@@ -13,6 +14,8 @@ export interface GeneratedCodeScreenProps {
     onBack: () => void;
     onGoToExams: () => void;
     onGoToFolders: () => void;
+    onDeleteSection: (sectionKey: string) => void;
+    onDeleteTest?: (testKey: string) => void; 
 }
 
 export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
@@ -22,16 +25,19 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     onWelcome,
     onBack,
     onGoToExams,
-    onGoToFolders
+    onGoToFolders,
+    onDeleteSection,
+    onDeleteTest
 }) => {
-    const rawTests = selectedProject.javaTests;
+    const [itemToDelete, setItemToDelete] = useState<{ type: 'section' | 'test', key: string, name: string } | null>(null);
 
-    let tests: any[] = [];
-    if (Array.isArray(rawTests)) {
-        tests = rawTests;
-    } else if (rawTests) {
-        tests = [rawTests];
-    }
+    const testPartsMap: Record<string, { fileName: string; code: string }> =
+        selectedProject.testPartsMap || {};
+
+    const tests = Object.entries(testPartsMap)
+        .map(([key, part]) => ({ mapKey: key, ...part }))
+        .filter((part) => part?.fileName && part?.code)
+        .sort((a, b) => a.fileName.localeCompare(b.fileName));
 
     const parsedBaseClasses = parseJavaFiles(selectedProject.baseClasses || '');
                         
@@ -44,6 +50,21 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     
     const currentTitle = "CÓDIGO EXAMEN";
 
+    const confirmDelete = () => {
+        if (itemToDelete) {
+            if (itemToDelete.type === 'section') {
+                onDeleteSection(itemToDelete.key);
+            } else if (itemToDelete.type === 'test') {
+                if (onDeleteTest) {
+                    onDeleteTest(itemToDelete.key);
+                } else {
+                    onDeleteSection(`testPart:${itemToDelete.key}`);
+                }
+            }
+            setItemToDelete(null);
+        }
+    };
+
     return (
         <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
             <Header 
@@ -54,10 +75,16 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
 
             <main className="main-content" style={{ padding: '30px', paddingBottom: '100px', height: 'auto', overflow: 'visible', flex: 1 }}>
                 
-                <div className="section-block" style={{ marginBottom: '1px', marginTop: '20px' }}>
-                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
+                {/* SECCIÓN: CLASES BASE */}
+                <div className="section-block" style={{ marginBottom: '1px', marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #b08968', paddingBottom: '10px' }}>
+                    <h2 style={{ borderBottom: 'none', paddingBottom: '0', marginBottom: '0' }}>
                         Clases Base
                     </h2>
+                    {parsedBaseClasses.length > 0 && (
+                        <button type="button" onClick={() => setItemToDelete({ type: 'section', key: 'baseClasses', name: 'Clases Base' })} style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 5px' }} title="Eliminar Clases Base">
+                            ✕
+                        </button>
+                    )}
                 </div>
                 <div className="section-block" style={{ width: '200%', marginBottom: '40px' }}>
                     <div className="content-card" style={{ padding: '20px' }}>
@@ -77,28 +104,34 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                     </div>
                 </div>
 
-                <div className="section-block" style={{ marginBottom: '1px' }}>
-                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
+                {/* SECCIÓN: TESTS DE JAVA */}
+                <div className="section-block" style={{ marginBottom: '1px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #b08968', paddingBottom: '10px' }}>
+                    <h2 style={{ borderBottom: 'none', paddingBottom: '0', marginBottom: '0' }}>
                         Tests de Java
                     </h2>
                 </div>
+                
                 <div className="section-block" style={{ width: '200%', marginBottom: '50px' }}>
                     <div className="content-card" style={{ padding: '20px' }}>
                         {tests.length > 0 ? (
-                            tests.map((test, i) => {
-                                const cleanCode = test.trim()
-                                    .replace(/^```[a-z]*\r?\n/i, '')
-                                    .replace(/\r?\n```$/i, '')
-                                    .trim();
-                                
-                                return (
-                                    <JavaCodeBlock 
-                                        key={`test-${i}`} 
-                                        filename={`Test${i + 1}.java`} 
-                                        code={cleanCode} 
+                            tests.map((part) => (
+                                <div key={part.mapKey} style={{ marginBottom: '30px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '5px' }}>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setItemToDelete({ type: 'test', key: part.mapKey, name: part.fileName })} 
+                                            style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 5px' }} 
+                                            title={`Eliminar ${part.fileName}`}
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                    <JavaCodeBlock
+                                        filename={part.fileName}   
+                                        code={part.code}          
                                     />
-                                );
-                            })
+                                </div>
+                            ))
                         ) : (
                             <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
                                 Aún no se han generado los tests para este examen.
@@ -112,6 +145,14 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                         Volver
                     </button>
                 </div>
+
+                <DeleteConfirmationModal 
+                    isOpen={!!itemToDelete}
+                    itemName={itemToDelete?.name || ''}
+                    onConfirm={confirmDelete}
+                    onCancel={() => setItemToDelete(null)}
+                />
+
             </main>
         </div>
     );

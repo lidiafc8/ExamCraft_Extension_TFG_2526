@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import attributesConstraintsPromptMarkdown from "bundle-text:../../prompts/generation-constraints-attributes/generation_attribute_constraints_from_statement.md"
+import entityRelationshipsPromptMarkdown from "bundle-text:../../prompts/generation-entity-relationships/generation_relationships_between_entities_from_statement.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import WorkflowScreen from "../../components/WorkflowScreen"
 
@@ -7,23 +7,24 @@ interface Props {
   readonly onBack: () => void
   readonly onWelcome: () => void
   readonly onCreateExam: () => void
-  readonly onCreateTest: (data: { project: any; constraints: string, entityRelationships: string, baseClass: string }) => void
+  readonly onCreateTest: (data: { project: any; constraints: string, entityRelationships: string, baseClass: string, targetPart?: string }) => void
   readonly onGoToBaseClass: (project?: any) => void 
 }
 
-export default function AttributesConstraintsWorkflowScreen({
+export default function EntityRelationshipsWorkflowScreen({
   onBack,
   onWelcome,
   onCreateExam,
   onCreateTest,
   onGoToBaseClass,
 }: Props) {
-
+  
   const [pendingProjectForBaseClass, setPendingProjectForBaseClass] = useState<any>(null);
 
   return (
     <>
       <WorkflowScreen
+        // ── Navegación ────────────────────────────────────────────────────────
         onBack={onBack}
         onWelcome={onWelcome}
         breadcrumbItems={[
@@ -31,35 +32,37 @@ export default function AttributesConstraintsWorkflowScreen({
           { label: "CREAR EXAMEN", action: onCreateExam },
           { label: "POR PARTES", action: onBack },
         ]}
-        currentStep="RESTRICCIONES DE ATRIBUTOS"
+        currentStep="RELACIONES ENTRE ENTIDADES"
 
+        // ── Textos ────────────────────────────────────────────────────────────
         selectionTitle="Selecciona un dominio"
-        selectionDescription='Para generar el ejercicio "Restricciones de Atributos" es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base para este ejercicio.'
-        workflowInputTitle="Restricciones de Atributos"
-        workflowResultTitle={(name) => `Generar Restricciones: ${name}`}
+        selectionDescription='Para generar el ejercicio "Relaciones entre Entidades" es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base para este ejercicio.'
+        workflowInputTitle="Relaciones entre Entidades"
+        workflowResultTitle={(name) => `Generar Relaciones: ${name}`}
         instructionText={
           <>
-            Este es el prompt que se usará para generar las restricciones de atributos del examen
+            Este es el prompt que se usará para generar las relaciones entre entidades del examen
             seleccionado, puede revisar o modificar cualquier información que vea conveniente.
             Al terminar, pulse en <strong>"Generar"</strong>.
           </>
         }
         confirmTitle="Confirmar Contexto"
         confirmDescription={(name) =>
-          `¿Deseas utilizar ${name} como base para generar el ejercicio de restricciones?`
+          `¿Deseas utilizar ${name} como base para generar el ejercicio de relaciones entre entidades?`
         }
         confirmWarning={(project) =>
-          project.attributeConstraints
-            ? "Este examen ya tiene restricciones de atributos generadas.\nSi continúas, las restricciones anteriores serán reemplazadas por las nuevas."
+          project.entityRelationships
+            ? "Este examen ya tiene relaciones entre entidades generadas.\nSi continúas, las relaciones anteriores serán reemplazadas por las nuevas."
             : null
         }
         confirmButtonLabel={(project) =>
-          project.attributeConstraints ? "Continuar y reemplazar" : "Confirmar"
+          project.entityRelationships ? "Continuar y reemplazar" : "Confirmar"
         }
         
+        // ── Éxito y Redirección a Tests ────────────────────────────────────────
         successTitle="¡Guardado correctamente!"
         successDescription={(name) =>
-          `Las restricciones de atributos de ${name} han sido actualizadas correctamente.\n\n¿Deseas continuar y generar los tests para estas restricciones ahora mismo?`
+          `Las relaciones entre entidades de ${name} han sido actualizadas correctamente.\n\n¿Deseas continuar y generar los tests para estas relaciones ahora mismo?`
         }
         successPrimaryButtonLabel="Sí, generar tests"
         successSecondaryButtonLabel="No, volver al inicio"
@@ -68,9 +71,10 @@ export default function AttributesConstraintsWorkflowScreen({
           if (data.project.baseClasses) {
             onCreateTest({ 
               project: data.project, 
-              constraints: data.result,
-              entityRelationships: data.project.entityRelationships || "", 
-              baseClass: data.project.baseClasses 
+              constraints: data.project.attributeConstraints || "", 
+              entityRelationships: data.result, 
+              baseClass: data.project.baseClasses,
+              targetPart: "test2_relationships" 
             });
           } else {
             setPendingProjectForBaseClass(data.project);
@@ -78,17 +82,19 @@ export default function AttributesConstraintsWorkflowScreen({
         }}
         onSuccessSecondary={() => onWelcome()}
 
+        // ── Configuración de guardado ──────────────────────────────────────────
         saveButtonLabel="Guardar"
         allowedFolders={["clínica veterinaria", "ajedrez"]}
-        storageKey="attributeConstraints"
-        buildPrompt={() => parseMasterPrompt(attributesConstraintsPromptMarkdown)}
-        logExerciseName="attributes_constraints"
-        downloadPrefix="Restricciones_Atributos"
+        storageKey="entityRelationships"
+        buildPrompt={() => parseMasterPrompt(entityRelationshipsPromptMarkdown)}
+        logExerciseName="entity_relationships"
+        downloadPrefix="Relaciones_Entidades"
         downloadTitle={(p) =>
-          `Restricciones de Atributos - ${p.customName || p.domainName}`
+          `Relaciones entre Entidades - ${p.customName || p.domainName}`
         }
       />
 
+      {/* ── Modal de Advertencia: Faltan Clases Base ───────────────────────── */}
       {pendingProjectForBaseClass && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
@@ -104,7 +110,7 @@ export default function AttributesConstraintsWorkflowScreen({
               Faltan las Clases Base
             </h3>
             <p style={{ marginBottom: "25px", color: "#555", fontSize: "15px" }}>
-              Para poder generar los tests de restricciones, primero es necesario generar las <strong>Clases Base</strong> del examen.
+              Para poder generar los tests de relaciones, primero es necesario generar las <strong>Clases Base</strong> del examen.
             </p>
             <div className="wf-actions-row" style={{ justifyContent: "center", gap: "15px" }}>
               <button

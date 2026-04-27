@@ -69,13 +69,12 @@ export default function GenerationAttributeConstraintsSolutionScreen({
       storageKey="attributeConstraintsSolution" 
       
       filterProject={(project) => {
-        return Boolean(
-            project.baseClasses && 
-            project.baseClasses.trim() !== "" &&
-            project.javaTests && 
-            project.attributeConstraints && 
-            project.attributeConstraints.trim() !== ""
-        );
+        const hasBaseClasses = !!(project.baseClasses && project.baseClasses.trim() !== "");
+        const hasConstraints = !!(project.attributeConstraints && project.attributeConstraints.trim() !== "");
+        
+        const hasAttributeTests = !!(project.testPartsMap?.test1_attributes?.code?.trim());
+
+        return hasBaseClasses && hasConstraints && hasAttributeTests;
       }}
       
       buildPrompt={(project) => {
@@ -83,12 +82,7 @@ export default function GenerationAttributeConstraintsSolutionScreen({
         
         const AttributeConstraintsStatement = project.attributeConstraints || "";
         
-        let testsCode = "";
-        if (Array.isArray(project.javaTests) && project.javaTests.length > 0) {
-            testsCode = project.javaTests.join('\n\n');
-        } else if (project.javaTests) {
-            testsCode = project.javaTests;
-        }
+        const testsCode = project.testPartsMap?.test1_attributes?.code || "";
 
         const baseClassesCode = project.baseClasses || "";
 

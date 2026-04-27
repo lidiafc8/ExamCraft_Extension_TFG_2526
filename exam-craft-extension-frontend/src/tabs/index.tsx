@@ -17,21 +17,22 @@ import GenerationBaseClassesScreen from "~src/screens/codeGeneration/exam/Genera
 import StorageExamsIndex from "../screens/storage/StorageExamsIndex"
 import SolutionCodeGenerationScreen from "~src/screens/codeGeneration/solution/SolutionCodeGenerationScreen"
 import AttributesConstraintsSolutionCodeScreen from "~src/screens/codeGeneration/solution/AttributesConstraintsSolutionCodeScreen"
+import EntityRelationshipsWorkflowScreen from "~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
   const [contextResponse, setContextResponse] = useState<string>("")
-  const [functionalExtensionCompleted, setFunctionalExtensionCompleted] = useState<string>("")
   const [extensionStatement, setExtensionStatement] = useState<string>("")
   const [extensionMermaid, setExtensionMermaid] = useState<string>("")
   
-  const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string, baseClass: string } | null>(null)
+  const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string, entityRelationships: string, baseClass: string } | null>(null)
 
-  const [testOrigin, setTestOrigin] = useState<'attributes' | 'general'>('attributes');
+  const [testOrigin, setTestOrigin] = useState<'attributes' | 'entityRelationships' | 'general'>('attributes');
 
   // Estados de control de flujo
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [cameFromAttributes, setCameFromAttributes] = useState<boolean>(false);
+  const [cameFromEntityRelationships, setCameFromEntityRelationships] = useState<boolean>(false);
 
   const [screen, setScreen] = useState<
     "welcome" | 
@@ -39,13 +40,14 @@ export default function IndexTab() {
     "createExam" | 
     "createExamByParts" | 
     "attributesConstraints" |
+    "entityRelationships" |
     "functionalExtension" | 
     "domainWorkflow" |
     "diagramUML" |
     "finishFunctionalExtension" |
     "storage" |
     "domainSelection" | 
-    "testAtributes" |
+    "testAttributes" |
     "testGeneral" |
     "codeGeneration" |
     "generateBaseClasses" |
@@ -80,15 +82,15 @@ export default function IndexTab() {
       {screen === "createExamByParts" && (
         <CreateExamByPartsScreen 
         onBack={() => setScreen("createExam")} 
-          onWelcome={() => setScreen("welcome")} 
-          onFunctionalExtension={() => setScreen("domainSelection")}
-          onAttributesConstraints={() => setScreen("attributesConstraints")}
-          // 👇 Al ir a código desde aquí, reseteamos el origen
-          onCodeGeneration={() => {
-            setSelectedProject(null); 
-            setCameFromAttributes(false);
-            setScreen("codeGeneration");
+        onWelcome={() => setScreen("welcome")} 
+        onFunctionalExtension={() => setScreen("domainSelection")}
+        onAttributesConstraints={() => setScreen("attributesConstraints")}
+        onCodeGeneration={() => {
+          setSelectedProject(null); 
+          setCameFromAttributes(false);
+          setScreen("codeGeneration");
           }}
+        onEntityRelationships={() => setScreen("entityRelationships")}
         />
       )}
 
@@ -141,17 +143,22 @@ export default function IndexTab() {
       {screen === "generateBaseClasses" && (
         <GenerationBaseClassesScreen 
           initialProject={selectedProject} 
-          fromAttributes={cameFromAttributes} // ✅ Corregido: Ahora pasa el booleano real
+          fromAttributes={cameFromAttributes || cameFromEntityRelationships} 
           onGoToTests={(updatedProject) => { 
             setSharedTestData({
               project: updatedProject,
               constraints: updatedProject.attributeConstraints || "",
+              entityRelationships: updatedProject.entityRelationships || "",
               baseClass: updatedProject.baseClasses || updatedProject.baseClass || ""
             });
-            setTestOrigin('attributes');
-            setScreen("testAtributes");
+            setTestOrigin(cameFromEntityRelationships ? 'entityRelationships' : 'attributes');
+            setScreen("testAttributes");
           }} 
-          onBack={() => setScreen(cameFromAttributes ? "attributesConstraints" : "codeGeneration")} 
+          onBack={() => {
+            if (cameFromEntityRelationships) setScreen("entityRelationships");
+            else if (cameFromAttributes) setScreen("attributesConstraints");
+            else setScreen("codeGeneration");
+          }} 
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
@@ -196,9 +203,10 @@ export default function IndexTab() {
           onCreateTest1={(data) => {
             setSharedTestData(data);
             setTestOrigin('general');
-            setScreen("testAtributes");
+            setScreen("testAttributes");
           }}
           onCodeGeneration={() => setScreen("codeGeneration")}
+          onCreateExamCode={() => setScreen("examCodeGeneration")}
         />
       )}
 
@@ -249,18 +257,42 @@ export default function IndexTab() {
           onCreateExam={() => setScreen("createExam")}
           onGoToBaseClass={(project) => {
             setSelectedProject(project);
-            setCameFromAttributes(true); // ✅ Marcamos que venimos de atributos
+            setCameFromAttributes(true); 
             setScreen("generateBaseClasses");
           }}
           onCreateTest={(data) => {
             setSharedTestData(data);
             setTestOrigin('attributes');
-            setScreen("testAtributes");
+            setScreen("testAttributes");
           }}
         />
       )}
 
-      {screen === "testAtributes" && (
+      {screen === "entityRelationships" && (
+      <EntityRelationshipsWorkflowScreen 
+        onBack={() => setScreen("createExamByParts")} 
+        onWelcome={() => setScreen("welcome")} 
+        onCreateExam={() => setScreen("createExam")}
+        onGoToBaseClass={(project) => {
+          setSelectedProject(project);
+          setCameFromEntityRelationships(true);
+          setScreen("generateBaseClasses");
+        }}
+        onCreateTest={(data) => {
+          setSharedTestData(data);
+          
+          if (data.targetPart === "test2_relationships") {
+            setTestOrigin('entityRelationships');
+          } else {
+            setTestOrigin('attributes'); 
+          }
+          
+          setScreen("testAttributes"); 
+        }}
+      />
+    )}
+
+      {screen === "testAttributes" && (
         <GenerationTestAtributesScreen 
           initialData={sharedTestData} 
           source={testOrigin} 
@@ -268,6 +300,8 @@ export default function IndexTab() {
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
+          onCodeGeneration={() => setScreen("codeGeneration")}
+          onCreateExamCode={() => setScreen("examCodeGeneration")}
         />
       )}
     </div>

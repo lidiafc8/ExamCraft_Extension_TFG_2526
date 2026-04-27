@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import 'highlight.js/styles/github.css';
 import { Header } from "~src/components/Header";
 import { parseJavaFiles } from "~src/utils/codeUtils";
 import { JavaCodeBlock } from "~src/components/JavaCodeBlock";
+import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
 
 export interface GeneratedSolutionCodeScreenProps {
     selectedProject: any;
@@ -12,6 +13,7 @@ export interface GeneratedSolutionCodeScreenProps {
     onBack: () => void;
     onGoToExams: () => void;
     onGoToFolders: () => void;
+    onDeleteSection: (sectionKey: string) => void;
 }
 
 export const GeneratedSolutionCodeScreen: React.FC<GeneratedSolutionCodeScreenProps> = ({
@@ -20,8 +22,11 @@ export const GeneratedSolutionCodeScreen: React.FC<GeneratedSolutionCodeScreenPr
     onWelcome,
     onBack,
     onGoToExams,
-    onGoToFolders
+    onGoToFolders,
+    onDeleteSection
 }) => {
+    const [sectionToDelete, setSectionToDelete] = useState<{ key: string, name: string } | null>(null);
+    
     const parsedAttributesConstraintsSolution = parseJavaFiles(selectedProject?.attributeConstraintsSolution || '');
 
     const breadcrumbItems = [
@@ -31,15 +36,34 @@ export const GeneratedSolutionCodeScreen: React.FC<GeneratedSolutionCodeScreenPr
         { label: selectedProject?.customName || `Examen de ${selectedProject?.domainName}`, action: onBack },
     ];
 
+    const confirmDelete = () => {
+        if (sectionToDelete) {
+            onDeleteSection(sectionToDelete.key);
+            setSectionToDelete(null);
+        }
+    };
+
     return (
         <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
             <Header onWelcome={onWelcome} breadcrumbItems={breadcrumbItems} currentStep="CÓDIGO SOLUCIÓN" />
 
             <main className="main-content" style={{ padding: '30px', paddingBottom: '100px', height: 'auto', overflow: 'visible', flex: 1 }}>
-                <div className="section-block" style={{ marginBottom: '1px', marginTop: '20px' }}>
-                    <h2 style={{ borderBottom: '2px solid #b08968', paddingBottom: '10px', marginBottom: '1px' }}>
+                
+                {/* SECCIÓN: SOLUCIÓN DE RESTRICCIONES DE ATRIBUTOS */}
+                <div className="section-block" style={{ marginBottom: '1px', marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #b08968', paddingBottom: '10px' }}>
+                    <h2 style={{ borderBottom: 'none', paddingBottom: '0', marginBottom: '0' }}>
                         Solución de Restricciones de Atributos
                     </h2>
+                    {parsedAttributesConstraintsSolution.length > 0 && (
+                        <button 
+                            type="button" 
+                            onClick={() => setSectionToDelete({ key: 'attributeConstraintsSolution', name: 'Solución de Restricciones de Atributos' })} 
+                            style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 5px' }} 
+                            title="Eliminar Solución de Restricciones de Atributos"
+                        >
+                            ✕
+                        </button>
+                    )}
                 </div>
 
                 <div className="section-block" style={{ width: '200%', marginBottom: '40px' }}>
@@ -61,6 +85,14 @@ export const GeneratedSolutionCodeScreen: React.FC<GeneratedSolutionCodeScreenPr
                         Volver
                     </button>
                 </div>
+
+                <DeleteConfirmationModal 
+                    isOpen={!!sectionToDelete}
+                    itemName={sectionToDelete?.name || ''}
+                    onConfirm={confirmDelete}
+                    onCancel={() => setSectionToDelete(null)}
+                />
+                
             </main>
         </div>
     );
