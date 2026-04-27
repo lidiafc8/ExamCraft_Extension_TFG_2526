@@ -68,7 +68,6 @@ async function callGemini(prompt) {
   throw new Error("Gemini no disponible");
 }
 
-
 async function callOpenAI(prompt) {
   for (let attempt = 0; attempt < OPENAI_KEYS.length; attempt++) {
     const key = OPENAI_KEYS[openaiIndex];
