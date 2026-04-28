@@ -4,13 +4,14 @@ import { Header } from "~src/components/Header";
 import { parseJavaFiles } from "~src/utils/codeUtils";
 import { JavaCodeBlock } from "~src/components/JavaCodeBlock";
 import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
+import "./css/StorageScreen.css";
 import "./css/GeneratedCodeScreen.css";
+import "../../css/CommonText.css";
 
 export interface GeneratedCodeScreenProps {
     selectedProject: any;
     selectedDomainFolder: string;
     logoExamCraft: string;
-
     onWelcome: () => void;
     onBack: () => void;
     onGoToExams: () => void;
@@ -48,8 +49,6 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
         { label: selectedProject.customName || `Examen de ${selectedProject.domainName}`, action: onBack },
     ];
 
-    const currentTitle = "CÓDIGO EXAMEN";
-
     const confirmDelete = () => {
         if (itemToDelete) {
             if (itemToDelete.type === 'section') {
@@ -66,20 +65,21 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     };
 
     return (
-        <div className="generated-code-page">
+        <div className="storage-page">
             <Header
                 onWelcome={onWelcome}
                 breadcrumbItems={breadcrumbItems}
-                currentStep={currentTitle}
+                currentStep="CÓDIGO EXAMEN"
             />
 
-            <main className="generated-code-main">
-                <div className="generated-section-heading">
+            <main className="storage-main">
+
+                <div className="storage-section-heading">
                     <h2>Clases Base</h2>
                     {parsedBaseClasses.length > 0 && (
                         <button
                             type="button"
-                            className="generated-delete-btn"
+                            className="storage-delete-btn"
                             onClick={() => setItemToDelete({ type: 'section', key: 'baseClasses', name: 'Clases Base' })}
                             title="Eliminar Clases Base"
                         >
@@ -88,12 +88,12 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                     )}
                 </div>
 
-                <div className="generated-section-content">
+                <div className="storage-section-content">
                     <div className="wide-card">
                         <div className="card-header">
                             <h3>Archivos de Clases Base</h3>
                         </div>
-                        <div className="generated-content-card">
+                        <div className="storage-content-card">
                             {parsedBaseClasses.length > 0 ? (
                                 parsedBaseClasses.map((block) => (
                                     <JavaCodeBlock
@@ -103,7 +103,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                                     />
                                 ))
                             ) : (
-                                <p className="generated-empty-state">
+                                <p className="storage-empty-state">
                                     Aún no se han generado las clases base para este examen.
                                 </p>
                             )}
@@ -111,23 +111,23 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                     </div>
                 </div>
 
-                <div className="generated-section-heading">
+                <div className="storage-section-heading">
                     <h2>Tests de Java</h2>
                 </div>
 
-                <div className="generated-section-content generated-section-content--tests">
+                <div className="storage-section-content storage-section-content--tests">
                     <div className="wide-card">
                         <div className="card-header">
                             <h3>Archivos de Test</h3>
                         </div>
-                        <div className="generated-content-card">
+                        <div className="storage-content-card">
                             {tests.length > 0 ? (
                                 tests.map((part) => (
                                     <div key={part.mapKey} className="generated-test-item">
                                         <div className="generated-test-item-actions">
                                             <button
                                                 type="button"
-                                                className="generated-delete-btn"
+                                                className="storage-delete-btn"
                                                 onClick={() => setItemToDelete({ type: 'test', key: part.mapKey, name: part.fileName })}
                                                 title={`Eliminar ${part.fileName}`}
                                             >
@@ -141,7 +141,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                                     </div>
                                 ))
                             ) : (
-                                <p className="generated-empty-state">
+                                <p className="storage-empty-state">
                                     Aún no se han generado los tests para este examen.
                                 </p>
                             )}
@@ -149,7 +149,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                     </div>
                 </div>
 
-                <div className="generated-bottom-actions">
+                <div className="storage-bottom-actions">
                     <button type="button" onClick={onBack} className="btn-back">
                         Volver
                     </button>

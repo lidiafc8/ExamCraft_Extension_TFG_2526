@@ -4,7 +4,7 @@ import { Header } from "~src/components/Header";
 import { parseJavaFiles } from "~src/utils/codeUtils";
 import { JavaCodeBlock } from "~src/components/JavaCodeBlock";
 import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
-import "./css/VisualSolutionCodeScreen.css";
+import "./css/StorageScreen.css";
 
 export interface VisualSolutionCodeScreenProps {
     selectedProject: any;
@@ -47,22 +47,21 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
     };
 
     return (
-        <div className="visual-solution-page">
+        <div className="storage-page">
             <Header
                 onWelcome={onWelcome}
                 breadcrumbItems={breadcrumbItems}
                 currentStep="CÓDIGO SOLUCIÓN"
             />
 
-            <main className="visual-solution-main">
+            <main className="storage-main">
 
-                {/* ── SOLUCIÓN DE RESTRICCIONES DE ATRIBUTOS ── */}
-                <div className="visual-solution-section-heading">
+                <div className="storage-section-heading">
                     <h2>Solución de Restricciones de Atributos</h2>
                     {parsedAttributesConstraintsSolution.length > 0 && (
                         <button
                             type="button"
-                            className="visual-solution-delete-btn"
+                            className="storage-delete-btn"
                             onClick={() => setSectionToDelete({
                                 key: 'attributeConstraintsSolution',
                                 name: 'Solución de Restricciones de Atributos',
@@ -74,12 +73,12 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                     )}
                 </div>
 
-                <div className="visual-solution-section-content">
+                <div className="storage-section-content">
                     <div className="wide-card">
                         <div className="card-header">
                             <h3>Archivos de Solución</h3>
                         </div>
-                        <div className="visual-solution-content-card">
+                        <div className="storage-content-card">
                             {parsedAttributesConstraintsSolution.length > 0 ? (
                                 parsedAttributesConstraintsSolution.map((block) => (
                                     <JavaCodeBlock
@@ -89,7 +88,7 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                                     />
                                 ))
                             ) : (
-                                <p className="visual-solution-empty-state">
+                                <p className="storage-empty-state">
                                     Aún no se ha generado la solución del ejercicio "Restricciones de Atributos" para este examen.
                                 </p>
                             )}
@@ -97,8 +96,7 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                     </div>
                 </div>
 
-                {/* ── VOLVER ── */}
-                <div className="visual-solution-bottom-actions">
+                <div className="storage-bottom-actions">
                     <button type="button" onClick={onBack} className="btn-back">
                         Volver
                     </button>
@@ -110,7 +108,6 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                     onConfirm={confirmDelete}
                     onCancel={() => setSectionToDelete(null)}
                 />
-
             </main>
         </div>
     );

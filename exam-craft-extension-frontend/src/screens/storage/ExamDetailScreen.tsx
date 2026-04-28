@@ -4,17 +4,16 @@ import { MermaidViewer } from "../../components/MermaidViewer";
 import { Header } from "../../components/Header";
 import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
 import { cleanMermaidCode } from "../../components/mermaidCleaner";
+import "./css/StorageScreen.css";
 import "./css/ExamDetailScreen.css";
 
 export interface ExamDetailScreenProps {
     selectedProject: any;
     selectedDomainFolder: string;
     isCreating: boolean;
-
     onWelcome: () => void;
     onBack: () => void;
     onGoToFolders: () => void;
-
     onDownload: () => void;
     onGitHubDeploy: () => void;
     onShowGeneratedCode: () => void;
@@ -42,11 +41,11 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
     const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
 
-    const mermaidCode  = selectedProject?.extensionMermaid  || '';
-    const introText    = selectedProject?.extensionStatement || '';
+    const mermaidCode = selectedProject?.extensionMermaid  || '';
+    const introText   = selectedProject?.extensionStatement || '';
 
     const breadcrumbItems = [
-        { label: 'INICIO',              action: onWelcome   },
+        { label: 'INICIO',              action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
         { label: selectedDomainFolder?.toUpperCase() || '', action: onBack },
     ];
@@ -70,14 +69,14 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     };
 
     return (
-        <div className="exam-detail-page">
+        <div className="storage-page">
             <Header
                 onWelcome={onWelcome}
                 breadcrumbItems={breadcrumbItems}
                 currentStep={currentTitle}
             />
 
-            <main className="exam-detail-main">
+            <main className="storage-main exam-detail-main">
 
                 <div className="actions-menu-wrapper">
                     <button
@@ -91,46 +90,44 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 
                     {showActionsMenu && (
                         <>
-                            <div
-                                className="actions-overlay"
-                                onClick={() => setShowActionsMenu(false)}
-                            />
+                            <div className="actions-overlay" onClick={() => setShowActionsMenu(false)} />
                             <div className="actions-dropdown">
-                            <button
-                                type="button"
-                                className="action-btn action-btn--preview"
-                                onClick={() => { setShowPreviewModal(true); setShowActionsMenu(false); }}
-                            >
-                                Previsualizar
-                            </button>
-                            <button
-                                type="button"
-                                className="action-btn action-btn--download"
-                                onClick={() => { onDownload(); setShowActionsMenu(false); }}
-                            >
-                                Descargar (.md)
-                            </button>
-                            <button
-                                type="button"
-                                className="action-btn action-btn--github"
-                                onClick={onGitHubDeploy}
-                                disabled={isCreating}
-                            >
-                                {isCreating ? 'Generando Repositorio…' : 'Crear repositorio GitHub'}
-                            </button>
-                            <hr className="action-divider" />
-                            <button
-                                type="button"
-                                className="action-btn action-btn--delete"
-                                onClick={() => { setShowDeleteProjectModal(true); setShowActionsMenu(false); }}
-                            >
-                                Eliminar
-                            </button>
+                                <button
+                                    type="button"
+                                    className="action-btn action-btn--preview"
+                                    onClick={() => { setShowPreviewModal(true); setShowActionsMenu(false); }}
+                                >
+                                    Previsualizar
+                                </button>
+                                <button
+                                    type="button"
+                                    className="action-btn action-btn--download"
+                                    onClick={() => { onDownload(); setShowActionsMenu(false); }}
+                                >
+                                    Descargar (.md)
+                                </button>
+                                <button
+                                    type="button"
+                                    className="action-btn action-btn--github"
+                                    onClick={onGitHubDeploy}
+                                    disabled={isCreating}
+                                >
+                                    {isCreating ? 'Generando Repositorio…' : 'Crear repositorio GitHub'}
+                                </button>
+                                <hr className="action-divider" />
+                                <button
+                                    type="button"
+                                    className="action-btn action-btn--delete"
+                                    onClick={() => { setShowDeleteProjectModal(true); setShowActionsMenu(false); }}
+                                >
+                                    Eliminar
+                                </button>
                             </div>
                         </>
                     )}
                 </div>
-                <div className="section-heading">
+
+                <div className="storage-section-heading">
                     <h2>Extensión Funcional</h2>
                 </div>
 
@@ -158,12 +155,12 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                     </div>
                 </div>
 
-                <div className="section-heading">
+                <div className="storage-section-heading">
                     <h2>Restricciones de Atributos</h2>
                     {selectedProject?.attributeConstraints && (
                         <button
                             type="button"
-                            className="delete-section-btn"
+                            className="storage-delete-btn"
                             onClick={() => handleDeletePart('attributeConstraints', 'Restricciones de Atributos')}
                             title="Eliminar Restricciones de Atributos"
                         >
@@ -177,24 +174,20 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         <h3>Definición de Restricciones</h3>
                     </div>
                     {selectedProject?.attributeConstraints ? (
-                        <textarea
-                            className="wide-textarea"
-                            readOnly
-                            value={selectedProject.attributeConstraints}
-                        />
+                        <textarea className="wide-textarea" readOnly value={selectedProject.attributeConstraints} />
                     ) : (
-                        <p className="empty-state">
+                        <p className="storage-empty-state">
                             Aún no se han creado las restricciones de atributos para este examen.
                         </p>
                     )}
                 </div>
 
-                <div className="section-heading">
+                <div className="storage-section-heading">
                     <h2>Relaciones entre Entidades</h2>
                     {selectedProject?.entityRelationships && (
                         <button
                             type="button"
-                            className="delete-section-btn"
+                            className="storage-delete-btn"
                             onClick={() => handleDeletePart('entityRelations', 'Relaciones entre Entidades')}
                             title="Eliminar Relaciones entre Entidades"
                         >
@@ -208,19 +201,15 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         <h3>Definición de Relaciones</h3>
                     </div>
                     {selectedProject?.entityRelationships ? (
-                        <textarea
-                            className="wide-textarea"
-                            readOnly
-                            value={selectedProject.entityRelationships}
-                        />
+                        <textarea className="wide-textarea" readOnly value={selectedProject.entityRelationships} />
                     ) : (
-                        <p className="empty-state">
+                        <p className="storage-empty-state">
                             Aún no se han creado las relaciones entre entidades para este examen.
                         </p>
                     )}
                 </div>
 
-                <div className="section-heading" style={{ marginTop: '48px' }}>
+                <div className="storage-section-heading" style={{ marginTop: '48px' }}>
                     <h2>Código Generado</h2>
                 </div>
 
@@ -235,7 +224,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                     </div>
                 </div>
 
-                <div className="bottom-actions">
+                <div className="storage-bottom-actions">
                     <button type="button" className="btn-back" onClick={onBack}>
                         Volver
                     </button>
@@ -256,9 +245,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             </div>
                             <div className="preview-modal-body">
                                 <div className="exam-markdown-container">
-
                                     <h1>{selectedProject?.customName || `Examen de ${selectedProject?.domainName}`}</h1>
-
                                     <h2>1. Extensión Funcional y Diagrama UML</h2>
                                     {introText && <p style={{ whiteSpace: 'pre-wrap' }}>{introText}</p>}
                                     {mermaidCode && (
@@ -267,13 +254,11 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                                             <MermaidViewer chartCode={cleanMermaidCode(mermaidCode)} />
                                         </div>
                                     )}
-
                                     <h2>2. Restricciones de Atributos</h2>
                                     {selectedProject?.attributeConstraints
                                         ? <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProject.attributeConstraints}</p>
                                         : <p><em>Sin restricciones para atributos definidas</em></p>
                                     }
-
                                     <h2>3. Relaciones entre Entidades</h2>
                                     {selectedProject?.entityRelationships
                                         ? <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProject.entityRelationships}</p>

@@ -1,58 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Code+Pro:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-:root {
-  --bg-page:        #f5f0eb;
-  --bg-card:        #ffffff;
-  --bg-code:        #1e1e2e;
-  --accent:         #b08968;
-  --accent-dark:    #8a6748;
-  --accent-light:   #e8d5c4;
-  --text-primary:   #1a1a1a;
-  --text-secondary: #555555;
-  --text-muted:     #999999;
-  --border:         #e2d5c8;
-  --shadow-card:    0 2px 12px rgba(176, 137, 104, 0.12);
-  --shadow-hover:   0 6px 24px rgba(176, 137, 104, 0.22);
-  --radius:         10px;
-  --radius-sm:      6px;
-  --font-display:   'Segoe UI', 'Roboto', sans-serif;
-  --font-body:      'Segoe UI', 'Roboto', sans-serif;
-  --font-code:      'Segoe UI', 'Roboto', sans-serif;
-}
-
-.exam-detail-page {
-  min-height: 100vh;
-  background: var(--bg-page);
-  font-family: var(--font-body);
-  color: var(--text-primary);
-}
+/* ============================================================
+   ExamDetailScreen — específico
+   Importa StorageScreens.css para los estilos comunes
+   ============================================================ */
 
 .exam-detail-main {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 32px 40px 80px;
   position: relative;
 }
 
-.section-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-top: 48px;
-  margin-bottom: 18px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--accent);
-}
-
-.section-heading h2 {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: var(--accent-dark);
-  margin: 0;
-  letter-spacing: 0.02em;
-}
-
+/* ── Two col grid ── */
 .two-col-grid {
   display: grid;
   grid-template-columns: 1fr 1.6fr;
@@ -61,37 +16,7 @@
   min-height: 560px;
 }
 
-.content-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: box-shadow 0.2s ease;
-}
-
-.content-card:hover {
-  box-shadow: var(--shadow-hover);
-}
-
-.card-header {
-  background: linear-gradient(135deg, var(--accent-light) 0%, #f0e6d8 100%);
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.card-header h3 {
-  font-family: var(--font-body);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent-dark);
-  margin: 0;
-}
-
+/* ── Card body ── */
 .card-body {
   flex: 1;
   overflow: hidden;
@@ -132,14 +57,7 @@
   background: #fafafa;
 }
 
-.wide-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
-}
-
+/* ── Wide textarea ── */
 .wide-textarea {
   width: 100%;
   min-height: 380px;
@@ -155,14 +73,7 @@
   box-sizing: border-box;
 }
 
-.empty-state {
-  color: var(--text-muted);
-  font-style: italic;
-  text-align: center;
-  padding: 48px 24px;
-  font-size: 0.92rem;
-}
-
+/* ── Code buttons ── */
 .code-buttons-row {
   display: flex;
   flex-direction: row;
@@ -196,12 +107,14 @@
   transform: translateY(0);
 }
 
+/* ── Actions menu ── */
 .actions-menu-wrapper {
   position: absolute;
   top: 22px;
   right: 40px;
   z-index: 150;
 }
+
 .actions-menu-btn {
   background: none;
   border: none;
@@ -269,23 +182,7 @@
   margin: 4px 0;
 }
 
-.delete-section-btn {
-  background: none;
-  border: none;
-  color: #ff4d4f;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  line-height: 1;
-  transition: background 0.15s;
-}
-
-.delete-section-btn:hover {
-  background: #fff0f0;
-}
-
+/* ── Preview modal ── */
 .preview-backdrop {
   position: fixed;
   inset: 0;
@@ -391,20 +288,9 @@
   color: var(--accent-dark);
 }
 
-.bottom-actions {
-  margin-top: 32px;
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-}
-
 @media (max-width: 960px) {
   .two-col-grid {
     grid-template-columns: 1fr;
     min-height: auto;
-  }
-
-  .exam-detail-main {
-    padding: 24px 20px 60px;
   }
 }
