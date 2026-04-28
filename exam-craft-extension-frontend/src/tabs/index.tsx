@@ -4,7 +4,6 @@ import GithubScreen from "../screens/principal/GithubScreen"
 import CreateExamScreen from "../screens/chooseCreate/CreateExamScreen"
 import CreateExamByPartsScreen from "../screens/chooseCreate/CreateExamByPartsScreen"
 import DomainSelectionScreen from "../screens/examStatementGeneration/DomainSelectionScreen"
-import DomainWorkflowScreen from "../screens/examStatementGeneration/DomainWorkflowScreen"
 import DiagramUMLScreen from "../screens/examStatementGeneration/DiagramUMLScreen"
 import FinishFunctionalExtensionScreen from "../screens/examStatementGeneration/FinishFunctionalExtensionScreen"
 import AttributesConstraintsWorkflowScreen from "~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen"
@@ -18,6 +17,7 @@ import SolutionCodeGenerationScreen from "~src/screens/codeGeneration/solution/S
 import AttributesConstraintsSolutionCodeScreen from "~src/screens/codeGeneration/solution/AttributesConstraintsSolutionCodeScreen"
 import EntityRelationshipsWorkflowScreen from "~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen"
 import PartsGenerationScreen from "~src/screens/chooseCreate/PartsGenetarionScreen"
+import ContextWorkflowScreen from "../screens/examStatementGeneration/ContextWorkflowScreen"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
@@ -42,7 +42,7 @@ export default function IndexTab() {
     "attributesConstraints" |
     "entityRelationships" |
     "functionalExtension" | 
-    "domainWorkflow" |
+    "contextWorkflow" |
     "diagramUML" |
     "finishFunctionalExtension" |
     "storage" |
@@ -183,15 +183,15 @@ export default function IndexTab() {
           onWelcome={() => setScreen("welcome")} 
           onSelectDomain={(domainName) => {
               setSelectedDomain(domainName)  
-              setScreen("domainWorkflow") 
+              setScreen("contextWorkflow") 
           }}
          onCreateExam={() => setScreen("createExam")}
          onComponents={() => setScreen("partsGeneration")}
         />
       )}
 
-      {screen === "domainWorkflow" && (
-        <DomainWorkflowScreen 
+      {screen === "contextWorkflow" && (
+        <ContextWorkflowScreen 
           domainName={selectedDomain}
           onBack={() => setScreen("domainSelection")} 
           onWelcome={() => setScreen("welcome")} 
@@ -225,12 +225,12 @@ export default function IndexTab() {
         <DiagramUMLScreen 
           domainName={selectedDomain}
           context={contextResponse}
-          onBack={() => setScreen("domainWorkflow")} 
+          onBack={() => setScreen("contextWorkflow")} 
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onFunctionalExtension={() => setScreen("domainSelection")}
-          onStatementStep1={() => setScreen("domainWorkflow")}
+          onStatementStep1={() => setScreen("contextWorkflow")}
           onFinishExtension={(statement, mermaid) => {
               setExtensionStatement(statement);
               setExtensionMermaid(mermaid);
@@ -249,7 +249,7 @@ export default function IndexTab() {
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onFunctionalExtension={() => setScreen("domainSelection")}
-          onStatementStep1={() => setScreen("domainWorkflow")}
+          onStatementStep1={() => setScreen("contextWorkflow")}
           onCreateDiagram={(context) => {
             setContextResponse(context)
             setScreen("diagramUML")

@@ -3,6 +3,8 @@ import { Header } from "~src/components/Header"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md"
 import { sendToGemini } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
+import "../../css/WorkFlowParts.css"
+import "../../css/CommonText.css"
 
 declare var chrome: any;
 
@@ -16,7 +18,7 @@ interface Props {
   readonly onCreateDiagram: (text: string) => void;
 }
 
-export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, onCreateExam, onCreateExamByParts, onFunctionalExtension, onCreateDiagram }: Props) {
+export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, onCreateExam, onCreateExamByParts, onFunctionalExtension, onCreateDiagram }: Props) {
   const [currentStep, setCurrentStep] = useState(1);
   const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
   
@@ -102,7 +104,6 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
             });
             console.log("Log enviado al servidor local correctamente.");
         } catch (error) {
-            // CORRECCIÓN: Usamos la variable 'error' para que Sonar no se queje
             console.warn("Servidor de logs apagado. El log no se guardó en el repo.", error);
         }
 
@@ -122,7 +123,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
     ];
 
   return (
-    <div className="exam-app">
+    <div>
       <Header 
         onWelcome={onWelcome} 
         breadcrumbItems={breadcrumbItems} 
@@ -151,7 +152,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
                             Este es el prompt que se usará para generar el texto del enunciado del examen, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar Enunciado"</strong>.
                         </p>                        
                         <textarea 
-                            className="wf-textarea" 
+                            className="wf-textarea-input" 
                             value={promptText}
                             onChange={(e) => setPromptText(e.target.value)}
                         />
