@@ -51,8 +51,7 @@
   cursor: text; 
   margin-top: 5px;
   display: block;  
-  white-space: nowrap;
-  overflow: hidden;
+  overflow: visible;
   text-overflow: ellipsis;
 }
 
