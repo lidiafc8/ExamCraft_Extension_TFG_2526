@@ -146,7 +146,7 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
 
             <div className="wf-wide-wrapper">
                 {currentStep === 1 && internalStep === 'input' && (
-                    <div className="content-card" style={{ maxWidth: '800px', width: '100%' }}>
+                    <div className="content-card">
                         <h2 className="main-title small">{domainName.toUpperCase()}: Texto de enunciado</h2>
                         <p className="wf-instruction-text">
                             Este es el prompt que se usará para generar el texto del enunciado del examen, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar Enunciado"</strong>.
@@ -157,7 +157,7 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                             onChange={(e) => setPromptText(e.target.value)}
                         />
                         <div className="wf-actions-row">
-                            <button onClick={onBack} className="btn-step secondary">Volver</button>
+                            <button onClick={onBack} className="btn-back">Volver</button>
                             <button onClick={handleGenerate} className="btn-step primary">
                                 {isLoading ? <div className="loading-spinner"></div> : 'Generar Enunciado'}
                             </button>
@@ -170,7 +170,7 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                         <div className="wf-column">
                             <span className="wf-column-title">Prompt enviado</span>
                             <textarea 
-                            className="wf-textarea" 
+                            className="wf-textarea-input" 
                             value={promptText}
                             onChange={(e) => setPromptText(e.target.value)}
                         />
@@ -182,7 +182,7 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                             <span className="wf-column-title">Propuesta de texto de enunciado</span>
                             
                             {isLoading ? (
-                                <div className="wf-result-box" style={{ whiteSpace: 'pre-wrap' }}>
+                                <div className="wf-result-box" >
                                     Generando...
                                 </div>
                             ) : (
@@ -201,8 +201,8 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                 )}
                 
                 {currentStep === 1 && internalStep === 'result' && (
-                     <div className="wf-actions-row" style={{ marginTop: '20px' }}>
-                        <button onClick={() => setInternalStep('input')} className="btn-step secondary">Volver</button>
+                     <div className="wf-actions-row">
+                        <button onClick={onBack} className="btn-back">Volver</button>
                     </div>
                 )}
 

@@ -58,7 +58,7 @@ body {
   font-weight: bold; font-size: 1.2rem; transition: all 0.3s ease; border: 3px solid transparent;
 }
 .step-label { margin-top: 8px; font-size: 0.9rem; font-weight: 600; color: #555; }
-.step-line { flex-grow: 1; height: 4px; background-color: #e0e0e0; margin: 0 10px 25px 10px; border-radius: 2px; }
+.step-line { flex-grow: 1; height: 4px; margin: 0 10px 25px 10px; border-radius: 2px; }
 
 .step-active .step-circle { background-color: #3E2723; color: white; box-shadow: 0 0 0 4px rgba(62, 39, 35, 0.2); }
 .step-active .step-label { color: #3E2723; font-weight: bold; }
@@ -92,7 +92,7 @@ body {
   display: flex;
   flex-direction: row;
   gap: 20px;
-  width: 100%;
+  width: 200%;
   align-items: stretch;
   min-height: 500px;
 }
@@ -106,6 +106,7 @@ body {
   flex-direction: column;
   gap: 15px;
   border: 1px solid #E0E0E0;
+  width: 150%;
 }
 
 .wf-column-title {
