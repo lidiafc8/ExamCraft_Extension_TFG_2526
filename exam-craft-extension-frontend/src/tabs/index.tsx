@@ -84,7 +84,7 @@ export default function IndexTab() {
         <CreateExamByPartsScreen 
         onBack={() => setScreen("createExam")} 
         onWelcome={() => setScreen("welcome")} 
-        onPartsGeneration={() => setScreen("partsGeneration")}
+        onComponents={() => setScreen("partsGeneration")}
         onCodeGeneration={() => {
           setSelectedProject(null); 
           setCameFromAttributes(false);
@@ -100,6 +100,7 @@ export default function IndexTab() {
         onFunctionalExtension={() => setScreen("domainSelection")}
         onAttributesConstraints={() => setScreen("attributesConstraints")}
         onEntityRelationships={() => setScreen("entityRelationships")}
+        onPartsGeneration={() => setScreen("createExamByParts")}
         />
       )}
 
@@ -178,13 +179,14 @@ export default function IndexTab() {
 
       {screen === "domainSelection" && (
         <DomainSelectionScreen 
-        onBack={() => setScreen("createExamByParts")} 
+        onBack={() => setScreen("partsGeneration")} 
           onWelcome={() => setScreen("welcome")} 
           onSelectDomain={(domainName) => {
               setSelectedDomain(domainName)  
               setScreen("domainWorkflow") 
           }}
          onCreateExam={() => setScreen("createExam")}
+         onComponents={() => setScreen("partsGeneration")}
         />
       )}
 
@@ -261,7 +263,7 @@ export default function IndexTab() {
 
       {screen === "attributesConstraints" && (
         <AttributesConstraintsWorkflowScreen 
-          onBack={() => setScreen("createExamByParts")} 
+          onBack={() => setScreen("partsGeneration")} 
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
           onGoToBaseClass={(project) => {
@@ -279,7 +281,7 @@ export default function IndexTab() {
 
       {screen === "entityRelationships" && (
       <EntityRelationshipsWorkflowScreen 
-        onBack={() => setScreen("createExamByParts")} 
+        onBack={() => setScreen("partsGeneration")} 
         onWelcome={() => setScreen("welcome")} 
         onCreateExam={() => setScreen("createExam")}
         onGoToBaseClass={(project) => {

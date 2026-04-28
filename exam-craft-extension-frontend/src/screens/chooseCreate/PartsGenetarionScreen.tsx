@@ -5,12 +5,13 @@ import "../../css/Vertical.css"
 interface Props {
   readonly onBack: () => void
   readonly onWelcome: () => void
+  readonly onPartsGeneration: () => void
   readonly onFunctionalExtension: () => void
   readonly onAttributesConstraints: () => void
   readonly onEntityRelationships: () => void
 }
 
-export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onEntityRelationships }: Props) {
+export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctionalExtension, onAttributesConstraints, onEntityRelationships, onPartsGeneration }: Props) {
   return (
     <div className="exam-app">
        
@@ -19,8 +20,9 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
         breadcrumbItems={[
             { label: 'INICIO',        action: onWelcome },
             { label: 'CREAR EXAMEN',  action: onBack },
+            { label: 'POR PARTES',  action: onPartsGeneration },
         ]}
-        currentStep="POR PARTES"
+        currentStep="COMPONENTES"
       />
 
       <main className="main-content">

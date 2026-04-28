@@ -6,10 +6,10 @@ interface Props {
   readonly onBack: () => void
   readonly onWelcome: () => void
   readonly onCodeGeneration: () => void
-  readonly onPartsGeneration: () => void
+  readonly onComponents: () => void
 }
 
-export default function CreateExamByPartsScreen({ onBack, onWelcome, onCodeGeneration, onPartsGeneration  }: Props) {
+export default function CreateExamByPartsScreen({ onBack, onWelcome, onCodeGeneration, onComponents  }: Props) {
   return (
     <div>
        
@@ -32,8 +32,8 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onCodeGener
 
         <div className="vertical-menu-container">
 
-          <button className="menu-btn1" onClick={onPartsGeneration}>
-            Generación de las partes del examen
+          <button className="menu-btn1" onClick={onComponents}>
+            Generación de las partes 
           </button>
           
           <button className="menu-btn1" onClick={onCodeGeneration}>
