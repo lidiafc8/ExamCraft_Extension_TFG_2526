@@ -18,7 +18,7 @@ export interface WorkflowScreenProps {
   selectionDescription: string
   workflowInputTitle: string
   workflowResultTitle: (projectName: string) => string
-  instructionText: React.ReactNode
+  instructionText: React.ReactNode | ((project: any) => React.ReactNode);
   confirmTitle: string
   confirmDescription: (projectName: string) => string
   confirmWarning?: (project: any) => string | null
@@ -100,6 +100,10 @@ export default function WorkflowScreen({
   const [hiddenContext, setHiddenContext] = useState("")
   const [responseText, setResponseText] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+
+  const resolvedInstructionText = typeof instructionText === 'function' 
+    ? instructionText(selectedProject) 
+    : instructionText;
 
   useEffect(() => {
     if (step === "selection" && globalThis.chrome?.storage?.local) {
@@ -498,7 +502,7 @@ export default function WorkflowScreen({
             <div className="wf-wide-wrapper">
               {internalStep === "input" && (
                 <>
-                  <p className="wf-instruction-text">{instructionText}</p>
+                  <p className="wf-instruction-text">{resolvedInstructionText}</p>
                   <textarea
                     className="wf-textarea"
                     value={promptText}

@@ -6,11 +6,12 @@ interface Props {
   readonly onWelcome: () => void
   readonly onCreateExamByParts: () => void
   readonly onGenerateAttributesConstraintsSolutionCode: () => void
+  readonly onGenerateEntityRelationshipsSolutionCode: () => void
   readonly onCodeGeneration: () => void
   
 }
 
-export default function SolutionCodeGenerationScreen({ onBack, onWelcome, onCreateExamByParts, onGenerateAttributesConstraintsSolutionCode, onCodeGeneration }: Props
+export default function SolutionCodeGenerationScreen({ onBack, onWelcome, onCreateExamByParts, onGenerateAttributesConstraintsSolutionCode, onGenerateEntityRelationshipsSolutionCode, onCodeGeneration }: Props
 ) {
   
   const breadcrumbItems = [
@@ -43,6 +44,10 @@ export default function SolutionCodeGenerationScreen({ onBack, onWelcome, onCrea
 
           <button className="menu-btn" onClick={onGenerateAttributesConstraintsSolutionCode}>
             Solución Restricción de atributos
+          </button>
+
+          <button className="menu-btn" onClick={onGenerateEntityRelationshipsSolutionCode}>
+            Solución Relaciones entre entidades
           </button>
 
         </div>

@@ -18,6 +18,7 @@ import AttributesConstraintsSolutionCodeScreen from "~src/screens/codeGeneration
 import EntityRelationshipsWorkflowScreen from "~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen"
 import PartsGenerationScreen from "~src/screens/chooseCreate/PartsGenetarionScreen"
 import ContextWorkflowScreen from "../screens/examStatementGeneration/ContextWorkflowScreen"
+import EntityRelationshipsSolutionCodeScreen from "~src/screens/codeGeneration/solution/EntityRelationshipsSolutionCodeScreen"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
@@ -54,7 +55,8 @@ export default function IndexTab() {
     "examCodeGeneration" |
     "solutionCodeGeneration" |
     "attributesConstraintsSolutionCode" |
-    "partsGeneration"
+    "partsGeneration" |
+    "entityRelationshipsSolutionCode"
     
   >("welcome")
 
@@ -135,12 +137,24 @@ export default function IndexTab() {
         onWelcome={() => setScreen("welcome")}
         onCreateExamByParts={() => setScreen("createExamByParts")}
         onGenerateAttributesConstraintsSolutionCode={() => setScreen("attributesConstraintsSolutionCode")}
+        onGenerateEntityRelationshipsSolutionCode={() => setScreen("entityRelationshipsSolutionCode")}
         onCodeGeneration={() => setScreen("codeGeneration")}
         />
       )} 
 
       {screen === "attributesConstraintsSolutionCode" && (
         <AttributesConstraintsSolutionCodeScreen 
+        onBack={() => setScreen("solutionCodeGeneration")}
+        onWelcome ={() => setScreen("welcome")}
+        onCreateExam={() => setScreen("createExam")}
+        onCreateExamByParts={() => setScreen("createExamByParts")}
+        onCodeGeneration={() => setScreen("codeGeneration")}
+        onSolutionCodeGeneration={() => setScreen("solutionCodeGeneration")}
+        />
+      )}
+
+      {screen === "entityRelationshipsSolutionCode" && (
+        <EntityRelationshipsSolutionCodeScreen 
         onBack={() => setScreen("solutionCodeGeneration")}
         onWelcome ={() => setScreen("welcome")}
         onCreateExam={() => setScreen("createExam")}

@@ -34,7 +34,7 @@ export default function GenerationAttributeConstraintsSolutionScreen({
       currentStep="RESTRICCIONES ATRIBUTOS"
 
       selectionTitle="Selecciona un examen"
-      selectionDescription="Para generar la solución es necesario elegir un examen que ya cuente con el enunciado de restricciones, los tests y el código base generado. Haz clic en la carpeta del dominio correspondiente."
+      selectionDescription="Para generar la solución es necesario elegir un examen que ya cuente con el enunciado de restricciones, los tests correspondientes y el código base generado. Haz clic en la carpeta del dominio correspondiente."
       
       workflowInputTitle="Generación de Código Solución"
       workflowResultTitle={(name) => `Generar Solución: ${name}`}

@@ -32,6 +32,14 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
         selectedProject?.attributeConstraintsSolution || ''
     );
 
+    const parsedEntityRelationshipsSolution = parseJavaFiles(
+        selectedProject?.entityRelationshipsSolution || ''
+    );
+
+    const parsedFullSolution = parseJavaFiles(
+        selectedProject?.fullSolution || ''
+    );
+
     const breadcrumbItems = [
         { label: 'INICIO',              action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
@@ -55,6 +63,46 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
             />
 
             <main className="storage-main">
+
+                <div className="storage-section-heading">
+                    <h2>Solución Completa </h2>
+                    {parsedFullSolution.length > 0 && (
+                        <button
+                            type="button"
+                            className="storage-delete-btn"
+                            onClick={() => setSectionToDelete({
+                                key: 'fullSolution',
+                                name: 'Solución Completa',
+                            })}
+                            title="Eliminar Solución Completa"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+
+                <div className="storage-section-content">
+                    <div className="wide-card">
+                        <div className="card-header">
+                            <h3>Archivos de Solución</h3>
+                        </div>
+                        <div className="storage-content-card">
+                            {parsedFullSolution.length > 0 ? (
+                                parsedFullSolution.map((block) => (
+                                    <JavaCodeBlock
+                                        key={block.filename}
+                                        filename={block.filename}
+                                        code={block.code}
+                                    />
+                                ))
+                            ) : (
+                                <p className="storage-empty-state">
+                                    Aún no se ha generado una solución completa para este examen.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
 
                 <div className="storage-section-heading">
                     <h2>Solución de Restricciones de Atributos</h2>
@@ -95,6 +143,49 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                         </div>
                     </div>
                 </div>
+
+
+                <div className="storage-section-heading">
+                    <h2>Solución de Relaciones entre Entidades</h2>
+                    {parsedEntityRelationshipsSolution.length > 0 && (
+                        <button
+                            type="button"
+                            className="storage-delete-btn"
+                            onClick={() => setSectionToDelete({
+                                key: 'entityRelationshipsSolution',
+                                name: 'Solución de Relaciones entre Entidades',
+                            })}
+                            title="Eliminar Solución de Relaciones entre Entidades"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+
+                <div className="storage-section-content">
+                    <div className="wide-card">
+                        <div className="card-header">
+                            <h3>Archivos de Solución</h3>
+                        </div>
+                        <div className="storage-content-card">
+                            {parsedEntityRelationshipsSolution.length > 0 ? (
+                                parsedEntityRelationshipsSolution.map((block) => (
+                                    <JavaCodeBlock
+                                        key={block.filename}
+                                        filename={block.filename}
+                                        code={block.code}
+                                    />
+                                ))
+                            ) : (
+                                <p className="storage-empty-state">
+                                    Aún no se ha generado la solución del ejercicio "Relaciones entre Entidades" para este examen.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                
 
                 <div className="storage-bottom-actions">
                     <button type="button" onClick={onBack} className="btn-back">
