@@ -92,9 +92,9 @@
 }
 
 .btn-icon img {
-    width: 140px;
-    height: 140px;
-    object-fit: contain; 
+  width: 130px;
+  height: 130px;
+  object-fit: contain; 
 }
 
 .btn-cross {
