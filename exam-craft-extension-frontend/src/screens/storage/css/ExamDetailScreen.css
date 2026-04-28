@@ -1,10 +1,5 @@
-/* ============================================================
-   ExamDetailScreen — refined academic layout
-   ============================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Code+Pro:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-/* ── Root tokens ── */
 :root {
   --bg-page:        #f5f0eb;
   --bg-card:        #ffffff;
@@ -20,12 +15,11 @@
   --shadow-hover:   0 6px 24px rgba(176, 137, 104, 0.22);
   --radius:         10px;
   --radius-sm:      6px;
-  --font-display:   'Playfair Display', Georgia, serif;
-  --font-body:      'DM Sans', sans-serif;
-  --font-code:      'Source Code Pro', monospace;
+  --font-display:   'Segoe UI', 'Roboto', sans-serif;
+  --font-body:      'Segoe UI', 'Roboto', sans-serif;
+  --font-code:      'Segoe UI', 'Roboto', sans-serif;
 }
 
-/* ── Page shell ── */
 .exam-detail-page {
   min-height: 100vh;
   background: var(--bg-page);
@@ -40,7 +34,6 @@
   position: relative;
 }
 
-/* ── Section heading strip ── */
 .section-heading {
   display: flex;
   justify-content: space-between;
@@ -60,7 +53,6 @@
   letter-spacing: 0.02em;
 }
 
-/* ── Two-column layout for section 1 ── */
 .two-col-grid {
   display: grid;
   grid-template-columns: 1fr 1.6fr;
@@ -69,7 +61,6 @@
   min-height: 560px;
 }
 
-/* ── Generic content card ── */
 .content-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -109,7 +100,6 @@
   flex-direction: column;
 }
 
-/* ── Code textarea ── */
 .wf-textarea {
   width: 100%;
   flex: 1;
@@ -132,7 +122,6 @@
   background: rgba(176, 137, 104, 0.25);
 }
 
-/* ── Mermaid diagram panel ── */
 .diagram-panel {
   flex: 1;
   overflow: auto;
@@ -143,7 +132,6 @@
   background: #fafafa;
 }
 
-/* ── Wide-section cards (attr constraints / entity relations) ── */
 .wide-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -175,7 +163,6 @@
   font-size: 0.92rem;
 }
 
-/* ── Generated code buttons section ── */
 .code-buttons-row {
   display: flex;
   flex-direction: row;
@@ -209,7 +196,6 @@
   transform: translateY(0);
 }
 
-/* ── Actions kebab menu ── */
 .actions-menu-wrapper {
   position: absolute;
   top: 22px;
@@ -283,7 +269,6 @@
   margin: 4px 0;
 }
 
-/* ── Delete section icon button ── */
 .delete-section-btn {
   background: none;
   border: none;
@@ -301,7 +286,6 @@
   background: #fff0f0;
 }
 
-/* ── Preview modal ── */
 .preview-backdrop {
   position: fixed;
   inset: 0;
@@ -373,7 +357,6 @@
   position: relative;
 }
 
-/* Overlay que bloquea todos los eventos del ratón sobre el diagrama */
 .preview-diagram-blocker {
   position: absolute;
   inset: 0;
@@ -381,7 +364,6 @@
   cursor: default;
 }
 
-/* Ocultar controles de zoom del MermaidViewer en la previsualización */
 .preview-diagram-wrapper [class*="zoom"],
 .preview-diagram-wrapper [class*="controls"],
 .preview-diagram-wrapper [class*="toolbar"],
@@ -409,7 +391,6 @@
   color: var(--accent-dark);
 }
 
-/* ── Bottom action row ── */
 .bottom-actions {
   margin-top: 32px;
   display: flex;
@@ -417,7 +398,6 @@
   gap: 16px;
 }
 
-/* ── Responsive ── */
 @media (max-width: 960px) {
   .two-col-grid {
     grid-template-columns: 1fr;
