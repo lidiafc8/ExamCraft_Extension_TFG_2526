@@ -1,4 +1,8 @@
-.generated-code-page {
+/* ============================================================
+   VisualSolutionCodeScreen
+   ============================================================ */
+
+.visual-solution-page {
   min-height: 100vh;
   height: auto;
   background: var(--bg-page);
@@ -8,7 +12,7 @@
   flex-direction: column;
 }
 
-.generated-code-main {
+.visual-solution-main {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
@@ -16,7 +20,8 @@
   flex: 1;
 }
 
-.generated-section-heading {
+/* ── Section headings ── */
+.visual-solution-section-heading {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -26,11 +31,11 @@
   border-bottom: 2px solid var(--accent);
 }
 
-.generated-section-heading:first-of-type {
+.visual-solution-section-heading:first-of-type {
   margin-top: 20px;
 }
 
-.generated-section-heading h2 {
+.visual-solution-section-heading h2 {
   font-family: var(--font-display);
   font-size: 1.35rem;
   font-weight: 600;
@@ -41,19 +46,17 @@
   padding: 0;
 }
 
-.generated-section-content {
+/* ── Section content ── */
+.visual-solution-section-content {
   margin-bottom: 40px;
 }
 
-.generated-section-content--tests {
-  margin-bottom: 50px;
-}
-
-.generated-content-card {
+.visual-solution-content-card {
   padding: 20px;
 }
 
-.generated-delete-btn {
+/* ── Delete button ── */
+.visual-solution-delete-btn {
   background: none;
   border: none;
   color: #ff4d4f;
@@ -66,21 +69,12 @@
   transition: background 0.15s;
 }
 
-.generated-delete-btn:hover {
+.visual-solution-delete-btn:hover {
   background: #fff0f0;
 }
 
-.generated-test-item {
-  margin-bottom: 30px;
-}
-
-.generated-test-item-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 5px;
-}
-
-.generated-empty-state {
+/* ── Empty state ── */
+.visual-solution-empty-state {
   color: var(--text-muted);
   font-style: italic;
   text-align: center;
@@ -89,20 +83,22 @@
   margin: 0;
 }
 
-.generated-bottom-actions {
+/* ── Bottom actions ── */
+.visual-solution-bottom-actions {
   margin-top: 32px;
   display: flex;
   justify-content: center;
   gap: 16px;
 }
 
-.generated-bottom-actions .btn-back {
+.visual-solution-bottom-actions .btn-back {
   position: relative;
   margin: 0;
 }
 
+/* ── Responsive ── */
 @media (max-width: 960px) {
-  .generated-code-main {
+  .visual-solution-main {
     padding: 24px 20px 60px;
   }
 }

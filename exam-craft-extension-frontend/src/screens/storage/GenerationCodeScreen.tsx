@@ -22,7 +22,6 @@ export interface GeneratedCodeScreenProps {
 export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     selectedProject,
     selectedDomainFolder,
-    logoExamCraft,
     onWelcome,
     onBack,
     onGoToExams,
@@ -75,7 +74,6 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
             />
 
             <main className="generated-code-main">
-                {/* ── CLASES BASE ── */}
                 <div className="generated-section-heading">
                     <h2>Clases Base</h2>
                     {parsedBaseClasses.length > 0 && (
@@ -113,7 +111,6 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                     </div>
                 </div>
 
-                {/* ── TESTS DE JAVA ── */}
                 <div className="generated-section-heading">
                     <h2>Tests de Java</h2>
                 </div>
@@ -152,7 +149,6 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                     </div>
                 </div>
 
-                {/* ── VOLVER ── */}
                 <div className="generated-bottom-actions">
                     <button type="button" onClick={onBack} className="btn-back">
                         Volver

@@ -9,7 +9,7 @@ import { FoldersGridScreen } from "./FoldersGridScreen";
 import { DomainFolderScreen } from "./DomainFolderScreen";
 import { ExamDetailScreen } from "./ExamDetailScreen";
 import { GeneratedCodeScreen } from "./GenerationCodeScreen";
-import { GeneratedSolutionCodeScreen } from "./VisualSolutionCodeScreen";
+import { VisualSolutionCodeScreen } from "./VisualSolutionCodeScreen";
 
 declare var chrome: any;
 
@@ -228,7 +228,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
     if (selectedProject && showSolutionGeneratedCode) {
         return (
-            <GeneratedSolutionCodeScreen          
+            <VisualSolutionCodeScreen          
                 selectedProject={selectedProject}
                 selectedDomainFolder={selectedDomainFolder || ""}
                 logoExamCraft={logoExamCraft}
@@ -275,7 +275,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             <DomainFolderScreen
                 selectedDomainFolder={selectedDomainFolder}
                 projectsInFolder={projectsInFolder}
-                logoExamCraft={logoExamCraft}
                 editingId={editingId}
                 tempName={tempName}
                 onWelcome={onWelcome}

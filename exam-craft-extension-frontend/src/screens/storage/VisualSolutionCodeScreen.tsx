@@ -4,6 +4,7 @@ import { Header } from "~src/components/Header";
 import { parseJavaFiles } from "~src/utils/codeUtils";
 import { JavaCodeBlock } from "~src/components/JavaCodeBlock";
 import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
+import "./css/VisualSolutionCodeScreen.css";
 
 export interface VisualSolutionCodeScreenProps {
     selectedProject: any;
@@ -23,14 +24,16 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
     onBack,
     onGoToExams,
     onGoToFolders,
-    onDeleteSection
+    onDeleteSection,
 }) => {
-    const [sectionToDelete, setSectionToDelete] = useState<{ key: string, name: string } | null>(null);
-    
-    const parsedAttributesConstraintsSolution = parseJavaFiles(selectedProject?.attributeConstraintsSolution || '');
+    const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
+
+    const parsedAttributesConstraintsSolution = parseJavaFiles(
+        selectedProject?.attributeConstraintsSolution || ''
+    );
 
     const breadcrumbItems = [
-        { label: 'INICIO', action: onWelcome },
+        { label: 'INICIO',              action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
         { label: selectedDomainFolder?.toUpperCase(), action: onGoToExams },
         { label: selectedProject?.customName || `Examen de ${selectedProject?.domainName}`, action: onBack },
@@ -44,21 +47,26 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
     };
 
     return (
-        <div className="exam-app" style={{ minHeight: '100vh', height: 'auto', overflow: 'visible', display: 'flex', flexDirection: 'column' }}>
-            <Header onWelcome={onWelcome} breadcrumbItems={breadcrumbItems} currentStep="CÓDIGO SOLUCIÓN" />
+        <div className="visual-solution-page">
+            <Header
+                onWelcome={onWelcome}
+                breadcrumbItems={breadcrumbItems}
+                currentStep="CÓDIGO SOLUCIÓN"
+            />
 
-            <main className="main-content" style={{ padding: '30px', paddingBottom: '100px', height: 'auto', overflow: 'visible', flex: 1 }}>
-                
-                {/* SECCIÓN: SOLUCIÓN DE RESTRICCIONES DE ATRIBUTOS */}
-                <div className="section-block" style={{ marginBottom: '1px', marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #b08968', paddingBottom: '10px' }}>
-                    <h2 style={{ borderBottom: 'none', paddingBottom: '0', marginBottom: '0' }}>
-                        Solución de Restricciones de Atributos
-                    </h2>
+            <main className="visual-solution-main">
+
+                {/* ── SOLUCIÓN DE RESTRICCIONES DE ATRIBUTOS ── */}
+                <div className="visual-solution-section-heading">
+                    <h2>Solución de Restricciones de Atributos</h2>
                     {parsedAttributesConstraintsSolution.length > 0 && (
-                        <button 
-                            type="button" 
-                            onClick={() => setSectionToDelete({ key: 'attributeConstraintsSolution', name: 'Solución de Restricciones de Atributos' })} 
-                            style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 5px' }} 
+                        <button
+                            type="button"
+                            className="visual-solution-delete-btn"
+                            onClick={() => setSectionToDelete({
+                                key: 'attributeConstraintsSolution',
+                                name: 'Solución de Restricciones de Atributos',
+                            })}
                             title="Eliminar Solución de Restricciones de Atributos"
                         >
                             ✕
@@ -66,33 +74,43 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                     )}
                 </div>
 
-                <div className="section-block" style={{ width: '200%', marginBottom: '40px' }}>
-                    <div className="content-card" style={{ padding: '20px' }}>
-                        {parsedAttributesConstraintsSolution.length > 0 ? (
-                            parsedAttributesConstraintsSolution.map((block) => (
-                                <JavaCodeBlock key={block.filename} filename={block.filename} code={block.code} />
-                            ))
-                        ) : (
-                            <p style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', margin: '30px 0' }}>
-                                Aún no se han generado la solución del ejercicio "Restricciones de Atributos" para este examen.
-                            </p>
-                        )}
+                <div className="visual-solution-section-content">
+                    <div className="wide-card">
+                        <div className="card-header">
+                            <h3>Archivos de Solución</h3>
+                        </div>
+                        <div className="visual-solution-content-card">
+                            {parsedAttributesConstraintsSolution.length > 0 ? (
+                                parsedAttributesConstraintsSolution.map((block) => (
+                                    <JavaCodeBlock
+                                        key={block.filename}
+                                        filename={block.filename}
+                                        code={block.code}
+                                    />
+                                ))
+                            ) : (
+                                <p className="visual-solution-empty-state">
+                                    Aún no se ha generado la solución del ejercicio "Restricciones de Atributos" para este examen.
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '15px' }}>
-                    <button onClick={onBack} className="btn-back" style={{ position: 'relative', margin: 0 }}>
+                {/* ── VOLVER ── */}
+                <div className="visual-solution-bottom-actions">
+                    <button type="button" onClick={onBack} className="btn-back">
                         Volver
                     </button>
                 </div>
 
-                <DeleteConfirmationModal 
+                <DeleteConfirmationModal
                     isOpen={!!sectionToDelete}
                     itemName={sectionToDelete?.name || ''}
                     onConfirm={confirmDelete}
                     onCancel={() => setSectionToDelete(null)}
                 />
-                
+
             </main>
         </div>
     );
