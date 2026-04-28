@@ -1,0 +1,119 @@
+/* ============================================================
+   GeneratedCodeScreen — mismo estilo que ExamDetailScreen
+   ============================================================ */
+
+.generated-code-page {
+  min-height: 100vh;
+  height: auto;
+  background: var(--bg-page);
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.generated-code-main {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 32px 40px 100px;
+  flex: 1;
+}
+
+/* ── Section headings ── */
+.generated-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 48px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--accent);
+}
+
+.generated-section-heading:first-of-type {
+  margin-top: 20px;
+}
+
+.generated-section-heading h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  margin: 0;
+  letter-spacing: 0.02em;
+  border: none;
+  padding: 0;
+}
+
+/* ── Section content ── */
+.generated-section-content {
+  margin-bottom: 40px;
+}
+
+.generated-section-content--tests {
+  margin-bottom: 50px;
+}
+
+.generated-content-card {
+  padding: 20px;
+}
+
+/* ── Delete button ── */
+.generated-delete-btn {
+  background: none;
+  border: none;
+  color: #ff4d4f;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.generated-delete-btn:hover {
+  background: #fff0f0;
+}
+
+/* ── Test item ── */
+.generated-test-item {
+  margin-bottom: 30px;
+}
+
+.generated-test-item-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 5px;
+}
+
+/* ── Empty state ── */
+.generated-empty-state {
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 48px 24px;
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+/* ── Bottom actions ── */
+.generated-bottom-actions {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.generated-bottom-actions .btn-back {
+  position: relative;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 960px) {
+  .generated-code-main {
+    padding: 24px 20px 60px;
+  }
+}
