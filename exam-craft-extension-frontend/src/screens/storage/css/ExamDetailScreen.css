@@ -1,0 +1,430 @@
+/* ============================================================
+   ExamDetailScreen — refined academic layout
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Code+Pro:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ── Root tokens ── */
+:root {
+  --bg-page:        #f5f0eb;
+  --bg-card:        #ffffff;
+  --bg-code:        #1e1e2e;
+  --accent:         #b08968;
+  --accent-dark:    #8a6748;
+  --accent-light:   #e8d5c4;
+  --text-primary:   #1a1a1a;
+  --text-secondary: #555555;
+  --text-muted:     #999999;
+  --border:         #e2d5c8;
+  --shadow-card:    0 2px 12px rgba(176, 137, 104, 0.12);
+  --shadow-hover:   0 6px 24px rgba(176, 137, 104, 0.22);
+  --radius:         10px;
+  --radius-sm:      6px;
+  --font-display:   'Playfair Display', Georgia, serif;
+  --font-body:      'DM Sans', sans-serif;
+  --font-code:      'Source Code Pro', monospace;
+}
+
+/* ── Page shell ── */
+.exam-detail-page {
+  min-height: 100vh;
+  background: var(--bg-page);
+  font-family: var(--font-body);
+  color: var(--text-primary);
+}
+
+.exam-detail-main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 40px 80px;
+  position: relative;
+}
+
+/* ── Section heading strip ── */
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 48px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--accent);
+}
+
+.section-heading h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+/* ── Two-column layout for section 1 ── */
+.two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 20px;
+  align-items: stretch;
+  min-height: 560px;
+}
+
+/* ── Generic content card ── */
+.content-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.content-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--accent-light) 0%, #f0e6d8 100%);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-header h3 {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+  margin: 0;
+}
+
+.card-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Code textarea ── */
+.wf-textarea {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  background: #ffffff;
+  color: var(--text-primary);
+  font-family: var(--font-code);
+  font-size: 13px;
+  line-height: 1.65;
+  padding: 20px;
+  border: none;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+  tab-size: 2;
+  overflow-y: auto;
+}
+
+.wf-textarea::selection {
+  background: rgba(176, 137, 104, 0.25);
+}
+
+/* ── Mermaid diagram panel ── */
+.diagram-panel {
+  flex: 1;
+  overflow: auto;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: #fafafa;
+}
+
+/* ── Wide-section cards (attr constraints / entity relations) ── */
+.wide-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.wide-textarea {
+  width: 100%;
+  min-height: 380px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font-family: var(--font-code);
+  font-size: 13px;
+  line-height: 1.65;
+  padding: 20px;
+  border: none;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.empty-state {
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 48px 24px;
+  font-size: 0.92rem;
+}
+
+/* ── Generated code buttons section ── */
+.code-buttons-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 24px;
+}
+
+.btn-code {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 12px 32px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(176, 137, 104, 0.35);
+}
+
+.btn-code:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(176, 137, 104, 0.45);
+}
+
+.btn-code:active {
+  transform: translateY(0);
+}
+
+/* ── Actions kebab menu ── */
+.actions-menu-wrapper {
+  position: absolute;
+  top: 22px;
+  right: 40px;
+  z-index: 150;
+}
+.actions-menu-btn {
+  background: none;
+  border: none;
+  font-size: 36px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.actions-menu-btn:hover {
+  background: var(--accent-light);
+}
+
+.actions-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 149;
+}
+
+.actions-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 230px;
+  z-index: 200;
+}
+
+.action-btn {
+  width: 100%;
+  border: none;
+  border-radius: 50px;
+  padding: 13px 16px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: filter 0.15s, transform 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.action-btn:hover { filter: brightness(1.08); transform: scale(1.04); }
+.action-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+.action-btn--preview  { background: #2e7d32; color: white; }
+.action-btn--download { background: #4a90e2; color: white; }
+.action-btn--github   { background: #24292e; color: white; }
+.action-btn--delete   { background: #ff4d4f; color: white; }
+
+.action-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 4px 0;
+}
+
+/* ── Delete section icon button ── */
+.delete-section-btn {
+  background: none;
+  border: none;
+  color: #ff4d4f;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.delete-section-btn:hover {
+  background: #fff0f0;
+}
+
+/* ── Preview modal ── */
+.preview-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  backdrop-filter: blur(3px);
+}
+
+.preview-modal {
+  background: var(--bg-card);
+  width: 100%;
+  max-width: 1100px;
+  max-height: 90vh;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+.preview-modal-header {
+  padding: 20px 28px;
+  border-bottom: 2px solid var(--accent);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, var(--accent-light), #f5f0eb);
+}
+
+.preview-modal-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin: 0;
+  color: var(--accent-dark);
+}
+
+.preview-close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.preview-close-btn:hover { background: var(--accent-light); }
+
+.preview-modal-body {
+  padding: 32px;
+  overflow-y: auto;
+  flex: 1;
+  background: #fafaf8;
+}
+
+.preview-diagram-wrapper {
+  margin: 20px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fafafa;
+  height: 500px;
+  width: 100%;
+  position: relative;
+}
+
+/* Overlay que bloquea todos los eventos del ratón sobre el diagrama */
+.preview-diagram-blocker {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  cursor: default;
+}
+
+/* Ocultar controles de zoom del MermaidViewer en la previsualización */
+.preview-diagram-wrapper [class*="zoom"],
+.preview-diagram-wrapper [class*="controls"],
+.preview-diagram-wrapper [class*="toolbar"],
+.preview-diagram-wrapper [class*="header"],
+.preview-diagram-wrapper button,
+.preview-diagram-wrapper > div > div:first-child {
+  display: none !important;
+}
+
+.exam-markdown-container {
+  padding: 40px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-family: var(--font-body);
+  line-height: 1.75;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.exam-markdown-container h1,
+.exam-markdown-container h2,
+.exam-markdown-container h3 {
+  font-family: var(--font-display);
+  color: var(--accent-dark);
+}
+
+/* ── Bottom action row ── */
+.bottom-actions {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 960px) {
+  .two-col-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .exam-detail-main {
+    padding: 24px 20px 60px;
+  }
+}

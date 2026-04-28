@@ -10,7 +10,10 @@
   background-color: #EFDECD; 
   min-height: 100vh;
   height: 100vh;        
-  overflow: hidden;     
+  overflow: hidden;  
+  padding-bottom: 100px;  
+  height: auto;
+  position: relative;
 }
 
 .main-title {
