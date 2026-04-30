@@ -491,83 +491,106 @@ export default function WorkflowScreen({
         {/* PASO: workflow */}
         {step === "workflow" && selectedProject && (
           <div className="content-card" style={{
-            width: "100%", maxWidth: "1000px", maxHeight: "85vh", overflowY: "auto",
+              width: "100%", 
+              maxWidth: "1000px", 
+              maxHeight: "85vh", 
+              overflowY: "auto",
+              overflowX: "hidden",     
+              boxSizing: "border-box", 
+              margin: "0 auto"         
           }}>
-            <h2 className="main-title small">
-              {internalStep === "input"
-                ? workflowInputTitle
-                : workflowResultTitle(projectDisplayName(selectedProject))}
-            </h2>
+              <h2 className="main-title small">
+                  {internalStep === "input"
+                      ? workflowInputTitle
+                      : workflowResultTitle(projectDisplayName(selectedProject))}
+              </h2>
 
-            <div className="wf-wide-wrapper">
-              {internalStep === "input" && (
-                <>
-                  <p className="wf-instruction-text">{resolvedInstructionText}</p>
-                  <textarea
-                    className="wf-textarea"
-                    value={promptText}
-                    onChange={(e) => setPromptText(e.target.value)}
-                  />
-                  <div className="wf-actions-row" style={{ marginTop: "20px" }}>
-                    <button onClick={onBack} className="btn-step secondary">Volver</button>
-                    <button onClick={handleGenerate} className="btn-step primary">
-                      {isLoading ? <div className="loading-spinner" /> : "Generar"}
-                    </button>
-                  </div>
-                </>
-              )}
+              <div className="wf-wide-wrapper" style={{ width: "100%", boxSizing: "border-box" }}>
+                {internalStep === "input" && (
+                    <div className="content-card">
+                        <p className="wf-instruction-text">{resolvedInstructionText}</p>
+                        
+                        <textarea
+                            className="wf-textarea-input"
+                            value={promptText}
+                            onChange={(e) => setPromptText(e.target.value)}
+                            style={{ width: "100%", boxSizing: "border-box" }} 
+                        />
+                        
+                        <div className="wf-actions-row">
+                            <button onClick={onBack} className="btn-back">Volver</button>
+                            <button onClick={handleGenerate} className="btn-step primary">
+                                {isLoading ? <div className="loading-spinner" /> : "Generar"}
+                            </button>
+                        </div>
+                    </div>
+                )}
+            
 
-              {internalStep === "result" && (
-                <>
-                  <div className="wf-split-view">
-                    <div className="wf-column">
-                      <span className="wf-column-title">Prompt enviado</span>
-                      <textarea
-                        className="wf-textarea"
-                        value={promptText}
-                        onChange={(e) => setPromptText(e.target.value)}
-                      />
-                      <button onClick={handleGenerate} className="btn-step primary" disabled={isLoading}>
-                        Volver a generar
-                      </button>
-                    </div>
-                    <div className="wf-column">
-                      <span className="wf-column-title">Propuesta del modelo</span>
-                      <textarea
-                        className="wf-result-box"
-                        value={responseText}
-                        onChange={(e) => setResponseText(e.target.value)}
-                      />
-                      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                        <button
-                          onClick={handleDownload}
-                          className="btn-step secondary"
-                          style={{ flex: 1, backgroundColor: "#4a90e2", color: "white" }}
-                        >
-                          Descargar (.md)
-                        </button>
-                        <button onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1 }}>
-                          {saveButtonLabel}
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                            <polyline points="17 21 17 13 7 13 7 21" />
-                            <polyline points="7 3 7 8 15 8" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="wf-actions-row" style={{ marginTop: "20px" }}>
-                    <button onClick={() => setInternalStep("input")} className="btn-step secondary">
-                      Volver al editor
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+                  {internalStep === "result" && (
+                      <>
+                          <div className="wf-split-view" style={{ display: "flex", flexWrap: "wrap", width: "100%", gap: "20px", boxSizing: "border-box" }}>
+                              
+                              <div className="wf-column" style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column" }}>
+                                  <span className="wf-column-title">Prompt enviado</span>
+                                  <textarea
+                                      className="wf-textarea-input"
+                                      value={promptText}
+                                      onChange={(e) => setPromptText(e.target.value)}
+                                      style={{ width: "100%", boxSizing: "border-box", flexGrow: 1 }}
+                                  />
+                                  <button onClick={handleGenerate} className="btn-step primary" disabled={isLoading} style={{ marginTop: "10px" }}>
+                                      {isLoading ? '...' : 'Volver a generar'}
+                                  </button>
+                              </div>
+                              
+                              <div className="wf-column" style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column" }}>
+                                  <span className="wf-column-title">Propuesta del modelo</span>
+                                  
+                                  {isLoading ? (
+                                      <div className="wf-result-box" style={{ width: "100%", boxSizing: "border-box", flexGrow: 1 }}>
+                                          Generando...
+                                      </div>
+                                  ) : (
+                                      <textarea
+                                          className="wf-result-box"
+                                          value={responseText}
+                                          onChange={(e) => setResponseText(e.target.value)}
+                                          style={{ width: "100%", boxSizing: "border-box", flexGrow: 1 }}
+                                      />
+                                  )}
+                                  
+                                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "10px" }}>
+                                      <button
+                                          onClick={handleDownload}
+                                          className="btn-step secondary"
+                                          style={{ flex: 1, backgroundColor: "#4a90e2", color: "white", minWidth: "140px" }}
+                                      >
+                                          Descargar (.md)
+                                      </button>
+                                      <button onClick={handleSaveToChrome} className="btn-step primary" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", minWidth: "140px" }}>
+                                          {saveButtonLabel}
+                                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                              <polyline points="17 21 17 13 7 13 7 21" />
+                                              <polyline points="7 3 7 8 15 8" />
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </div>
+                          </div>
+                          
+                          <div className="wf-actions-row" style={{ marginTop: "20px", justifyContent: "center" }}>
+                              <button onClick={() => setInternalStep("input")} className="btn-step secondary">
+                                  Volver al editor
+                              </button>
+                          </div>
+                      </>
+                  )}
+              </div>
           </div>
-        )}
+      )}
       </main>
     </div>
   )
