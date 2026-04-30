@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import generationEntityRelationshipsSolutionPrompt from "bundle-text:../../../prompts/generation-exam-repository/solution/generation_entity_relationships_solution.md"
 import WorkflowScreen from "../../../components/WorkflowScreen"
@@ -20,8 +20,6 @@ export default function GenerationEntityRelationshipsSolutionScreen({
   onCodeGeneration,
   onSolutionCodeGeneration
 }: Props) {
-  
-  const [generateCombined, setGenerateCombined] = useState(false);
 
   return (
     <WorkflowScreen
@@ -43,7 +41,7 @@ export default function GenerationEntityRelationshipsSolutionScreen({
       workflowResultTitle={(name) => `Generar Solución: ${name}`}
       
       instructionText={(project) => {
-        const hasOtherSolution = !!(project?.attributeConstraintsSolution);
+        const hasOtherSolution = !!(project?.fullSolution);
 
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
@@ -55,51 +53,32 @@ export default function GenerationEntityRelationshipsSolutionScreen({
             
             {hasOtherSolution && (
               <div style={{ backgroundColor: "#f0f4f8", padding: "15px", borderRadius: "8px", border: "1px solid #cce0ff" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontWeight: "bold", color: "#333" }}>
-                  <input 
-                    type="checkbox" 
-                    checked={generateCombined} 
-                    onChange={(e) => setGenerateCombined(e.target.checked)} 
-                    style={{ transform: "scale(1.2)" }}
-                  />
-                  Generar versión COMPLETA
-                </label>
-                <p style={{ margin: "8px 0 0 25px", fontSize: "0.9em", color: "#555" }}>
-                  Has generado código solución para el ejercicio "Restricciones de Atributos". Al activar esta opción, la IA usará dicho código como base para añadirle la solución de "Relaciones entre Entidades". 
+                <p style={{ margin: 0, fontSize: "0.9em", color: "#555" }}>
+                  <strong>Nota:</strong> Se ha detectado código solución del ejercicio "Restricciones de Atributos". La IA usará dicho código como base automáticamente para añadirle la solución de "Relaciones entre Entidades", generando así una versión completa. 
                 </p>
               </div>
             )}
           </div>
-        );}
-    
-      }
+        );
+      }}
       
       confirmTitle="Confirmar Generación"
-      confirmDescription={(name) =>
-        `¿Deseas generar el código solución ${generateCombined ? "COMPLETO" : "AISLADO"} del ejercicio "Relaciones entre Entidades" para el examen ${name}?`
+      confirmDescription={(name) => `¿Deseas generar el código solución de "Relaciones entre Entidades" para el examen ${name}?`}
+      
+      confirmWarning={(project) => project.fullSolution
+          ? `Este examen ya tiene código solución generado.\nSi continúas, el código anterior será actualizado o reemplazado.`
+          : null
       }
       
-      confirmWarning={(project) => {
-        const keyToCheck = generateCombined ? "fullSolution" : "entityRelationshipsSolution";
-        return project[keyToCheck]
-          ? `Este examen ya tiene código solución generado para la versión ${generateCombined ? "COMPLETA" : "AISLADA"}.\nSi continúas, el código anterior será reemplazado.`
-          : null;
-      }}
-      
-      confirmButtonLabel={(project) => {
-        const keyToCheck = generateCombined ? "fullSolution" : "entityRelationshipsSolution";
-        return project[keyToCheck] ? "Continuar y reemplazar" : "Confirmar";
-      }}
+      confirmButtonLabel={(project) => project.fullSolution ? "Continuar y reemplazar" : "Confirmar"}
       
       successTitle="¡Solución generada correctamente!"
-      successDescription={(name) =>
-        `El código solución ${generateCombined ? "completo" : "de Relaciones"} para ${name} ha sido guardado exitosamente.`
-      }
+      successDescription={(name) => `El código solución para ${name} ha sido guardado exitosamente.`}
       saveButtonLabel="Guardar"
 
       allowedFolders={["clínica veterinaria", "ajedrez"]}
       
-      storageKey={generateCombined ? "fullSolution" : "entityRelationshipsSolution"} 
+      storageKey="fullSolution" 
       
       filterProject={(project) => {
         const hasBaseClasses = !!(project.baseClasses && project.baseClasses.trim() !== "");
@@ -114,12 +93,8 @@ export default function GenerationEntityRelationshipsSolutionScreen({
         const entityRelationshipsStatement = project.entityRelationships || "";
         const testsCode = project.testPartsMap?.test2_relationships?.code || "";
 
-        const otherSolutionCode = project.attributeConstraintsSolution || ""; 
-        let baseClassesCode = project.baseClasses || "";
-        
-        if (generateCombined && otherSolutionCode) {
-            baseClassesCode = otherSolutionCode; 
-        }
+        // Si existe la solución de restricciones la usa como base, de lo contrario cae en las clases base limpias
+        const baseClassesCode = project.fullSolution || project.baseClasses || "";
 
         return {
           visibleText: visibleText
@@ -130,9 +105,9 @@ export default function GenerationEntityRelationshipsSolutionScreen({
         }
       }}
       
-      logExerciseName={generateCombined ? "full_solution_generation" : "entity_relationships_solution_generation"}
-      downloadPrefix={generateCombined ? "Solucion_Completa" : "Solucion_Relaciones_Entidades"}
-      downloadTitle={(p) => `Solución ${generateCombined ? "Completa" : "Relaciones"} - ${p.customName || p.domainName}`}
+      logExerciseName="full_solution_generation"
+      downloadPrefix="Solucion_Completa"
+      downloadTitle={(p) => `Solución Completa - ${p.customName || p.domainName}`}
       onSaved={() => onWelcome()}
     />
   )

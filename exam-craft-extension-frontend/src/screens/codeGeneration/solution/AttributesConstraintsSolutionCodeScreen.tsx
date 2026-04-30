@@ -39,39 +39,57 @@ export default function GenerationAttributeConstraintsSolutionScreen({
       workflowInputTitle="Generación de Código Solución"
       workflowResultTitle={(name) => `Generar Solución: ${name}`}
       
-      instructionText={
-        <>
-          Este es el prompt que se usará para generar el <strong>Código Solución de Restricciones de Atributos</strong> del examen seleccionado. 
-          Puede revisar o modificar cualquier información que vea conveniente.
-          Al terminar, pulse en <strong>"Generar"</strong>.
-        </>
-      }
+      instructionText={(project) => {
+        const hasOtherSolution = !!(project?.fullSolution);
+
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+            <p>
+              Este es el prompt que se usará para generar el <strong>Código Solución de Restricciones de Atributos</strong> del examen seleccionado. 
+              Puede revisar o modificar cualquier información que vea conveniente.
+              Al terminar, pulse en <strong>"Generar"</strong>.
+            </p>
+            
+            {hasOtherSolution && (
+              <div style={{ backgroundColor: "#f0f4f8", padding: "15px", borderRadius: "8px", border: "1px solid #cce0ff" }}>
+                <p style={{ margin: 0, fontSize: "0.9em", color: "#555" }}>
+                  <strong>Nota:</strong> Se ha detectado código solución del ejercicio "Relaciones entre Entidades". La IA usará dicho código como base automáticamente para añadirle la solución de "Restricciones de Atributos", generando así una versión completa. 
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      }}
       
       confirmTitle="Confirmar Generación"
       confirmDescription={(name) =>
-        `¿Deseas generar el código solución del ejercicio "Restricciones de Atributos" para el examen ${name}?`
+        `¿Deseas generar el código solución de "Restricciones de Atributos" para el examen ${name}?`
       }
+      
       confirmWarning={(project) =>
-        project.attributeConstraintsSolution
-          ? "Este examen ya tiene código solución generado para el ejercicio de restricciones de atributos.\nSi continúas, el código solución anterior será reemplazado por el nuevo."
+        project.fullSolution
+          ? "Este examen ya tiene código solución generado.\nSi continúas, el código anterior será reemplazado."
           : null
       }
+      
       confirmButtonLabel={(project) =>
-        project.attributeConstraintsSolution ? "Continuar y reemplazar" : "Confirmar"
+        project.fullSolution ? "Continuar y reemplazar" : "Confirmar"
       }
+      
       successTitle="¡Solución generada correctamente!"
       successDescription={(name) =>
-        `El código solución de restricciones para ${name} ha sido guardado exitosamente.`
+        `El código solución para ${name} ha sido guardado exitosamente.`
       }
       saveButtonLabel="Guardar"
 
       allowedFolders={["clínica veterinaria", "ajedrez"]}
-      storageKey="attributeConstraintsSolution" 
+      
+      // Guardamos siempre en fullSolution
+      storageKey="fullSolution" 
       
       filterProject={(project) => {
         const hasBaseClasses = !!(project.baseClasses && project.baseClasses.trim() !== "");
         const hasConstraints = !!(project.attributeConstraints && project.attributeConstraints.trim() !== "");
-        
         const hasAttributeTests = !!(project.testPartsMap?.test1_attributes?.code?.trim());
 
         return hasBaseClasses && hasConstraints && hasAttributeTests;
@@ -80,24 +98,24 @@ export default function GenerationAttributeConstraintsSolutionScreen({
       buildPrompt={(project) => {
         const { visibleText, hiddenContext } = parseMasterPrompt(generationAttributeConstraintsSolutionPrompt);
         
-        const AttributeConstraintsStatement = project.attributeConstraints || "";
-        
+        const attributeConstraintsStatement = project.attributeConstraints || "";
         const testsCode = project.testPartsMap?.test1_attributes?.code || "";
 
-        const baseClassesCode = project.baseClasses || "";
+        // Si existe la solución de relaciones o la completa, la usa como base, de lo contrario usa las clases base limpias
+        const baseClassesCode = project.fullSolution || project.baseClasses || "";
 
         return {
           visibleText: visibleText
-            .replace("{enunciado_restricciones}", AttributeConstraintsStatement)
+            .replace("{enunciado_restricciones}", attributeConstraintsStatement)
             .replace("{codigo_tests}", testsCode)
             .replace("{codigo_base_localstorage}", baseClassesCode),
           hiddenContext,
         }
       }}
       
-      logExerciseName="attribute_constraints_solution_generation"
-      downloadPrefix="Solucion_Restricciones_Atributos"
-      downloadTitle={(p) => `Solución Restricciones Atributos - ${p.customName || p.domainName}`}
+      logExerciseName="attribute_constraints_full_solution_generation"
+      downloadPrefix="Solucion_Completa"
+      downloadTitle={(p) => `Solución Completa - ${p.customName || p.domainName}`}
       onSaved={() => onWelcome()}
     />
   )
