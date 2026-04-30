@@ -159,7 +159,6 @@ body {
 }
 
 .btn-step.primary { background-color: #3E2723; color: white; }
-.btn-step.secondary { background-color: #D7CCC8; color: #3E2723; }
 .btn-step.success { background-color: #2E7D32; color: white; }
 
 .loading-spinner {

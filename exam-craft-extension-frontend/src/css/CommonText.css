@@ -4,14 +4,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 80px 20px;
+  padding: 10px 10px;
   gap: 20px;
   text-align: center;
   background-color: #EFDECD; 
   min-height: 100vh;
   height: 100vh;        
-  overflow: hidden;  
-  padding-bottom: 100px;  
+  overflow: hidden;   
   height: auto;
   position: relative;
 }
@@ -45,8 +44,8 @@
 }
 
 .btn-back {
-  background-color: #3E2723; 
-  color: #FDF5E6;            
+  background-color: #D7CCC8; 
+  color: #3E2723;          
   border: none;
   padding: 14px 35px;
   border-radius: 50px;      
@@ -60,7 +59,7 @@
 
 .btn-back:hover { 
   transform: scale(1.1); 
-  background-color: #5D3A3A; 
+  background-color: #D7CCC8;  
 }
 
 .btn-delete {
