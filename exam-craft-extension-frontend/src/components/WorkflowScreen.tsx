@@ -255,7 +255,7 @@ export default function WorkflowScreen({
           backgroundColor: "rgba(0,0,0,0.6)",
           display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000,
         }}>
-          <div className="content-card" style={{
+          <div className="content-card-wf" style={{
             maxWidth: "400px", width: "90%", padding: "30px",
             textAlign: "center", backgroundColor: "#fff", borderRadius: "12px",
           }}>
@@ -299,7 +299,7 @@ export default function WorkflowScreen({
           backgroundColor: "rgba(0,0,0,0.6)",
           display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000,
         }}>
-          <div className="content-card" style={{
+          <div className="content-card-wf" style={{
             maxWidth: "400px", width: "90%", padding: "30px",
             textAlign: "center", backgroundColor: "#fff", borderRadius: "12px",
           }}>
@@ -370,7 +370,7 @@ export default function WorkflowScreen({
 
         {/* PASO: selección */}
         {step === "selection" && (
-          <div className="content-card" style={{ width: "100%", maxWidth: "900px" }}>
+          <div className="content-card-wf" style={{ width: "100%", maxWidth: "900px" }}>
 
             {/* Elegir carpeta */}
             {!selectedDomainFolder && (
@@ -486,7 +486,7 @@ export default function WorkflowScreen({
 
         {/* PASO: workflow */}
         {step === "workflow" && selectedProject && (
-          <div className="content-card" style={{
+          <div className="content-card-wf" style={{
             width: "100%", maxWidth: "1000px", maxHeight: "85vh", overflowY: "auto",
           }}>
             <h2 className="main-title small">

@@ -146,7 +146,7 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
 
             <div className="wf-wide-wrapper">
                 {currentStep === 1 && internalStep === 'input' && (
-                    <div className="content-card">
+                    <div className="content-card-wf">
                         <h2 className="main-title small">{domainName.toUpperCase()}: Texto de enunciado</h2>
                         <p className="wf-instruction-text">
                             Este es el prompt que se usará para generar el texto del enunciado del examen, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar Enunciado"</strong>.
@@ -175,7 +175,7 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                             onChange={(e) => setPromptText(e.target.value)}
                         />
                             <button onClick={handleGenerate} className="btn-step primary" disabled={isLoading}>
-                                {isLoading ? '...' : 'Volver a generar'}
+                                {isLoading ? <div className="loading-spinner"></div> : 'Volver a generar'}
                             </button>
                         </div>
                         <div className="wf-column">
@@ -193,7 +193,7 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                                 />
                             )}
                             
-                            <button onClick={() => setCurrentStep(2)} className="btn-step primary">
+                            <button onClick={() => setCurrentStep(2)} className="btn-step success">
                                 Confirmar y Continuar
                             </button>
                         </div>
@@ -207,7 +207,7 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                 )}
 
                 {currentStep === 2 && (
-                    <div className="content-card">
+                    <div className="content-card-wf">
                         <h2 className="main-title small">Confirmación</h2>
                         <p className="wf-instruction-text">
                             ¿Está seguro que desea usar el texto de enunciado generado? Una vez confirmado, se generará el diagrama UML en base a él y no podrá modificarlo.                        </p> 
@@ -216,7 +216,7 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                                 Cancelar y seguir editando enunciado
                             </button>
                             <button onClick={() => onCreateDiagram(responseText)} className="btn-step success">
-                                Confirmar y pasar al paso 2 (Diagrama UML)
+                                Confirmar y pasar al paso 2  <br/>  (Diagrama UML)
                             </button>
                         </div>
                     </div>

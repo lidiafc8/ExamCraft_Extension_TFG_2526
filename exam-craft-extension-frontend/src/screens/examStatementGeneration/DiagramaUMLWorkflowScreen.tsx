@@ -94,6 +94,7 @@ export default function DiagramUMLScreen({
             setIsLoading(false);
         }
     };
+
     const handleCombinationExtension = (context: string, responseText: string) => {
         onFinishExtension(context.trim(), responseText.trim());
     };
@@ -143,113 +144,66 @@ export default function DiagramUMLScreen({
                                 onChange={(e) => setPromptText(e.target.value)}
                             />
                             <div className="wf-actions-row">
-                            <button onClick={onBack} className="btn-back">Volver</button>
-                            <button onClick={handleGenerate} className="btn-step primary">
-                                {isLoading ? <div className="loading-spinner"></div> : 'Generar Diagrama UML'}
-                            </button>
-                        </div>
+                                <button onClick={onBack} className="btn-back">Volver</button>
+                                <button onClick={handleGenerate} className="btn-step primary">
+                                    {isLoading ? <div className="loading-spinner"></div> : 'Generar Diagrama UML'}
+                                </button>
+                            </div>
                         </div>
                     )}
 
                     {internalStep === 'result' && (
-                        <div style={{ 
-                            display: 'flex', 
-                            gap: '20px',
-                            width: '200%',
-                            maxWidth: '1600px',
-                            height: '105vh', 
-                            alignItems: 'stretch',
-                            padding: '0 20px', 
-                            boxSizing: 'border-box'
-                        }}>
-        
-                        {/* COLUMNA 1: PROMPT */}
-                        <div className="wf-column" style={{ flex: '1', display: 'flex', flexDirection: 'column', minWidth: '0' }}>
-                            <span className="wf-column-title" style={{ fontSize: '16px', fontWeight: '700', marginBottom: '10px', textAlign: 'center' }}>
-                                Prompt de Generación del Diagrama UML
-                            </span>
-                            <div style={{ flex: '1', display: 'flex', flexDirection: 'column', backgroundColor: '#fff', borderRadius: '15px', border: '1px solid #ddd', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                                <textarea 
-                                    className="wf-textarea" 
-                                    value={promptText} 
-                                    onChange={(e) => setPromptText(e.target.value)}
-                                    style={{ flex: '1', border: 'none', padding: '20px', fontSize: '14px', resize: 'none', outline: 'none', lineHeight: '1.5' }}
-                                />
-                                <button onClick={handleGenerate} className="btn-step secondary" style={{ margin: '15px', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>
-                                    Volver a generar
-                                </button>
-                            </div>
-                        </div>                        
+                        <div className="wf-diagram-split-view">
 
-                        {/* COLUMNA 2: VISUALIZACIÓN */}
-                        <div className="wf-column" style={{ flex: '1', display: 'flex', flexDirection: 'column', minWidth: '0' }}>
-                            <span className="wf-column-title" style={{ fontSize: '16px', fontWeight: '700', marginBottom: '10px', textAlign: 'center' }}>
-                                Extensión Funcional con Diagrama UML
-                            </span>
-                            <div style={{ 
-                                flex: '1', 
-                                backgroundColor: '#fff', 
-                                border: '1px solid #ddd', 
-                                borderRadius: '15px', 
-                                display: 'flex',
-                                flexDirection: 'column', 
-                                overflow: 'auto',
-                                boxShadow: '0 8px 25px rgba(0,0,0,0.1)' 
-                            }}>
-                                {/* ENUNCIADO */}
-                                <div style={{ 
-                                    fontSize: '13px', 
-                                    padding: '18px', 
-                                    background: '#f8f9fa', 
-                                    borderBottom: '1px solid #eee', 
-                                    color: '#333',
-                                    flexShrink: 0 
-                                }}>
-                                    <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#666' }}>📌 Enunciado completo:</div>
-                                    {context} 
+                            <div className="wf-column-three">
+                                <span className="wf-column-title">Prompt de Generación del Diagrama UML</span>
+                                <div className="wf-instruction-text">
+                                    <textarea
+                                        className="wf-textarea-input"
+                                        value={promptText}
+                                        onChange={(e) => setPromptText(e.target.value)}
+                                    />
+                                    <button onClick={handleGenerate} className="btn-step secondary">
+                                        {isLoading ? <div className="loading-spinner"></div> : 'Volver a generar'}
+                                    </button>
                                 </div>
-                                
-                                {/* ÁREA DEL DIAGRAMA */}
-                                <div style={{ 
-                                    flex: '1', 
-                                    overflow: 'auto',
-                                    padding: '10px',
-                                }}>
-                                    {cleanCode ? (
-                                        <MermaidViewer chartCode={cleanCode} />
-                                    ) : (
-                                        <div style={{fontSize: '13px', color: '#aaa', marginTop: '20px'}}>Renderizando...</div>
-                                    )}
+                            </div>
+
+                            <div className="wf-column-three">
+                                <span className="wf-column-title">Extensión Funcional con Diagrama UML</span>
+                                <div className="wf-diagram-viewer-inner">
+                                    <div className="wf-diagram-enunciado">
+                                        {context}
+                                    </div>
+                                    <div className="wf-diagram-area">
+                                        {cleanCode ? (
+                                            <MermaidViewer chartCode={cleanCode} />
+                                        ) : (
+                                            <div style={{ fontSize: '13px', color: '#aaa', marginTop: '20px' }}>Renderizando...</div>
+                                        )}
+                                    </div>
+                                    <button
+                                        className="btn-step primary"
+                                        onClick={() => handleCombinationExtension(context, responseText)}
+                                    >
+                                        Confirmar Diagrama UML
+                                    </button>
                                 </div>
-
-                                {/* BOTÓN CONFIRMAR */}
-                                <button  
-                                    className="btn-step primary"
-                                    style={{ flexShrink: 0 }}
-                                    onClick={() => handleCombinationExtension(context, responseText)}
-                                >
-                                    Confirmar Diagrama UML
-                                </button>
                             </div>
-                        </div>
 
-                        {/* COLUMNA 3: CÓDIGO MERMAID */}
-                        <div className="wf-column" style={{ flex: '1', display: 'flex', flexDirection: 'column', minWidth: '0' }}>
-                            <span className="wf-column-title" style={{ fontSize: '16px', fontWeight: '700', marginBottom: '10px', textAlign: 'center' }}>
-                                Código Mermaid
-                            </span>
-                            <div style={{ flex: '1', backgroundColor: '#1e1e1e', borderRadius: '15px', border: '1px solid #333', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                                <pre style={{ flex: '1', color: '#9cdcfe', padding: '20px', fontSize: '12px', overflow: 'auto', margin: '0', lineHeight: '1.4' }}>
-                                    <code>{responseText || "// Esperando..."}</code>
-                                </pre>
+                            {/* COLUMNA 3: CÓDIGO MERMAID */}
+                            <div className="wf-column-three">
+                                <span className="wf-column-title">Código Mermaid</span>
+                                <div className="wf-diagram-code-inner">
+                                    <pre><code>{responseText || "// Esperando..."}</code></pre>
+                                </div>
                             </div>
+
                         </div>
-                    </div>
                     )}
                 </div>
             </div>
         </main>
-
     </div>
   )
 }
