@@ -1,7 +1,7 @@
 import React from "react"
-import generationExamBaseClassesPrompt from "bundle-text:../../../prompts/generation-exam-repository/exam/generation_exam_base_classes.md"
+import generationExamBaseClassesPrompt from "bundle-text:../../prompts/generation-exam-repository/exam/generation_exam_base_classes.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
-import WorkflowScreen from "../../../components/WorkflowScreen"
+import WorkflowScreen from "../../components/WorkflowScreen"
 
 interface Props {
   readonly initialProject?: any; 
@@ -12,7 +12,6 @@ interface Props {
   readonly onCreateExam: () => void
   readonly onCreateExamByParts: () => void
   readonly onCodeGeneration: () => void
-  readonly onExamCodeGeneration: () => void
 }
 
 const CLASES_POR_DEFECTO: Record<string, string> = {
@@ -49,8 +48,7 @@ export default function GenerationBaseClassesScreen({
   onWelcome,
   onCreateExam,
   onCreateExamByParts,
-  onCodeGeneration,
-  onExamCodeGeneration
+  onCodeGeneration
 }: Props) {
 
   const breadcrumbs = fromAttributes
@@ -64,9 +62,7 @@ export default function GenerationBaseClassesScreen({
         { label: "INICIO", action: onWelcome },
         { label: "CREAR EXAMEN", action: onCreateExam },
         { label: "POR PARTES", action: onCreateExamByParts },
-        { label: "CÓDIGO", action: onCodeGeneration },
-        { label: 'EXAMEN', action: onExamCodeGeneration }
-
+        { label: "CÓDIGO", action: onCodeGeneration }
       ];
 
 
@@ -118,30 +114,24 @@ export default function GenerationBaseClassesScreen({
       storageKey="baseClasses"
       buildPrompt={(project) => {
         try {
-          // 1. Extraemos el texto del MD
           const { visibleText, hiddenContext } = parseMasterPrompt(generationExamBaseClassesPrompt);
           
-          // 2. Buscamos el dominio de forma ultra-flexible (por si viene de un flujo u otro)
-          // Buscamos en domainName, si no en name, si no en customName
           const rawDominio = project?.domainName || project?.name || project?.customName || "";
           const dominioNormalizado = rawDominio.trim();
           
-          // 3. Buscamos las clases por defecto (con fallback por si no hay coincidencia exacta)
           const clasesExistentes = CLASES_POR_DEFECTO[dominioNormalizado.toLowerCase()] || 
                                   "No hay clases base registradas para este dominio.";
 
-          // 4. FALLBACK CRÍTICO: Si visibleText está vacío por error de carga del MD, 
-          // creamos un prompt mínimo para que la IA no devuelva error.
           const baseTemplate = visibleText && visibleText.trim().length > 0 
             ? visibleText 
             : "Genera las clases base en Java para el dominio {dominio}. Clases a incluir: {clases_existentes}";
 
           return {
-            visibleText: baseTemplate
-              .replaceAll(/{dominio}/g, dominioNormalizado || "el examen")
-              .replaceAll(/{clases_existentes}/g, clasesExistentes),
-            hiddenContext: hiddenContext || "",
-          };
+          visibleText: baseTemplate
+            .replaceAll("{dominio}", dominioNormalizado || "el examen")
+            .replaceAll("{clases_existentes}", clasesExistentes),
+          hiddenContext: hiddenContext || "",
+        };
         } catch (error) {
           console.error("Error en buildPrompt:", error);
           return { 

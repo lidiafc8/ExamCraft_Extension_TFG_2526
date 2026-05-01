@@ -21,7 +21,6 @@ interface Props {
     readonly onWelcome: () => void;
     readonly onCreateExam: () => void;
     readonly onCodeGeneration: () => void;
-    readonly onCreateExamCode: () => void;
 
 }
 
@@ -33,7 +32,6 @@ export default function GenerationTestScreen({
     onWelcome,
     onCreateExam,
     onCodeGeneration,
-    onCreateExamCode
 }: Props) {
     const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
     const [promptText, setPromptText] = useState("");
@@ -116,9 +114,9 @@ export default function GenerationTestScreen({
 
             const codigoLimpio = javaBlocks.map(block =>
                 block
-                    .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") 
+                    .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
                     .replace(/^(?!package\s|import\s+org\.springframework\.samples\.petclinic)import\s.*;$/gm, "")
-                    .replace(/^\s*[\r\n]/gm, "") 
+                    .replace(/^\s*[\r\n]/gm, "") // NOSONAR javascript:S5852
                     .trim()
             ).join("\n\n// ---\n\n");
 
@@ -220,15 +218,12 @@ Genera ${isEntityRelationshipsTest? `(Test2.java)`: `(Test1.java)`} sin bloques 
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${isEntityRelationshipsTest? `Test2`: `Test1`}-${initialData?.project?.customName || "Generado"}.java`;
-        link.click();
-    };
 
-    const getBreadcrumbLabel = () => {
-        if (source === 'general') return 'TEST GENERAL';
-        if (source === 'attributes') return 'RESTRICCIONES';
-        if (source === 'entityRelationships') return 'RELACIONES';
-        return 'TESTS';
+        const testPrefix = isEntityRelationshipsTest ? "Test2" : "Test1";
+        const projectName = initialData?.project?.customName || "Generado";
+        link.download = `${testPrefix}-${projectName}.java`;
+
+        link.click();
     };
 
     const baseBreadcrumbs = [
@@ -242,7 +237,6 @@ Genera ${isEntityRelationshipsTest? `(Test2.java)`: `(Test1.java)`} sin bloques 
     if (source === 'general') {
         dynamicBreadcrumbs = [
             { label: 'CÓDIGO', action: onCodeGeneration },
-            { label: 'EXAMEN', action: onCreateExamCode },
             { label: 'TESTS', action: onBack }
         ];
     } else if (source === 'attributes') {
@@ -270,38 +264,85 @@ Genera ${isEntityRelationshipsTest? `(Test2.java)`: `(Test1.java)`} sin bloques 
             <Header onWelcome={onWelcome} breadcrumbItems={breadcrumbItems} currentStep={currentStepLabel} />
             <main className="main-content">
                 <div className="wf-layout-container">
-                    <div className="wf-wide-wrapper">
+                    <div className="wf-wide-wrapper" style={{ width: "100%", boxSizing: "border-box" }}>
                         {internalStep === 'input' ? (
                             <div className="content-card">
                                 <h2 className="main-title small">Configuración del Test</h2>
-                                <textarea className="wf-textarea" style={{ height: '400px', fontFamily: 'monospace' }} value={promptText} onChange={(e) => setPromptText(e.target.value)} />
-                                <div className="wf-actions-row" style={{ marginTop: '20px' }}>
-                                    <button onClick={onBack} className="btn-step secondary">Volver</button>
+                                
+                                <textarea 
+                                    className="wf-textarea-input" 
+                                    style={{ height: '400px', fontFamily: 'monospace', width: "100%", boxSizing: "border-box" }} 
+                                    value={promptText} 
+                                    onChange={(e) => setPromptText(e.target.value)} 
+                                />
+                                
+                                <div className="wf-actions-row">
+                                    <button onClick={onBack} className="btn-back">Volver</button>
                                     <button onClick={executeGeneration} className="btn-step primary" disabled={isLoading}>
-                                        {isLoading ? "Generando..." : "Generar Tests"}
+                                        {isLoading ? <div className="loading-spinner"></div> : "Generar Tests"}
                                     </button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="content-card">
-                                <h2 className="main-title small">Resultado: ${isEntityRelationshipsTest? `Test2.java`: `Test1.java`}</h2>
-                                <div className="wf-split-view">
-                                    <div className="wf-column">
-                                        <textarea className="wf-textarea" value={promptText} readOnly />
-                                        <button onClick={executeGeneration} className="btn-step primary" disabled={isLoading}>Regenerar</button>
-                                    </div>
-                                    <div className="wf-column">
-                                        <textarea className="wf-result-box" value={responseText} onChange={(e) => setResponseText(e.target.value)} style={{ fontSize: '11px' }} />
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            <button onClick={handleDownload} className="btn-step secondary">Descargar .java</button>
-                                            <button onClick={handleSaveToChrome} className="btn-step primary" style={{ backgroundColor: '#28a745' }}>Guardar en Proyecto</button>
-                                        </div>
-                                    </div>
+                        <div className="content-card" style={{ width: "100%", boxSizing: "border-box", overflowX: "hidden" }}>
+                            <h2 className="main-title small">Resultado: {isEntityRelationshipsTest ? `Test2.java` : `Test1.java`}</h2>
+                            
+                            <div className="wf-split-view" style={{ display: "flex", flexWrap: "wrap", width: "100%", maxWidth: "100%", gap: "20px", boxSizing: "border-box" }}>
+                                
+                                <div className="wf-column" style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column" }}>
+                                    <span className="wf-column-title">Prompt enviado</span>
+                                    <textarea 
+                                        className="wf-textarea-input" 
+                                        value={promptText} 
+                                        readOnly 
+                                        style={{ width: "100%", boxSizing: "border-box", flexGrow: 1 }}
+                                    />
+                                    <button onClick={executeGeneration} className="btn-step primary" disabled={isLoading} style={{ marginTop: "10px" }}>
+                                        {isLoading ? '...' : 'Regenerar'}
+                                    </button>
                                 </div>
-                                <div className="wf-actions-row" style={{ marginTop: '20px' }}>
-                                    <button type="button" onClick={() => setInternalStep('input')} className="btn-step secondary">Editar Prompt</button>
+                                
+                                <div className="wf-column" style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column" }}>
+                                    <span className="wf-column-title">Código generado</span>
+                                    
+                                    {isLoading ? (
+                                        <div className="wf-result-box" style={{ width: "100%", boxSizing: "border-box", flexGrow: 1, fontSize: '11px' }}>
+                                            Generando...
+                                        </div>
+                                    ) : (
+                                        <textarea 
+                                            className="wf-result-box" 
+                                            value={responseText} 
+                                            onChange={(e) => setResponseText(e.target.value)} 
+                                            style={{ width: "100%", boxSizing: "border-box", flexGrow: 1, fontSize: '11px' }} 
+                                        />
+                                    )}
+                                    
+                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "10px" }}>
+                                        <button 
+                                            onClick={handleDownload} 
+                                            className="btn-step secondary"
+                                            style={{ flex: 1, minWidth: "140px" }}
+                                        >
+                                            Descargar .java
+                                        </button>
+                                        <button 
+                                            onClick={handleSaveToChrome} 
+                                            className="btn-step primary" 
+                                            style={{ flex: 1, backgroundColor: '#28a745', minWidth: "140px" }}
+                                        >
+                                            Guardar en Proyecto
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                            
+                            <div className="wf-actions-row" style={{ marginTop: "20px", justifyContent: "center" }}>
+                                <button type="button" onClick={() => setInternalStep('input')} className="btn-step secondary">
+                                    Editar Prompt
+                                </button>
+                            </div>
+                        </div>
                         )}
                     </div>
                 </div>

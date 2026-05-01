@@ -331,17 +331,14 @@ export const GithubService = {
 
       await this.updateReadmeWithDescription(token, TARGET_OWNER, newRepoName, markdownContent);
 
-      // 2. Tests
       if (project?.testPartsMap) {
         await this._uploadTests(token, TARGET_OWNER, newRepoName, project.testPartsMap, testBasePath);
       }
 
-      // 3. Clases base
       if (project?.baseClasses) await this._uploadBaseClasses(token, TARGET_OWNER, newRepoName, project.baseClasses);
 
-      // 4. Rama solution
-      if (project?.attributeConstraintsSolution?.trim() && project?.baseClasses) {
-          await this._uploadSolutionBranch(token, TARGET_OWNER, newRepoName, project.baseClasses, project.attributeConstraintsSolution);
+      if (project?.fullSolution?.trim() && project?.baseClasses) {
+          await this._uploadSolutionBranch(token, TARGET_OWNER, newRepoName, project.baseClasses, project.fullSolution);
       }
 
       return newRepo.html_url;

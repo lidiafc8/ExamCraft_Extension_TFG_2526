@@ -1,6 +1,8 @@
 import React from "react"
 import { Header } from "~src/components/Header"
 import "../../css/Vertical.css"
+import statementIcon from "../../../assets/images/statement.png"
+import codeIcon from "../../../assets/images/code.png"
 
 interface Props {
   readonly onBack: () => void
@@ -30,14 +32,16 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onCodeGener
           ¿Qué parte te gustaría generar primero?
         </div>
 
-        <div className="vertical-menu-container">
-
-          <button className="menu-btn1" onClick={onComponents}>
-            Generación de las partes 
-          </button>
+         <div className="cards-container">
           
-          <button className="menu-btn1" onClick={onCodeGeneration}>
-            Generación de código
+          <button className="action-card" onClick={onComponents}>
+            <span className="parts-exam-icon"><img src={statementIcon} alt="Icono examen" className="card-icon" /></span> 
+            <span className="card-label">Enunciado</span>
+          </button>
+
+          <button className="action-card" onClick={onCodeGeneration}>
+              <span className="complete-exam-icon"><img src={codeIcon} alt="Icono archivo" className="card-icon" /></span>
+            <span className="card-label">Código</span>
           </button>
 
         </div>

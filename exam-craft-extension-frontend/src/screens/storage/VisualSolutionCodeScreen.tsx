@@ -27,9 +27,9 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
     onDeleteSection,
 }) => {
     const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
-
-    const parsedAttributesConstraintsSolution = parseJavaFiles(
-        selectedProject?.attributeConstraintsSolution || ''
+    
+    const parsedFullSolution = parseJavaFiles(
+        selectedProject?.fullSolution || ''
     );
 
     const breadcrumbItems = [
@@ -57,16 +57,16 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
             <main className="storage-main">
 
                 <div className="storage-section-heading">
-                    <h2>Solución de Restricciones de Atributos</h2>
-                    {parsedAttributesConstraintsSolution.length > 0 && (
+                    <h2>Solución Completa </h2>
+                    {parsedFullSolution.length > 0 && (
                         <button
                             type="button"
                             className="storage-delete-btn"
                             onClick={() => setSectionToDelete({
-                                key: 'attributeConstraintsSolution',
-                                name: 'Solución de Restricciones de Atributos',
+                                key: 'fullSolution',
+                                name: 'Solución Completa',
                             })}
-                            title="Eliminar Solución de Restricciones de Atributos"
+                            title="Eliminar Solución Completa"
                         >
                             ✕
                         </button>
@@ -79,8 +79,8 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                             <h3>Archivos de Solución</h3>
                         </div>
                         <div className="storage-content-card">
-                            {parsedAttributesConstraintsSolution.length > 0 ? (
-                                parsedAttributesConstraintsSolution.map((block) => (
+                            {parsedFullSolution.length > 0 ? (
+                                parsedFullSolution.map((block) => (
                                     <JavaCodeBlock
                                         key={block.filename}
                                         filename={block.filename}
@@ -89,13 +89,13 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                                 ))
                             ) : (
                                 <p className="storage-empty-state">
-                                    Aún no se ha generado la solución del ejercicio "Restricciones de Atributos" para este examen.
+                                    Aún no se ha generado una solución completa para este examen.
                                 </p>
                             )}
                         </div>
                     </div>
-                </div>
-
+                </div> 
+                
                 <div className="storage-bottom-actions">
                     <button type="button" onClick={onBack} className="btn-back">
                         Volver

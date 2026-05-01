@@ -85,18 +85,19 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
         const updatedProject = { ...selectedProject, [sectionKey]: "" };
 
+        const updateProjectsList = (prevProjects: any[]) => 
+            prevProjects.map(p => (p.id === selectedProject.id ? updatedProject : p));
+
         if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
-                setProjects(prevProjects =>
-                    prevProjects.map(p => (p.id === selectedProject.id ? updatedProject : p))
-                );
+                setProjects(updateProjectsList);
                 setSelectedProject(updatedProject);
             });
         }
     };
 
     const handleDeleteTest = (testKey: string) => {
-        if (!selectedProject || !selectedProject.id) return;
+        if (!selectedProject?.id) return;
 
         const updatedProject = { ...selectedProject };
         const updatedTestMap = { ...(updatedProject.testPartsMap || {}) };
@@ -164,8 +165,17 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             itemsToUpload.push("- Clases base para la extensión creada.");
         }
         
-        if (selectedProject.attributeConstraintsSolution && selectedProject.attributeConstraintsSolution.trim() !== "") {
-            itemsToUpload.push("- Rama 'solution' con las clases resueltas (restricciones de atributos).");
+        if (selectedProject.fullSolution && selectedProject.fullSolution.trim() !== "") {
+            const hasConstraints = !!(selectedProject.attributeConstraints && selectedProject.attributeConstraints.trim() !== "");
+            const hasRelationships = !!(selectedProject.entityRelationships && selectedProject.entityRelationships.trim() !== "");
+
+            let solvedParts = [];
+            if (hasConstraints) solvedParts.push("restricciones de atributos");
+            if (hasRelationships) solvedParts.push("relaciones entre entidades");
+
+            const detailText = solvedParts.length > 0 ? ` (${solvedParts.join(" y ")})` : "";
+
+            itemsToUpload.push(`- Rama 'solution' con las clases resueltas${detailText}.`);
         }
 
         const uploadListString = itemsToUpload.join("\n");
@@ -292,7 +302,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         <FoldersGridScreen
             allowedFolders={allowedFolders}
             projects={projects}
-            logoExamCraft={logoExamCraft}
             onWelcome={onWelcome}
             onSelectFolder={(folderName) => setSelectedDomainFolder(folderName)}
         />

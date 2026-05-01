@@ -17,7 +17,7 @@ Además, para las clases que no estén implementadas en el código base, buscarl
 
 **Procedimiento obligatorio antes de escribir un solo import:**
 
-1. Localiza la sección `=== PAQUETES REALES DETECTADOS EN EL CÓDIGO BASE ===` del contexto.
+1. Localiza la sección `=== PAQUETES DE LA PLANTILLA DEL PROYECTO ===` del contexto.
 2. Para cada clase que necesites importar, busca su `package` en el código base proporcionado.
 3. Construye el import como: `import <package_de_esa_clase>.<NombreClase>;`
 - Pero ten en cuenta en poner los nombres de las clases nueva generadas, no es siempre Achievement; sino q coja las clases del contexto que se le pase de la extensión funcional.
@@ -59,7 +59,7 @@ Tienes que tener en cuenta como los métodos se llaman en ReflexiveTest
 
 ## Estructura Estricta Requerida para la Test2.java
 
-Debes generar una clase de pruebas que siga EXACTAMENTE el patrón de diseño proporcionado. La clase evaluará anotaciones JPA y restricciones de obligatoriedad apoyándose en los métodos de la clase padre `ReflexiveTest`.
+Debes generar una clase de pruebas que siga EXACTAMENTE el patrón de diseño proporcionado, siguiendo los ejemplos proporcionados en el archivo markdown "test_previous_exams" anotados como **Test 2: Relaciones entre las entidades**. La clase evaluará lo necesario apoyándose en los métodos de la clase padre `ReflexiveTest`.
 
 ### 1. Configuración de la Clase e Inyección de Dependencias
 - **Clase y Herencia:** La clase debe ser pública, estar anotada obligatoriamente con `@DataJpaTest()` y heredar de `ReflexiveTest`.
@@ -71,15 +71,20 @@ Debes generar una clase de pruebas que siga EXACTAMENTE el patrón de diseño pr
 - **Formato exacto:** `checkThatFieldIsAnnotatedWith(Entidad.class, "nombreDelAtributo", TipoDeRelacion.class);` (Donde `TipoDeRelacion` será `ManyToMany.class`, `ManyToOne.class`, etc.).
 - Agrupa todas las aserciones de una misma entidad en su método correspondiente.
 
-### 3. Validación de Restricciones (Constraints y Obligatoriedad)
-- **Nomenclatura del Método:** Crea un método llamado `test[Num][NombreEntidad]Constraints()` por cada entidad (ej. `test2TreatmentConstraints()`). Debe llevar la anotación `@Test`.
-- **Creación de Entidad Válida:** Instancia un objeto válido llamando a un método generador (por ejemplo, `Test1A.createValid[Entidad](em)` o, si no existe en el contexto, crea un método privado `createValid[Entidad](EntityManager em)` que lo construya usando `setValue()` para saltarse la falta de setters).
-- **Implementación (Estricta):** Usa ÚNICAMENTE el método heredado `checkThatFieldsAreMandatory` para evaluar campos nulos/obligatorios.
-- **Formato exacto:** `checkThatFieldsAreMandatory(instanciaValida, em, "atributoObligatorio1", "atributoObligatorio2");`
+
+### 3. Verificación de Restricciones (Constraints y Obligatoriedad)
+- **Nomenclatura del Método:** Crea un método llamado `test[Num][NombreEntidad]Constraints()` por cada relación a implementar (ej. `test2TreatmentConstraints()`). Es obligatorio que sea `public void` y lleve la anotación `@Test` (evita métodos privados o JUnit no los ejecutará).
+- **Instanciación de la Entidad:** Para probar las restricciones, la primera línea del método debe instanciar una entidad válida llamando a la factoría de `Test1` pasándole el EntityManager. Formato exacto: `NombreEntidad e = Test1.createValid[NombreEntidad](em);`
+- **Filtro de Atributos (¡IMPORTANTE!):** Genera aserciones ÚNICAMENTE para los atributos que implementan las relaciones exigidas en este ejercicio. Omite estrictamente cualquier aserción de obligatoriedad para atributos básicos (como ids, nombres, fechas, etc.) que no formen parte de la relación que se está evaluando.
+- **Implementación (Estricta):** Tras instanciar la entidad, usa ÚNICAMENTE el método heredado `checkThatFieldsAreMandatory` para verificar la obligatoriedad de los atributos filtrados en el paso anterior.
+- **Formato exacto:** checkThatFieldsAreMandatory(e, em, "nombreDelAtributoRelacion");
+
 
 ### 4. Reglas Críticas de Sintaxis y Reflexión
 - **Asignación de Valores (Si generas métodos auxiliares):** Si necesitas construir entidades de prueba localmente, usa EXCLUSIVAMENTE `setValue(objeto, "atributo", Tipo.class, valor)` proporcionado por `ReflexiveTest` para eludir la ausencia de métodos *setter* en el código base.
 - **Evita aserciones estándar:** NO uses `assertNotNull`, `assertDoesNotThrow` ni pruebes repositorios con `.save()` a menos que se te pida explícitamente. Cíñete a los métodos de aserción de `ReflexiveTest` (`checkThatFieldIsAnnotatedWith` y `checkThatFieldsAreMandatory`).
+- **Separación de responsabilidades**: Mantén estrictamente separados los métodos que comprueban anotaciones de los métodos que comprueban restricciones de validación.
+- **Limpieza**: Omite comentarios innecesarios, importaciones no utilizadas y explicaciones adicionales. Devuelve únicamente el código Java solicitado.
 
 ---
 

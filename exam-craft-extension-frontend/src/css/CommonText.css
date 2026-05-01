@@ -31,14 +31,12 @@
   background-color: #E6DFF0; 
   color: #6A4C93;  
   padding: 10px 40px;
-  border-radius: 50px;
   font-weight: 600;
   font-size: 1.3rem;
   margin-bottom: 50px;
   box-shadow: 0 4px 15px rgba(155, 114, 207, 0.25);
   border: none;
   border-radius: 50px;      
-  padding: 10px 40px;
   font-family: 'Segoe UI', 'Roboto', sans-serif;
   letter-spacing: 0.5px;
 }

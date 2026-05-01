@@ -30,7 +30,7 @@ export default function CreateExamByPartsScreen({ onBack, onWelcome, onFunctiona
         <h1 className="main-title">CREAR EXAMEN POR PARTES</h1>
         
         <div className="subtitle-badge">
-          ¿Qué parte te gustaría generar primero?
+          ¿Qué parte del enunciado te gustaría generar primero?
         </div>
 
         <div className="vertical-menu-container">
