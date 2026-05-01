@@ -7,11 +7,13 @@ interface Props {
   readonly onBack: () => void
   readonly onWelcome: () => void
   readonly onCreateExamByParts: () => void
-  readonly onExamCodeGeneration: () => void
-  readonly onSolutionCodeGeneration: () => void
+  readonly onGenerateBaseClasses: (project: any) => void;
+  readonly onGenerateTest: () => void
+  readonly onGenerateSolutionCode: () => void
+
 }
 
-export default function CodeGenerationScreen({ onBack, onWelcome, onCreateExamByParts, onExamCodeGeneration, onSolutionCodeGeneration }: Props
+export default function CodeGenerationScreen({ onBack, onWelcome, onCreateExamByParts, onGenerateBaseClasses, onGenerateTest, onGenerateSolutionCode }: Props
 ) {
   
   const breadcrumbItems = [
@@ -36,19 +38,21 @@ export default function CodeGenerationScreen({ onBack, onWelcome, onCreateExamBy
         <h1 className="main-title">GENERACIÓN DE CÓDIGO</h1>
         
         <div className="subtitle-badge">
-          Elige si quieres generar el código de un examen o bien el código de la solución del mismo
+          ¿Qué parte de código te gustaría generar primero?
         </div>
 
-        <div className="cards-container">
-          
-          <button className="action-card" onClick={onExamCodeGeneration}>
-            <span className="exam-icon"><img src={studentIcon} alt="Icono estudiante" width="120" height="130" /></span> 
-            <span className="card-label">Código examen</span>
+        <div className="vertical-menu-container">
+
+          <button className="menu-btn" onClick={onGenerateBaseClasses}>
+            Clases base
           </button>
 
-          <button className="action-card" onClick={onSolutionCodeGeneration}>
-              <span className="archive-icon"><img src={teacherIcon} alt="Icono profesor" width="130" height="130" /></span>
-            <span className="card-label">Código solución</span>
+          <button className="menu-btn" onClick={onGenerateTest}>
+            Tests
+          </button>
+
+          <button className="menu-btn" onClick={onGenerateSolutionCode}>
+            Solución
           </button>
 
         </div>

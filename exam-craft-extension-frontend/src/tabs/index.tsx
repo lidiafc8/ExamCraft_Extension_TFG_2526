@@ -8,17 +8,14 @@ import DiagramUMLScreen from "../screens/examStatementGeneration/DiagramaUMLWork
 import FinishFunctionalExtensionScreen from "../screens/examStatementGeneration/FinishFunctionalExtensionScreen"
 import AttributesConstraintsWorkflowScreen from "~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen"
 import GenerationTestAtributesScreen from "../screens/codeGeneration/GenerationTestAtributesScreen"
-import GeneralGenerationTestScreen from "../screens/codeGeneration/exam/GeneralGenerationTestScreen"
+import GeneralGenerationTestScreen from "../screens/codeGeneration/GeneralGenerationTestScreen"
 import CodeGenerationScreen from "~src/screens/codeGeneration/CodeGenerationScreen"
-import ExamCodeGenerationScreen from "~src/screens/codeGeneration/exam/ExamCodeGenerationScreen"
-import GenerationBaseClassesScreen from "~src/screens/codeGeneration/exam/GenerationBaseClassesScreen"
+import GenerationBaseClassesScreen from "~src/screens/codeGeneration/GenerationBaseClassesScreen"
 import StorageExamsIndex from "../screens/storage/StorageExamsIndex"
-import SolutionCodeGenerationScreen from "~src/screens/codeGeneration/solution/SolutionCodeGenerationScreen"
-import AttributesConstraintsSolutionCodeScreen from "~src/screens/codeGeneration/solution/AttributesConstraintsSolutionCodeScreen"
 import EntityRelationshipsWorkflowScreen from "~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen"
 import PartsGenerationScreen from "~src/screens/chooseCreate/PartsGenetarionScreen"
 import ContextWorkflowScreen from "../screens/examStatementGeneration/ContextWorkflowScreen"
-import EntityRelationshipsSolutionCodeScreen from "~src/screens/codeGeneration/solution/EntityRelationshipsSolutionCodeScreen"
+import GenerationSolutionCodeScreen from "~src/screens/codeGeneration/GenerationSolutionCodeScreen"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
@@ -52,11 +49,8 @@ export default function IndexTab() {
     "testGeneral" |
     "codeGeneration" |
     "generateBaseClasses" |
-    "examCodeGeneration" |
-    "solutionCodeGeneration" |
-    "attributesConstraintsSolutionCode" |
     "partsGeneration" |
-    "entityRelationshipsSolutionCode"
+    "generationSolutionCode"
     
   >("welcome")
 
@@ -111,58 +105,17 @@ export default function IndexTab() {
         onBack={() => setScreen("createExamByParts")} 
           onWelcome={() => setScreen("welcome")} 
           onCreateExamByParts={() => setScreen("createExamByParts")}
-          onExamCodeGeneration={() => setScreen("examCodeGeneration")}
-          onSolutionCodeGeneration={() => setScreen("solutionCodeGeneration")}
-        />
-      )}
-
-      {screen === "examCodeGeneration" && (
-        <ExamCodeGenerationScreen 
-        onBack={() => setScreen("codeGeneration")} 
-        onWelcome={() => setScreen("welcome")}
-        onGenerateTest={() => setScreen("testGeneral")}
-        onCreateExamByParts={() => setScreen("createExamByParts")}
-        onGenerateBaseClasses={(project) => {
+          onGenerateTest={() => setScreen("testGeneral")}
+          onGenerateBaseClasses={(project) => {
             setSelectedProject(null);
             setCameFromAttributes(false); 
             setScreen("generateBaseClasses");
           }}
-        onCodeGeneration={() => setScreen("codeGeneration")}
-        />
-      )} 
-
-      {screen === "solutionCodeGeneration" && (
-        <SolutionCodeGenerationScreen 
-        onBack={() => setScreen("codeGeneration")} 
-        onWelcome={() => setScreen("welcome")}
-        onCreateExamByParts={() => setScreen("createExamByParts")}
-        onGenerateAttributesConstraintsSolutionCode={() => setScreen("attributesConstraintsSolutionCode")}
-        onGenerateEntityRelationshipsSolutionCode={() => setScreen("entityRelationshipsSolutionCode")}
-        onCodeGeneration={() => setScreen("codeGeneration")}
-        />
-      )} 
-
-      {screen === "attributesConstraintsSolutionCode" && (
-        <AttributesConstraintsSolutionCodeScreen 
-        onBack={() => setScreen("solutionCodeGeneration")}
-        onWelcome ={() => setScreen("welcome")}
-        onCreateExam={() => setScreen("createExam")}
-        onCreateExamByParts={() => setScreen("createExamByParts")}
-        onCodeGeneration={() => setScreen("codeGeneration")}
-        onSolutionCodeGeneration={() => setScreen("solutionCodeGeneration")}
+          onGenerateSolutionCode={ () => setScreen("generationSolutionCode")}
+            
         />
       )}
-
-      {screen === "entityRelationshipsSolutionCode" && (
-        <EntityRelationshipsSolutionCodeScreen 
-        onBack={() => setScreen("solutionCodeGeneration")}
-        onWelcome ={() => setScreen("welcome")}
-        onCreateExam={() => setScreen("createExam")}
-        onCreateExamByParts={() => setScreen("createExamByParts")}
-        onCodeGeneration={() => setScreen("codeGeneration")}
-        onSolutionCodeGeneration={() => setScreen("solutionCodeGeneration")}
-        />
-      )}
+ 
 
       {screen === "generateBaseClasses" && (
         <GenerationBaseClassesScreen 
@@ -187,7 +140,16 @@ export default function IndexTab() {
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onCodeGeneration={() => setScreen("codeGeneration")}
-          onExamCodeGeneration={() => setScreen("examCodeGeneration")}
+        />
+      )}
+
+      {screen === "generationSolutionCode" && (
+        <GenerationSolutionCodeScreen 
+          onBack={() => setScreen("codeGeneration")}
+          onWelcome ={() => setScreen("welcome")}
+          onCreateExam={() => setScreen("createExam")}
+          onCreateExamByParts={() => setScreen("createExamByParts")}
+          onCodeGeneration={() => setScreen("codeGeneration")}
         />
       )}
 
@@ -221,7 +183,7 @@ export default function IndexTab() {
 
       {screen === "testGeneral" && (
         <GeneralGenerationTestScreen 
-          onBack={() => setScreen("examCodeGeneration")} 
+          onBack={() => setScreen("codeGeneration")} 
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
@@ -231,7 +193,6 @@ export default function IndexTab() {
             setScreen("testAttributes");
           }}
           onCodeGeneration={() => setScreen("codeGeneration")}
-          onCreateExamCode={() => setScreen("examCodeGeneration")}
         />
       )}
 
@@ -326,7 +287,6 @@ export default function IndexTab() {
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onCodeGeneration={() => setScreen("codeGeneration")}
-          onCreateExamCode={() => setScreen("examCodeGeneration")}
         />
       )}
     </div>

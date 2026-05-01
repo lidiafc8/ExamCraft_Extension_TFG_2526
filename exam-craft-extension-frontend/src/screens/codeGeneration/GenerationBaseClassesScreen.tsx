@@ -1,7 +1,7 @@
 import React from "react"
-import generationExamBaseClassesPrompt from "bundle-text:../../../prompts/generation-exam-repository/exam/generation_exam_base_classes.md"
+import generationExamBaseClassesPrompt from "bundle-text:../../prompts/generation-exam-repository/exam/generation_exam_base_classes.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
-import WorkflowScreen from "../../../components/WorkflowScreen"
+import WorkflowScreen from "../../components/WorkflowScreen"
 
 interface Props {
   readonly initialProject?: any; 
@@ -12,7 +12,6 @@ interface Props {
   readonly onCreateExam: () => void
   readonly onCreateExamByParts: () => void
   readonly onCodeGeneration: () => void
-  readonly onExamCodeGeneration: () => void
 }
 
 const CLASES_POR_DEFECTO: Record<string, string> = {
@@ -49,8 +48,7 @@ export default function GenerationBaseClassesScreen({
   onWelcome,
   onCreateExam,
   onCreateExamByParts,
-  onCodeGeneration,
-  onExamCodeGeneration
+  onCodeGeneration
 }: Props) {
 
   const breadcrumbs = fromAttributes
@@ -64,9 +62,7 @@ export default function GenerationBaseClassesScreen({
         { label: "INICIO", action: onWelcome },
         { label: "CREAR EXAMEN", action: onCreateExam },
         { label: "POR PARTES", action: onCreateExamByParts },
-        { label: "CÓDIGO", action: onCodeGeneration },
-        { label: 'EXAMEN', action: onExamCodeGeneration }
-
+        { label: "CÓDIGO", action: onCodeGeneration }
       ];
 
 

@@ -164,8 +164,17 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             itemsToUpload.push("- Clases base para la extensión creada.");
         }
         
-        if (selectedProject.attributeConstraintsSolution && selectedProject.attributeConstraintsSolution.trim() !== "") {
-            itemsToUpload.push("- Rama 'solution' con las clases resueltas (restricciones de atributos).");
+        if (selectedProject.fullSolution && selectedProject.fullSolution.trim() !== "") {
+            const hasConstraints = !!(selectedProject.attributeConstraints && selectedProject.attributeConstraints.trim() !== "");
+            const hasRelationships = !!(selectedProject.entityRelationships && selectedProject.entityRelationships.trim() !== "");
+
+            let solvedParts = [];
+            if (hasConstraints) solvedParts.push("restricciones de atributos");
+            if (hasRelationships) solvedParts.push("relaciones entre entidades");
+
+            const detailText = solvedParts.length > 0 ? ` (${solvedParts.join(" y ")})` : "";
+
+            itemsToUpload.push(`- Rama 'solution' con las clases resueltas${detailText}.`);
         }
 
         const uploadListString = itemsToUpload.join("\n");

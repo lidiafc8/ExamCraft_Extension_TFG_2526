@@ -21,7 +21,6 @@ interface Props {
     readonly onWelcome: () => void;
     readonly onCreateExam: () => void;
     readonly onCodeGeneration: () => void;
-    readonly onCreateExamCode: () => void;
 
 }
 
@@ -33,7 +32,6 @@ export default function GenerationTestScreen({
     onWelcome,
     onCreateExam,
     onCodeGeneration,
-    onCreateExamCode
 }: Props) {
     const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
     const [promptText, setPromptText] = useState("");
@@ -242,7 +240,6 @@ Genera ${isEntityRelationshipsTest? `(Test2.java)`: `(Test1.java)`} sin bloques 
     if (source === 'general') {
         dynamicBreadcrumbs = [
             { label: 'CÓDIGO', action: onCodeGeneration },
-            { label: 'EXAMEN', action: onCreateExamCode },
             { label: 'TESTS', action: onBack }
         ];
     } else if (source === 'attributes') {
