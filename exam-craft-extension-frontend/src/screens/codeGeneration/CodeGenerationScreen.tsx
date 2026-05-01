@@ -1,7 +1,5 @@
 import React from "react"
 import { Header } from "~src/components/Header"
-import studentIcon from "~assets/images/student.png"
-import teacherIcon from "~assets/images/teacher.png"
 
 interface Props {
   readonly onBack: () => void

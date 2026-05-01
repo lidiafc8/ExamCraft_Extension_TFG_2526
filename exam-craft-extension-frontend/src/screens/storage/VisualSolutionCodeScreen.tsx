@@ -27,15 +27,7 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
     onDeleteSection,
 }) => {
     const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
-
-    const parsedAttributesConstraintsSolution = parseJavaFiles(
-        selectedProject?.attributeConstraintsSolution || ''
-    );
-
-    const parsedEntityRelationshipsSolution = parseJavaFiles(
-        selectedProject?.entityRelationshipsSolution || ''
-    );
-
+    
     const parsedFullSolution = parseJavaFiles(
         selectedProject?.fullSolution || ''
     );

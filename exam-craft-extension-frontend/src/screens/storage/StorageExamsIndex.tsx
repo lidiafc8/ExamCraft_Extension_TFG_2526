@@ -85,18 +85,19 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
         const updatedProject = { ...selectedProject, [sectionKey]: "" };
 
+        const updateProjectsList = (prevProjects: any[]) => 
+            prevProjects.map(p => (p.id === selectedProject.id ? updatedProject : p));
+
         if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
-                setProjects(prevProjects =>
-                    prevProjects.map(p => (p.id === selectedProject.id ? updatedProject : p))
-                );
+                setProjects(updateProjectsList);
                 setSelectedProject(updatedProject);
             });
         }
     };
 
     const handleDeleteTest = (testKey: string) => {
-        if (!selectedProject || !selectedProject.id) return;
+        if (!selectedProject?.id) return;
 
         const updatedProject = { ...selectedProject };
         const updatedTestMap = { ...(updatedProject.testPartsMap || {}) };
@@ -301,7 +302,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         <FoldersGridScreen
             allowedFolders={allowedFolders}
             projects={projects}
-            logoExamCraft={logoExamCraft}
             onWelcome={onWelcome}
             onSelectFolder={(folderName) => setSelectedDomainFolder(folderName)}
         />

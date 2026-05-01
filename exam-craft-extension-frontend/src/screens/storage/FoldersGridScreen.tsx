@@ -6,7 +6,6 @@ import "./css/FoldersGridScreen.css";
 export interface FoldersGridScreenProps {
     allowedFolders: string[];
     projects: any[];
-    logoExamCraft: string;
     onWelcome: () => void;
     onSelectFolder: (folderName: string) => void;
 }

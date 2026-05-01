@@ -83,7 +83,7 @@ export default function DiagramUMLScreen({
                     })
                 });
                 console.log("Log enviado al servidor local correctamente.");
-            } catch (error) {
+            } catch {
                 console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
             }
 
