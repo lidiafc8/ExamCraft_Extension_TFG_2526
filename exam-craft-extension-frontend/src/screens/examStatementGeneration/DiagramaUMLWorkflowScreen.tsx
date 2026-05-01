@@ -133,16 +133,16 @@ export default function DiagramUMLScreen({
 
                 <div className="wf-wide-wrapper">
                     {internalStep === 'input' && (
-                        <div className="content-card">
+                        // BUG CORREGIDO 1: Había dos <div className="content-card"> anidados
+                        // y el exterior nunca se cerraba. Se elimina el duplicado.
                         <div className="content-card">
                             <h2 className="main-title small">{domainName.toUpperCase()}: Diagrama UML</h2>
                             <p className="wf-instruction-text">
                                 Este es el prompt que se usará para generar el diagrama UML (en código mermaid y en visualización gráfica), puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar Diagrama UML"</strong>.
                             </p>
+                            {/* BUG CORREGIDO 2: El textarea tenía className y value duplicados.
+                                Se eliminan los atributos repetidos. */}
                             <textarea 
-                                className="wf-textarea-input" 
-                                value={promptText}
-                                onChange={(e) => setPromptText(e.target.value)}
                                 className="wf-textarea-input" 
                                 value={promptText}
                                 onChange={(e) => setPromptText(e.target.value)}
@@ -196,7 +196,6 @@ export default function DiagramUMLScreen({
                                 </div>
                             </div>
 
-                            {/* COLUMNA 3: CÓDIGO MERMAID */}
                             <div className="wf-column-three">
                                 <span className="wf-column-title">Código Mermaid</span>
                                 <div className="wf-diagram-code-inner">
