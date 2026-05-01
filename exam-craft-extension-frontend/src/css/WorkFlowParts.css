@@ -178,6 +178,12 @@ body {
 .btn-step.primary { background-color: #3E2723; color: white; }
 .btn-step.success { background-color: #2E7D32; color: white; }
 
+.btn-step.success.confirm { background-color: #2E7D32; color: white; width: 250px;
+  height: 48px;}
+
+.btn-step.secondary.cancel { background-color: #3E2723; color: white; width: 250px;
+  height: 48px;}
+
 .loading-spinner {
   border: 4px solid #f3f3f3;
   border-top: 3px solid #FDF5E6;

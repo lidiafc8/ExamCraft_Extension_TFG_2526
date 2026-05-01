@@ -212,10 +212,10 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                         <p className="wf-instruction-text">
                             ¿Está seguro que desea usar el texto de enunciado generado? Una vez confirmado, se generará el diagrama UML en base a él y no podrá modificarlo.                        </p> 
                         <div className="wf-actions-row">
-                            <button onClick={() => setCurrentStep(1)} className="btn-step secondary">
+                            <button onClick={() => setCurrentStep(1)} className="btn-step secondary cancel">
                                 Cancelar y seguir editando enunciado
                             </button>
-                            <button onClick={() => onCreateDiagram(responseText)} className="btn-step success">
+                            <button onClick={() => onCreateDiagram(responseText)} className="btn-step success confirm">
                                 Confirmar y pasar al paso 2  <br/>  (Diagrama UML)
                             </button>
                         </div>
