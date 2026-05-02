@@ -11,7 +11,6 @@ import "../../css/CommonText.css";
 export interface GeneratedCodeScreenProps {
     selectedProject: any;
     selectedDomainFolder: string;
-    logoExamCraft: string;
     onWelcome: () => void;
     onBack: () => void;
     onGoToExams: () => void;

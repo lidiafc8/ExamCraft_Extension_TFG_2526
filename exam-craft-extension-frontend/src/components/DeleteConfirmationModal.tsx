@@ -39,7 +39,9 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
                         onClick={onCancel} 
                         style={{ padding: '12px 24px', borderRadius: '8px', border: '1px solid #d9d9d9', backgroundColor: '#fff', color: '#333', cursor: 'pointer', fontWeight: 'bold', flex: 1, transition: 'all 0.2s' }}
                         onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+                        onFocus={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
                         onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+                        onBlur={(e) => e.currentTarget.style.backgroundColor = '#fff'}
                     >
                         Cancelar
                     </button>
@@ -48,7 +50,9 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
                         onClick={onConfirm} 
                         style={{ padding: '12px 24px', borderRadius: '8px', border: 'none', backgroundColor: '#ff4d4f', color: '#fff', cursor: 'pointer', fontWeight: 'bold', flex: 1, transition: 'all 0.2s' }}
                         onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#d9363e'}
+                        onFocus={(e) => e.currentTarget.style.backgroundColor = '#d9363e'}
                         onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ff4d4f'}
+                        onBlur={(e) => e.currentTarget.style.backgroundColor = '#ff4d4f'}
                     >
                         Sí, eliminar
                     </button>

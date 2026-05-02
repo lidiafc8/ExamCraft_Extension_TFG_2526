@@ -11,6 +11,36 @@ interface Props {
   readonly onCodeGeneration: () => void
 }
 
+interface InstructionContentProps {
+  project: any;
+}
+
+function InstructionContent({ project }: InstructionContentProps) {
+  const hasConstraints = !!(project?.attributeConstraints);
+  const hasRelations = !!(project?.entityRelationships); 
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+      <p>
+        Este es el prompt que se usará para generar el <strong>Código Solución Completo</strong> del examen seleccionado. 
+        La IA tomará las clases base iniciales y aplicará las soluciones para todas las partes detectadas.
+        Al terminar, pulsa en <strong>"Generar"</strong>.
+      </p>
+
+      <div style={{ backgroundColor: "#f6f8fa", padding: "15px", borderRadius: "8px", border: "1px solid #e1e4e8" }}>
+        <p style={{ margin: "0 0 8px 0", fontSize: "0.95em", fontWeight: 600, color: "#333" }}>
+          Partes detectadas en este proyecto:
+        </p>
+        <ul style={{ margin: 0, paddingLeft: "24px", fontSize: "0.9em", color: "#555" }}>
+          {hasConstraints && <li>Enunciado de Restricciones de Atributos</li>}
+          {hasRelations && <li>Enunciado de Relaciones entre Entidades</li>}
+        </ul>
+      </div>
+      
+    </div>
+  );
+}
+
 export default function GenerationSolutionCodeScreen({
   onBack,
   onWelcome,
@@ -36,31 +66,7 @@ export default function GenerationSolutionCodeScreen({
       workflowInputTitle="Generación de Código Solución"
       workflowResultTitle={(name) => `Generar Solución Completa: ${name}`}
       
-      instructionText={(project) => {
-        const hasConstraints = !!(project?.attributeConstraints);
-        const hasRelations = !!(project?.entityRelationships); 
-
-        return (
-          <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-            <p>
-              Este es el prompt que se usará para generar el <strong>Código Solución Completo</strong> del examen seleccionado. 
-              La IA tomará las clases base iniciales y aplicará las soluciones para todas las partes detectadas.
-              Al terminar, pulsa en <strong>"Generar"</strong>.
-            </p>
-
-            <div style={{ backgroundColor: "#f6f8fa", padding: "15px", borderRadius: "8px", border: "1px solid #e1e4e8" }}>
-              <p style={{ margin: "0 0 8px 0", fontSize: "0.95em", fontWeight: 600, color: "#333" }}>
-                Partes detectadas en este proyecto:
-              </p>
-              <ul style={{ margin: 0, paddingLeft: "24px", fontSize: "0.9em", color: "#555" }}>
-                {hasConstraints && <li>Enunciado de Restricciones de Atributos</li>}
-                {hasRelations && <li>Enunciado de Relaciones entre Entidades</li>}
-              </ul>
-            </div>
-            
-          </div>
-        );
-      }}
+      instructionText={(project) => <InstructionContent project={project} />}
       
       confirmTitle="Confirmar Generación"
       confirmDescription={(name) =>
@@ -113,11 +119,11 @@ export default function GenerationSolutionCodeScreen({
 
         return {
           visibleText: visibleText
-            .replace("{enunciado_restricciones}", attributeConstraintsStatement)
-            .replace("{enunciado_relaciones}", entityRelationsStatement)
-            .replace("{codigo_tests_restricciones}", testsCodeAttributes)
-            .replace("{codigo_tests_relaciones}", testsCodeRelations)
-            .replace("{codigo_base_localstorage}", baseClassesCode),
+            .replaceAll("{enunciado_restricciones}", attributeConstraintsStatement)
+            .replaceAll("{enunciado_relaciones}", entityRelationsStatement)
+            .replaceAll("{codigo_tests_restricciones}", testsCodeAttributes)
+            .replaceAll("{codigo_tests_relaciones}", testsCodeRelations)
+            .replaceAll("{codigo_base_localstorage}", baseClassesCode),
           hiddenContext,
         }
       }}

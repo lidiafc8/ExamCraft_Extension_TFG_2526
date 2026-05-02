@@ -256,9 +256,10 @@ export default function GeneralGenerationTestScreen({
                                 const isAttributeConstraintsTests = pendingPartKey.toLowerCase().includes('attribute');
                                 const isEntityRelationshipsTests = pendingPartKey.toLowerCase().includes('entity');
 
-                                if (isAttributeConstraintsTests && testPartsMap['test1_attributes']?.code?.trim().length > 0) {
-                                    hasExistingTests = true;
-                                } else if (isEntityRelationshipsTests && testPartsMap['test2_relationships']?.code?.trim().length > 0) {
+                                if (
+                                    (isAttributeConstraintsTests && testPartsMap['test1_attributes']?.code?.trim().length > 0) || 
+                                    (isEntityRelationshipsTests && testPartsMap['test2_relationships']?.code?.trim().length > 0)
+                                ) {
                                     hasExistingTests = true;
                                 }
 
