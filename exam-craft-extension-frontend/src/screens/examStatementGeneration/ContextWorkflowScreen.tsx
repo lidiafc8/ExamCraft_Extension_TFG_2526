@@ -166,7 +166,7 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                 )}
 
                 {currentStep === 1 && internalStep === 'result' && (
-                    <div className="wf-split-view">
+                    <div className="wf-split-view-two">
                         <div className="wf-column">
                             <span className="wf-column-title">Prompt enviado</span>
                             <textarea 
