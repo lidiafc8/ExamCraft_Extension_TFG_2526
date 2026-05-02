@@ -36,7 +36,6 @@ export default function DiagramUMLScreen({
     const [responseText, setResponseText] = useState("");
     const [cleanCode, setCleanCode] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [extensionComplete, setExtensionComplete] = useState("");
 
     useEffect(() => {
         if (extensionPromptMarkdown && domainName) {

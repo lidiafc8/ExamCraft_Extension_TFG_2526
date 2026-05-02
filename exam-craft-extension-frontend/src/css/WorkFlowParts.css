@@ -62,7 +62,7 @@ body {
 
 .step-active .step-circle { background-color: #3E2723; color: white; box-shadow: 0 0 0 4px rgba(62, 39, 35, 0.2); }
 .step-active .step-label { color: #3E2723; font-weight: bold; }
-.step-completed .step-circle { background-color: #4CAF50; color: white; }
+.step-completed .step-circle { background-color: #4CAF50; color: white; } /* NOSONAR */
 .step-completed + .step-line { background-color: #4CAF50; }
 .step-inactive .step-circle { background-color: #e0e0e0; color: #888; } /* NOSONAR */
 

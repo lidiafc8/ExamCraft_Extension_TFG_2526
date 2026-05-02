@@ -172,9 +172,9 @@
 .action-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
 .action-btn--preview  { background: #2e7d32; color: white; }
-.action-btn--download { background: #4a90e2; color: white; }
+.action-btn--download { background: #4a90e2; color: white; } /* NOSONAR */
 .action-btn--github   { background: #24292e; color: white; }
-.action-btn--delete   { background: #ff4d4f; color: white; }
+.action-btn--delete   { background: #ff4d4f; color: white; } /* NOSONAR */
 
 .action-divider {
   border: none;

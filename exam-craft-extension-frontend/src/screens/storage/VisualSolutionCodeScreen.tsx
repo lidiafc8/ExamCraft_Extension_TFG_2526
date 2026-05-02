@@ -9,7 +9,6 @@ import "./css/StorageScreen.css";
 export interface VisualSolutionCodeScreenProps {
     selectedProject: any;
     selectedDomainFolder: string;
-    logoExamCraft: string;
     onWelcome: () => void;
     onBack: () => void;
     onGoToExams: () => void;

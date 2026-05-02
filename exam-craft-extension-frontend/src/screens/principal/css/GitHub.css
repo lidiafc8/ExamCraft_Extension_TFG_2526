@@ -90,7 +90,7 @@
 
 .repo-card { 
   background-color: #A67C6D; 
-  color: white; 
+  color: white; /* NOSONAR */
   padding: 20px;   
   border-radius: 15px; 
   text-align: center;

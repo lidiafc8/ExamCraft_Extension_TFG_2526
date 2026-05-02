@@ -90,7 +90,20 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 
                     {showActionsMenu && (
                         <>
-                            <div className="actions-overlay" onClick={() => setShowActionsMenu(false)} />
+                            <div 
+                                className="actions-overlay" 
+                                onClick={() => setShowActionsMenu(false)}
+                                role="button" 
+                                tabIndex={0} 
+                                aria-label="Cerrar menú"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    setShowActionsMenu(false);
+                                    }
+                                }}
+                                />
+                                
                             <div className="actions-dropdown">
                                 <button
                                     type="button"
