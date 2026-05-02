@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import attributesConstraintsPromptMarkdown from "bundle-text:../../prompts/generation-constraints-attributes/generation_attribute_constraints_from_statement.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
-import WorkflowScreen from "../../components/WorkflowScreen"
+import WorkflowScreen from "../../components/WorkflowComponents"
 
 interface Props {
   readonly onBack: () => void

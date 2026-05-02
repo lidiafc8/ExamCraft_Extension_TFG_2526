@@ -1,213 +1,186 @@
 import React, { useState, useEffect } from "react"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md"
-import { sendToGemini } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import { Header } from "~src/components/Header"
 import { cleanMermaidCode } from "../../components/mermaidCleaner"
+import { useGeminiGeneration } from "../../components/GeminiGeneration"
+import { StepperHeader, PromptEditor } from "../../components/WorkflowComponents"
 import "../../css/WorkFlowParts.css"
 
 interface Props {
-  readonly domainName: string;
-  readonly context: string;
-  readonly onBack: () => void;
-  readonly onWelcome: () => void;
-  readonly onCreateExam: () => void;
-  readonly onCreateExamByParts: () => void;
-  readonly onFunctionalExtension: () => void;
-  readonly onStatementStep1: () => void;
-  readonly onFinishExtension: (statement: string, mermaidCode: string) => void;
+  readonly domainName: string
+  readonly context: string
+  readonly onBack: () => void
+  readonly onWelcome: () => void
+  readonly onCreateExam: () => void
+  readonly onCreateExamByParts: () => void
+  readonly onFunctionalExtension: () => void
+  readonly onStatementStep1: () => void
+  readonly onFinishExtension: (statement: string, mermaidCode: string) => void
 }
 
-export default function DiagramUMLScreen({ 
-  domainName, 
+const STEPS = [{ label: "Texto de enunciado" }, { label: "Diagrama UML" }]
+
+export default function DiagramUMLScreen({
+  domainName,
   context,
-  onBack, 
-  onWelcome, 
-  onCreateExam, 
-  onCreateExamByParts, 
-  onFunctionalExtension, 
+  onBack,
+  onWelcome,
+  onCreateExam,
+  onCreateExamByParts,
+  onFunctionalExtension,
   onStatementStep1,
-  onFinishExtension
+  onFinishExtension,
 }: Props) {
+  const [internalStep, setInternalStep] = useState<"input" | "result">("input")
+  const [promptText, setPromptText] = useState("")
+  const [hiddenContext, setHiddenContext] = useState("")
+  const [cleanCode, setCleanCode] = useState("")
 
-    const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
-    const [promptText, setPromptText] = useState("");
-    const [hiddenContext, setHiddenContext] = useState("");
-    const [responseText, setResponseText] = useState("");
-    const [cleanCode, setCleanCode] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+  // Parse and inject domain into the prompt template
+  useEffect(() => {
+    if (!extensionPromptMarkdown || !domainName) return
+    const { visibleText, hiddenContext: parsed } = parseMasterPrompt(extensionPromptMarkdown)
+    setPromptText(visibleText.replaceAll("{{DOMAIN}}", domainName))
+    setHiddenContext(parsed)
+  }, [context, domainName])
 
-    useEffect(() => {
-        if (extensionPromptMarkdown && domainName) {
-            const { visibleText, hiddenContext } = parseMasterPrompt(extensionPromptMarkdown);
-            const finalVisible = visibleText.replaceAll("{{DOMAIN}}", domainName);
-            setPromptText(finalVisible);    
-            setHiddenContext(hiddenContext);
-        }
-    }, [context, domainName]);
+  const { responseText, isLoading, generate, setResponseText } = useGeminiGeneration({
+    logExerciseName: "diagram_uml_functional_extension",
+    buildLogPayload: (result) => ({
+      domain: domainName,
+      hiddenContext,
+      statementContext: context,
+      visiblePrompt: promptText,
+      response: result,
+    }),
+  })
 
-    const handleGenerate = async () => {
-        setIsLoading(true);
-        setResponseText("");
-        setCleanCode("");
-        try {
-            const finalPayload = `
-            CONTEXTO Y RECURSOS (Información interna):
-            ${hiddenContext}
+  const handleGenerate = async () => {
+    const payload = `
+      CONTEXTO Y RECURSOS (Información interna):
+      ${hiddenContext}
 
-            ENUNCIADO / EXTENSIÓN FUNCIONAL (Sobre lo que tienes que hacer el diagrama):
-            ${context}
+      ENUNCIADO / EXTENSIÓN FUNCIONAL (Sobre lo que tienes que hacer el diagrama):
+      ${context}
 
-            INSTRUCCIONES PRINCIPALES:
-            ${promptText}
-        `;
-            const result = await sendToGemini(finalPayload);
-            const cleanResult = cleanMermaidCode(result);
+      INSTRUCCIONES PRINCIPALES:
+      ${promptText}
+    `
+    const result = await generate(payload)
+    if (result) {
+      const clean = cleanMermaidCode(result)
+      setCleanCode(clean)
+      setResponseText(clean)
+      setInternalStep("result")
+    }
+  }
 
-            setResponseText(cleanResult);
-            setCleanCode(cleanResult);
-            setInternalStep('result');
+  const breadcrumbItems = [
+    { label: "INICIO", action: onWelcome },
+    { label: "CREAR EXAMEN", action: onCreateExam },
+    { label: "POR PARTES", action: onCreateExamByParts },
+    { label: "EXTENSIÓN FUNCIONAL", action: onFunctionalExtension },
+    { label: domainName.toUpperCase(), action: onStatementStep1 },
+  ]
 
-            try {
-                await fetch("http://localhost:3001/save-log", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        exercise: "diagram_uml_functional_extension",
-                        domain: domainName,
-                        hiddenContext,
-                        statementContext: context,
-                        visiblePrompt: promptText,
-                        response: cleanResult
-                    })
-                });
-                console.log("Log enviado al servidor local correctamente.");
-            } catch {
-                console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
-            }
-
-        } catch (error) {
-            console.error(error);
-            alert("Error al generar.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleCombinationExtension = (context: string, responseText: string) => {
-        onFinishExtension(context.trim(), responseText.trim());
-    };
-
-    const breadcrumbItems = [
-        { label: 'INICIO', action: onWelcome },
-        { label: 'CREAR EXAMEN', action: onCreateExam },
-        { label: 'POR PARTES', action: onCreateExamByParts },
-        { label: 'EXTENSIÓN FUNCIONAL', action: onFunctionalExtension },
-        { label: domainName.toUpperCase(), action: onStatementStep1 },
-    ];
-
-    const currentTitle = "DIAGRAMA UML";
-    
   return (
     <div className="exam-app">
-        <Header 
-            onWelcome={onWelcome} 
-            breadcrumbItems={breadcrumbItems} 
-            currentStep={currentTitle} 
-        />
+      <Header
+        onWelcome={onWelcome}
+        breadcrumbItems={breadcrumbItems}
+        currentStep="DIAGRAMA UML"
+      />
 
-        <main className="main-content"> 
-            <div className="wf-layout-container">
-                <div className="stepper-container">
-                    <div className={`step-wrapper step-completed`}>
-                        <div className="step-circle">1</div>
-                        <span className="step-label">Texto de enunciado</span>
+      <main className="main-content">
+        <div className="wf-layout-container">
+
+          {/* Step 2 is always the active one on this screen */}
+          <StepperHeader steps={STEPS} currentStep={2} />
+
+          <div className="wf-wide-wrapper">
+
+            {/* ── Input ───────────────────────────────────────────────────── */}
+            {internalStep === "input" && (
+              <PromptEditor
+                title={`${domainName.toUpperCase()}: Diagrama UML`}
+                description={
+                  <>
+                    Este es el prompt que se usará para generar el diagrama UML (en código mermaid
+                    y en visualización gráfica), puede revisar o modificar cualquier información
+                    que vea conveniente. Al terminar, pulse en{" "}
+                    <strong>"Generar Diagrama UML"</strong>.
+                  </>
+                }
+                promptText={promptText}
+                isLoading={isLoading}
+                generateLabel="Generar Diagrama UML"
+                onPromptChange={setPromptText}
+                onGenerate={handleGenerate}
+                onBack={onBack}
+              />
+            )}
+
+            {/* ── Result: three-column layout unique to this screen ───────── */}
+            {internalStep === "result" && (
+              <>
+                <div className="wf-diagram-split-view">
+
+                  {/* Col 1 – Editable prompt */}
+                  <div className="wf-column-three">
+                    <span className="wf-column-title">Prompt de Generación del Diagrama UML</span>
+                    <div className="wf-instruction-text">
+                      <textarea
+                        className="wf-textarea-input"
+                        value={promptText}
+                        onChange={(e) => setPromptText(e.target.value)}
+                      />
+                      <button
+                        onClick={handleGenerate}
+                        className="btn-step primary"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                      </button>
                     </div>
-                    <div className="step-line" style={{ background: '#4CAF50' }}></div>
-                    <div className={`step-wrapper step-active`}>
-                        <div className="step-circle">2</div>
-                        <span className="step-label">Diagrama UML</span>
+                  </div>
+
+                  {/* Col 2 – Statement text + rendered Mermaid diagram */}
+                  <div className="wf-column-three">
+                    <span className="wf-column-title">Extensión Funcional con Diagrama UML</span>
+                    <div className="wf-diagram-viewer-inner">
+                      <div className="wf-diagram-enunciado">{context}</div>
+                      <div className="wf-diagram-area">
+                        {cleanCode
+                          ? <MermaidViewer chartCode={cleanCode} />
+                          : <div>Renderizando...</div>
+                        }
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Col 3 – Raw Mermaid code */}
+                  <div className="wf-column-three">
+                    <span className="wf-column-title">Código Mermaid</span>
+                    <div className="wf-diagram-code-inner">
+                      <pre><code>{responseText || "// Esperando..."}</code></pre>
+                    </div>
+                  </div>
+
                 </div>
 
-                <div className="wf-wide-wrapper">
-                    {internalStep === 'input' && (
-                        // BUG CORREGIDO 1: Había dos <div className="content-card"> anidados
-                        // y el exterior nunca se cerraba. Se elimina el duplicado.
-                        <div className="content-card">
-                            <h2 className="main-title small">{domainName.toUpperCase()}: Diagrama UML</h2>
-                            <p className="wf-instruction-text">
-                                Este es el prompt que se usará para generar el diagrama UML (en código mermaid y en visualización gráfica), puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar Diagrama UML"</strong>.
-                            </p>
-                            {/* BUG CORREGIDO 2: El textarea tenía className y value duplicados.
-                                Se eliminan los atributos repetidos. */}
-                            <textarea 
-                                className="wf-textarea-input" 
-                                value={promptText}
-                                onChange={(e) => setPromptText(e.target.value)}
-                            />
-                            
-                            <div className="wf-actions-row">
-                                <button onClick={onBack} className="btn-back">Volver</button>
-                                <button onClick={handleGenerate} className="btn-step primary">
-                                    {isLoading ? <div className="loading-spinner"></div> : 'Generar Diagrama UML'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {internalStep === 'result' && (
-                        <div className="wf-diagram-split-view">
-
-                            <div className="wf-column-three">
-                                <span className="wf-column-title">Prompt de Generación del Diagrama UML</span>
-                                <div className="wf-instruction-text">
-                                    <textarea
-                                        className="wf-textarea-input"
-                                        value={promptText}
-                                        onChange={(e) => setPromptText(e.target.value)}
-                                    />
-                                    <button onClick={handleGenerate} className="btn-step secondary">
-                                        {isLoading ? <div className="loading-spinner"></div> : 'Volver a generar'}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="wf-column-three">
-                                <span className="wf-column-title">Extensión Funcional con Diagrama UML</span>
-                                <div className="wf-diagram-viewer-inner">
-                                    <div className="wf-diagram-enunciado">
-                                        {context}
-                                    </div>
-                                    <div className="wf-diagram-area">
-                                        {cleanCode ? (
-                                            <MermaidViewer chartCode={cleanCode} />
-                                        ) : (
-                                            <div style={{ fontSize: '13px', color: '#aaa', marginTop: '20px' }}>Renderizando...</div>
-                                        )}
-                                    </div>
-                                    <button
-                                        className="btn-step primary"
-                                        onClick={() => handleCombinationExtension(context, responseText)}
-                                    >
-                                        Confirmar Diagrama UML
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="wf-column-three">
-                                <span className="wf-column-title">Código Mermaid</span>
-                                <div className="wf-diagram-code-inner">
-                                    <pre><code>{responseText || "// Esperando..."}</code></pre>
-                                </div>
-                            </div>
-
-                        </div>
-                    )}
-                </div>
-            </div>
-        </main>
+                <button
+                  className="btn-step primary"
+                  onClick={() => onFinishExtension(context.trim(), responseText.trim())}
+                >
+                  Confirmar Diagrama UML
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   )
 }

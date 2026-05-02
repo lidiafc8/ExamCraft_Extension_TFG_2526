@@ -1,7 +1,7 @@
 import React from "react"
 import generationExamBaseClassesPrompt from "bundle-text:../../prompts/generation-exam-repository/exam/generation_exam_base_classes.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
-import WorkflowScreen from "../../components/WorkflowScreen"
+import WorkflowScreen from "../../components/WorkflowComponents"
 
 interface Props {
   readonly initialProject?: any; 

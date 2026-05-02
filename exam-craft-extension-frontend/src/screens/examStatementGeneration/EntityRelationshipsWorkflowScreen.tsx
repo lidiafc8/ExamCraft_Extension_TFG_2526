@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import entityRelationshipsPromptMarkdown from "bundle-text:../../prompts/generation-entity-relationships/generation_relationships_between_entities_from_statement.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
-import WorkflowScreen from "../../components/WorkflowScreen"
+import WorkflowScreen from "../../components/WorkflowComponents"
 
 interface Props {
   readonly onBack: () => void

@@ -1,7 +1,7 @@
 import React from "react"
 import generationCodeSolutionPrompt from "bundle-text:../../prompts/generation-exam-repository/solution/generation_code_solution.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
-import WorkflowScreen from "../../components/WorkflowScreen"
+import WorkflowScreen from "../../components/WorkflowComponents"
 
 interface Props {
   readonly onBack: () => void
