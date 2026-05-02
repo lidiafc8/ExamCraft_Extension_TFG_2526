@@ -9,10 +9,15 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 2. [Generación de Diagrama UML de la Extensión Funcional](#prompt-2-)  
 3. [Generación de Ejercicio "Restricciones de Atributos"](#prompt-3-)  
 4. [Generación de Ejercicio "Relaciones entre Entidades"](#prompt-4-)  
-5. [Generación de Examen Completo](#prompt-5-)  
-6. [Generación de Clases Base del Examen](#prompt-6-)  
-7. [Generación de Tests del Examen](#prompt-7-)
-8. [Generación de Código Solución para el Ejercicio Restricciones de Atributos](#prompt-8-)
+
+5. [Generación de Clases Base del Examen](#prompt-5-)  
+
+6. [Generación de Tests para Restricciones de Atributos](#prompt-6-)
+7. [Generación de Tests para Relaciones entre Entidades](#prompt-7-)
+
+8. [Generación de Código Solución para Examen](#prompt-8-)
+
+9. [Generación de Examen Completo](#prompt-9-)  
 
 
 ## PROMPTS
@@ -34,7 +39,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     # PROMPT COMPLETO PARA LA GENERACIÓN DE EXTENSIÓN FUNCIONAL (ENUNCIADO)
 
     ## Recursos a proporcionar:
-    * `functional_extension_examples.md`
+    * `functional_extension_examples_previous_exams.md`
 
     ## Prompt a utilizar:
 
@@ -90,6 +95,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     *	Devuélveme directamente el enunciado resultado como si fuera el del examen, sin comentarios entre medio ni indicaciones concretas generadas por ti.
 
     *	Debido a la ausencia de clases azules, omite en tu respuesta cualquier información acerca de ellas en el enunciado generado, aunque en los enunciados de ejemplos si venga.
+
     
     ```
 
@@ -110,7 +116,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     # PROMPT PARA LA GENERACIÓN DE EXTENSIÓN FUNCIONAL (DIAGRAMA UML) - ENTIDADES, ATRIBUTOS, RELACIONES
 
     ## Recursos a proporcionar:
-    * `functional_extension_examples.md`
+    * `functional_extension_examples_previous_exams.md`
 
     ## Prompt a utilizar:
 
@@ -118,18 +124,54 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
     Quiero que en base a la lógica de la extensión funcional que me has pasado, me generes un diagrama UML en código Mermaid similar al de los ejemplos que te he pasado en el documento md “functional_extension_examples”. Ten en cuenta estos requisitos:
 
-    -	Recuerda todo el contexto dado en la anterior petición.
+    -  Recuerda todo el contexto dado en la anterior petición.
 
-    -	De los enunciados de ejemplo, céntrate en la estructura del código Mermaid de los del proyecto {{DOMAIN}}
+    -  De los enunciados de ejemplo, céntrate en la estructura del código Mermaid de los del proyecto {{DOMAIN}}
 
+        - IMPORTANTE: Ignora si los ejemplos están compactados; tú debes aplicar siempre las reglas de saltos de línea estrictas mencionadas abajo.
         - De ellos, mantendrás la estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), de las clases base, es decir, las de color negro.
 
-    -	Para las nuevas clases a implementar por el alumno, es decir, clases rojas, añadirás toda su estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), acorde a la extensión funcional generada.
+    -  Para las nuevas clases a implementar por el alumno, es decir, clases rojas, añadirás toda su estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), acorde a la extensión funcional generada.
 
-    -	Para las relaciones, si estas tienen un nombre asignado, este debe constar en el diagrama.
+    -  Para las relaciones, si estas tienen un nombre asignado, este debe constar en el diagrama.
 
     -    REGLA ESTRICTA DE FORMATO: Genera código Mermaid válido y estándar. Bajo ninguna circunstancia utilices comandos de estilo (como style, classDef o linkStyle). Limítate exclusivamente a definir las clases, sus atributos, métodos y las relaciones entre ellas. Separa cada instrucción con un salto de línea.
-    
+
+    REGLAS ESTRICTAS DE SINTAXIS MERMAID (obligatorio cumplir todas):
+
+    1. Usa SIEMPRE `-->` para asociaciones. NUNCA escribas `--` con `>` separado al final.
+    - CORRECTO: `Owner "1" --> "0..n" Pet : owns`
+    - INCORRECTO: `Owner "1" -- "0..n" Pet : owns >`
+
+    2. NUNCA uses comillas escapadas. Las comillas de multiplicidad van sin barra invertida.
+    - CORRECTO: `Owner "1" --> "0..n" Pet : owns`
+    - INCORRECTO: `Owner \"1\" --> \"0..n\" Pet : owns`
+
+    3. NUNCA uses `style`, `classDef` ni `linkStyle`.
+
+    4. NUNCA pongas texto introductorio ni explicaciones antes o después del código.
+    El resultado debe empezar DIRECTAMENTE con `classDiagram` y nada más.
+
+    5. Cada clase, atributo y relación en su propia línea. Sin líneas vacías dentro de una clase.
+
+    6. Formato exacto de relaciones:
+    - Herencia:    `NamedEntity <|-- Pet`
+    - Asociación:  `Owner "1" --> "0..n" Pet : owns`
+    - Sin nombre:  `Visit "0..n" --> "1" Vet`
+
+    7. ESTRUCTURA DE LLAVES OBLIGATORIA: Incluso si una clase no tiene atributos, NO uses el formato compacto `{}`. Usa siempre saltos de línea.
+    - CORRECTO:
+        class Vet {
+        }
+    - INCORRECTO: class Vet {}
+
+    8. PROHIBIDO PEGAR CLASES: Está TERMINANTEMENTE PROHIBIDO pegar el cierre de una clase `}` con el inicio de otra `class` en la misma línea. Siempre debe haber un salto de línea real después de cada `}`.
+    - CORRECTO:
+        }
+        class Owner {
+    - INCORRECTO: }class Owner {
+
+    9. ESPACIADO DE RELACIONES: Añade una línea en blanco entre la última clase definida y la primera relación (flecha) para asegurar la correcta lectura del parser.
     ```
 
 ### Prompt 3 📝
@@ -249,6 +291,8 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
     -	Lo que vamos a proporcionar al alumno es un proyecto real que tendrá que manipular, por lo que los atributos de las nuevas clases tendrán anotaciones @Transient, que deberán eliminarse en este ejercicio. Esto se debe indicar explícitamente en este ejercicio.
 
+    -   Deberás indicar las relaciones a implementar de las entidades ROJAS, es decir, de las entidades que se han añadido a la nueva funcionalidad y que el alumno deberá implementar, evitando dejar ninguna relación atrás. Puedes apoyarte en el apartado del código Mermaid donde se definen todas ellas.
+
     -	Las explicaciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
 
     -	Se debe especificar la direccionalidad de las relaciones a implementar y las entidades implicadas en cada una de ellas.
@@ -266,10 +310,286 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
         *“Elimine las anotaciones @Transient de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior, (así como del atributo [atributo] de la clase [clase]). Se pide crear las siguientes relaciones entre las entidades:”*
 
         *“Además, se pide crear dos relaciones [direccionalidad] desde “[clase origen]” hacia “[clase destino]” que representen las que aparecen en el diagrama UML, tenga en cuenta la cardinalidad que tienen usando como nombre de los atributos “[nombre de atributo] ” y “[nombre de atributo]” en la clase “[clase]”. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, algunos atributos pueden ser nulos puesto que la cardinalidad es 0..n pero otros no, porque su cardinalidad en el extremo navegable de la relación es 1..n.”*
+
      ```
 
 
 ### Prompt 5 📝
+
+- **Título:**  Generación de Clases Base del Examen (*Generation of Exam Bases Classes*).
+
+- **Descripción:** Establece las pautas y reglas que el modelo LLM debe seguir para generar de manera correcta y ordenada el código Java de cada una de las clases base que se proporcionarán al alumno. Este código se utilizará para subirlo automáticamente al repositorio del examen desde el cual el alumno comenzará a implementar los ejercicios, creando así todas las clases necesarias. Por lo tanto, la generación de este código es de vital importancia.
+
+    Para ello, se proporciona al modelo la estructura específica que deben tener las entidades, servicios y repositorios correspondientes a las entidades que el alumno debe implementar o que no se encuentren ya en el repositorio plantilla del examen. Previamente, se entrega como contexto ejemplos de clases generadas en otros exámenes, a fin de guiar la correcta creación de las nuevas clases.
+
+- **Recursos Necesarios:** 
+    - Ejemplos de estructura de clases base de exámenes anteriores. 
+    - Dominio del proyecto elegido (Clínica Veterinaria o Ajedrez).
+    - Clases ya existentes en el repositorio plantilla correspondiente.
+
+- **Prompt:**  
+    ```text
+    # PROMPT PARA LA GENERACIÓN DE CLASES BASE A SUBIR AL REPOSITORIO EXAMEN
+
+    Actúa como un desarrollador Senior de Java y Spring Boot experto en la creación de esqueletos de código para exámenes universitarios. 
+
+    Tu tarea es analizar un diagrama UML y generar las clases base (Entidad, Repositorio y Servicio) únicamente para las entidades nuevas que el alumno debe desarrollar, siguiendo estrictamente una plantilla de estilo.
+
+    ### DATOS DE ENTRADA
+    - Dominio del proyecto: {dominio}
+    - Clases que YA EXISTEN en el repositorio (NO debes generarlas bajo ninguna circunstancia): {clases_existentes}
+    - Diagrama UML completo (formato Mermaid): {diagrama_uml}
+    - Ejemplos de estructura base esperada (plantillas): {ejemplos_base}
+
+    ### REGLAS DE GENERACIÓN (ESTRICTAS)
+    1. IDENTIFICACIÓN: Compara las entidades del "Diagrama UML" con las "Clases que YA EXISTEN". Genera código ÚNICAMENTE para las entidades del UML que estén AUSENTES en la lista de clases existentes.
+    2. ESTRUCTURA DE ARCHIVOS: Para cada entidad nueva identificada (ej. `Cita`), debes crear una carpeta con su nombre en minúsculas y dentro tres archivos:
+    - La entidad en sí (ej. `Cita.java`)
+    - El repositorio (ej. `CitaRepository.java`)
+    - El servicio (ej. `CitaService.java`)
+    3. FORMATO DE CÓDIGO: El código generado debe ser un esqueleto inicial para que el alumno lo complete. Debes imitar EXACTAMENTE la estructura, anotaciones JPA/Spring y nivel de detalle proporcionado en los "Ejemplos de estructura base esperada". EVITA añadir lógica de negocio adicional y resolver el examen.
+    4. CERO EXPLICACIONES: Devuelve ÚNICAMENTE el código fuente. EVITA hacer saludos, explicaciones de tus decisiones y comentarios finales.
+
+    ### FORMATO DE SALIDA OBLIGATORIO
+    Para que el sistema automatizado pueda procesar tu respuesta, debes devolver cada archivo utilizando exactamente este formato (fíjate en la ruta de la carpeta):
+
+    ### [nombrecarpeta]/[NombreClase].java
+    ```java
+    // Código Java aquí
+    ```
+
+
+### Prompt 6 📝
+
+- **Título:**  Generación de Tests para Restricciones de Atributos (*Generation of Attributes Constraints Tests*).
+
+- **Descripción:** Establece las pautas y reglas que el modelo LLM debe seguir para generar de manera correcta y ordenada el código Java de las clases de tests para el ejercicio de Restricciones de Atributos, encargadas de verificar automáticamente si el código implementado por el alumno, es decir, la respuesta al examen, es correcto.
+
+    Dado que se parte de un examen plantilla, la estructura de dichos tests debe ser estrictamente precisa para garantizar el correcto funcionamiento del sistema de evaluación automática. Previamente, al modelo se le proporciona el contexto completo del examen, con el fin de orientar adecuadamente la generación de los tests.
+
+- **Recursos Necesarios:** 
+    - Ejemplos de tests de Restricciones de Atributos y Relaciones entre Entidades de exámenes anteriores
+
+- **Prompt:**  
+    ```text
+    # PROMPT COMPLETO PARA GENERACIÓN DE TESTS DE RESTRICCIONES DE ATRIBUTOS
+
+    ## Recursos a proporcionar:
+    * `generation_test.md`
+
+    ## Prompt a utilizar:
+
+    Nuestra misión es generar, a partir de un enunciado dado, el test del ejercicio de un examen, tomando el rol de profesores para una asignatura llamada Diseño y Pruebas, para evaluar los conocimientos de los alumnos sobre mapeo objeto relacional en JPA, manejo de estas entidades y base de datos, entre otras más. Concretamente te pasaré el enunciado y el diagrama UML en código Mermaid que lo acompaña, elementos en los que te tendrás que basar para proporcionarme la solución, pero antes, te daré información de contexto que necesitarás como recurso y entender mejor qué características tiene este examen:
+
+    -	Hay que tomar el rol de profesor siempre, estamos generando un examen, hay que ponerse en los zapatos del profesorado.
+    -	Tenemos dos tipos de exámenes, uno enfocado a una clínica veterinaria y otro al juego del ajedrez.
+    -	Respecto al diagrama UML:
+
+        - 	Concepto de colores de clases:  
+            - **Clases negras**: El núcleo del sistema. Clases estables que se usan como contexto, pero que quedan fuera de la tarea de implementación. 
+            - **Clases rojas**: La tarea principal del alumno, se deben crear desde 0. Las clases vienen creadas pero su contenido está vacío.
+
+            - Las clases negras son la base de la que partimos siempre en todos los exámenes, el dominio común a todos los exámenes dependiendo de qué tipo (clínica o ajedrez) de examen estemos generando y las rojas, pueden variar según la extensión funcional que se le añada.
+
+        -	Relaciones, cardinalidad y direccionalidad:
+
+            - Relaciones rojas entre clases rojas: el alumno deberá añadir el atributo con su anotación de relación correspondiente. 
+
+            - Tendremos relaciones únicamente unidireccionales.
+
+            - La cardinalidad podrá ser de 1..1, 1, 0..1, 0..n, 1..n. Las relaciones muchos a muchos se omitirán en todos los casos.
+
+    -	Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
+
+    Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica de los tests que te paso en el archivo md “generation_test”, donde vienen tests de ejemplos que se han realizado para otros enunciado de examenes, quiero que me generes los tests de los distintos ejercicios del examen.
+
+    Deberá cumplir estos requisitos:
+
+    -	Para generar los tests de los ejercicios es necesario usar lenguaje y framework: Java 17+, JUnit 5, Spring Boot (@DataJpaTest). 
+
+    -	Los tests tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
+
+    -	La clase DEBE extender de la clase base ReflexiveTest proporcionada por la asignatura..
+
+
+    ### Para el ejercicio Test1 :
+
+    Requisitos que debe de cumplir:
+
+    - Inyecta el Repositorio de la nueva entidad y el EntityManager usando @Autowired.
+    - Crea el método test1RepositoriesExist(), anótalo con @Test y verifica que el repositorio siempre tiene que tener un valor, nunca null (assertNotNull).
+    - Crea el método test1RepositoriesContainsMethod(). ESTRICTAMENTE PROHIBIDO anotarlo con @Test. Este método debe ser llamado internamente desde el final de test1RepositoriesExist() dentro de un bloque if (repositorio != null) para evitar un NullPointerException si la inyección falla.
+    - Crea el método @Test public void test1Check[NOMBRE_ENTIDAD]Constraints().
+    - Analiza el UML proporcionado. Identifica los campos obligatorios e invoca el método heredado checkThatFieldsAreMandatory(entidad, em, "campo1", "campo2", ...).
+    - Analiza las restricciones del UML (tamaños, mínimos, máximos, nulos). Construye un mapa con los casos negativos (valores frontera y particiones de equivalencia).
+    - ESTRICTAMENTE PROHIBIDO usar new HashMap<>() o .put(). Inicializa el mapa en una sola instrucción con Java moderno: Map<String, List<Object>> invalidValues = Map.of("campo1", List.of(...), "campo2", List.of(...));.
+    - Invoca el método heredado checkThatValuesAreNotValid(entidad, invalidValues, em).
+    - Crea el método @Test public void test1Check[NOMBRE_ENTIDAD]Annotations().
+    - Usa el método heredado classIsAnnotatedWith(Clase.class, Entity.class) para verificar @Entity.
+    - Si la entidad tiene algún atributo Enum, usa reflexión para verificar que tiene la anotación @Enumerated(EnumType.STRING).
+    - Crea un método public static [Entidad] createValid[NOMBRE_ENTIDAD](EntityManager em).
+    - Usa EXCLUSIVAMENTE el método heredado setValue(entidad, "atributo", Tipo.class, valor) para asignar datos válidos a todos los atributos de la entidad, evadiendo así fallos de compilación si el alumno se le ha olvidado crear los setters.
+    - Crea el método @Test public void test1Valid[NOMBRE_ENTIDAD]IsPersisted(). Obtén una instancia válida, guárdala con el repositorio y haz un .flush() dentro de un assertDoesNotThrow.
+
+    Por favor, bajo ninguna circustnacia generes nada de comentarios, solo los tests para copiar lo que me devuelvas directamente para ejecutarlo.
+
+    Tampoco pongas nada de ```java y ``` 
+
+    Genera el código completo de Test1.java aplicando estas reglas a la entidad principal descrita en el UML de este examen en particular.
+    ```
+
+### Prompt 7 📝
+
+- **Título:**  Generación de Tests para Relaciones entre Entidades (*Generation of Entity Relationships Tests*).
+
+- **Descripción:** Establece las pautas y reglas que el modelo LLM debe seguir para generar de manera correcta y ordenada el código Java de las clases de tests para el ejercicio de Relaciones entre Entidades, encargadas de verificar automáticamente si el código implementado por el alumno, es decir, la respuesta al examen, es correcto.
+
+    Dado que se parte de un examen plantilla, la estructura de dichos tests debe ser estrictamente precisa para garantizar el correcto funcionamiento del sistema de evaluación automática. Previamente, al modelo se le proporciona el contexto completo del examen, con el fin de orientar adecuadamente la generación de los tests.
+
+- **Recursos Necesarios:** 
+    - Ejemplos de tests de Restricciones de Atributos y Relaciones entre Entidades de exámenes anteriores
+
+- **Prompt:**  
+    ```text
+   # PROMPT COMPLETO PARA GENERACIÓN DE TESTS DE RELACIONES ENTRE ENTIDADES
+
+    ## Recursos a proporcionar:
+    * `test_previous_exams.md`
+
+    ## Prompt a utilizar
+    Nuestra misión es generar el test de un examen de la asignatura "Diseño y Pruebas". Actuamos como profesores evaluando conocimientos de JPA y mapeo objeto-relacional. Te proporcionaré el enunciado, el diagrama UML en Mermaid y, **CRÍTICAMENTE, el Código Base de las clases ya generadas**.
+
+    Por favor, no uses Wildcard Imports (asteriscos). Genera todos los imports de forma explícita, uno por cada clase utilizada. IMPORTANTE CENTRARSE EN LAS CLASES QUE SE PROPORCIONA COMO CÓDIGO BASE, DE SU LOCALIZACIÓN PARA PODER PONER CORRECTAMENTE LOS IMPORTS DE DONDE SE SACAN LAS CLASES.
+
+    ---
+
+    ## REGLA ABSOLUTA — PAQUETES: LEE EL CÓDIGO BASE, EVITA INVENTAR COSAS
+
+    Esta es la regla más importante del prompt. Debes seguirla antes que cualquier otra cosa.
+    Además, para las clases que no estén implementadas en el código base, buscarla en el repositorio pasado, como Pet, viene de pet.Pet
+
+    **Procedimiento obligatorio antes de escribir un solo import:**
+
+    1. Localiza la sección `=== PAQUETES DE LA PLANTILLA DEL PROYECTO ===` del contexto.
+    2. Para cada clase que necesites importar, busca su `package` en el código base proporcionado.
+    3. Construye el import como: `import <package_de_esa_clase>.<NombreClase>;`
+    - Pero ten en cuenta en poner los nombres de las clases nueva generadas, no es siempre Achievement; sino q coja las clases del contexto que se le pase de la extensión funcional.
+
+    **Ejemplo concreto:**
+    - Si el código base de `Achievement.java` empieza con `package es.us.dp1.chess.tournament.achievement;`
+    - El import correcto en el test es: `import es.us.dp1.chess.tournament.achievement.Achievement;`
+    - Teniendo en cuenta las mayúsculas y minúsculas de las clases para evitar el error en los tests
+    - NUNCA: `import org.springframework.samples.chessgame.model.Achievement;`
+    - NUNCA: `import org.springframework.samples.petClinic.model.Achievement;`
+
+    **Aplica lo mismo para `@ComponentScan`:**
+    - CORRECTO: `@ComponentScan(basePackages = {"es.us.dp1.chess.tournament.achievement", "es.us.dp1.chess.tournament.userAchievement"})`
+    - INCORRECTO: `@ComponentScan(basePackages = {"org.springframework.samples.chessgame.repository", "org.springframework.samples.chessgame.model"})`
+
+    **El paquete del propio test (`package ...` en la primera línea) también debe derivarse del código base**, usando el prefijo de donde se crean los test. Ejemplo: si el prefijo raíz es `es.us.dp1.chess.tournament`, el paquete del test será `es.us.dp1.chess.tournament`.
+
+    Si una clase (como `ReflexiveTest`, `NamedEntity`, etc.) no aparece en el código base proporcionado, usa el mismo prefijo raíz detectado para inferir su paquete. Nunca uses `org.springframework.samples.*` salvo que ese prefijo aparezca explícitamente en el código base.
+
+    Tienes que tener en cuenta como los métodos se llaman en ReflexiveTest
+
+    ---
+
+    ## Reglas de Coherencia Adicionales
+    2.  **Fidelidad al Código Base:** Si una clase en el código base tiene un atributo o relación con un nombre específico (ej. `checkInDate`), el test debe usar ese nombre exacto, ignorando lo que diga cualquier otro ejemplo externo.
+    3.  **Manejo de Relaciones:** Si en el Código Base una relación está marcada como `@Transient`, el test debe tratarla según las instrucciones del enunciado, pero siempre importando la clase desde su paquete real.
+
+    ---
+
+    ## Especificaciones del Examen
+    - **Clases Negras:** Núcleo estable (Contexto). No se testea su implementación interna, pero se usan para crear objetos válidos (ej. `Owner`, `Pet`).
+    - **Clases Rojas:** Tarea principal del alumno. Son las que debemos testear exhaustivamente (Restricciones, Anotaciones y Persistencia).
+    - **Límite:** Máximo 2 entidades rojas por examen.
+    - **Framework:** Java 17+, JUnit 5, Spring Boot (@DataJpaTest).
+    - **Herencia:** La clase de test DEBE extender de `ReflexiveTest`.
+
+    ---
+
+
+    ## Estructura Estricta Requerida para la Test2.java
+
+    Debes generar una clase de pruebas que siga EXACTAMENTE el patrón de diseño proporcionado, siguiendo los ejemplos proporcionados en el archivo markdown "test_previous_exams" anotados como **Test 2: Relaciones entre las entidades**. La clase evaluará lo necesario apoyándose en los métodos de la clase padre `ReflexiveTest`.
+
+    ### 1. Configuración de la Clase e Inyección de Dependencias
+    - **Clase y Herencia:** La clase debe ser pública, estar anotada obligatoriamente con `@DataJpaTest()` y heredar de `ReflexiveTest`.
+    - **Inyección:** Inyecta EXCLUSIVAMENTE el `EntityManager` utilizando `@Autowired(required = false)`. No inyectes repositorios a menos que la creación de la entidad base lo requiera de forma crítica.
+
+    ### 2. Verificación de Anotaciones (Relaciones JPA)
+    - **Nomenclatura del Método:** Crea un método llamado `test[Num][NombreEntidad]Annotations()` por cada entidad a evaluar (ej. `test2TreatmentAnnotations()`). Debe ser `public void` y llevar la anotación `@Test`.
+    - **Implementación (Estricta):** Dentro del método, usa ÚNICAMENTE el método heredado `checkThatFieldIsAnnotatedWith` para comprobar relaciones. 
+    - **Formato exacto:** `checkThatFieldIsAnnotatedWith(Entidad.class, "nombreDelAtributo", TipoDeRelacion.class);` (Donde `TipoDeRelacion` será `ManyToMany.class`, `ManyToOne.class`, etc.).
+    - Agrupa todas las aserciones de una misma entidad en su método correspondiente.
+
+
+    ### 3. Verificación de Restricciones (Constraints y Obligatoriedad)
+    - **Nomenclatura del Método:** Crea un método llamado `test[Num][NombreEntidad]Constraints()` por cada relación a implementar (ej. `test2TreatmentConstraints()`). Es obligatorio que sea `public void` y lleve la anotación `@Test` (evita métodos privados o JUnit no los ejecutará).
+    - **Instanciación de la Entidad:** Para probar las restricciones, la primera línea del método debe instanciar una entidad válida llamando a la factoría de `Test1` pasándole el EntityManager. Formato exacto: `NombreEntidad e = Test1.createValid[NombreEntidad](em);`
+    - **Filtro de Atributos (¡IMPORTANTE!):** Genera aserciones ÚNICAMENTE para los atributos que implementan las relaciones exigidas en este ejercicio. Omite estrictamente cualquier aserción de obligatoriedad para atributos básicos (como ids, nombres, fechas, etc.) que no formen parte de la relación que se está evaluando.
+    - **Implementación (Estricta):** Tras instanciar la entidad, usa ÚNICAMENTE el método heredado `checkThatFieldsAreMandatory` para verificar la obligatoriedad de los atributos filtrados en el paso anterior.
+    - **Formato exacto:** checkThatFieldsAreMandatory(e, em, "nombreDelAtributoRelacion");
+
+
+    ### 4. Reglas Críticas de Sintaxis y Reflexión
+    - **Asignación de Valores (Si generas métodos auxiliares):** Si necesitas construir entidades de prueba localmente, usa EXCLUSIVAMENTE `setValue(objeto, "atributo", Tipo.class, valor)` proporcionado por `ReflexiveTest` para eludir la ausencia de métodos *setter* en el código base.
+    - **Evita aserciones estándar:** NO uses `assertNotNull`, `assertDoesNotThrow` ni pruebes repositorios con `.save()` a menos que se te pida explícitamente. Cíñete a los métodos de aserción de `ReflexiveTest` (`checkThatFieldIsAnnotatedWith` y `checkThatFieldsAreMandatory`).
+    - **Separación de responsabilidades**: Mantén estrictamente separados los métodos que comprueban anotaciones de los métodos que comprueban restricciones de validación.
+    - **Limpieza**: Omite comentarios innecesarios, importaciones no utilizadas y explicaciones adicionales. Devuelve únicamente el código Java solicitado.
+
+    ---
+
+    ## Restricciones de Salida (Formato)
+    - **PROHIBIDO** generar comentarios explicativos.
+    - **PROHIBIDO** envolver el código en bloques de código markdown (sin \`\`\`java).
+    - **PROHIBIDO** incluir texto antes o después del código.
+    - Entrega el código listo para ser copiado y pegado en un archivo `.java`.
+    ```
+
+
+### Prompt 8 📝
+
+- **Título:**  Generación de Código Solución para Examen (*Generation of Solution Code for Exam*).
+
+- **Descripción:** Establece las pautas y reglas que el modelo LLM debe seguir para generar de manera correcta y estructurada la solución en código correspondiente a todas los ejercicios generados para un examen concreto. En este contexto, el modelo deberá partir del código base previamente generado en el [prompt 5](#prompt-5-) y aplicar las modificaciones necesarias para implementar la solución completa de los ejercicios, conforme a los requisitos del examen. Dicha solución representa la respuesta oficial del profesor, la cual se pretende automatizar dentro del sistema, garantizando coherencia, precisión y adecuación a las especificaciones planteadas.
+
+- **Recursos Necesarios:** 
+    - Enunciado del ejercicio "Restricciones de Atributos" y código de los tests que validan dicho ejercicio.
+    - Enunciado del ejercicio "Relaciones entre Entidades" y código de los tests que validan dicho ejercicio.
+    - Código base del examen concreto generado en la extensión previamente.
+
+- **Prompt:**  
+    ```text
+   # PROMPT PARA LA GENERACIÓN DE CÓDIGO SOLUCIÓN COMPLETA (RESTRICCIONES Y RELACIONES)
+
+    Actúa como un desarrollador Senior de Java y Spring Boot experto en la resolución de ejercicios universitarios. 
+
+    Tu tarea es tomar un código base (esqueletos de clases) y completarlo aplicando estrictamente tanto las **Restricciones de Atributos** como las **Relaciones entre Entidades** definidas en los enunciados proporcionados. Además, tu implementación debe garantizar que pase con éxito todos los tests de validación proporcionados para ambas partes.
+
+    ### DATOS DE ENTRADA
+    - Enunciado de Restricciones de Atributos: {enunciado_restricciones}
+    - Tests de Restricciones de Atributos: {codigo_tests_restricciones}
+    - Enunciado de Relaciones entre Entidades: {enunciado_relaciones}
+    - Tests de Relaciones entre Entidades: {codigo_tests_relaciones}
+    - Código Base Actual: {codigo_base_localstorage}
+
+    ### REGLAS DE GENERACIÓN (ESTRICTAS)
+    1. ANÁLISIS INTEGRAL: Lee detenidamente ambos enunciados y todos los tests. Aplica las validaciones de atributos (anotaciones de Jakarta/Hibernate Validation) y las relaciones entre entidades (mapeo ORM, cardinalidades, cascadas, fetch) según sea estrictamente necesario. Si algún enunciado indica que "No hay" datos, omite esa parte y céntrate en la otra.
+    2. MODIFICACIÓN MÍNIMA Y COHERENTE: Completa únicamente el código de las clases proporcionadas en el "Código Base Actual". Integra ambas soluciones (restricciones y relaciones) de forma armónica en las mismas clases. EVITA crear entidades, repositorios o servicios que no existan ya en el código base. Tu objetivo es *completar*, no reestructurar.
+    3. ALINEACIÓN CON LOS TESTS: Los tests proporcionados son la única fuente de la verdad. Si un test espera que se lance una excepción específica (ej. `ConstraintViolationException`), busca un nombre de campo o tabla concreto, o exige un comportamiento de eliminación en cascada, tu código debe coincidir exactamente con esa expectativa.
+    4. CERO EXPLICACIONES: Devuelve ÚNICAMENTE el código fuente modificado, en el mismo orden en el que recibes las clases base. EVITA hacer saludos, explicaciones de tus decisiones, comentarios finales o bloques de texto fuera del formato requerido.
+
+    ### FORMATO DE SALIDA OBLIGATORIO
+    Para que el sistema automatizado pueda procesar tu respuesta, debes devolver CADA ARCHIVO siguiendo este formato estricto. La ruta debe ser la ruta completa del sistema de archivos que corresponde a la clase (ej: src/main/java/com/example/model/Clase.java):
+
+    [RUTA_EXTRAIDA_DEL_CODIGO_BASE];
+    ```java
+    // Contenido completo de la clase con la solución completa aplicada
+    ```
+
+### Prompt 9 📝
 
 - **Título:**  Generación de Examen Completo (*Generation of Complete Exam*).
 
@@ -415,165 +735,3 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
         *“Además, se pide crear dos relaciones [direccionalidad] desde “[clase origen]” hacia “[clase destino]” que representen las que aparecen en el diagrama UML, tenga en cuenta la cardinalidad que tienen usando como nombre de los atributos “[nombre de atributo] ” y “[nombre de atributo]” en la clase “[clase]”. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, algunos atributos pueden ser nulos puesto que la cardinalidad es 0..n pero otros no, porque su cardinalidad en el extremo navegable de la relación es 1..n.”*
      ```
-
-
-### Prompt 6 📝
-
-- **Título:**  Generación de Clases Base del Examen (*Generation of Exam Bases Classes*).
-
-- **Descripción:** Establece las pautas y reglas que el modelo LLM debe seguir para generar de manera correcta y ordenada el código Java de cada una de las clases base que se proporcionarán al alumno. Este código se utilizará para subirlo automáticamente al repositorio del examen desde el cual el alumno comenzará a implementar los ejercicios, creando así todas las clases necesarias. Por lo tanto, la generación de este código es de vital importancia.
-
-    Para ello, se proporciona al modelo la estructura específica que deben tener las entidades, servicios y repositorios correspondientes a las entidades que el alumno debe implementar o que no se encuentren ya en el repositorio plantilla del examen. Previamente, se entrega como contexto ejemplos de clases generadas en otros exámenes, a fin de guiar la correcta creación de las nuevas clases.
-
-- **Recursos Necesarios:** 
-    - Ejemplos de estructura de clases base de exámenes anteriores. 
-    - Dominio del proyecto elegido (Clínica Veterinaria o Ajedrez).
-    - Clases ya existentes en el repositorio plantilla correspondiente.
-
-- **Prompt:**  
-    ```text
-    # PROMPT PARA LA GENERACIÓN DE CLASES BASE A SUBIR AL REPOSITORIO EXAMEN
-
-    Actúa como un desarrollador Senior de Java y Spring Boot experto en la creación de esqueletos de código para exámenes universitarios. 
-
-    Tu tarea es analizar un diagrama UML y generar las clases base (Entidad, Repositorio y Servicio) únicamente para las entidades nuevas que el alumno debe desarrollar, siguiendo estrictamente una plantilla de estilo.
-
-    ### DATOS DE ENTRADA
-    - Dominio del proyecto: {dominio}
-    - Clases que YA EXISTEN en el repositorio (NO debes generarlas bajo ninguna circunstancia): {clases_existentes}
-    - Diagrama UML completo (formato Mermaid): {diagrama_uml}
-    - Ejemplos de estructura base esperada (plantillas): {ejemplos_base}
-
-    ### REGLAS DE GENERACIÓN (ESTRICTAS)
-    1. IDENTIFICACIÓN: Compara las entidades del "Diagrama UML" con las "Clases que YA EXISTEN". Genera código ÚNICAMENTE para las entidades del UML que estén AUSENTES en la lista de clases existentes.
-    2. ESTRUCTURA DE ARCHIVOS: Para cada entidad nueva identificada (ej. `Cita`), debes crear una carpeta con su nombre en minúsculas y dentro tres archivos:
-    - La entidad en sí (ej. `Cita.java`)
-    - El repositorio (ej. `CitaRepository.java`)
-    - El servicio (ej. `CitaService.java`)
-    3. FORMATO DE CÓDIGO: El código generado debe ser un esqueleto inicial para que el alumno lo complete. Debes imitar EXACTAMENTE la estructura, anotaciones JPA/Spring y nivel de detalle proporcionado en los "Ejemplos de estructura base esperada". EVITA añadir lógica de negocio adicional y resolver el examen.
-    4. CERO EXPLICACIONES: Devuelve ÚNICAMENTE el código fuente. EVITA hacer saludos, explicaciones de tus decisiones y comentarios finales.
-
-    ### FORMATO DE SALIDA OBLIGATORIO
-    Para que el sistema automatizado pueda procesar tu respuesta, debes devolver cada archivo utilizando exactamente este formato (fíjate en la ruta de la carpeta):
-
-    ### [nombrecarpeta]/[NombreClase].java
-    ```java
-    // Código Java aquí
-    ```
-
-### Prompt 7 📝
-
-- **Título:**  Generación de Tests del Examen (*Generation of Exam Tests*).
-
-- **Descripción:** Establece las pautas y reglas que el modelo LLM debe seguir para generar de manera correcta y ordenada el código Java de las clases de tests, encargadas de verificar automáticamente si el código implementado por el alumno, es decir, la respuesta al examen, es correcto.
-
-    Dado que se parte de un examen plantilla, la estructura de dichos tests debe ser estrictamente precisa para garantizar el correcto funcionamiento del sistema de evaluación automática. Previamente, al modelo se le proporciona el contexto completo del examen, con el fin de orientar adecuadamente la generación de los tests.
-
-- **Recursos Necesarios:** 
-    - Ejemplos de tests de exámenes anteriores
-
-- **Prompt:**  
-    ```text
-   # PROMPT COMPLETO PARA GENERACIÓN DE TESTS DE LOS DISTITNOS EJERCICIOS
-
-    ## Recursos a proporcionar:
-    * `generation_test.md`
-
-    ## Prompt a utilizar:
-
-    Nuestra misión es generar, a partir de un enunciado dado, el test del ejercicio de un examen, tomando el rol de profesores para una asignatura llamada Diseño y Pruebas, para evaluar los conocimientos de los alumnos sobre mapeo objeto relacional en JPA, manejo de estas entidades y base de datos, entre otras más. Concretamente te pasaré el enunciado y el diagrama UML en código Mermaid que lo acompaña, elementos en los que te tendrás que basar para proporcionarme la solución, pero antes, te daré información de contexto que necesitarás como recurso y entender mejor qué características tiene este examen:
-
-    -	Hay que tomar el rol de profesor siempre, estamos generando un examen, hay que ponerse en los zapatos del profesorado.
-    -	Tenemos dos tipos de exámenes, uno enfocado a una clínica veterinaria y otro al juego del ajedrez.
-    -	Respecto al diagrama UML:
-
-        - 	Concepto de colores de clases:  
-            - **Clases negras**: El núcleo del sistema. Clases estables que se usan como contexto, pero que quedan fuera de la tarea de implementación. 
-            - **Clases rojas**: La tarea principal del alumno, se deben crear desde 0. Las clases vienen creadas pero su contenido está vacío.
-
-            - Las clases negras son la base de la que partimos siempre en todos los exámenes, el dominio común a todos los exámenes dependiendo de qué tipo (clínica o ajedrez) de examen estemos generando y las rojas, pueden variar según la extensión funcional que se le añada.
-
-        -	Relaciones, cardinalidad y direccionalidad:
-
-            - Relaciones rojas entre clases rojas: el alumno deberá añadir el atributo con su anotación de relación correspondiente. 
-
-            - Tendremos relaciones únicamente unidireccionales.
-
-            - La cardinalidad podrá ser de 1..1, 1, 0..1, 0..n, 1..n. Las relaciones muchos a muchos se omitirán en todos los casos.
-
-    -	Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
-
-    Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica de los tests que te paso en el archivo md “generation_test”, donde vienen tests de ejemplos que se han realizado para otros enunciado de examenes, quiero que me generes los tests de los distintos ejercicios del examen.
-
-    Deberá cumplir estos requisitos:
-
-    -	Para generar los tests de los ejercicios es necesario usar lenguaje y framework: Java 17+, JUnit 5, Spring Boot (@DataJpaTest). 
-
-    -	Los tests tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
-
-    -	La clase DEBE extender de la clase base ReflexiveTest proporcionada por la asignatura..
-
-
-    ### Para el ejercicio Test1 :
-
-    Requisitos que debe de cumplir:
-
-    - Inyecta el Repositorio de la nueva entidad y el EntityManager usando @Autowired.
-    - Crea el método test1RepositoriesExist(), anótalo con @Test y verifica que el repositorio siempre tiene que tener un valor, nunca null (assertNotNull).
-    - Crea el método test1RepositoriesContainsMethod(). ESTRICTAMENTE PROHIBIDO anotarlo con @Test. Este método debe ser llamado internamente desde el final de test1RepositoriesExist() dentro de un bloque if (repositorio != null) para evitar un NullPointerException si la inyección falla.
-    - Crea el método @Test public void test1Check[NOMBRE_ENTIDAD]Constraints().
-    - Analiza el UML proporcionado. Identifica los campos obligatorios e invoca el método heredado checkThatFieldsAreMandatory(entidad, em, "campo1", "campo2", ...).
-    - Analiza las restricciones del UML (tamaños, mínimos, máximos, nulos). Construye un mapa con los casos negativos (valores frontera y particiones de equivalencia).
-    - ESTRICTAMENTE PROHIBIDO usar new HashMap<>() o .put(). Inicializa el mapa en una sola instrucción con Java moderno: Map<String, List<Object>> invalidValues = Map.of("campo1", List.of(...), "campo2", List.of(...));.
-    - Invoca el método heredado checkThatValuesAreNotValid(entidad, invalidValues, em).
-    - Crea el método @Test public void test1Check[NOMBRE_ENTIDAD]Annotations().
-    - Usa el método heredado classIsAnnotatedWith(Clase.class, Entity.class) para verificar @Entity.
-    - Si la entidad tiene algún atributo Enum, usa reflexión para verificar que tiene la anotación @Enumerated(EnumType.STRING).
-    - Crea un método public static [Entidad] createValid[NOMBRE_ENTIDAD](EntityManager em).
-    - Usa EXCLUSIVAMENTE el método heredado setValue(entidad, "atributo", Tipo.class, valor) para asignar datos válidos a todos los atributos de la entidad, evadiendo así fallos de compilación si el alumno se le ha olvidado crear los setters.
-    - Crea el método @Test public void test1Valid[NOMBRE_ENTIDAD]IsPersisted(). Obtén una instancia válida, guárdala con el repositorio y haz un .flush() dentro de un assertDoesNotThrow.
-
-    Por favor, bajo ninguna circustnacia generes nada de comentarios, solo los tests para copiar lo que me devuelvas directamente para ejecutarlo.
-
-    Tampoco pongas nada de ```java y ``` 
-
-    Genera el código completo de Test1.java aplicando estas reglas a la entidad principal descrita en el UML de este examen en particular.
-    ```
-
-### Prompt 8 📝
-
-- **Título:**  Generación de Código Solución para el Ejercicio Restricciones de Atributos (*Generation of Solution Code for Attribute Constraints Exercise*).
-
-- **Descripción:** Establece las pautas y reglas que el modelo LLM debe seguir para generar de manera correcta y estructurada la solución en código correspondiente al ejercicio de restricción de atributos. En este contexto, el modelo deberá partir del código base previamente generado en el [prompt 6](#prompt-6-) y aplicar las modificaciones necesarias para implementar la solución completa del ejercicio, conforme a los requisitos del examen. Dicha solución representa la respuesta oficial del profesor, la cual se pretende automatizar dentro del sistema, garantizando coherencia, precisión y adecuación a las especificaciones planteadas.
-
-- **Recursos Necesarios:** 
-    - Enunciado del ejercicio "Restricciones de Atributos".
-    - Código de los tests que validan dicho ejercicio.
-    - Código base del examen concreto generado en la extensión previamente.
-
-- **Prompt:**  
-    ```text
-   # PROMPT PARA LA GENERACIÓN DE CÓDIGO SOLUCIÓN DEL EJERCICIO "RESTRICCIONES DE ATRIBUTOS"
-
-    Actúa como un desarrollador Senior de Java y Spring Boot experto en la resolución de ejercicios universitarios. 
-
-    Tu tarea es tomar un código base (esqueletos de clases) y completarlo aplicando estrictamente las restricciones de atributos definidas en el enunciado del ejercicio. Además, tu implementación debe garantizar que pase con éxito todos los tests de validación proporcionados.
-
-    ### DATOS DE ENTRADA
-    - Enunciado de Restricciones (Attribute Constraints): {enunciado_restricciones}
-    - Tests de Validación (JUnit): {codigo_tests}
-    - Código Base Actual: {codigo_base_localstorage}
-
-    ### REGLAS DE GENERACIÓN (ESTRICTAS)
-    1. ANÁLISIS DE RESTRICCIONES: Lee detenidamente el enunciado y los tests. Aplica las validaciones de Jakarta/Javax Validation (ej. `@NotNull`, `@Min`, `@Max`, `@Size`, `@Pattern`, etc.), anotaciones JPA (`@Column(unique=true, nullable=false)`) o lógica en los setters/métodos según sea estrictamente necesario para cumplir con el enunciado y hacer que los tests pasen.
-    2. MODIFICACIÓN MÍNIMA: Completa únicamente el código de las clases proporcionadas en el "Código Base Actual". EVITA crear entidades, repositorios o servicios que no existan ya en el código base. Tu objetivo es *completar*, no reestructurar.
-    3. ALINEACIÓN CON LOS TESTS: Los tests proporcionados son la fuente de la verdad. Si un test espera que se lance una excepción específica (ej. `ConstraintViolationException`) o busca un nombre de campo concreto, tu código debe coincidir exactamente con esa expectativa.
-    4. CERO EXPLICACIONES: Devuelve ÚNICAMENTE el código fuente modificado, en el mismo orden en el que recibes las clases base. EVITA hacer saludos, explicaciones de tus decisiones, comentarios finales o bloques de texto fuera del formato requerido.
-
-    ### FORMATO DE SALIDA OBLIGATORIO
-    Para que el sistema automatizado pueda procesar tu respuesta, debes devolver CADA ARCHIVO siguiendo este formato estricto. La ruta debe ser la ruta completa del sistema de archivos que corresponde a la clase (ej: src/main/java/com/example/model/Clase.java):
-
-    [RUTA_EXTRAIDA_DEL_CODIGO_BASE];
-    ```java
-    // Contenido completo de la clase con la solución aplicada
-    ```
