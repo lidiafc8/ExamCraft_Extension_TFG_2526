@@ -38,7 +38,6 @@ export default function DiagramUMLScreen({
   const [hiddenContext, setHiddenContext] = useState("")
   const [cleanCode, setCleanCode] = useState("")
 
-  // Parse and inject domain into the prompt template
   useEffect(() => {
     if (!extensionPromptMarkdown || !domainName) return
     const { visibleText, hiddenContext: parsed } = parseMasterPrompt(extensionPromptMarkdown)
@@ -96,12 +95,10 @@ export default function DiagramUMLScreen({
       <main className="main-content">
         <div className="wf-layout-container">
 
-          {/* Step 2 is always the active one on this screen */}
           <StepperHeader steps={STEPS} currentStep={2} />
 
           <div className="wf-wide-wrapper">
 
-            {/* ── Input ───────────────────────────────────────────────────── */}
             {internalStep === "input" && (
               <PromptEditor
                 title={`${domainName.toUpperCase()}: Diagrama UML`}
@@ -122,12 +119,10 @@ export default function DiagramUMLScreen({
               />
             )}
 
-            {/* ── Result: three-column layout unique to this screen ───────── */}
             {internalStep === "result" && (
               <>
                 <div className="wf-diagram-split-view">
 
-                  {/* Col 1 – Editable prompt */}
                   <div className="wf-column-three">
                     <span className="wf-column-title">Prompt de Generación del Diagrama UML</span>
                     <div className="wf-instruction-text">
@@ -146,7 +141,6 @@ export default function DiagramUMLScreen({
                     </div>
                   </div>
 
-                  {/* Col 2 – Statement text + rendered Mermaid diagram */}
                   <div className="wf-column-three">
                     <span className="wf-column-title">Extensión Funcional con Diagrama UML</span>
                     <div className="wf-diagram-viewer-inner">
@@ -160,7 +154,6 @@ export default function DiagramUMLScreen({
                     </div>
                   </div>
 
-                  {/* Col 3 – Raw Mermaid code */}
                   <div className="wf-column-three">
                     <span className="wf-column-title">Código Mermaid</span>
                     <div className="wf-diagram-code-inner">
