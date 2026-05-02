@@ -2,35 +2,43 @@ import React, { useState, useEffect } from "react";
 import { Header } from "~src/components/Header";
 import { parseMasterPrompt } from "~src/utils/promptParser";
 import { sendToGemini } from "~src/services/geminiService";
-import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests.md";
+import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests_attributes.md";
+import testRelationshipsPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests_relationships.md";
 
 declare var chrome: any;
 
 interface Props {
-    readonly initialData: { project: any; constraints: string } | null;
-    readonly source: 'attributes' | 'general';
+    readonly initialData: { 
+        project: any; 
+        constraints: string; 
+        entityRelationships: string; 
+        baseClass: string;
+        targetType?: 'attributes' | 'entityRelationships';
+    } | null;
+    readonly source: 'attributes' | 'entityRelationships' | 'general';
     readonly onBack: () => void;
     readonly onCreateExamByParts: () => void;
     readonly onWelcome: () => void;
     readonly onCreateExam: () => void;
+    readonly onCodeGeneration: () => void;
+
 }
 
-export default function GenerationTestAtributesScreen({
+export default function GenerationTestScreen({
     initialData,
     source,
     onBack,
     onCreateExamByParts,
     onWelcome,
-    onCreateExam
+    onCreateExam,
+    onCodeGeneration,
 }: Props) {
     const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
     const [promptText, setPromptText] = useState("");
     const [hiddenContext, setHiddenContext] = useState("");
     const [responseText, setResponseText] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [showOverwriteWarning, setShowOverwriteWarning] = useState(false);
 
-    // Variables de configuración de dominio (estilo StorageExamsIndex)
     const [currentConfig, setCurrentConfig] = useState({
         rootPackage: "es.us.dp1.chess.tournament",
         repo: "DP1-chess-template-exam"
@@ -41,7 +49,6 @@ export default function GenerationTestAtributesScreen({
 
         const domain = (initialData.project.domainName || "").toLowerCase();
 
-        // --- LÓGICA DE PLANTILLA (ESTILO STORAGEEXAMSINDEX) ---
         let TEMPLATE_REPO = "DP1-chess-template-exam";
         let ROOT_PACKAGE = "es.us.dp1.chess.tournament";
         let EXTRA_PACKAGES = [
@@ -64,8 +71,22 @@ export default function GenerationTestAtributesScreen({
         // -------------------------------------------------------
 
         const enunciadoGeneral = initialData.project.extensionFinish || "";
-        const restricciones = initialData.constraints || initialData.project.attributeConstraints || "";
-        const baseClassesRaw = initialData.project.baseClasses || initialData.project.javaCode || "";
+        const baseClassesRaw = initialData.baseClass || initialData.project.baseClasses || initialData.project.javaCode || "";
+
+        let targetPromptMarkdown = "";
+        let contextToEvaluate = "";
+
+        const isEntityRelationshipsTest = 
+            source === 'entityRelationships' || 
+            (source === 'general' && initialData.targetType === 'entityRelationships');
+
+        if (isEntityRelationshipsTest) {
+            targetPromptMarkdown = testRelationshipsPromptMarkdown;
+            contextToEvaluate = initialData.entityRelationships || initialData.project.entityRelationships || "";
+        } else {
+            targetPromptMarkdown = testAttributesPromptMarkdown;
+            contextToEvaluate = initialData.constraints || initialData.project.attributeConstraints || "";
+        }
 
         const javaBlocks = [...baseClassesRaw.matchAll(/```java\n([\s\S]*?)```/g)]
             .map(m => m[1].trim());
@@ -75,7 +96,7 @@ export default function GenerationTestAtributesScreen({
             .filter(Boolean) as string[];
 
         const basePackageNames = packageLines.map(p =>
-            p.replace(/^package\s+/, "").replace(/;$/, "") // CORREGIDO AQUÍ
+            p.replace(/^package\s+/, "").replace(/;$/, "") 
         );
 
         const baseRootPackage = basePackageNames.length > 0
@@ -91,13 +112,9 @@ export default function GenerationTestAtributesScreen({
             }, basePackageNames[0])
             : ROOT_PACKAGE;
 
-        // Busca esta parte dentro del useEffect:
             const codigoLimpio = javaBlocks.map(block =>
                 block
                     .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
-                    // MODIFICACIÓN AQUÍ:
-                    // Solo borramos imports que NO sean del proyecto (como los de JUnit, Mockito, etc.)
-                    // Queremos que los imports de 'org.springframework.samples.petclinic' se queden.
                     .replace(/^(?!package\s|import\s+org\.springframework\.samples\.petclinic)import\s.*;$/gm, "")
                     .replace(/^\s*[\r\n]/gm, "") // NOSONAR javascript:S5852
                     .trim()
@@ -110,7 +127,7 @@ ${EXTRA_PACKAGES.join("\n")}
 REGLA CRÍTICA DE IMPORTS:
 - Usa EXACTAMENTE estos paquetes para las clases que NO son base.
 - Paquete raíz: ${ROOT_PACKAGE}
-- El paquete de ESTE test (Test1.java) debe ser: ${baseRootPackage};
+- El paquete de ESTE test ${isEntityRelationshipsTest? `(Test2.java)`: `(Test1.java)`} debe ser: ${baseRootPackage};
 
 === CÓDIGO FUENTE REAL ===
 ${codigoLimpio}
@@ -118,17 +135,17 @@ ${codigoLimpio}
 === ENUNCIADO ===
 ${enunciadoGeneral}
 
-=== RESTRICCIONES DE ATRIBUTOS ===
-${restricciones}
+=== REGLAS A EVALUAR (RESTRICCIONES / RELACIONES) ===
+${contextToEvaluate}
 `;
 
-        const { visibleText, hiddenContext: parsedHidden } = parseMasterPrompt(testAttributesPromptMarkdown || "");
+        const { visibleText, hiddenContext: parsedHidden } = parseMasterPrompt(targetPromptMarkdown || "");
         const finalPrompt = (visibleText || "").split(/\{\{DOMAIN\}\}/gi).join(domain).trim();
 
         setPromptText(finalPrompt);
         setHiddenContext(`${parsedHidden}\n\n${contextInfo}`);
 
-    }, [initialData]);
+    }, [initialData, source]);
 
     const executeGeneration = async () => {
         if (!promptText) return;
@@ -144,16 +161,16 @@ ${promptText}
 === REGLAS CRÍTICAS DE IMPORTACIÓN (ESTRICTO) ===
 1. El paquete raíz absoluto es: ${currentConfig.rootPackage}
 2. REGLA DE SUBPAQUETES: Todo subpaquete debe escribirse EXCLUSIVAMENTE EN MINÚSCULAS.
-3. El paquete de ESTE test (Test1.java) debe ser el subpaquete .test de las clases base.
+3. El paquete de ESTE test ${isEntityRelationshipsTest? `(Test2.java)`: `(Test1.java)`} debe ser el subpaquete .test de las clases base.
 4. Usa las clases reales del código fuente proporcionado.
 
-Genera Test1.java sin bloques markdown.
+Genera ${isEntityRelationshipsTest? `(Test2.java)`: `(Test1.java)`} sin bloques markdown.
 `.trim();
 
             const result = await sendToGemini(finalPayload);
             if (!result) throw new Error("Respuesta vacía");
 
-            const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").replace(/^java/i, "").trim(); // CORREGIDO AQUÍ
+            const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").replace(/^java/i, "").trim(); 
             setResponseText(cleanResult);
             setInternalStep('result');
         } catch (error: any) {
@@ -166,14 +183,28 @@ Genera Test1.java sin bloques markdown.
     const handleSaveToChrome = () => {
         const projectId = initialData?.project?.id;
         if (!projectId) return;
+
         if (chrome?.storage?.local) {
             chrome.storage.local.get([projectId], (result) => {
+                const existingProject = result[projectId] || {};
+                
+                const testParts: Record<string, { fileName: string, code: string }> = existingProject.testPartsMap || {};
+                
+                const partKey = isEntityRelationshipsTest ? 'test2_relationships' : 'test1_attributes';
+                const fileName = isEntityRelationshipsTest ? 'Test2.java' : 'Test1.java';
+                
+                testParts[partKey] = {
+                    fileName: fileName,
+                    code: responseText
+                };
+
                 const updatedData = { 
-                    ...result[projectId], 
+                    ...existingProject, 
                     ...initialData.project, 
-                    javaTests: responseText, 
+                    testPartsMap: testParts,
                     updatedAt: new Date().toISOString() 
                 };
+
                 chrome.storage.local.set({ [projectId]: updatedData }, () => { 
                     alert("¡Tests guardados con éxito!"); 
                     onWelcome(); 
@@ -182,86 +213,140 @@ Genera Test1.java sin bloques markdown.
         }
     };
 
-    const handleGenerateClick = () => {
-        const projectId = initialData?.project?.id;
-        if (chrome?.storage?.local && projectId) {
-            chrome.storage.local.get([projectId], (result) => {
-                if (result[projectId]?.javaTests?.trim()) setShowOverwriteWarning(true);
-                else executeGeneration();
-            });
-        } else { executeGeneration(); }
-    };
-
     const handleDownload = () => {
         const blob = new Blob([responseText], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `Test1-${initialData?.project?.customName}.java`;
+
+        const testPrefix = isEntityRelationshipsTest ? "Test2" : "Test1";
+        const projectName = initialData?.project?.customName || "Generado";
+        link.download = `${testPrefix}-${projectName}.java`;
+
         link.click();
     };
 
-    const breadcrumbItems = [
+    const baseBreadcrumbs = [
         { label: 'INICIO', action: onWelcome },
         { label: 'CREAR EXAMEN', action: onCreateExam },
-        { label: 'POR PARTES', action: onCreateExamByParts },
-        { label: source === 'attributes' ? 'RESTRICCIONES' : 'TESTS', action: onBack }
+        { label: 'POR PARTES', action: onCreateExamByParts }
     ];
+
+    let dynamicBreadcrumbs: Array<{ label: string; action: () => void }> = [];
+
+    if (source === 'general') {
+        dynamicBreadcrumbs = [
+            { label: 'CÓDIGO', action: onCodeGeneration },
+            { label: 'TESTS', action: onBack }
+        ];
+    } else if (source === 'attributes') {
+        dynamicBreadcrumbs = [
+            { label: 'RESTRICCIONES', action: onBack }
+        ];
+    } else if (source === 'entityRelationships') {
+        dynamicBreadcrumbs = [
+            { label: 'RELACIONES ENTRE ENTIDADES', action: onBack }
+        ];
+    }
+
+    const breadcrumbItems = [...baseBreadcrumbs, ...dynamicBreadcrumbs];
+
+    const isEntityRelationshipsTest = 
+        source === 'entityRelationships' || 
+        (source === 'general' && initialData?.targetType === 'entityRelationships');
+
+    const currentStepLabel = isEntityRelationshipsTest 
+        ? "TESTS DE RELACIONES" 
+        : "TESTS DE RESTRICCIONES";
 
     return (
         <div className="exam-app">
-            <Header onWelcome={onWelcome} breadcrumbItems={breadcrumbItems} currentStep="GENERACIÓN DE TEST" />
+            <Header onWelcome={onWelcome} breadcrumbItems={breadcrumbItems} currentStep={currentStepLabel} />
             <main className="main-content">
                 <div className="wf-layout-container">
-                    <div className="wf-wide-wrapper">
+                    <div className="wf-wide-wrapper" style={{ width: "100%", boxSizing: "border-box" }}>
                         {internalStep === 'input' ? (
                             <div className="content-card">
                                 <h2 className="main-title small">Configuración del Test</h2>
-                                <textarea className="wf-textarea" style={{ height: '400px', fontFamily: 'monospace' }} value={promptText} onChange={(e) => setPromptText(e.target.value)} />
-                                <div className="wf-actions-row" style={{ marginTop: '20px' }}>
-                                    <button onClick={onBack} className="btn-step secondary">Volver</button>
-                                    <button onClick={handleGenerateClick} className="btn-step primary" disabled={isLoading}>
-                                        {isLoading ? "Generando..." : "Generar Tests"}
+                                
+                                <textarea 
+                                    className="wf-textarea-input" 
+                                    style={{ height: '400px', fontFamily: 'monospace', width: "100%", boxSizing: "border-box" }} 
+                                    value={promptText} 
+                                    onChange={(e) => setPromptText(e.target.value)} 
+                                />
+                                
+                                <div className="wf-actions-row">
+                                    <button onClick={onBack} className="btn-back">Volver</button>
+                                    <button onClick={executeGeneration} className="btn-step primary" disabled={isLoading}>
+                                        {isLoading ? <div className="loading-spinner"></div> : "Generar Tests"}
                                     </button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="content-card">
-                                <h2 className="main-title small">Resultado: Test1.java</h2>
-                                <div className="wf-split-view">
-                                    <div className="wf-column">
-                                        <textarea className="wf-textarea" value={promptText} readOnly />
-                                        <button onClick={handleGenerateClick} className="btn-step primary" disabled={isLoading}>Regenerar</button>
-                                    </div>
-                                    <div className="wf-column">
-                                        <textarea className="wf-result-box" value={responseText} onChange={(e) => setResponseText(e.target.value)} style={{ fontSize: '11px' }} />
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            <button onClick={handleDownload} className="btn-step secondary">Descargar .java</button>
-                                            <button onClick={handleSaveToChrome} className="btn-step primary" style={{ backgroundColor: '#28a745' }}>Guardar en Proyecto</button>
-                                        </div>
-                                    </div>
+                        <div className="content-card" style={{ width: "100%", boxSizing: "border-box", overflowX: "hidden" }}>
+                            <h2 className="main-title small">Resultado: {isEntityRelationshipsTest ? `Test2.java` : `Test1.java`}</h2>
+                            
+                            <div className="wf-split-view" style={{ display: "flex", flexWrap: "wrap", width: "100%", maxWidth: "100%", gap: "20px", boxSizing: "border-box" }}>
+                                
+                                <div className="wf-column" style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column" }}>
+                                    <span className="wf-column-title">Prompt enviado</span>
+                                    <textarea 
+                                        className="wf-textarea-input" 
+                                        value={promptText} 
+                                        readOnly 
+                                        style={{ width: "100%", boxSizing: "border-box", flexGrow: 1 }}
+                                    />
+                                    <button onClick={executeGeneration} className="btn-step primary" disabled={isLoading} style={{ marginTop: "10px" }}>
+                                        {isLoading ? '...' : 'Regenerar'}
+                                    </button>
                                 </div>
-                                <div className="wf-actions-row" style={{ marginTop: '20px' }}>
-                                    <button type="button" onClick={() => setInternalStep('input')} className="btn-step secondary">Editar Prompt</button>
+                                
+                                <div className="wf-column" style={{ flex: "1 1 300px", minWidth: 0, display: "flex", flexDirection: "column" }}>
+                                    <span className="wf-column-title">Código generado</span>
+                                    
+                                    {isLoading ? (
+                                        <div className="wf-result-box" style={{ width: "100%", boxSizing: "border-box", flexGrow: 1, fontSize: '11px' }}>
+                                            Generando...
+                                        </div>
+                                    ) : (
+                                        <textarea 
+                                            className="wf-result-box" 
+                                            value={responseText} 
+                                            onChange={(e) => setResponseText(e.target.value)} 
+                                            style={{ width: "100%", boxSizing: "border-box", flexGrow: 1, fontSize: '11px' }} 
+                                        />
+                                    )}
+                                    
+                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "10px" }}>
+                                        <button 
+                                            onClick={handleDownload} 
+                                            className="btn-step secondary"
+                                            style={{ flex: 1, minWidth: "140px" }}
+                                        >
+                                            Descargar .java
+                                        </button>
+                                        <button 
+                                            onClick={handleSaveToChrome} 
+                                            className="btn-step primary" 
+                                            style={{ flex: 1, backgroundColor: '#28a745', minWidth: "140px" }}
+                                        >
+                                            Guardar en Proyecto
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                            
+                            <div className="wf-actions-row" style={{ marginTop: "20px", justifyContent: "center" }}>
+                                <button type="button" onClick={() => setInternalStep('input')} className="btn-step secondary">
+                                    Editar Prompt
+                                </button>
+                            </div>
+                        </div>
                         )}
                     </div>
                 </div>
             </main>
-
-            {showOverwriteWarning && (
-                <div className="modal-overlay">
-                    <div className="content-card" style={{ maxWidth: "400px", textAlign: "center" }}>
-                        <h3>⚠️ Tests existentes</h3>
-                        <p>Ya existen tests guardados para este proyecto. ¿Deseas borrarlos y generar unos nuevos?</p>
-                        <div className="wf-actions-row" style={{ justifyContent: "center" }}>
-                            <button onClick={() => setShowOverwriteWarning(false)} className="btn-step secondary">Cancelar</button>
-                            <button onClick={() => { setShowOverwriteWarning(false); executeGeneration(); }} className="btn-step primary">Sí, sobrescribir</button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

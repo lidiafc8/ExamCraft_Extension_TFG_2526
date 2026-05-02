@@ -36,7 +36,6 @@ export default function DiagramUMLScreen({
     const [responseText, setResponseText] = useState("");
     const [cleanCode, setCleanCode] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [extensionComplete, setExtensionComplete] = useState("");
 
     useEffect(() => {
         if (extensionPromptMarkdown && domainName) {
@@ -83,7 +82,7 @@ export default function DiagramUMLScreen({
                     })
                 });
                 console.log("Log enviado al servidor local correctamente.");
-            } catch (error) {
+            } catch {
                 console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
             }
 
@@ -132,17 +131,23 @@ export default function DiagramUMLScreen({
 
                 <div className="wf-wide-wrapper">
                     {internalStep === 'input' && (
-                        <div className="content-card" style={{ maxWidth: '800px', width: '100%', margin: '0 auto' }}>
+                        <div className="content-card">
                             <h2 className="main-title small">{domainName.toUpperCase()}: Diagrama UML</h2>
+                            
+                            <p className="wf-instruction-text">
+                                Este es el prompt que se usará para generar el diagrama UML del examen, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar Diagrama UML"</strong>.
+                            </p>                        
+                            
                             <textarea 
-                            className="wf-textarea" 
-                            value={promptText}
-                            onChange={(e) => setPromptText(e.target.value)}
+                                className="wf-textarea-input" 
+                                value={promptText}
+                                onChange={(e) => setPromptText(e.target.value)}
                             />
+                            
                             <div className="wf-actions-row">
-                                <button onClick={onBack} className="btn-step secondary">Volver</button>
+                                <button onClick={onBack} className="btn-back">Volver</button>
                                 <button onClick={handleGenerate} className="btn-step primary" disabled={isLoading}>
-                                    {isLoading ? 'Generando...' : 'Generar Diagrama UML'}
+                                    {isLoading ? <div className="loading-spinner"></div> : 'Generar Diagrama UML'}
                                 </button>
                             </div>
                         </div>

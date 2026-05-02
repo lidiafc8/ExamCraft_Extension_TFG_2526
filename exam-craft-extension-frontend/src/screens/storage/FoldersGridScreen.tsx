@@ -1,12 +1,11 @@
 import React from "react";
 import carpeta from "../../../assets/images/archive.png";
 import { Header } from "~src/components/Header";
-
+import "./css/FoldersGridScreen.css";
 
 export interface FoldersGridScreenProps {
     allowedFolders: string[];
     projects: any[];
-    logoExamCraft: string;
     onWelcome: () => void;
     onSelectFolder: (folderName: string) => void;
 }
@@ -14,7 +13,6 @@ export interface FoldersGridScreenProps {
 export const FoldersGridScreen: React.FC<FoldersGridScreenProps> = ({
     allowedFolders,
     projects,
-    logoExamCraft,
     onWelcome,
     onSelectFolder
 }) => {
@@ -25,8 +23,12 @@ export const FoldersGridScreen: React.FC<FoldersGridScreenProps> = ({
 
     const currentTitle = "EXÁMENES ANTERIORES";
 
+    const visibleFolders = allowedFolders.filter(folderName =>
+        projects.some(p => p.domainName?.toUpperCase() === folderName.toUpperCase())
+    );
+
     return (
-        <div className="exam-app">
+        <div>
             <Header 
                 onWelcome={onWelcome} 
                 breadcrumbItems={breadcrumbItems} 
@@ -38,26 +40,38 @@ export const FoldersGridScreen: React.FC<FoldersGridScreenProps> = ({
                 <div className="subtitle-badge">Selecciona un dominio</div>
                 
                 <div className="cards-container">
-                    {allowedFolders.map((folderName) => {
-                    const count = projects.filter(p => p.domainName?.toLowerCase() === folderName).length;
-                        return (
-                            <button 
-                                key={folderName} 
-                                className="action-card" 
-                                onClick={() => onSelectFolder(folderName)}
-                            >
-                                <span className="complete-exam-icon">
-                                    <img src={carpeta} alt="Carpeta" width="110" height="110" />
-                                </span>
-                                <span className="card-label" style={{ textTransform: 'capitalize' }}>
-                                    {folderName}
-                                </span>
-                                <span style={{ fontSize: '13px', color: '#000000', marginTop: '5px' }}>
-                                    {count} {count === 1 ? 'examen' : 'exámenes'}
-                                </span>
-                            </button>
-                        );
-                    })}
+                    {visibleFolders.length === 0 ? (
+                        <div className="empty-container">
+                            <p>Todavía no tienes ningún examen guardado.</p>
+                            <p className="empty-subtext">
+                                Crea tu primer examen para verlo aquí.
+                            </p>
+                        </div>
+                    ) : (
+                        visibleFolders.map((folderName) => {
+                            const count = projects.filter(p => 
+                                p.domainName?.toUpperCase() === folderName.toUpperCase()
+                            ).length;
+
+                            return (
+                                <button 
+                                    key={folderName} 
+                                    className="action-card" 
+                                    onClick={() => onSelectFolder(folderName)}
+                                >
+                                    <span>
+                                        <img src={carpeta} alt="Carpeta" className="card-icon"/>
+                                    </span>
+                                    <span className="card-label">
+                                        {folderName.toUpperCase()}
+                                    </span>
+                                    <span className="card-count">
+                                        {count} {count === 1 ? 'EXAMEN' : 'EXÁMENES'}
+                                    </span>
+                                </button>
+                            );
+                        })
+                    )}
                 </div>
                 
                 <button onClick={onWelcome} className="btn-back">Volver</button>

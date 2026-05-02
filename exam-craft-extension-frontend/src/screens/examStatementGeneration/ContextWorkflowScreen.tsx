@@ -3,6 +3,8 @@ import { Header } from "~src/components/Header"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md"
 import { sendToGemini } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
+import "../../css/WorkFlowParts.css"
+import "../../css/CommonText.css"
 
 declare var chrome: any;
 
@@ -16,7 +18,7 @@ interface Props {
   readonly onCreateDiagram: (text: string) => void;
 }
 
-export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, onCreateExam, onCreateExamByParts, onFunctionalExtension, onCreateDiagram }: Props) {
+export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, onCreateExam, onCreateExamByParts, onFunctionalExtension, onCreateDiagram }: Props) {
   const [currentStep, setCurrentStep] = useState(1);
   const [internalStep, setInternalStep] = useState<'input' | 'result'>('input');
   
@@ -102,7 +104,6 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
             });
             console.log("Log enviado al servidor local correctamente.");
         } catch (error) {
-            // CORRECCIÓN: Usamos la variable 'error' para que Sonar no se queje
             console.warn("Servidor de logs apagado. El log no se guardó en el repo.", error);
         }
 
@@ -122,7 +123,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
     ];
 
   return (
-    <div className="exam-app">
+    <div>
       <Header 
         onWelcome={onWelcome} 
         breadcrumbItems={breadcrumbItems} 
@@ -145,18 +146,18 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
 
             <div className="wf-wide-wrapper">
                 {currentStep === 1 && internalStep === 'input' && (
-                    <div className="content-card" style={{ maxWidth: '800px', width: '100%' }}>
+                    <div className="content-card">
                         <h2 className="main-title small">{domainName.toUpperCase()}: Texto de enunciado</h2>
                         <p className="wf-instruction-text">
                             Este es el prompt que se usará para generar el texto del enunciado del examen, puede revisar o modificar cualquier información que vea conveniente. Al terminar, pulse en <strong>"Generar Enunciado"</strong>.
                         </p>                        
                         <textarea 
-                            className="wf-textarea" 
+                            className="wf-textarea-input" 
                             value={promptText}
                             onChange={(e) => setPromptText(e.target.value)}
                         />
                         <div className="wf-actions-row">
-                            <button onClick={onBack} className="btn-step secondary">Volver</button>
+                            <button onClick={onBack} className="btn-back">Volver</button>
                             <button onClick={handleGenerate} className="btn-step primary">
                                 {isLoading ? <div className="loading-spinner"></div> : 'Generar Enunciado'}
                             </button>
@@ -169,7 +170,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
                         <div className="wf-column">
                             <span className="wf-column-title">Prompt enviado</span>
                             <textarea 
-                            className="wf-textarea" 
+                            className="wf-textarea-input" 
                             value={promptText}
                             onChange={(e) => setPromptText(e.target.value)}
                         />
@@ -181,7 +182,7 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
                             <span className="wf-column-title">Propuesta de texto de enunciado</span>
                             
                             {isLoading ? (
-                                <div className="wf-result-box" style={{ whiteSpace: 'pre-wrap' }}>
+                                <div className="wf-result-box" >
                                     Generando...
                                 </div>
                             ) : (
@@ -200,8 +201,8 @@ export default function DomainWorkflowScreen({ domainName, onBack, onWelcome, on
                 )}
                 
                 {currentStep === 1 && internalStep === 'result' && (
-                     <div className="wf-actions-row" style={{ marginTop: '20px' }}>
-                        <button onClick={() => setInternalStep('input')} className="btn-step secondary">Volver</button>
+                     <div className="wf-actions-row">
+                        <button onClick={onBack} className="btn-back">Volver</button>
                     </div>
                 )}
 

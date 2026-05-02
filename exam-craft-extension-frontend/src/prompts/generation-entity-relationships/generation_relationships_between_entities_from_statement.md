@@ -33,6 +33,8 @@ Deberá cumplir estos requisitos:
 
 -	Lo que vamos a proporcionar al alumno es un proyecto real que tendrá que manipular, por lo que los atributos de las nuevas clases tendrán anotaciones @Transient, que deberán eliminarse en este ejercicio. Esto se debe indicar explícitamente en este ejercicio.
 
+-   Deberás indicar las relaciones a implementar de las entidades ROJAS, es decir, de las entidades que se han añadido a la nueva funcionalidad y que el alumno deberá implementar, evitando dejar ninguna relación atrás. Puedes apoyarte en el apartado del código Mermaid donde se definen todas ellas.
+
 -	Las explicaciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
 
 -	Se debe especificar la direccionalidad de las relaciones a implementar y las entidades implicadas en cada una de ellas.

@@ -1,0 +1,30 @@
+.storage-section-content--tests {
+  margin-bottom: 50px;
+}
+
+.generated-test-item {
+  margin-bottom: 30px;
+}
+
+.generated-test-item-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 5px;
+}
+
+.storage-section-content:not(.storage-section-content--tests) .storage-content-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.storage-section-content--tests .storage-content-card {
+  display: block;
+}
+
+@media (max-width: 960px) {
+  .storage-section-content:not(.storage-section-content--tests) .storage-content-card {
+    grid-template-columns: 1fr;
+  }
+}

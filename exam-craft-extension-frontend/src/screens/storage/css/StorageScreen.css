@@ -1,0 +1,164 @@
+/* ============================================================
+   StorageScreens.css — estilos compartidos entre
+   GeneratedCodeScreen, VisualSolutionCodeScreen y ExamDetailScreen
+   ============================================================ */
+
+/* ── Variables ── */
+:root {
+  --bg-page:        #f5f0eb;
+  --bg-card:        #ffffff;
+  --bg-code:        #1e1e2e;
+  --accent:         #b08968;
+  --accent-dark:    #8a6748;
+  --accent-light:   #e8d5c4;
+  --text-primary:   #1a1a1a;
+  --text-secondary: #555555;
+  --text-muted:     #999999;
+  --border:         #e2d5c8;
+  --shadow-card:    0 2px 12px rgba(176, 137, 104, 0.12);
+  --shadow-hover:   0 6px 24px rgba(176, 137, 104, 0.22);
+  --radius:         10px;
+  --radius-sm:      6px;
+  --font-display:   'Segoe UI', 'Roboto', sans-serif;
+  --font-body:      'Segoe UI', 'Roboto', sans-serif;
+  --font-code:      'Segoe UI', 'Roboto', sans-serif;
+}
+
+.wide-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.content-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.content-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--accent-light) 0%, #f0e6d8 100%);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-header h3 {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+  margin: 0;
+}
+
+.storage-page {
+  min-height: 100vh;
+  height: auto;
+  background: var(--bg-page);
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.storage-main {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 32px 40px 100px;
+  flex: 1;
+}
+
+.storage-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 48px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--accent);
+}
+
+.storage-section-heading:first-of-type {
+  margin-top: 20px;
+}
+
+.storage-section-heading h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  margin: 0;
+  letter-spacing: 0.02em;
+  border: none;
+  padding: 0;
+}
+
+.storage-section-content {
+  margin-bottom: 40px;
+}
+
+.storage-content-card {
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); 
+  gap: 24px;
+}
+
+.storage-delete-btn {
+  background: none;
+  border: none;
+  color: #ff4d4f;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.storage-delete-btn:hover {
+  background: #fff0f0;
+}
+
+.storage-empty-state {
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 48px 24px;
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.storage-bottom-actions {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.storage-bottom-actions .btn-back {
+  position: relative;
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .storage-main {
+    padding: 24px 20px 60px;
+  }
+}

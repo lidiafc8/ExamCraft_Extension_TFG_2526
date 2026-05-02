@@ -1,7 +1,7 @@
 # PROMPT PARA LA GENERACIÓN DE CLASES BASE A SUBIR AL REPOSITORIO EXAMEN
 
 ## Recursos a proporcionar:
-* `base_classes_structure_examples.md`
+* `base_classes_structure_examples_previous_exams.md`
 
 ## Prompt a utilizar:
 

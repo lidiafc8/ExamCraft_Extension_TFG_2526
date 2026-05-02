@@ -261,16 +261,24 @@ export const GithubService = {
     }
   },
 
-  async _uploadTests(token: string, owner: string, repo: string, javaTests: any, testBasePath: string) {
-      const tests = Array.isArray(javaTests) ? javaTests : [javaTests];
-      for (let i = 0; i < tests.length; i++) {
-          const fileContent = tests[i].trim()
-              .replace(/^```[a-z]*\r?\n/i, '')
-              .replace(/\r?\n```$/i, '')
-              .trim();
-          const fileName = `Test${i + 1}.java`;
-          await this.createOrUpdateFile(token, owner, repo,
-              `${testBasePath}${fileName}`, fileContent, `Añadir test automático: ${fileName}`);
+  async _uploadTests(
+      token: string, 
+      owner: string, 
+      repo: string, 
+      testPartsMap: Record<string, { fileName: string; code: string }>, 
+      testBasePath: string
+  ) {
+      const parts = Object.values(testPartsMap)
+          .filter(p => p?.fileName && p?.code?.trim())
+          .sort((a, b) => a.fileName.localeCompare(b.fileName));
+
+      for (const part of parts) {
+          await this.createOrUpdateFile(
+              token, owner, repo,
+              `${testBasePath}${part.fileName}`,
+              part.code.trim(),
+              `test: añadir ${part.fileName}`
+          );
       }
   },
 
@@ -319,19 +327,18 @@ export const GithubService = {
           `#### 1. Extensión Funcional\n${introText || "No hay datos de extensión funcional."}\n\n` +
           (finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`\n\n` : '') +
           `#### 2. Restricciones de Atributos\n${project?.attributeConstraints || "No se crearon restricciones de atributos."}\n\n` +
-          `#### 3. Relaciones entre Entidades\n${project?.entityRelations || "No se crearon relaciones entre entidades."}\n`;
+          `#### 3. Relaciones entre Entidades\n${project?.entityRelationships || "No se crearon relaciones entre entidades."}\n`;
 
       await this.updateReadmeWithDescription(token, TARGET_OWNER, newRepoName, markdownContent);
 
-      // 2. Tests
-      if (project?.javaTests) await this._uploadTests(token, TARGET_OWNER, newRepoName, project.javaTests, testBasePath);
+      if (project?.testPartsMap) {
+        await this._uploadTests(token, TARGET_OWNER, newRepoName, project.testPartsMap, testBasePath);
+      }
 
-      // 3. Clases base
       if (project?.baseClasses) await this._uploadBaseClasses(token, TARGET_OWNER, newRepoName, project.baseClasses);
 
-      // 4. Rama solution
-      if (project?.attributeConstraintsSolution?.trim() && project?.baseClasses) {
-          await this._uploadSolutionBranch(token, TARGET_OWNER, newRepoName, project.baseClasses, project.attributeConstraintsSolution);
+      if (project?.fullSolution?.trim() && project?.baseClasses) {
+          await this._uploadSolutionBranch(token, TARGET_OWNER, newRepoName, project.baseClasses, project.fullSolution);
       }
 
       return newRepo.html_url;

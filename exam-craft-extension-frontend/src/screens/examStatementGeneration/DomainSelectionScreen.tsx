@@ -9,14 +9,16 @@ interface Props {
   readonly onWelcome: () => void
   readonly onSelectDomain: (domainName: string) => void
   readonly onCreateExam: () => void
+  readonly onComponents: () => void
 }
 
-export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectDomain, onCreateExam }: Props) {
+export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectDomain, onCreateExam, onComponents }: Props) {
   
   const breadcrumbItems = [
       { label: 'INICIO', action: onWelcome },
       { label: 'CREAR EXAMEN', action: onCreateExam },
       { label: 'POR PARTES', action: onBack },
+      { label: 'COMPONENTES', action: onComponents },
   ];
 
   const currentTitle = "EXTENSIÓN FUNCIONAL";
@@ -30,7 +32,6 @@ export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectD
           currentStep={currentTitle} 
       />
 
-      {/* --- CONTENIDO CENTRAL --- */}
       <main className="main-content">
         
         <h1 className="main-title">CREAR EXTENSIÓN FUNCIONAL</h1>
@@ -42,17 +43,17 @@ export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectD
         <div className="cards-container">
           
           <button className="action-card" onClick={() => onSelectDomain("Clínica Veterinaria")}>
-            <span className="petclinic-icon"><img src={petClinic} alt="Icono clínica veterinaria" width="110" height="110" /></span> 
+            <span className="petclinic-icon"><img src={petClinic} alt="Icono clínica veterinaria" className="card-icon" /></span> 
             <span className="card-label">Clínica Veterinaria</span>
           </button>
 
           <button className="action-card" onClick={() => onSelectDomain("Ajedrez")}>
-              <span className="chess-icon"><img src={chess} alt="Icono ajedrez" width="120" height="120" /></span>
+              <span className="chess-icon"><img src={chess} alt="Icono ajedrez" className="card-icon" /></span>
             <span className="card-label">Ajedrez</span>
           </button>
 
           <button className="action-card">
-              <span className="soon-icon"><img src={comingSoon} alt="Icono comingSoon" width="120" height="120" /></span>
+              <span className="soon-icon"><img src={comingSoon} alt="Icono comingSoon" className="card-icon"/></span>
             <span className="card-label">Crear nuevo dominio</span>
           </button>
 
