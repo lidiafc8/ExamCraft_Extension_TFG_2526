@@ -148,12 +148,12 @@ ${contextToEvaluate}
     }, [initialData, source]);
 
     const executeGeneration = async () => {
-        if (!promptText) return;
-        setIsLoading(true);
-        setResponseText("");
+        if (!promptText) return;
+        setIsLoading(true);
+        setResponseText("");
 
-        try {
-            const finalPayload = `
+        try {
+            const finalPayload = `
 ${hiddenContext}
 
 ${promptText}
@@ -167,18 +167,41 @@ ${promptText}
 Genera ${isEntityRelationshipsTest? `(Test2.java)`: `(Test1.java)`} sin bloques markdown.
 `.trim();
 
-            const result = await sendToGemini(finalPayload);
-            if (!result) throw new Error("Respuesta vacía");
+            const result = await sendToGemini(finalPayload);
+            if (!result) throw new Error("Respuesta vacía");
 
-            const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").replace(/^java/i, "").trim(); 
-            setResponseText(cleanResult);
-            setInternalStep('result');
-        } catch (error: any) {
-            alert(`Error: ${error.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").replace(/^java/i, "").trim(); 
+            setResponseText(cleanResult);
+            setInternalStep('result');
+
+            // --- LÓGICA DE LOGS ---
+            try {
+                const logExerciseName = isEntityRelationshipsTest 
+                    ? "test_relationships_code_generation" 
+                    : "test_attributes_code_generation";
+
+                await fetch("http://localhost:3001/save-log", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        ejercicio: logExerciseName,
+                        dominio: initialData?.project?.domainName || "",
+                        contextoOculto: hiddenContext, 
+                        examenSeleccionado: initialData?.project?.extensionFinish || "",
+                        promptVisible: promptText,   
+                        respuesta: result,             
+                    }),
+                });
+            } catch {
+                console.warn("Servidor de logs apagado.");
+            }
+
+        } catch (error: any) {
+            alert(`Error: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleSaveToChrome = () => {
         const projectId = initialData?.project?.id;

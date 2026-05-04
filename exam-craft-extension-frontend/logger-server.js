@@ -16,16 +16,16 @@ function formatTitle(key) {
 }
 
 app.post('/save-log', (req, res) => {
-  const { exercise, domain, ...dynamicFields } = req.body;
+  const { ejercicio, dominio, ...dynamicFields } = req.body;
 
   const domainTranslations = {
     "clínica veterinaria": "petClinic",
     "ajedrez": "chess"
   };
 
-  const rawDomain = domain ? domain.toLowerCase().trim() : 'unknown';
+  const rawDomain = dominio ? dominio.toLowerCase().trim() : 'unknown';
   const englishDomain = domainTranslations[rawDomain] || rawDomain.replace(/\s+/g, '_');
-  const safeExercise = exercise ? exercise.toLowerCase().replace(/\s+/g, '_') : 'general_exercise';
+  const safeExercise = ejercicio ? ejercicio.toLowerCase().replace(/\s+/g, '_') : 'general_exercise';
 
   const folderPath = path.join(__dirname, 'logs', safeExercise, englishDomain);
   if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true });
@@ -39,7 +39,7 @@ app.post('/save-log', (req, res) => {
     const anchor = key
       .replace(/([A-Z])/g, '-$1')  
       .toLowerCase()                
-      .replace(/_/g, '-');           
+      .replace(/_/g, '-');          
     
     return `- [${i + 1}. ${formatTitle(key)}](#${i + 1}-${anchor})`;
   }).join("\n");
@@ -50,7 +50,7 @@ app.post('/save-log', (req, res) => {
 
   const fileContent = `# Evaluación de Prompt
 
-**Ejercicio:** ${exercise.toUpperCase()}
+**Ejercicio:** ${(ejercicio || 'sin_nombre').toUpperCase()}
 **Dominio:** ${englishDomain.toUpperCase()}
 **Fecha:** ${new Date().toLocaleString()}
 
