@@ -96,7 +96,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
     *	La extensión funcional devuelta deberá tener la misma estructura narrativa que la de los proporcionados como ejemplo, tanto el principio como el final del enunciado.
 
-    *	La extensión funcional devuelta deberá tener el mismo nivel de detalle que los proporcionados como ejemplo, ni más ni menos, dando breves descripciones de los atributos de las nuevas entidades (rojas) y sus relaciones.
+    *	La extensión funcional devuelta deberá tener el mismo nivel de detalle que los proporcionados como ejemplo, ni más ni menos, dando BREVES descripciones de los atributos de las nuevas entidades (rojas) y sus relaciones, evita alargar dichas explicaciones.
 
     *	La extensión funcional deberá mantener la base del dominio.
 
@@ -110,7 +110,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
     *	Debido a la ausencia de clases azules, omite en tu respuesta cualquier información acerca de ellas en el enunciado generado, aunque en los enunciados de ejemplos si venga.
 
-    
+    *   Para el dominio de **Ajedrez**, es **MUY IMPORTANTE** que todas las propuestas de enunciado que devuelvas contengan estas 3 clases: ChessMatch, ChessBoard y Piece. Construye la nueva extensión funcional teniendo en cuenta SIEMPRE la existencia de estas clases.
     ```
 
 
@@ -139,6 +139,8 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     Quiero que en base a la lógica de la extensión funcional que me has pasado, me generes un diagrama UML en código Mermaid similar al de los ejemplos que te he pasado en el documento md “functional_extension_examples”. Ten en cuenta estos requisitos:
 
     -  Recuerda todo el contexto dado en la anterior petición.
+
+    -  Para el dominio de **Ajedrez**, es **MUY IMPORTANTE** que todas las propuestas que devuelvas contengan estas 3 clases: ChessMatch, ChessBoard y Piece. Construye la nueva extensión funcional teniendo en cuenta SIEMPRE la existencia de estas clases.
 
     -  De los enunciados de ejemplo, céntrate en la estructura del código Mermaid de los del proyecto {{DOMAIN}}
 
