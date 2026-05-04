@@ -1,5 +1,19 @@
 # Biblioteca de Prompts — ExamCraft
 
+![Logo ExamCraft](../exam-craft-extension-frontend/assets/icon512.png)
+
+<br>
+<br>
+
+# CONTROL DE VERSIONES
+
+| Versión | Fecha | Autor(es) | Descripción de Cambios |
+| :---: | :---: | :--- | :--- |
+| 1.0 | 02/04/2026 | Lidia Ning Fernández Casillas | Creación del documento base. |
+| 1.1 | 07/04/2026 | Lidia Ning Fernández Casillas | Adición de prompt para la generación de solución. |
+| 1.2 | 02/05/2026 | Lidia Ning Fernández Casillas | Actualización de prompts existentes y adición de otros nuevos.  |
+| 1.3 | 04/05/2026 | Lidia Ning Fernández Casillas | Logo y control de versiones añadido. |
+
 Este documento recoge todos los prompts desarrollados para la extensión **ExamCraft**, organizados de forma clara para facilitar su uso, mantenimiento y mejora.
 
 

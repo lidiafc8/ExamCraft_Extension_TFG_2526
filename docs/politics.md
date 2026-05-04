@@ -1,5 +1,20 @@
 # Política de Desarrollo y Colaboración - ExamCraft Extension
 
+![Logo ExamCraft](../exam-craft-extension-frontend/assets/icon512.png)
+
+<br>
+<br>
+
+# CONTROL DE VERSIONES
+
+| Versión | Fecha | Autor(es) | Descripción de Cambios |
+| :---: | :---: | :--- | :--- |
+| 1.0 | 11/02/2026 | María Auxiliadora Quintana Fernández | Creación del documento base. |
+| 1.1 | 16/02/2026 | María Auxiliadora Quintana Fernández | Cambio en la política de ramas.  |
+
+
+Este documento recoge todos los prompts desarrollados para la extensión **ExamCraft**, organizados de forma clara para facilitar su uso, mantenimiento y mejora.
+
 Este documento define los estándares, herramientas y flujos de trabajo acordados por el equipo para el desarrollo del TFG.
 
 ## 1. Stack Tecnológico y Herramientas
