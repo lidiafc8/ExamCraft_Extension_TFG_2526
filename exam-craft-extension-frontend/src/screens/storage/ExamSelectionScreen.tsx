@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import examen from "../../../assets/images/exam.png";
 import { Header } from "~src/components/Header";
-import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
+import { DeleteConfirmationModal } from "~src/components/modals/DeleteConfirmationModal";
 import "../../css/CommonText.css";
 import "../../css/Cards.css";
 
