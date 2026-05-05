@@ -2,6 +2,7 @@ import React from "react";
 import carpeta from "../../../assets/images/archive.png";
 import { Header } from "~src/components/Header";
 import "./css/FoldersGridScreen.css";
+import "../../css/Cards.css";
 
 export interface FoldersGridScreenProps {
     allowedFolders: string[];
