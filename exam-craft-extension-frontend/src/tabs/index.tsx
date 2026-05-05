@@ -9,7 +9,7 @@ import FinishFunctionalExtensionScreen from "../screens/examStatementGeneration/
 import AttributesConstraintsWorkflowScreen from "~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen"
 import GenerationTestAtributesScreen from "../screens/codeGeneration/GenerationTestAtributesScreen"
 import GeneralGenerationTestScreen from "../screens/codeGeneration/GeneralGenerationTestScreen"
-import CodeGenerationScreen from "~src/screens/codeGeneration/CodeGenerationScreen"
+import CodeGenerationScreen from "~src/screens/codeGeneration/CodeSelectionGenerateScreen"
 import GenerationBaseClassesScreen from "~src/screens/codeGeneration/GenerationBaseClassesScreen"
 import StorageExamsIndex from "../screens/storage/StorageExamsIndex"
 import EntityRelationshipsWorkflowScreen from "~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen"
