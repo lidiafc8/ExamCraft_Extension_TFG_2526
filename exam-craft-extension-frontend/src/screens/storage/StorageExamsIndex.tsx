@@ -5,7 +5,7 @@ import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/github.css';
 import { downloadProjectAsMarkdown } from "~src/utils/exportUtils";
 import { FoldersGridScreen } from "./FoldersGridScreen";
-import { DomainFolderScreen } from "./DomainFolderScreen";
+import { DomainFolderScreen } from "./ExamSelectionScreen";
 import { ExamDetailScreen } from "./ExamDetailScreen";
 import { GeneratedCodeScreen } from "./GenerationCodeScreen";
 import { VisualSolutionCodeScreen } from "./VisualSolutionCodeScreen";
@@ -113,8 +113,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             });
         }
     };
-
-    
 
     const handleDownload = () => {
         if (!selectedProject) return;
@@ -234,7 +232,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             <GeneratedCodeScreen
                 selectedProject={selectedProject}
                 selectedDomainFolder={selectedDomainFolder || ""}
-                logoExamCraft={logoExamCraft}
                 onWelcome={onWelcome}
                 onBack={() => setShowGeneratedCode(false)}
                 onGoToExams={() => {

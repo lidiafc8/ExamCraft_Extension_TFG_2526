@@ -3,7 +3,7 @@ import 'highlight.js/styles/github.css';
 import { Header } from "~src/components/Header";
 import { parseJavaFiles } from "~src/utils/codeUtils";
 import { JavaCodeBlock } from "~src/components/JavaCodeBlock";
-import { DeleteConfirmationModal } from "~src/components/DeleteConfirmationModal";
+import { DeleteConfirmationModal } from "~src/components/modals/DeleteConfirmationModal";
 import "./css/StorageScreen.css";
 import "./css/GeneratedCodeScreen.css";
 import "../../css/CommonText.css";
