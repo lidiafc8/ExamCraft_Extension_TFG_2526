@@ -5,18 +5,29 @@ import generationExamBaseClassesPrompt from "bundle-text:../../prompts/generatio
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponents"
 import { useGeminiGeneration } from "~src/components/GeminiGeneration"
-import { Header } from "~src/components/Header";
+import { Header } from "~src/components/Header"
+import { ConfirmModal } from "../../components/modals/ConfirmModal"
+import { SuccessModal } from "../../components/modals/SuccessModal"
+import { downloadMarkdown } from "~src/utils/downloadUtils"
+import { saveToChrome } from "~src/utils/chromeStorageUtils"
 import "../../css/Cards.css"
-import "../storage/css/FoldersGridScreen.css";
-import { ConfirmModal } from "../../components/modals/ConfirmModal";
-import { SuccessModal } from "../../components/modals/SuccessModal";
+import "../storage/css/FoldersGridScreen.css"
 
 declare var chrome: any
 
+interface Project {
+  id: string
+  domainName: string
+  customName?: string
+  extensionFinish?: string
+  baseClasses?: string
+  updatedAt?: string
+}
+
 interface Props {
-  readonly initialProject?: any
+  readonly initialProject?: Project
   readonly fromAttributes?: boolean
-  readonly onGoToTests?: (projectData: any) => void
+  readonly onGoToTests?: (projectData: Project) => void
   readonly onBack: () => void
   readonly onWelcome: () => void
   readonly onCreateExam: () => void
@@ -26,33 +37,41 @@ interface Props {
 
 const CLASES_POR_DEFECTO: Record<string, string> = {
   "clínica veterinaria": `
-- BaseEntity
-- NamedEntity
-- Person
-- Owner
-- Vet
-- Pet
-- PetType
-- Specialty
-- Visit
-- Clinic
-- PricingPlan
-- ClinicOwner
-- User
-- Authorities`,
+- BaseEntity\n- NamedEntity\n- Person\n- Owner\n- Vet\n- Pet\n- PetType
+- Specialty\n- Visit\n- Clinic\n- PricingPlan\n- ClinicOwner\n- User\n- Authorities`,
   "ajedrez": `
-- BaseEntity
-- NamedEntity
-- Authorities
-- User
-- ChessMatch
-- ChessBoard
-- Piece`,
+- BaseEntity\n- NamedEntity\n- Authorities\n- User\n- ChessMatch\n- ChessBoard\n- Piece`,
 }
 
 const ALLOWED_FOLDERS = ["clínica veterinaria", "ajedrez"]
 const STORAGE_KEY = "baseClasses"
 const DOWNLOAD_PREFIX = "Clases_Base"
+
+const displayName = (proj: Project) =>
+  proj.customName || `Examen de ${proj.domainName}`
+
+const warningMessage = (proj: Project): string | null =>
+  proj[STORAGE_KEY]
+    ? "Este examen ya tiene clases base generadas. Si continúas, se sobreescribirán al guardar."
+    : null
+
+function buildPrompt(project: Project): { visibleText: string; hiddenContext: string } {
+  try {
+    const { visibleText, hiddenContext } = parseMasterPrompt(generationExamBaseClassesPrompt)
+    const dominio = (project.domainName || project.customName || "").trim()
+    const clases = CLASES_POR_DEFECTO[dominio.toLowerCase()] || "No hay clases base registradas para este dominio."
+    const base = visibleText?.trim().length > 0
+      ? visibleText
+      : "Genera las clases base en Java para el dominio {dominio}. Clases a incluir: {clases_existentes}"
+    return {
+      visibleText: base.replaceAll("{dominio}", dominio || "el examen").replaceAll("{clases_existentes}", clases),
+      hiddenContext: hiddenContext || "",
+    }
+  } catch (error) {
+    console.error("Error en buildPrompt:", error)
+    return { visibleText: "Error al preparar el prompt.", hiddenContext: "" }
+  }
+}
 
 export default function GenerationBaseClassesScreen({
   initialProject,
@@ -66,15 +85,12 @@ export default function GenerationBaseClassesScreen({
 }: Props) {
   const [selectionStep, setSelectionStep] = useState<"folders" | "exams" | "workflow">("folders")
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
-
-  const [projects, setProjects] = useState<any[]>([])
-  const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null)
-  const [selectedProject, setSelectedProject] = useState<any>(initialProject ?? null)
-
+  const [projects, setProjects] = useState<Project[]>([])
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(initialProject ?? null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const [savedData, setSavedData] = useState<{ project: any; result: string } | null>(null)
-
+  const [savedData, setSavedData] = useState<{ project: Project; result: string } | null>(null)
   const [promptText, setPromptText] = useState("")
   const [hiddenContext, setHiddenContext] = useState("")
 
@@ -89,8 +105,12 @@ export default function GenerationBaseClassesScreen({
     }),
   })
 
-  const visibleFolders = ALLOWED_FOLDERS.filter((folderName) =>
-    projects.some((p) => p.domainName?.toLowerCase() === folderName.toLowerCase())
+  const visibleFolders = ALLOWED_FOLDERS.filter((f) =>
+    projects.some((p) => p.domainName?.toLowerCase() === f.toLowerCase())
+  )
+
+  const projectsInFolder = projects.filter(
+    (p) => p.domainName && selectedFolder && p.domainName.toLowerCase() === selectedFolder.toLowerCase()
   )
 
   const breadcrumbItems = fromAttributes
@@ -110,10 +130,10 @@ export default function GenerationBaseClassesScreen({
   useEffect(() => {
     if (globalThis.chrome?.storage?.local) {
       chrome.storage.local.get(null, (items: Record<string, any>) => {
-        const projectList = Object.keys(items)
-          .filter((key) => key.startsWith("project_"))
-          .map((key) => ({ id: key, ...items[key] }))
-        setProjects(projectList)
+        const list = Object.keys(items)
+          .filter((k) => k.startsWith("project_"))
+          .map((k) => ({ id: k, ...items[k] } as Project))
+        setProjects(list)
       })
     }
   }, [])
@@ -126,49 +146,12 @@ export default function GenerationBaseClassesScreen({
     }
   }, [selectedProject])
 
-  const projectsInFolder = projects.filter(
-    (p) =>
-      p.domainName &&
-      selectedDomainFolder &&
-      p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
-  )
-
-  const projectDisplayName = (proj: any) =>
-    proj?.customName || `Examen de ${proj?.domainName}`
-
-  const buildPrompt = (project: any): { visibleText: string; hiddenContext: string } => {
-    try {
-      const { visibleText, hiddenContext } = parseMasterPrompt(generationExamBaseClassesPrompt)
-      const rawDominio = project?.domainName || project?.name || project?.customName || ""
-      const dominioNormalizado = rawDominio.trim()
-      const clasesExistentes =
-        CLASES_POR_DEFECTO[dominioNormalizado.toLowerCase()] ||
-        "No hay clases base registradas para este dominio."
-      const baseTemplate =
-        visibleText?.trim().length > 0
-          ? visibleText
-          : "Genera las clases base en Java para el dominio {dominio}. Clases a incluir: {clases_existentes}"
-      return {
-        visibleText: baseTemplate
-          .replaceAll("{dominio}", dominioNormalizado || "el examen")
-          .replaceAll("{clases_existentes}", clasesExistentes),
-        hiddenContext: hiddenContext || "",
-      }
-    } catch (error) {
-      console.error("Error en buildPrompt:", error)
-      return {
-        visibleText: "Error al preparar el prompt. Por favor, revisa el dominio seleccionado.",
-        hiddenContext: "",
-      }
-    }
-  }
-
   const handleSelectFolder = (folderName: string) => {
-    setSelectedDomainFolder(folderName)
+    setSelectedFolder(folderName)
     setSelectionStep("exams")
   }
 
-  const handleSelectProject = (project: any) => {
+  const handleSelectProject = (project: Project) => {
     setSelectedProject(project)
     setShowConfirmModal(true)
   }
@@ -182,91 +165,46 @@ export default function GenerationBaseClassesScreen({
   const handleGenerate = async () => {
     const finalPayload = `
       CONTEXTO Y RECURSOS (Información interna):
-
-      [RECURSOS ESTÁTICOS Y EJEMPLOS]:
-      ${hiddenContext}
-
-      [ENUNCIADO Y DIAGRAMA DEL EXAMEN SELECCIONADO]:
-      ${selectedProject.extensionFinish}
-
-      INSTRUCCIONES PRINCIPALES:
-      ${promptText}
+      [RECURSOS ESTÁTICOS Y EJEMPLOS]: ${hiddenContext}
+      [ENUNCIADO Y DIAGRAMA DEL EXAMEN SELECCIONADO]: ${selectedProject?.extensionFinish}
+      INSTRUCCIONES PRINCIPALES: ${promptText}
     `
     const result = await generate(finalPayload)
     if (result) setInternalStep("result")
   }
 
-  const handleSaveToChrome = () => {
-    if (globalThis.chrome?.storage?.local) {
-      if (!selectedProject?.id) {
-        alert("Error: No hay un examen válido seleccionado para actualizar.")
-        return
-      }
-      const updatedExamData = {
-        ...selectedProject,
-        [STORAGE_KEY]: responseText,
-        updatedAt: new Date().toISOString(),
-      }
-      chrome.storage.local.set({ [selectedProject.id]: updatedExamData }, () => {
-        if (chrome.runtime.lastError) {
-          console.error("Error al actualizar:", chrome.runtime.lastError)
-          alert("No se pudo actualizar el examen en el almacenamiento local.")
-        } else {
-          setSelectedProject(updatedExamData)
-          const data = { project: updatedExamData, result: responseText }
-          setSavedData(data)
-          setShowSuccessModal(true)
-        }
-      })
-    } else {
-      alert("Esta funcionalidad solo está disponible dentro de la Extensión de Chrome.")
+  const handleSaveToChrome = async () => {
+    if (!selectedProject?.id) {
+      alert("Error: No hay un examen válido seleccionado para actualizar.")
+      return
+    }
+    const updated: Project = {
+      ...selectedProject,
+      [STORAGE_KEY]: responseText,
+      updatedAt: new Date().toISOString(),
+    }
+    try {
+      await saveToChrome(selectedProject.id, updated)
+      setSelectedProject(updated)
+      setSavedData({ project: updated, result: responseText })
+      setShowSuccessModal(true)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "No se pudo actualizar el examen.")
     }
   }
 
   const handleDownload = () => {
     if (!selectedProject || !responseText) return
-    const defaultName = `${DOWNLOAD_PREFIX}_${selectedProject.customName}`
-    const userChosenName = prompt("Introduce el nombre para el archivo a descargar:", defaultName)
-    if (userChosenName === null) return
-    let finalFileName = userChosenName.trim() || defaultName
-    if (!finalFileName.toLowerCase().endsWith(".md")) finalFileName += ".md"
-    const downloadTitle = `Clases Base - ${selectedProject.customName || selectedProject.domainName}`
-    const markdownContent = `# ${downloadTitle}\n\n${responseText}`
-    const blob = new Blob([markdownContent], { type: "text/markdown;charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = finalFileName
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
+    const title = `Clases Base - ${selectedProject.customName || selectedProject.domainName}`
+    downloadMarkdown(`# ${title}\n\n${responseText}`, `${DOWNLOAD_PREFIX}_${selectedProject.customName}`)
   }
 
   const handleSuccessPrimary = () => {
     if (!savedData) return
     setShowSuccessModal(false)
-    const finalProjectData = {
-      ...savedData.project,
-      id: savedData.project.id || initialProject?.id,
-    }
-    if (fromAttributes && onGoToTests) {
-      onGoToTests(finalProjectData)
-    } else {
-      onCodeGeneration()
-    }
-  }
-
-  const handleSuccessSecondary = () => {
-    setShowSuccessModal(false)
-    onWelcome()
-  }
-
-  const confirmWarning = (project: any): string | null => {
-    if (project?.[STORAGE_KEY]) {
-      return "Este examen ya tiene clases base generadas. Si continúas, se sobreescribirán al guardar."
-    }
-    return null
+    const final = { ...savedData.project, id: savedData.project.id || initialProject?.id }
+    if (fromAttributes && onGoToTests) onGoToTests(final as Project)
+    else onCodeGeneration()
   }
 
   return (
@@ -274,8 +212,8 @@ export default function GenerationBaseClassesScreen({
       {showConfirmModal && selectedProject && (
         <ConfirmModal
           title="Confirmar Examen"
-          message={`¿Deseas utilizar ${projectDisplayName(selectedProject)} como base para generar las clases base del examen?`}
-          warning={confirmWarning(selectedProject)}
+          message={`¿Deseas utilizar ${displayName(selectedProject)} como base para generar las clases base del examen?`}
+          warning={warningMessage(selectedProject)}
           onConfirm={handleConfirmSelection}
           onCancel={() => { setShowConfirmModal(false); setSelectedProject(null) }}
         />
@@ -284,22 +222,16 @@ export default function GenerationBaseClassesScreen({
       {showSuccessModal && savedData && (
         <SuccessModal
           title="¡Guardado correctamente!"
-          message={`Las clases base de ${projectDisplayName(savedData.project)} han sido actualizadas correctamente.`}
-          actions={[
-            {
-              label: fromAttributes ? "Continuar con Generación de Tests" : "Volver",
-              onClick: handleSuccessPrimary,
-              variant: "primary",
-            }
-          ]}
+          message={`Las clases base de ${displayName(savedData.project)} han sido actualizadas correctamente.`}
+          actions={[{
+            label: fromAttributes ? "Continuar con Generación de Tests" : "Volver",
+            onClick: () => { setShowSuccessModal(false); onWelcome() },
+            variant: "primary",
+          }]}
         />
       )}
 
-      <Header
-        onWelcome={onWelcome}
-        breadcrumbItems={breadcrumbItems}
-        currentStep="CLASES BASE"
-      />
+      <Header onWelcome={onWelcome} breadcrumbItems={breadcrumbItems} currentStep="CLASES BASE" />
 
       <main className="main-content">
 
@@ -307,7 +239,6 @@ export default function GenerationBaseClassesScreen({
           <div>
             <h1 className="main-title">MIS EXÁMENES</h1>
             <div className="subtitle-badge">Selecciona un dominio</div>
-
             <div className="cards-container">
               {visibleFolders.length === 0 ? (
                 <div className="empty-container">
@@ -320,65 +251,34 @@ export default function GenerationBaseClassesScreen({
                     (p) => p.domainName?.toLowerCase() === folderName.toLowerCase()
                   ).length
                   return (
-                    <button
-                      key={folderName}
-                      type="button"
-                      className="action-card"
-                      onClick={() => handleSelectFolder(folderName)}
-                    >
-                      <span>
-                        <img src={carpeta} alt="Carpeta" className="card-icon" />
-                      </span>
+                    <button key={folderName} type="button" className="action-card" onClick={() => handleSelectFolder(folderName)}>
+                      <span><img src={carpeta} alt="Carpeta" className="card-icon" /></span>
                       <span className="card-label">{folderName.toUpperCase()}</span>
-                      <span className="card-count">
-                        {count} {count === 1 ? "EXAMEN" : "EXÁMENES"}
-                      </span>
+                      <span className="card-count">{count} {count === 1 ? "EXAMEN" : "EXÁMENES"}</span>
                     </button>
                   )
                 })
               )}
             </div>
-
-            <button onClick={onBack} className="btn-back" style={{ marginTop: "20px" }}>
-              Volver
-            </button>
+            <button onClick={onBack} className="btn-back" style={{ marginTop: "20px" }}>Volver</button>
           </div>
         )}
 
-        {selectionStep === "exams" && selectedDomainFolder && (
+        {selectionStep === "exams" && selectedFolder && (
           <div>
-            <h1 className="main-title">
-              Exámenes de {selectedDomainFolder.toUpperCase()}
-            </h1>
-            <div className="subtitle-badge">
-              Selecciona el examen que deseas utilizar como contexto.
-            </div>
-
+            <h1 className="main-title">Exámenes de {selectedFolder.toUpperCase()}</h1>
+            <div className="subtitle-badge">Selecciona el examen que deseas utilizar como contexto.</div>
             <div className="cards-container">
-              {projectsInFolder.map((proj) => {
-                const displayName = projectDisplayName(proj)
-                return (
-                  <div key={proj.id} className="action-card">
-                    <button
-                      className="btn-icon"
-                      onClick={() => handleSelectProject(proj)}
-                      title="Abrir examen"
-                    >
-                      <img src={examen} alt="Abrir examen" />
-                    </button>
-                    <span className="card-label">{displayName}</span>
-                  </div>
-                )
-              })}
+              {projectsInFolder.map((proj) => (
+                <div key={proj.id} className="action-card">
+                  <button className="btn-icon" onClick={() => handleSelectProject(proj)} title="Abrir examen">
+                    <img src={examen} alt="Abrir examen" />
+                  </button>
+                  <span className="card-label">{displayName(proj)}</span>
+                </div>
+              ))}
             </div>
-
-            <button
-              onClick={() => setSelectionStep("folders")}
-              className="btn-back"
-              style={{ marginTop: "20px" }}
-            >
-              Volver
-            </button>
+            <button onClick={() => setSelectionStep("folders")} className="btn-back" style={{ marginTop: "20px" }}>Volver</button>
           </div>
         )}
 
@@ -388,13 +288,7 @@ export default function GenerationBaseClassesScreen({
               {internalStep === "input" && (
                 <PromptEditor
                   title="Clases Base del Examen"
-                  description={
-                    <>
-                      Este es el prompt que se usará para generar las clases base del examen seleccionado.
-                      Puedes revisar o modificar cualquier información que veas conveniente.
-                      Al terminar, pulsa en <strong>"Generar"</strong>.
-                    </>
-                  }
+                  description={<>Este es el prompt que se usará para generar las clases base. Puedes modificar lo que veas conveniente. Al terminar, pulsa <strong>"Generar"</strong>.</>}
                   promptText={promptText}
                   isLoading={isLoading}
                   onPromptChange={setPromptText}
@@ -402,7 +296,6 @@ export default function GenerationBaseClassesScreen({
                   onBack={() => setSelectionStep("exams")}
                 />
               )}
-
               {internalStep === "result" && (
                 <SplitResultView
                   promptText={promptText}
@@ -413,13 +306,9 @@ export default function GenerationBaseClassesScreen({
                   onResponseChange={setResponseText}
                   rightTitle="Propuesta del código de las clases bases"
                   footer={
-                    <div className="wf-actions-row finish-extension-actions">
-                      <button onClick={handleDownload} className="btn-step btn-download">
-                        Descargar (.md)
-                      </button>
-                      <button onClick={handleSaveToChrome} className="btn-step primary">
-                        Guardar
-                      </button>
+                    <div className="wf-actions-row">
+                      <button onClick={handleDownload} className="btn-step btn-download">Descargar (.md)</button>
+                      <button onClick={handleSaveToChrome} className="btn-step primary">Guardar</button>
                     </div>
                   }
                 />
@@ -427,6 +316,7 @@ export default function GenerationBaseClassesScreen({
             </div>
           </div>
         )}
+
       </main>
     </div>
   )

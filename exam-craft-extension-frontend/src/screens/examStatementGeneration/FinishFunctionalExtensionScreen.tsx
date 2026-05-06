@@ -3,6 +3,8 @@ import { MermaidViewer } from "../../components/MermaidViewer"
 import { Header } from "~src/components/Header"
 import { StepperHeader } from "../../components/WorkflowComponents"
 import "../../css/WorkFlowParts.css"
+import { downloadMarkdown } from "~src/utils/downloadUtils"
+import { saveToChrome } from "~src/utils/chromeStorageUtils"
 
 declare var chrome: any
 
@@ -32,46 +34,32 @@ export default function FinishFunctionalExtensionScreen({
   onStatementStep1,
 }: Props) {
 
-  const handleSaveToChrome = () => {
-    if (!globalThis.chrome?.storage?.local) {
-      alert("Esta funcionalidad solo está disponible dentro de la Extensión de Chrome.")
-      return
-    }
+  const handleSaveToChrome = async () => {
     const userChosenName = prompt("Introduce el nombre para guardar este examen:", `Examen de ${domainName}`)
     if (userChosenName === null) return
     const finalName = userChosenName.trim() || `Examen de ${domainName}`
-    const extensionFinish = `${extensionStatement}\n\n${extensionMermaid ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\`` : ""}`.trim()
-    const dataToSave = {
-      domainName, customName: finalName,
-      extensionStatement, extensionMermaid, extensionFinish,
-      savedAt: new Date().toISOString(),
+    const extensionFinish = `${extensionStatement}\n\n${
+      extensionMermaid ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\`` : ""
+    }`.trim()
+
+    try {
+      await saveToChrome(`project_${Date.now()}`, {
+        domainName, customName: finalName,
+        extensionStatement, extensionMermaid, extensionFinish,
+        savedAt: new Date().toISOString(),
+      })
+      alert(`¡Examen "${finalName}" guardado con éxito!`)
+      onWelcome()
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "No se pudo guardar.")
     }
-    chrome.storage.local.set({ [`project_${Date.now()}`]: dataToSave }, () => {
-      if (chrome.runtime.lastError) {
-        alert("No se pudo guardar en el almacenamiento local.")
-      } else {
-        alert(`¡Examen "${finalName}" guardado con éxito en la carpeta de ${domainName.toUpperCase()}!`)
-        onWelcome()
-      }
-    })
   }
 
   const handleDownload = () => {
-    const defaultName = `Extension_Funcional_${domainName}`
-    const userChosenName = prompt("Introduce el nombre para el archivo a descargar:", defaultName)
-    if (userChosenName === null) return
-    let finalFileName = userChosenName.trim() || defaultName
-    if (!finalFileName.toLowerCase().endsWith(".md")) finalFileName += ".md"
-    const markdownContent = `# Extensión Funcional - ${domainName}\n\n## Enunciado\n${extensionStatement || "No hay texto de enunciado."}\n\n${
+    const content = `# Extensión Funcional - ${domainName}\n\n## Enunciado\n${extensionStatement || "No hay texto de enunciado."}\n\n${
       extensionMermaid ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\`` : "*No se generó código Mermaid*"
     }\n`
-    const blob = new Blob([markdownContent], { type: "text/markdown;charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const link = Object.assign(document.createElement("a"), { href: url, download: finalFileName })
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
+    downloadMarkdown(content, `Extension_Funcional_${domainName}`)
   }
 
   const breadcrumbItems = [
@@ -127,7 +115,7 @@ export default function FinishFunctionalExtensionScreen({
 
             </div>
 
-            <div className="wf-actions-row finish-extension-actions">
+            <div className="wf-actions-row ">
               <button onClick={onBack} className="btn-back">
                 Volver a UML
               </button>
