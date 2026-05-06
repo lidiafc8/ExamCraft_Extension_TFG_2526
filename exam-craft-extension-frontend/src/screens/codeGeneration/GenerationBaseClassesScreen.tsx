@@ -12,6 +12,7 @@ import { downloadMarkdown } from "~src/utils/downloadUtils"
 import { saveToChrome } from "~src/utils/chromeStorageUtils"
 import "../../css/Cards.css"
 import "../storage/css/FoldersGridScreen.css"
+import { FolderExamSelector } from "~src/components/FolderExamsSelector"
 
 declare var chrome: any
 
@@ -235,33 +236,19 @@ export default function GenerationBaseClassesScreen({
 
       <main className="main-content">
 
-        {selectionStep === "folders" && (
-          <div>
-            <h1 className="main-title">MIS EXÁMENES</h1>
-            <div className="subtitle-badge">Selecciona un dominio</div>
-            <div className="cards-container">
-              {visibleFolders.length === 0 ? (
-                <div className="empty-container">
-                  <p>No hay exámenes creados todavía.</p>
-                  <p className="empty-subtext">Crea tu primer examen para verlo aquí.</p>
-                </div>
-              ) : (
-                visibleFolders.map((folderName) => {
-                  const count = projects.filter(
-                    (p) => p.domainName?.toLowerCase() === folderName.toLowerCase()
-                  ).length
-                  return (
-                    <button key={folderName} type="button" className="action-card" onClick={() => handleSelectFolder(folderName)}>
-                      <span><img src={carpeta} alt="Carpeta" className="card-icon" /></span>
-                      <span className="card-label">{folderName.toUpperCase()}</span>
-                      <span className="card-count">{count} {count === 1 ? "EXAMEN" : "EXÁMENES"}</span>
-                    </button>
-                  )
-                })
-              )}
-            </div>
-            <button onClick={onBack} className="btn-back" style={{ marginTop: "20px" }}>Volver</button>
-          </div>
+        {(selectionStep === "folders" || selectionStep === "exams") && (
+          <FolderExamSelector
+            projects={projects}
+            allowedFolders={ALLOWED_FOLDERS}
+            selectedFolder={selectionStep === "exams" ? selectedFolder : null}
+            onSelectFolder={(folder) => {
+              setSelectedFolder(folder)
+              setSelectionStep("exams")
+            }}
+            onSelectProject={handleSelectProject}
+            onBack={onBack}
+            displayName={displayName}
+          />
         )}
 
         {selectionStep === "exams" && selectedFolder && (
