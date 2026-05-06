@@ -308,14 +308,15 @@ export const GithubService = {
       }
   },
 
-  async deployExam(token, project, newRepoName, templateRepo, testBasePath): Promise<string> {
+  async deployExam(token: string, project: any, newRepoName: string, templateOwner: string, templateRepo: string, testBasePath: string): Promise<string> {
       const userResponse = await fetch("https://api.github.com/user", {
           headers: { Authorization: `token ${token}` }
       });
       if (!userResponse.ok) throw new Error("Token inválido o caducado (Requires authentication)");
 
       const { login: TARGET_OWNER } = await userResponse.json();
-      const newRepo = await this.createRepoFromTemplate(token, "lidiafc8", templateRepo, newRepoName);
+      
+      const newRepo = await this.createRepoFromTemplate(token, templateOwner, templateRepo, newRepoName);
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // 1. README
