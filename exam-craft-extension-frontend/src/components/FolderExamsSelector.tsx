@@ -1,7 +1,7 @@
 import React from "react"
 import carpeta from "../../assets/images/archive.png"
 import examen from "../../assets/images/exam.png"
-import "../../css/Cards.css"
+import "../../src/css/Cards.css"
 
 interface Project {
   id: string
