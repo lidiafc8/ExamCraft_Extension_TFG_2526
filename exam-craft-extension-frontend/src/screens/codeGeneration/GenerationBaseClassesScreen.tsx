@@ -5,9 +5,8 @@ import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponent
 import { useGeminiGeneration } from "~src/components/GeminiGeneration"
 import { Header } from "~src/components/Header"
 import { ConfirmModal } from "../../components/modals/ConfirmModal"
-import { SuccessModal } from "../../components/modals/SuccessModal"
+import { SaveModal } from "../../components/modals/SaveModal"
 import { downloadMarkdown } from "~src/utils/downloadUtils"
-import { saveToChrome } from "~src/utils/chromeStorageUtils"
 import "../../css/Cards.css"
 import "../storage/css/FoldersGridScreen.css"
 import { FolderExamSelector } from "~src/components/FolderExamsSelector"
@@ -88,8 +87,7 @@ export default function GenerationBaseClassesScreen({
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
   const [selectedProject, setSelectedProject] = useState<Project | null>(initialProject ?? null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const [savedData, setSavedData] = useState<{ project: Project; result: string } | null>(null)
+  const [showSaveModal, setShowSaveModal] = useState(false)
   const [promptText, setPromptText] = useState("")
   const [hiddenContext, setHiddenContext] = useState("")
 
@@ -103,10 +101,6 @@ export default function GenerationBaseClassesScreen({
       response: result,
     }),
   })
-
-  const visibleFolders = ALLOWED_FOLDERS.filter((f) =>
-    projects.some((p) => p.domainName?.toLowerCase() === f.toLowerCase())
-  )
 
   const projectsInFolder = projects.filter(
     (p) => p.domainName && selectedFolder && p.domainName.toLowerCase() === selectedFolder.toLowerCase()
@@ -145,11 +139,6 @@ export default function GenerationBaseClassesScreen({
     }
   }, [selectedProject])
 
-  const handleSelectFolder = (folderName: string) => {
-    setSelectedFolder(folderName)
-    setSelectionStep("exams")
-  }
-
   const handleSelectProject = (project: Project) => {
     setSelectedProject(project)
     setShowConfirmModal(true)
@@ -172,26 +161,6 @@ export default function GenerationBaseClassesScreen({
     if (result) setInternalStep("result")
   }
 
-  const handleSaveToChrome = async () => {
-    if (!selectedProject?.id) {
-      alert("Error: No hay un examen válido seleccionado para actualizar.")
-      return
-    }
-    const updated: Project = {
-      ...selectedProject,
-      [STORAGE_KEY]: responseText,
-      updatedAt: new Date().toISOString(),
-    }
-    try {
-      await saveToChrome(selectedProject.id, updated)
-      setSelectedProject(updated)
-      setSavedData({ project: updated, result: responseText })
-      setShowSuccessModal(true)
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "No se pudo actualizar el examen.")
-    }
-  }
-
   const handleDownload = () => {
     if (!selectedProject || !responseText) return
     const title = `Clases Base - ${selectedProject.customName || selectedProject.domainName}`
@@ -210,22 +179,23 @@ export default function GenerationBaseClassesScreen({
         />
       )}
 
-      {showSuccessModal && savedData && (
-        <SuccessModal
-          title="¡Guardado correctamente!"
-          message={`Las clases base de ${displayName(savedData.project)} han sido actualizadas correctamente.`}
-          actions={[{
-            label: fromAttributes ? "Continuar con Generación de Tests" : "Aceptar",
-            onClick: () => { setShowSuccessModal(false); onWelcome() },
-            variant: "primary",
-          }]}
+      {showSaveModal && selectedProject && (
+        <SaveModal
+          domainName={displayName(selectedProject)}
+          onSuccess={onWelcome}
+          onClose={() => setShowSaveModal(false)}
+          buildPayload={() => ({
+            ...selectedProject,
+            [STORAGE_KEY]: responseText,
+            updatedAt: new Date().toISOString(),
+          })}
+          existingKey={selectedProject.id}
         />
       )}
 
       <Header onWelcome={onWelcome} breadcrumbItems={breadcrumbItems} currentStep="CLASES BASE" />
 
       <main className="main-content">
-
         {(selectionStep === "folders" || selectionStep === "exams") && (
           <FolderExamSelector
             projects={projects}
@@ -267,7 +237,7 @@ export default function GenerationBaseClassesScreen({
                   footer={
                     <div className="wf-actions-row">
                       <button onClick={handleDownload} className="btn-step btn-download">Descargar (.md)</button>
-                      <button onClick={handleSaveToChrome} className="btn-step primary">Guardar</button>
+                      <button onClick={() => setShowSaveModal(true)} className="btn-step primary">Guardar</button>
                     </div>
                   }
                 />

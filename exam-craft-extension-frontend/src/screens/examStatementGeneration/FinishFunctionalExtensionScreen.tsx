@@ -1,10 +1,10 @@
-import React from "react"
+import React, { useState } from "react"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import { Header } from "~src/components/Header"
 import { StepperHeader } from "../../components/WorkflowComponents"
 import "../../css/WorkFlowParts.css"
 import { downloadMarkdown } from "~src/utils/downloadUtils"
-import { saveToChrome } from "~src/utils/chromeStorageUtils"
+import { SaveModal } from "~src/components/modals/SaveModal"
 
 declare var chrome: any
 
@@ -33,27 +33,7 @@ export default function FinishFunctionalExtensionScreen({
   onFunctionalExtension,
   onStatementStep1,
 }: Props) {
-
-  const handleSaveToChrome = async () => {
-    const userChosenName = prompt("Introduce el nombre para guardar este examen:", `Examen de ${domainName}`)
-    if (userChosenName === null) return
-    const finalName = userChosenName.trim() || `Examen de ${domainName}`
-    const extensionFinish = `${extensionStatement}\n\n${
-      extensionMermaid ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\`` : ""
-    }`.trim()
-
-    try {
-      await saveToChrome(`project_${Date.now()}`, {
-        domainName, customName: finalName,
-        extensionStatement, extensionMermaid, extensionFinish,
-        savedAt: new Date().toISOString(),
-      })
-      alert(`¡Examen "${finalName}" guardado con éxito!`)
-      onWelcome()
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "No se pudo guardar.")
-    }
-  }
+  const [showSave, setShowSave] = useState(false)
 
   const handleDownload = () => {
     const content = `# Extensión Funcional - ${domainName}\n\n## Enunciado\n${extensionStatement || "No hay texto de enunciado."}\n\n${
@@ -80,7 +60,6 @@ export default function FinishFunctionalExtensionScreen({
 
       <main className="main-content">
         <div className="wf-layout-container">
-
           <StepperHeader steps={STEPS} currentStep={3} />
 
           <div className="wf-wide-wrapper">
@@ -89,11 +68,8 @@ export default function FinishFunctionalExtensionScreen({
             </h2>
 
             <div className="finish-extension-columns">
-
               <div className="wf-column-three">
-                <div className="wf-column-title">
-                  Contexto
-                </div>
+                <div className="wf-column-title">Contexto</div>
                 <textarea
                   className="wf-textarea-input"
                   value={extensionStatement}
@@ -102,9 +78,7 @@ export default function FinishFunctionalExtensionScreen({
               </div>
 
               <div className="wf-column-three">
-                <div className="wf-column-title">
-                  Visualización del Modelo UML
-                </div>
+                <div className="wf-column-title">Visualización del Modelo UML</div>
                 <div className="wf-diagram-area">
                   {extensionMermaid
                     ? <div><MermaidViewer chartCode={extensionMermaid} /></div>
@@ -112,23 +86,34 @@ export default function FinishFunctionalExtensionScreen({
                   }
                 </div>
               </div>
-
             </div>
 
-            <div className="wf-actions-row ">
-              <button onClick={onBack} className="btn-back">
-                Volver a UML
-              </button>
-              <button onClick={handleDownload} className="btn-step btn-download">
-                Descargar (.md)
-              </button>
-              <button onClick={handleSaveToChrome} className="btn-step primary">
-                Guardar
-              </button>
+            <div className="wf-actions-row">
+              <button onClick={onBack} className="btn-back">Volver a UML</button>
+              <button onClick={handleDownload} className="btn-step btn-download">Descargar (.md)</button>
+              <button onClick={() => setShowSave(true)} className="btn-step primary">Guardar</button>
             </div>
           </div>
         </div>
       </main>
+
+      {showSave && (
+        <SaveModal
+          domainName={domainName}
+          onSuccess={onWelcome}
+          onClose={() => setShowSave(false)}
+          buildPayload={(finalName) => ({
+            domainName,
+            customName: finalName,
+            extensionStatement,
+            extensionMermaid,
+            extensionFinish: `${extensionStatement}\n\n${
+              extensionMermaid ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\`` : ""
+            }`.trim(),
+            savedAt: new Date().toISOString(),
+          })}
+        />
+      )}
     </div>
   )
 }

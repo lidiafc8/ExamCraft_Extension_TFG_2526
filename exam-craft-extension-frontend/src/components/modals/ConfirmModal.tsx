@@ -4,7 +4,7 @@ import "./css/ConfirmModal.css";
 interface ConfirmModalProps {
   title: string;
   message: string;
-  warning?: string | null;
+  warning?: React.ReactNode;
   onConfirm: () => void;
   onCancel: () => void;
   confirmLabel?: string;
