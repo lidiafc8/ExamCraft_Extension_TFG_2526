@@ -131,13 +131,6 @@ export default function DiagramUMLScreen({
                         value={promptText}
                         onChange={(e) => setPromptText(e.target.value)}
                       />
-                      <button
-                        onClick={handleGenerate}
-                        className="btn-step primary"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
-                      </button>
                     </div>
                   </div>
 
@@ -163,6 +156,13 @@ export default function DiagramUMLScreen({
 
                 </div>
 
+                <button
+                  onClick={handleGenerate}
+                  className="btn-step primary"
+                  disabled={isLoading}
+                >
+                  {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                </button>
                 <button
                   className="btn-step primary"
                   onClick={() => onFinishExtension(context.trim(), responseText.trim())}

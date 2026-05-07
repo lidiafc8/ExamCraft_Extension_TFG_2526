@@ -1,13 +1,7 @@
-/* ============================================================
-   ExamDetailScreen — específico
-   Importa StorageScreens.css para los estilos comunes
-   ============================================================ */
-
 .exam-detail-main {
   position: relative;
 }
 
-/* ── Two col grid ── */
 .two-col-grid {
   display: grid;
   grid-template-columns: 1fr 1.6fr;
@@ -16,7 +10,6 @@
   min-height: 560px;
 }
 
-/* ── Card body ── */
 .card-body {
   flex: 1;
   overflow: hidden;
@@ -57,7 +50,6 @@
   background: #fafafa;
 }
 
-/* ── Wide textarea ── */
 .wide-textarea {
   width: 100%;
   min-height: 380px;
@@ -73,7 +65,6 @@
   box-sizing: border-box;
 }
 
-/* ── Code buttons ── */
 .code-buttons-row {
   display: flex;
   flex-direction: row;
@@ -84,7 +75,7 @@
 }
 
 .btn-code {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  background-color: #B48574;
   color: white;
   border: none;
   border-radius: var(--radius-sm);
@@ -107,7 +98,6 @@
   transform: translateY(0);
 }
 
-/* ── Actions menu ── */
 .actions-menu-wrapper {
   position: absolute;
   top: 22px;
@@ -172,9 +162,9 @@
 .action-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
 .action-btn--preview  { background: #2e7d32; color: white; }
-.action-btn--download { background: #4a90e2; color: white; } /* NOSONAR */
+.action-btn--download { background: #4a90e2; color: white; } 
 .action-btn--github   { background: #24292e; color: white; }
-.action-btn--delete   { background: #ff4d4f; color: white; } /* NOSONAR */
+.action-btn--delete   { background: #ff4d4f; color: white; } 
 
 .action-divider {
   border: none;
@@ -182,7 +172,6 @@
   margin: 4px 0;
 }
 
-/* ── Preview modal ── */
 .preview-backdrop {
   position: fixed;
   inset: 0;

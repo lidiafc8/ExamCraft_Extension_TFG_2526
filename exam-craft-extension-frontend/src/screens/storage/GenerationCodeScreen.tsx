@@ -64,103 +64,104 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     };
 
     return (
-        <div className="storage-page">
+        <div>
             <Header
                 onWelcome={onWelcome}
                 breadcrumbItems={breadcrumbItems}
                 currentStep="CÓDIGO EXAMEN"
             />
+            <div className="main-content">
+                <main className="storage-main">
 
-            <main className="storage-main">
-
-                <div className="storage-section-heading">
-                    <h2>Clases Base</h2>
-                    {parsedBaseClasses.length > 0 && (
-                        <button
-                            type="button"
-                            className="storage-delete-btn"
-                            onClick={() => setItemToDelete({ type: 'section', key: 'baseClasses', name: 'Clases Base' })}
-                            title="Eliminar Clases Base"
-                        >
-                            ✕
-                        </button>
-                    )}
-                </div>
-
-                <div className="storage-section-content">
-                    <div className="wide-card">
-                        <div className="card-header">
-                            <h3>Archivos de Clases Base</h3>
-                        </div>
-                        <div className="storage-content-card">
-                            {parsedBaseClasses.length > 0 ? (
-                                parsedBaseClasses.map((block) => (
-                                    <JavaCodeBlock
-                                        key={block.path}
-                                        filename={block.filename}
-                                        code={block.code}
-                                    />
-                                ))
-                            ) : (
-                                <p className="storage-empty-state">
-                                    Aún no se han generado las clases base para este examen.
-                                </p>
-                            )}
-                        </div>
+                    <div className="storage-section-heading">
+                        <h2>Clases Base</h2>
+                        {parsedBaseClasses.length > 0 && (
+                            <button
+                                type="button"
+                                className="storage-delete-btn"
+                                onClick={() => setItemToDelete({ type: 'section', key: 'baseClasses', name: 'Clases Base' })}
+                                title="Eliminar Clases Base"
+                            >
+                                ✕
+                            </button>
+                        )}
                     </div>
-                </div>
 
-                <div className="storage-section-heading">
-                    <h2>Tests de Java</h2>
-                </div>
-
-                <div className="storage-section-content storage-section-content--tests">
-                    <div className="wide-card">
-                        <div className="card-header">
-                            <h3>Archivos de Test</h3>
-                        </div>
-                        <div className="storage-content-card">
-                            {tests.length > 0 ? (
-                                tests.map((part) => (
-                                    <div key={part.mapKey} className="generated-test-item">
-                                        <div className="generated-test-item-actions">
-                                            <button
-                                                type="button"
-                                                className="storage-delete-btn"
-                                                onClick={() => setItemToDelete({ type: 'test', key: part.mapKey, name: part.fileName })}
-                                                title={`Eliminar ${part.fileName}`}
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
+                    <div className="storage-section-content">
+                        <div className="wide-card">
+                            <div className="card-header">
+                                <h3>Archivos de Clases Base</h3>
+                            </div>
+                            <div className="content-card">
+                                {parsedBaseClasses.length > 0 ? (
+                                    parsedBaseClasses.map((block) => (
                                         <JavaCodeBlock
-                                            filename={part.fileName}
-                                            code={part.code}
+                                            key={block.path}
+                                            filename={block.filename}
+                                            code={block.code}
                                         />
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="storage-empty-state">
-                                    Aún no se han generado los tests para este examen.
-                                </p>
-                            )}
+                                    ))
+                                ) : (
+                                    <p className="storage-empty-state">
+                                        Aún no se han generado las clases base para este examen.
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="storage-bottom-actions">
-                    <button type="button" onClick={onBack} className="btn-back">
-                        Volver
-                    </button>
-                </div>
+                    <div className="storage-section-heading">
+                        <h2>Tests de Java</h2>
+                    </div>
 
-                <DeleteConfirmationModal
-                    isOpen={!!itemToDelete}
-                    itemName={itemToDelete?.name || ''}
-                    onConfirm={confirmDelete}
-                    onCancel={() => setItemToDelete(null)}
-                />
-            </main>
+                    <div className="storage-section-content storage-section-content--tests">
+                        <div className="wide-card">
+                            <div className="card-header">
+                                <h3>Archivos de Test</h3>
+                            </div>
+                            <div className="content-card">
+                                {tests.length > 0 ? (
+                                    tests.map((part) => (
+                                        <div key={part.mapKey} className="generated-test-item">
+                                            <div className="generated-test-item-actions">
+                                                <button
+                                                    type="button"
+                                                    className="storage-delete-btn"
+                                                    onClick={() => setItemToDelete({ type: 'test', key: part.mapKey, name: part.fileName })}
+                                                    title={`Eliminar ${part.fileName}`}
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                            <JavaCodeBlock
+                                                filename={part.fileName}
+                                                code={part.code}
+                                            />
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="storage-empty-state">
+                                        Aún no se han generado los tests para este examen.
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="storage-bottom-actions">
+                        <button type="button" onClick={onBack} className="btn-back">
+                            Volver
+                        </button>
+                    </div>
+
+                    <DeleteConfirmationModal
+                        isOpen={!!itemToDelete}
+                        itemName={itemToDelete?.name || ''}
+                        onConfirm={confirmDelete}
+                        onCancel={() => setItemToDelete(null)}
+                    />
+                </main>
+            </div>
         </div>
     );
 };

@@ -75,7 +75,7 @@ export default function FinishFunctionalExtensionScreen({
       <Header
         onWelcome={onWelcome}
         breadcrumbItems={breadcrumbItems}
-        currentStep="EXTENSION FUNCIONAL COMPLETA"
+        currentStep="PROPUESTA FINAL"
       />
 
       <main className="main-content">

@@ -48,18 +48,19 @@
 }
 
 .card-header {
-  background: linear-gradient(135deg, var(--accent-light) 0%, #f0e6d8 100%);
+  background-color: #B48574;
   padding: 14px 20px;
   border-bottom: 1px solid var(--border);
 }
 
 .card-header h3 {
   font-family: var(--font-body);
-  font-size: 0.72rem;
+  align-items: center;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent-dark);
+  color:  #3d2d27;
   margin: 0;
 }
 
