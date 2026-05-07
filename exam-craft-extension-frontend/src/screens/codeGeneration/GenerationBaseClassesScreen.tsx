@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react"
-import carpeta from "../../../assets/images/archive.png"
-import examen from "../../../assets/images/exam.png"
 import generationExamBaseClassesPrompt from "bundle-text:../../prompts/generation-exam-repository/exam/generation_exam_base_classes.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponents"
@@ -200,14 +198,6 @@ export default function GenerationBaseClassesScreen({
     downloadMarkdown(`# ${title}\n\n${responseText}`, `${DOWNLOAD_PREFIX}_${selectedProject.customName}`)
   }
 
-  const handleSuccessPrimary = () => {
-    if (!savedData) return
-    setShowSuccessModal(false)
-    const final = { ...savedData.project, id: savedData.project.id || initialProject?.id }
-    if (fromAttributes && onGoToTests) onGoToTests(final as Project)
-    else onCodeGeneration()
-  }
-
   return (
     <div>
       {showConfirmModal && selectedProject && (
@@ -225,7 +215,7 @@ export default function GenerationBaseClassesScreen({
           title="¡Guardado correctamente!"
           message={`Las clases base de ${displayName(savedData.project)} han sido actualizadas correctamente.`}
           actions={[{
-            label: fromAttributes ? "Continuar con Generación de Tests" : "Volver",
+            label: fromAttributes ? "Continuar con Generación de Tests" : "Aceptar",
             onClick: () => { setShowSuccessModal(false); onWelcome() },
             variant: "primary",
           }]}
@@ -249,24 +239,6 @@ export default function GenerationBaseClassesScreen({
             onBack={onBack}
             displayName={displayName}
           />
-        )}
-
-        {selectionStep === "exams" && selectedFolder && (
-          <div>
-            <h1 className="main-title">Exámenes de {selectedFolder.toUpperCase()}</h1>
-            <div className="subtitle-badge">Selecciona el examen que deseas utilizar como contexto.</div>
-            <div className="cards-container">
-              {projectsInFolder.map((proj) => (
-                <div key={proj.id} className="action-card">
-                  <button className="btn-icon" onClick={() => handleSelectProject(proj)} title="Abrir examen">
-                    <img src={examen} alt="Abrir examen" />
-                  </button>
-                  <span className="card-label">{displayName(proj)}</span>
-                </div>
-              ))}
-            </div>
-            <button onClick={() => setSelectionStep("folders")} className="btn-back" style={{ marginTop: "20px" }}>Volver</button>
-          </div>
         )}
 
         {selectionStep === "workflow" && selectedProject && (
@@ -303,7 +275,6 @@ export default function GenerationBaseClassesScreen({
             </div>
           </div>
         )}
-
       </main>
     </div>
   )
