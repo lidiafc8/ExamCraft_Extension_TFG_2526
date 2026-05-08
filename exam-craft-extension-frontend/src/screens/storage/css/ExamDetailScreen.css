@@ -268,13 +268,25 @@
   line-height: 1.75;
   font-size: 0.95rem;
   color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .exam-markdown-container h1,
-.exam-markdown-container h2,
-.exam-markdown-container h3 {
-  font-family: var(--font-display);
+.exam-markdown-container h2 {
+  text-align: center;
+  width: 100%;
+  margin-bottom: 20px;
   color: var(--accent-dark);
+}
+
+.exam-markdown-container p {
+  text-align: left;
+  white-space: pre-wrap; 
+  width: 100%;
+  margin-top: 0;
 }
 
 @media (max-width: 960px) {

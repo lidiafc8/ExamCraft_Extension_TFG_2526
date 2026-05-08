@@ -14,7 +14,7 @@ export interface DomainFolderScreenProps {
     onBack: () => void;
     onSelectProject: (project: any) => void;
     onDeleteProject: (id: string, e?: React.MouseEvent) => void;
-    onRenameProject: (id: string) => void;
+    onRenameProject: (id: string, newName: string) => void;
     setEditingId: (id: string | null) => void;
     setTempName: (name: string) => void;
 }
@@ -95,11 +95,11 @@ export const DomainFolderScreen: React.FC<DomainFolderScreenProps> = ({
                                         className="card-label" 
                                         value={tempName}
                                         onChange={(e) => setTempName(e.target.value)}
-                                        onBlur={() => onRenameProject(proj.id)}
+                                        onBlur={() => onRenameProject(proj.id, tempName)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 e.preventDefault();
-                                                onRenameProject(proj.id);
+                                                onRenameProject(proj.id, tempName);
                                             } else if (e.key === 'Escape') {
                                                 setEditingId(null);
                                             }

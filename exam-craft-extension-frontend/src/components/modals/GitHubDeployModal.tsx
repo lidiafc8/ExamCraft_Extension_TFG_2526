@@ -1,102 +1,90 @@
-import React, { useState } from "react"
-import { ConfirmModal } from "./ConfirmModal"
-import { SuccessModal } from "./SuccessModal"
+import React, { useState } from "react";
+import { ConfirmModal } from "./ConfirmModal";
+import { SuccessModal } from "./SuccessModal";
 
 interface GitHubDeployModalProps {
-  domainName: string
-  templateRepo: string
-  newRepoName: string
-  uploadListString: string
-  savedToken: string | null
-  onConfirm: (token: string) => Promise<string> // devuelve la URL del repo creado
-  onSuccess: () => void
-  onClose: () => void
+    domainName: string;
+    templateRepo: string;
+    newRepoName: string;
+    uploadListString: string;
+    savedToken: string | null;
+    onConfirm: (token: string) => Promise<string>;
+    onSuccess: () => void;
+    onClose: () => void;
 }
-
-type DeployState =
-  | { type: "confirm" }
-  | { type: "loading" }
-  | { type: "success"; repoUrl: string }
-  | { type: "error"; message: string }
 
 export const GitHubDeployModal: React.FC<GitHubDeployModalProps> = ({
-  domainName,
-  templateRepo,
-  newRepoName,
-  uploadListString,
-  savedToken,
-  onConfirm,
-  onSuccess,
-  onClose,
+    domainName, templateRepo, newRepoName, uploadListString, savedToken, onConfirm, onSuccess, onClose
 }) => {
-  const [deployState, setDeployState] = useState<DeployState>({ type: "confirm" })
-  const [token, setToken] = useState(savedToken ?? "")
+    const [status, setStatus] = useState<'confirm' | 'loading' | 'success' | 'error'>('confirm');
+    const [token, setToken] = useState(savedToken ?? "");
+    const [errorMsg, setErrorMsg] = useState("");
+    const [repoUrl, setRepoUrl] = useState("");
 
-  const handleConfirm = async () => {
-    if (!token.trim()) return
-    setDeployState({ type: "loading" })
-    try {
-      const repoUrl = await onConfirm(token.trim())
-      setDeployState({ type: "success", repoUrl })
-    } catch (error: any) {
-      setDeployState({
-        type: "error",
-        message: error?.message ?? "No se pudo crear el repositorio.",
-      })
+    const handleDeploy = async () => {
+        if (!token.trim()) return;
+        setStatus('loading');
+        try {
+            const url = await onConfirm(token.trim());
+            
+            localStorage.setItem("github_token", token.trim());
+            
+            if (url) {
+                window.open(url, "_blank");
+            }
+
+            setStatus('success');
+        } catch (e: any) {
+            setErrorMsg(e.message || "Error");
+            setStatus('error');
+        }
+    };
+
+    if (status === 'success') {
+        return (
+            <SuccessModal 
+                title="¡Despliegue completado!" 
+                message="El repositorio ha sido creado y abierto en una nueva pestaña."
+                actions={[
+                    { label: "Vale", onClick: onSuccess, variant: "primary" }
+                ]}
+            />
+        );
     }
-  }
 
-  if (deployState.type === "success") {
+    if (status === 'error') {
+        return (
+            <ConfirmModal
+                title="ERROR EN EL DESPLIEGUE"
+                message={`No se pudo crear el repositorio: ${errorMsg}`}
+                onConfirm={() => setStatus('confirm')}
+                onCancel={onClose}
+                confirmLabel="Reintentar"
+                cancelLabel="Cerrar"
+            />
+        );
+    }
+
     return (
-      <SuccessModal
-        title="¡Repositorio creado con éxito!"
-        message={`El repositorio ${newRepoName} ha sido creado y todos los archivos subidos correctamente.`}
-        actions={[
-          { label: "Abrir repositorio", onClick: () => globalThis.open(deployState.repoUrl, "_blank"), variant: "secondary" },
-          { label: "Ir al inicio", onClick: onSuccess, variant: "primary" },
-        ]}
-      />
-    )
-  }
-
-  if (deployState.type === "error") {
-    return (
-      <ConfirmModal
-        title="Error al crear el repositorio"
-        message={deployState.message}
-        onConfirm={() => setDeployState({ type: "confirm" })}
-        onCancel={onClose}
-        confirmLabel="Reintentar"
-        cancelLabel="Cerrar"
-      />
-    )
-  }
-
-  return (
-    <ConfirmModal
-      title="Confirmar subida a GitHub"
-      message={
-        `Dominio: ${domainName}\n` +
-        `Plantilla: lidiafc8/${templateRepo}\n` +
-        `Nuevo repo: ${newRepoName}\n\n` +
-        `Se subirán:\n${uploadListString}`
-      }
-      warning={
-        !savedToken ? (
-          <input
-            type="password"
-            className="wf-input"
-            value={token}
-            onChange={e => setToken(e.target.value)}
-            placeholder="Introduce tu token de GitHub"
-            autoFocus
-          />
-        ) : null
-      }
-      onConfirm={handleConfirm}
-      onCancel={onClose}
-      confirmLabel={deployState.type === "loading" ? "Creando..." : "Confirmar"}
-      cancelLabel="Cancelar"
-    />
-  )
-}
+        <ConfirmModal
+            title="CONFIRMAR SUBIDA A GITHUB"
+            message={`Repo: ${newRepoName}\n\nSe subirán:\n${uploadListString}`}
+            warning={!savedToken && (
+                <div>
+                    <p>Se requiere Token de GitHub:</p>
+                    <input 
+                        type="password" 
+                        className="wf-input" 
+                        placeholder="ghp_xxxxxxxxxxxx" 
+                        value={token} 
+                        onChange={e => setToken(e.target.value)} 
+                        autoFocus
+                    />
+                </div>
+            )}
+            onConfirm={handleDeploy}
+            onCancel={onClose}
+            confirmLabel={status === 'loading' ? "Subiendo..." : "Desplegar"}
+        />
+    );
+};

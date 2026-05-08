@@ -46,6 +46,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     }, []);
 
+
     const applyRenameToState = (id: string, newName: string) => {
         setProjects(prevProjects =>
             prevProjects.map(p => (p.id === id ? { ...p, customName: newName } : p))
@@ -53,16 +54,21 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         setEditingId(null);
     };
 
-    const handleRename = (id: string) => {
-        if (!tempName.trim()) { setEditingId(null); return; }
+    const handleRename = (id: string, newName: string) => {
+        const nameToSet = newName.trim();
+        if (!nameToSet) { 
+            setEditingId(null); 
+            return; 
+        }
+
         const projectToUpdate = projects.find(p => p.id === id);
         if (!projectToUpdate) return;
-        const newName = tempName.trim();
-        const updatedData = { ...projectToUpdate, customName: newName };
+        
+        const updatedData = { ...projectToUpdate, customName: nameToSet };
 
         if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.set({ [id]: updatedData }, () => {
-                applyRenameToState(id, newName);
+                applyRenameToState(id, nameToSet);
             });
         }
     };
@@ -83,12 +89,9 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     const handleDeleteSection = (sectionKey: string) => {
         if (!selectedProject) return;
         const updatedProject = { ...selectedProject, [sectionKey]: "" };
-        const updateProjectsList = (prevProjects: any[]) => 
-            prevProjects.map(p => (p.id === selectedProject.id ? updatedProject : p));
-
         if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
-                setProjects(updateProjectsList);
+                setProjects(prev => prev.map(p => (p.id === selectedProject.id ? updatedProject : p)));
                 setSelectedProject(updatedProject);
             });
         }
@@ -101,105 +104,44 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         delete updatedTestMap[testKey];
         updatedProject.testPartsMap = updatedTestMap;
         setSelectedProject(updatedProject);
-
         if (chrome?.storage?.local) {
-            chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
-                console.log(`Test ${testKey} eliminado correctamente.`);
-            });
+            chrome.storage.local.set({ [selectedProject.id]: updatedProject });
         }
     };
-
-    // --- SOLUCIÓN AL ERROR DE TRIM ---
-    // Ahora aceptamos el argumento 'fileName' que viene del modal
     const handleDownload = (fileName: string) => {
         if (!selectedProject) return;
-        // Pasamos el proyecto y el nombre elegido a la utilidad
         downloadProjectAsMarkdown(selectedProject, fileName);
     };
 
-    const getRepoConfig = (domain: string) => {
-        const isPetClinic = domain.includes("clínica veterinaria") || domain.includes("veterinaria");
-        return {
-            TEMPLATE_OWNER: "lidiafc8",
-            TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
-            TEST_BASE_PATH: isPetClinic
-                ? "src/test/java/org/springframework/samples/petclinic/grooming/"
+    const handleGitHubDeploy = async (token: string, project: any) => {
+        const isPetClinic = project.domainName.toLowerCase().includes("veterinaria") || 
+                            project.domainName.toLowerCase().includes("clínica");
+
+        const cleanDomain = project.domainName
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]/gi, '-').toLowerCase();
+
+        const uniqueRepoName = `examen-${cleanDomain}-${Date.now()}`;
+
+        const config = {
+            owner: "lidiafc8",
+            repo: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
+            path: isPetClinic 
+                ? "src/test/java/org/springframework/samples/petclinic/grooming/" 
                 : "src/test/java/es/us/dp1/chess/tournament/"
         };
-    };
 
-    const getOrPromptGitHubToken = (): string | null => {
-        const existingToken = localStorage.getItem("github_token");
-        if (existingToken) return existingToken;
-        const newToken = globalThis.prompt(
-            "Para crear repositorios en GitHub necesitas un Token de acceso (Personal Access Token).\n\n" +
-            "Por favor, pégalo aquí (se guardará de forma segura en tu navegador para la próxima vez):"
+        return await GithubService.deployExam(
+            token,
+            project,
+            uniqueRepoName,
+            config.owner,
+            config.repo,
+            config.path
         );
-        if (!newToken) {
-            alert("Operación cancelada. Se requiere un token de GitHub para continuar.");
-            return null;
-        }
-        localStorage.setItem("github_token", newToken);
-        return newToken;
     };
+    
 
-    const buildUploadList = (project: any): string => {
-        const items = ["- README.md (Actualizado con el enunciado)"];
-        const testParts = Object.values(project.testPartsMap || {})
-            .filter((p: any) => p?.fileName && p?.code);
-        if (testParts.length > 0) {
-            items.push(`- Tests de Java: ${testParts.map((p: any) => p.fileName).join(', ')}`);
-        }
-        if (project.baseClasses?.trim()) items.push("- Clases base para la extensión creada.");
-        if (project.fullSolution?.trim()) {
-            const solvedParts = [];
-            if (project.attributeConstraints?.trim()) solvedParts.push("restricciones de atributos");
-            if (project.entityRelationships?.trim()) solvedParts.push("relaciones entre entidades");
-            const detailText = solvedParts.length > 0 ? ` (${solvedParts.join(" y ")})` : "";
-            items.push(`- Rama 'solution' con las clases resueltas${detailText}.`);
-        }
-        return items.join("\n");
-    };
-
-    const handleDeployError = (error: any) => {
-        console.error("Error al desplegar:", error);
-        const msg = error.message || "";
-        const isAuthError = msg.includes("Bad credentials") || msg.includes("401") || msg.includes("Requires authentication");
-        if (isAuthError) {
-            localStorage.removeItem("github_token");
-            alert("El token de GitHub ha caducado. Vuelve a intentarlo para introducir uno nuevo.");
-        } else {
-            alert(`Error: ${msg}`);
-        }
-    };
-
-    const handleGitHubDeploy = async () => {
-        const cleanProjectName = selectedProject.domainName
-            .normalize("NFD").replaceAll(/[\u0300-\u036f]/g, "").replaceAll(/[^a-z0-9]/gi, '-').toLowerCase();
-        const cleanCustomName = selectedProject.customName 
-            ? selectedProject.customName.normalize("NFD").replaceAll(/[\u0300-\u036f]/g, "").replaceAll(/[^a-z0-9]/gi, '-').toLowerCase()
-            : "";
-        const now = new Date();
-        const formattedDate = `${String(now.getDate()).padStart(2, '0')}${String(now.getMonth() + 1).padStart(2, '0')}${now.getFullYear()}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
-        const newRepoName = `examen-${cleanProjectName}-${cleanCustomName}-${formattedDate}`;
-        const { TEMPLATE_OWNER, TEMPLATE_REPO, TEST_BASE_PATH } = getRepoConfig(selectedProject.domainName.toLowerCase());
-        const MY_TOKEN = getOrPromptGitHubToken();
-        if (!MY_TOKEN) return;
-        const uploadListString = buildUploadList(selectedProject);
-        const confirmacion = globalThis.confirm(`¿Confirmas la creación del examen en GitHub?\n\nNombre: ${newRepoName}\n\nArchivos:\n${uploadListString}`);
-        if (!confirmacion) return;
-
-        setIsCreating(true);
-        try {
-            const newRepoUrl = await GithubService.deployExam(MY_TOKEN, selectedProject, newRepoName, TEMPLATE_OWNER, TEMPLATE_REPO, TEST_BASE_PATH);
-            alert("¡Repositorio creado con éxito!");
-            globalThis.open(newRepoUrl, '_blank');
-        } catch (error: any) {
-            handleDeployError(error);
-        } finally {
-            setIsCreating(false);
-        }
-    };
 
     if (selectedProject && showGeneratedCode) {
         return (
@@ -239,7 +181,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 onWelcome={onWelcome}
                 onBack={() => setSelectedProject(null)}
                 onGoToFolders={() => { setSelectedProject(null); setSelectedDomainFolder(null); }}
-                // Pasamos la función que ahora recibe el nombre
                 onDownload={handleDownload}
                 onGitHubDeploy={handleGitHubDeploy}
                 onShowGeneratedCode={() => setShowGeneratedCode(true)}
@@ -261,7 +202,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 onBack={() => setSelectedDomainFolder(null)}
                 onSelectProject={(project) => setSelectedProject(project)}
                 onDeleteProject={handleDelete}
-                onRenameProject={handleRename}
+                onRenameProject={handleRename} 
                 setEditingId={setEditingId}
                 setTempName={setTempName}
             />
