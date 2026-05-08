@@ -27,15 +27,16 @@
 
 .success-modal-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 10px;
+  justify-content: center;
 }
 
 .success-modal-actions .btn-step {
-  width: 100%;
+  flex: 1;
 }
 
-.sucess-modal-description {
+.success-modal-description {
   margin-bottom: 25px; 
   color: #555;
   font-size: 15px;
