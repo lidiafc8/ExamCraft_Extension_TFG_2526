@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import logoExamCraft from "../../../assets/icon512.png";
 import hljs from 'highlight.js/lib/core';
 import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/github.css';
@@ -122,14 +121,15 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     };
 
     const getRepoConfig = (domain: string) => {
-        const isPetClinic = domain.includes("clínica veterinaria") || domain.includes("veterinaria");
-        return {
-            TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
-            TEST_BASE_PATH: isPetClinic
-                ? "src/test/java/org/springframework/samples/petclinic/grooming/"
-                : "src/test/java/es/us/dp1/chess/tournament/"
-        };
+    const isPetClinic = domain.includes("clínica veterinaria") || domain.includes("veterinaria");
+    return {
+        TEMPLATE_OWNER: "lidiafc8",
+        TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
+        TEST_BASE_PATH: isPetClinic
+            ? "src/test/java/org/springframework/samples/petclinic/grooming/"
+            : "src/test/java/es/us/dp1/chess/tournament/"
     };
+};
 
     const getOrPromptGitHubToken = (): string | null => {
         const existingToken = localStorage.getItem("github_token");
@@ -188,26 +188,44 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     };
 
-    const handleGitHubDeploy = async () => {
+   const handleGitHubDeploy = async () => {
+
         const cleanProjectName = selectedProject.domainName
             .normalize("NFD")
             .replaceAll(/[\u0300-\u036f]/g, "")
             .replaceAll(/[^a-z0-9]/gi, '-')
             .toLowerCase();
-            
-        const newRepoName = `examen-${cleanProjectName}-${Date.now()}`;
-        const { TEMPLATE_REPO, TEST_BASE_PATH } = getRepoConfig(selectedProject.domainName.toLowerCase());
+
+        const cleanCustomName = selectedProject.customName 
+            ? selectedProject.customName
+                .normalize("NFD")
+                .replaceAll(/[\u0300-\u036f]/g, "")
+                .replaceAll(/[^a-z0-9]/gi, '-')
+                .toLowerCase()
+            : "";
+
+        const now = new Date();
+        const formattedDate = 
+            `${String(now.getDate()).padStart(2, '0')}` +
+            `${String(now.getMonth() + 1).padStart(2, '0')}` +
+            `${now.getFullYear()}` +
+            `${String(now.getHours()).padStart(2, '0')}` +
+            `${String(now.getMinutes()).padStart(2, '0')}`;
+
+        const newRepoName = `examen-${cleanProjectName}-${cleanCustomName}-${formattedDate}`;
+        
+        const { TEMPLATE_OWNER, TEMPLATE_REPO, TEST_BASE_PATH } = getRepoConfig(selectedProject.domainName.toLowerCase());
 
         const MY_TOKEN = getOrPromptGitHubToken();
         if (!MY_TOKEN) return;
 
         const uploadListString = buildUploadList(selectedProject);
         const confirmacion = globalThis.confirm(
-            `¿Confirmas la creación del examen?\n\n` +
+            `¿Confirmas la creación del examen en GitHub?\n\n` +
             `Dominio detectado: ${selectedProject.domainName}\n` +
-            `Plantilla seleccionada: lidiafc8/${TEMPLATE_REPO}\n` +
-            `Nuevo Repo: ${newRepoName}\n\n` +
-            `Se subirán:\n${uploadListString}`
+            `Plantilla seleccionada: ${TEMPLATE_OWNER}/${TEMPLATE_REPO}\n` +
+            `Nombre del repositorio a subir: ${newRepoName}\n\n` +
+            `Archivos a subir:\n${uploadListString}`
         );
         if (!confirmacion) return;
 
@@ -217,6 +235,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 MY_TOKEN,
                 selectedProject,
                 newRepoName,
+                TEMPLATE_OWNER,
                 TEMPLATE_REPO,
                 TEST_BASE_PATH
             );
@@ -234,7 +253,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             <GeneratedCodeScreen
                 selectedProject={selectedProject}
                 selectedDomainFolder={selectedDomainFolder || ""}
-                logoExamCraft={logoExamCraft}
                 onWelcome={onWelcome}
                 onBack={() => setShowGeneratedCode(false)}
                 onGoToExams={() => {
