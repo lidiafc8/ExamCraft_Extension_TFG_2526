@@ -184,7 +184,10 @@ export default function GenerationBaseClassesScreen({
       {showSaveModal && selectedProject && (
         <SaveModal
           domainName={displayName(selectedProject)}
-          onSuccess={() => setShowSaveModal(false)}
+          onSuccess={fromAttributes
+            ? () => onGoToTests?.({ ...selectedProject, [STORAGE_KEY]: responseText })
+            : onWelcome
+          }
           onClose={() => setShowSaveModal(false)}
           buildPayload={() => ({
             ...selectedProject,
@@ -194,7 +197,7 @@ export default function GenerationBaseClassesScreen({
           existingKey={selectedProject.id}
           skipPrompt
           successMessage="Las clases base se han guardado correctamente."
-          successAction="Aceptar"
+          successAction={fromAttributes ? "Ir a Tests" : "Volver al inicio"}
         />
       )}
 

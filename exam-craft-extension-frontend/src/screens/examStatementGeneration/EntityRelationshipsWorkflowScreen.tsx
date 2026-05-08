@@ -1,15 +1,44 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import entityRelationshipsPromptMarkdown from "bundle-text:../../prompts/generation-entity-relationships/generation_relationships_between_entities_from_statement.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
-import WorkflowScreen from "../../components/WorkflowComponents"
+import { useGeminiGeneration } from "~src/components/GeminiGeneration"
+import { Header } from "~src/components/Header"
+import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponents"
+import { FolderExamSelector } from "~src/components/FolderExamsSelector"
+import { ConfirmModal } from "../../components/modals/ConfirmModal"
+import { SuccessModal } from "../../components/modals/SuccessModal"
+import { WarningModal } from "../../components/modals/WarningModal"
+import { downloadMarkdown } from "~src/utils/downloadUtils"
+import { saveToChrome } from "~src/utils/chromeStorageUtils"
+import "../../css/Cards.css"
+
+declare var chrome: any
+
+interface Project {
+  id: string
+  domainName: string
+  customName?: string
+  extensionFinish?: string
+  entityRelationships?: string
+  attributeConstraints?: string
+  baseClasses?: string
+  updatedAt?: string
+}
 
 interface Props {
   readonly onBack: () => void
   readonly onWelcome: () => void
   readonly onCreateExam: () => void
-  readonly onCreateTest: (data: { project: any; constraints: string, entityRelationships: string, baseClass: string, targetPart?: string }) => void
-  readonly onGoToBaseClass: (project?: any) => void 
+  readonly onCreateTest: (data: { project: any; constraints: string; entityRelationships: string; baseClass: string; targetPart?: string }) => void
+  readonly onGoToBaseClass: (project?: any) => void
 }
+
+const ALLOWED_FOLDERS = ["clínica veterinaria", "ajedrez"]
+const STORAGE_KEY = "entityRelationships"
+const DOWNLOAD_PREFIX = "Relaciones_Entidades"
+
+const projectDisplayName = (proj: any) =>
+  proj?.customName || `Examen de ${proj?.domainName}`
 
 export default function EntityRelationshipsWorkflowScreen({
   onBack,
@@ -18,14 +47,172 @@ export default function EntityRelationshipsWorkflowScreen({
   onCreateTest,
   onGoToBaseClass,
 }: Props) {
-  
-  const [pendingProjectForBaseClass, setPendingProjectForBaseClass] = useState<any>(null);
+  const [step, setStep] = useState<"selection" | "workflow">("selection")
+  const [internalStep, setInternalStep] = useState<"input" | "result">("input")
+
+  const [projects, setProjects] = useState<Project[]>([])
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [savedData, setSavedData] = useState<{ project: any; result: string } | null>(null)
+  const [pendingProjectForBaseClass, setPendingProjectForBaseClass] = useState<any>(null)
+
+  const [promptText, setPromptText] = useState("")
+  const [hiddenContext, setHiddenContext] = useState("")
+
+  const { responseText, isLoading, setResponseText, generate } = useGeminiGeneration({
+    logExerciseName: "entity_relationships",
+    buildLogPayload: (result) => ({
+      domain: selectedProject?.domainName,
+      hiddenContext,
+      selectedExam: selectedProject?.extensionFinish,
+      visiblePrompt: promptText,
+      response: result,
+    }),
+  })
+
+  useEffect(() => {
+    if (step === "selection" && globalThis.chrome?.storage?.local) {
+      chrome.storage.local.get(null, (items: Record<string, any>) => {
+        const list = Object.keys(items)
+          .filter((k) => k.startsWith("project_"))
+          .map((k) => ({ id: k, ...items[k] } as Project))
+        setProjects(list)
+      })
+    }
+  }, [step])
+
+  useEffect(() => {
+    if (selectedProject?.domainName) {
+      const { visibleText, hiddenContext: hc } = parseMasterPrompt(entityRelationshipsPromptMarkdown)
+      setPromptText(visibleText)
+      setHiddenContext(hc)
+    }
+  }, [selectedProject])
+
+  const handleSelectProject = (project: Project) => {
+    setSelectedProject(project)
+    setShowConfirmModal(true)
+  }
+
+  const handleConfirmSelection = () => {
+    setShowConfirmModal(false)
+    setStep("workflow")
+    setInternalStep("input")
+  }
+
+  const handleGenerate = async () => {
+    const finalPayload = `
+      CONTEXTO Y RECURSOS (Información interna):
+
+      [RECURSOS ESTÁTICOS Y EJEMPLOS]:
+      ${hiddenContext}
+
+      [ENUNCIADO Y DIAGRAMA DEL EXAMEN SELECCIONADO]:
+      ${selectedProject?.extensionFinish}
+
+      INSTRUCCIONES PRINCIPALES:
+      ${promptText}
+    `
+    const result = await generate(finalPayload)
+    if (result) setInternalStep("result")
+  }
+
+  const handleSave = async () => {
+    if (!selectedProject?.id) {
+      alert("Error: No hay un examen válido seleccionado para actualizar.")
+      return
+    }
+    const updatedProject = {
+      ...selectedProject,
+      [STORAGE_KEY]: responseText,
+      updatedAt: new Date().toISOString(),
+    }
+    try {
+      await saveToChrome(selectedProject.id, updatedProject)
+      setSelectedProject(updatedProject)
+      const data = { project: updatedProject, result: responseText }
+      setSavedData(data)
+      setShowSuccessModal(true)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "No se pudo guardar.")
+    }
+  }
+
+  const handleDownload = () => {
+    if (!selectedProject || !responseText) return
+    downloadMarkdown(
+      `# Relaciones entre Entidades - ${selectedProject.customName || selectedProject.domainName}\n\n${responseText}`,
+      `${DOWNLOAD_PREFIX}_${selectedProject.customName}`
+    )
+  }
+
+  const handlePrimarySuccess = () => {
+    if (!savedData) return
+    setShowSuccessModal(false)
+    if (savedData.project.baseClasses) {
+      onCreateTest({
+        project: savedData.project,
+        constraints: savedData.project.attributeConstraints || "",
+        entityRelationships: savedData.result,
+        baseClass: savedData.project.baseClasses,
+        targetPart: "test2_relationships",
+      })
+    } else {
+      setPendingProjectForBaseClass(savedData.project)
+    }
+  }
+
+  const confirmWarning = selectedProject?.entityRelationships
+    ? "Este examen ya tiene relaciones entre entidades generadas.\nSi continúas, las relaciones anteriores serán reemplazadas por las nuevas."
+    : null
 
   return (
-    <>
-      <WorkflowScreen
-        // ── Navegación ────────────────────────────────────────────────────────
-        onBack={onBack}
+    <div className="exam-app">
+
+      {/* Modal: confirmar selección */}
+      {showConfirmModal && selectedProject && (
+        <ConfirmModal
+          title="Confirmar Contexto"
+          message={`¿Deseas utilizar ${projectDisplayName(selectedProject)} como base para generar el ejercicio de relaciones entre entidades?`}
+          warning={confirmWarning ?? undefined}
+          onConfirm={handleConfirmSelection}
+          onCancel={() => { setShowConfirmModal(false); setSelectedProject(null) }}
+          confirmLabel={selectedProject.entityRelationships ? "Continuar y reemplazar" : "Confirmar"}
+        />
+      )}
+
+      {/* Modal: guardado con éxito */}
+      {showSuccessModal && savedData && (
+        <SuccessModal
+          title="¡Guardado correctamente!"
+          message={`Las relaciones entre entidades de ${projectDisplayName(savedData.project)} han sido actualizadas correctamente.\n\n¿Deseas continuar y generar los tests para estas relaciones ahora mismo?`}
+          actions={[
+            { label: "No, volver al inicio", onClick: () => { setShowSuccessModal(false); onWelcome() }, variant: "secondary" },
+            { label: "Sí, generar tests", onClick: handlePrimarySuccess, variant: "primary" },
+          ]}
+        />
+      )}
+
+      {/* Modal: faltan clases base */}
+      {pendingProjectForBaseClass && (
+        <WarningModal
+          title="Faltan las Clases Base"
+          message={<>Para poder generar los tests de relaciones, primero es necesario generar las <strong>Clases Base</strong> del examen.</>}
+          confirmLabel="Ir a crear Clases Base"
+          cancelLabel="Cancelar"
+          onConfirm={() => {
+            const project = pendingProjectForBaseClass
+            setPendingProjectForBaseClass(null)
+            onGoToBaseClass(project)
+          }}
+          onCancel={() => setPendingProjectForBaseClass(null)}
+        />
+      )}
+
+      <Header
         onWelcome={onWelcome}
         breadcrumbItems={[
           { label: "INICIO", action: onWelcome },
@@ -33,106 +220,64 @@ export default function EntityRelationshipsWorkflowScreen({
           { label: "POR PARTES", action: onBack },
         ]}
         currentStep="RELACIONES ENTRE ENTIDADES"
-
-        // ── Textos ────────────────────────────────────────────────────────────
-        selectionTitle="Selecciona un dominio"
-        selectionDescription='Para generar el ejercicio "Relaciones entre Entidades" es necesario elegir un examen ya creado y almacenado previamente en el sistema. Haz clic en la carpeta del dominio que quieres usar como base para este ejercicio.'
-        workflowInputTitle="Relaciones entre Entidades"
-        workflowResultTitle={(name) => `Generar Relaciones: ${name}`}
-        instructionText={
-          <>
-            Este es el prompt que se usará para generar las relaciones entre entidades del examen
-            seleccionado, puede revisar o modificar cualquier información que vea conveniente.
-            Al terminar, pulse en <strong>"Generar"</strong>.
-          </>
-        }
-        confirmTitle="Confirmar Contexto"
-        confirmDescription={(name) =>
-          `¿Deseas utilizar ${name} como base para generar el ejercicio de relaciones entre entidades?`
-        }
-        confirmWarning={(project) =>
-          project.entityRelationships
-            ? "Este examen ya tiene relaciones entre entidades generadas.\nSi continúas, las relaciones anteriores serán reemplazadas por las nuevas."
-            : null
-        }
-        confirmButtonLabel={(project) =>
-          project.entityRelationships ? "Continuar y reemplazar" : "Confirmar"
-        }
-        
-        // ── Éxito y Redirección a Tests ────────────────────────────────────────
-        successTitle="¡Guardado correctamente!"
-        successDescription={(name) =>
-          `Las relaciones entre entidades de ${name} han sido actualizadas correctamente.\n\n¿Deseas continuar y generar los tests para estas relaciones ahora mismo?`
-        }
-        successPrimaryButtonLabel="Sí, generar tests"
-        successSecondaryButtonLabel="No, volver al inicio"
-        
-        onSaved={(data) => {
-          if (data.project.baseClasses) {
-            onCreateTest({ 
-              project: data.project, 
-              constraints: data.project.attributeConstraints || "", 
-              entityRelationships: data.result, 
-              baseClass: data.project.baseClasses,
-              targetPart: "test2_relationships" 
-            });
-          } else {
-            setPendingProjectForBaseClass(data.project);
-          }
-        }}
-        onSuccessSecondary={() => onWelcome()}
-
-        // ── Configuración de guardado ──────────────────────────────────────────
-        saveButtonLabel="Guardar"
-        allowedFolders={["clínica veterinaria", "ajedrez"]}
-        storageKey="entityRelationships"
-        buildPrompt={() => parseMasterPrompt(entityRelationshipsPromptMarkdown)}
-        logExerciseName="entity_relationships"
-        downloadPrefix="Relaciones_Entidades"
-        downloadTitle={(p) =>
-          `Relaciones entre Entidades - ${p.customName || p.domainName}`
-        }
       />
 
-      {/* ── Modal de Advertencia: Faltan Clases Base ───────────────────────── */}
-      {pendingProjectForBaseClass && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000,
-        }}>
-          <div className="content-card" style={{
-            maxWidth: "400px", width: "90%", padding: "30px",
-            textAlign: "center", backgroundColor: "#fff", borderRadius: "12px",
-          }}>
-            <div style={{ fontSize: "48px", marginBottom: "15px" }}>⚠️</div>
-            <h3 className="main-title small" style={{ marginBottom: "10px", color: "#4a3728" }}>
-              Faltan las Clases Base
-            </h3>
-            <p style={{ marginBottom: "25px", color: "#555", fontSize: "15px" }}>
-              Para poder generar los tests de relaciones, primero es necesario generar las <strong>Clases Base</strong> del examen.
-            </p>
-            <div className="wf-actions-row" style={{ justifyContent: "center", gap: "15px" }}>
-              <button
-                onClick={() => setPendingProjectForBaseClass(null)}
-                className="btn-step secondary"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => {
-                  const projectToPass = pendingProjectForBaseClass;
-                  setPendingProjectForBaseClass(null);
-                  onGoToBaseClass(projectToPass); 
-                }}
-                className="btn-step primary"
-              >
-                Ir a crear Clases Base
-              </button>
+      <main className="main-content">
+
+        {step === "selection" && (
+          <FolderExamSelector
+            projects={projects}
+            allowedFolders={ALLOWED_FOLDERS}
+            selectedFolder={selectedFolder}
+            onSelectFolder={(folder) => setSelectedFolder(folder)}
+            onSelectProject={handleSelectProject}
+            onBack={onBack}
+            displayName={projectDisplayName}
+          />
+        )}
+
+        {step === "workflow" && selectedProject && (
+          <div className="wf-layout-container">
+            <div className="wf-wide-wrapper">
+              {internalStep === "input" && (
+                <PromptEditor
+                  title="Relaciones entre Entidades"
+                  description={
+                    <>
+                      Este es el prompt que se usará para generar las relaciones entre entidades del examen
+                      seleccionado, puede revisar o modificar cualquier información que vea conveniente.
+                      Al terminar, pulse en <strong>"Generar"</strong>.
+                    </>
+                  }
+                  promptText={promptText}
+                  isLoading={isLoading}
+                  onPromptChange={setPromptText}
+                  onGenerate={handleGenerate}
+                  onBack={() => setStep("selection")}
+                />
+              )}
+
+              {internalStep === "result" && (
+                <SplitResultView
+                  promptText={promptText}
+                  isLoading={isLoading}
+                  responseText={responseText}
+                  rightTitle={`Generar Relaciones: ${projectDisplayName(selectedProject)}`}
+                  onPromptChange={setPromptText}
+                  onRegenerate={handleGenerate}
+                  onResponseChange={setResponseText}
+                  footer={
+                    <div className="wf-actions-row">
+                      <button onClick={handleDownload} className="btn-step btn-download">Descargar (.md)</button>
+                      <button onClick={handleSave} className="btn-step primary">Guardar</button>
+                    </div>
+                  }
+                />
+              )}
             </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </main>
+    </div>
   )
 }
