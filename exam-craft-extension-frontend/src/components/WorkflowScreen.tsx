@@ -179,12 +179,12 @@ export default function WorkflowScreen({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            exercise: logExerciseName,
-            domain: selectedProject.domainName,
-            hiddenContext,
-            selectedExam: selectedProject.extensionFinish,
-            visiblePrompt: promptText,
-            response: result,
+            ejercicio: logExerciseName,
+            dominio: selectedProject.domainName,
+            contextoOculto: hiddenContext,
+            examenSeleccionado: selectedProject.extensionFinish,
+            promptVisible: promptText,
+            respuesta: result,
           }),
         })
       } catch {

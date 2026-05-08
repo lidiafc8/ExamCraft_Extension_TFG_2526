@@ -11,6 +11,8 @@ Quiero que en base a la lógica de la extensión funcional que me has pasado, me
 
 -  Recuerda todo el contexto dado en la anterior petición.
 
+-  Para el dominio de **Ajedrez**, es **MUY IMPORTANTE** que todas las propuestas que devuelvas contengan estas 3 clases: ChessMatch, ChessBoard y Piece. Construye la nueva extensión funcional teniendo en cuenta SIEMPRE la existencia de estas clases.
+
 -  De los enunciados de ejemplo, céntrate en la estructura del código Mermaid de los del proyecto {{DOMAIN}}
 
      - IMPORTANTE: Ignora si los ejemplos están compactados; tú debes aplicar siempre las reglas de saltos de línea estrictas mencionadas abajo.

@@ -44,7 +44,7 @@ Teniendo estos ejemplos, tu tarea es proporcionarme una extensión de enunciado 
 
 *	La extensión funcional devuelta deberá tener la misma estructura narrativa que la de los proporcionados como ejemplo, tanto el principio como el final del enunciado.
 
-*	La extensión funcional devuelta deberá tener el mismo nivel de detalle que los proporcionados como ejemplo, ni más ni menos, dando breves descripciones de los atributos de las nuevas entidades (rojas) y sus relaciones.
+*	La extensión funcional devuelta deberá tener el mismo nivel de detalle que los proporcionados como ejemplo, ni más ni menos, dando BREVES descripciones de los atributos de las nuevas entidades (rojas) y sus relaciones, evita alargar dichas explicaciones.
 
 *	La extensión funcional deberá mantener la base del dominio.
 
@@ -57,4 +57,8 @@ Teniendo estos ejemplos, tu tarea es proporcionarme una extensión de enunciado 
 *	Devuélveme directamente el enunciado resultado como si fuera el del examen, sin comentarios entre medio ni indicaciones concretas generadas por ti.
 
 *	Debido a la ausencia de clases azules, omite en tu respuesta cualquier información acerca de ellas en el enunciado generado, aunque en los enunciados de ejemplos si venga.
+
+*   Para el dominio de **Ajedrez**, es **MUY IMPORTANTE** que todas las propuestas de enunciado que devuelvas contengan estas 3 clases: ChessMatch, ChessBoard y Piece. Construye la nueva extensión funcional teniendo en cuenta SIEMPRE la existencia de estas clases.
+
+
 
