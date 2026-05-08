@@ -331,6 +331,7 @@ body {
 .btn-step.primary   { background-color: #3E2723; color: white; }
 .btn-step.secondary { background-color: #99807b; color: white; }
 .btn-step.success   { background-color: #2E7D32; color: white; }
+.btn-step.generate   { background-color: #976d65; color: white; }
 
 .btn-step.success.confirm  { width: 250px; height: 48px; }
 .btn-step.secondary.cancel { width: 250px; height: 48px; }

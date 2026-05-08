@@ -117,7 +117,7 @@ export function SplitResultView({
             value={promptText}
             onChange={(e) => onPromptChange(e.target.value)}
           />
-          <button onClick={onRegenerate} className="btn-step primary" disabled={isLoading}>
+          <button onClick={onRegenerate} className="btn-step generate" disabled={isLoading}>
             {isLoading ? <div className="loading-spinner" /> : regenerateLabel}
           </button>
         </div>

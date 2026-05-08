@@ -5,6 +5,7 @@ interface ConfirmModalProps {
   title: string;
   message: string;
   warning?: React.ReactNode;
+  plainWarning?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
   confirmLabel?: string;
@@ -15,6 +16,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   title,
   message,
   warning,
+  plainWarning = false,
   onConfirm,
   onCancel,
   confirmLabel = "Confirmar",
@@ -30,7 +32,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         {message}
       </p>
       {warning && (
-        <div className="confirm-modal-warning">
+        <div className={`confirm-modal-warning ${plainWarning ? 'confirm-modal-warning--plain' : ''}`}>
           {warning}
         </div>
       )}

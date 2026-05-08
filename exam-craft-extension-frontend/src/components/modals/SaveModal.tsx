@@ -26,6 +26,7 @@ export const SaveModal: React.FC<SaveModalProps> = ({
   const defaultName = `Examen de ${domainName}`
   const [saveState, setSaveState] = useState<SaveState>({ type: "prompt" })
   const [draftName, setDraftName] = useState(defaultName)
+  const [focused, setFocused] = useState(false)
 
   const handleConfirm = async () => {
     const finalName = draftName.trim() || defaultName
@@ -47,8 +48,7 @@ export const SaveModal: React.FC<SaveModalProps> = ({
         title="¡Guardado con éxito!"
         message={`El examen "${saveState.savedName}" se ha guardado correctamente.`}
         actions={[
-          { label: "Ir al inicio", onClick: onSuccess, variant: "primary" },
-          { label: "Cerrar", onClick: onClose, variant: "secondary" },
+          { label: "Volver al inicio", onClick: onSuccess, variant: "primary" }
         ]}
       />
     )
@@ -71,15 +71,83 @@ export const SaveModal: React.FC<SaveModalProps> = ({
     <ConfirmModal
       title="Guardar examen"
       message="¿Con qué nombre quieres guardar este examen?"
+      plainWarning
       warning={
-        <input
-          type="text"
-          className="wf-input"
-          value={draftName}
-          onChange={e => setDraftName(e.target.value)}
-          placeholder={defaultName}
-          autoFocus
-        />
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+          <label style={{
+            fontSize: "11px",
+            fontWeight: 600,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "#8a7060",
+          }}>
+            Nombre del examen
+          </label>
+          <div style={{ position: "relative", width: "100%" }}>
+            <span style={{
+              position: "absolute",
+              left: "13px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              fontSize: "15px",
+              color: focused ? "#5c3d2e" : "#b09080",
+              transition: "color 0.2s ease",
+              pointerEvents: "none",
+              userSelect: "none",
+            }}>
+              ✏️
+            </span>
+            <input
+              type="text"
+              value={draftName}
+              onChange={e => setDraftName(e.target.value)}
+              placeholder={defaultName}
+              autoFocus
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "13px 16px 13px 40px",
+                fontSize: "15px",
+                fontWeight: 500,
+                fontFamily: "Georgia, 'Times New Roman', serif",
+                color: "#2c1a0e",
+                background: focused ? "#fff" : "#fdf8f4",
+                border: `2px solid ${focused ? "#5c3d2e" : "#d4b8a8"}`,
+                borderRadius: "10px",
+                outline: "none",
+                transition: "all 0.2s ease",
+                boxShadow: focused
+                  ? "0 0 0 4px rgba(92, 61, 46, 0.12), 0 2px 8px rgba(92, 61, 46, 0.08)"
+                  : "0 1px 3px rgba(0,0,0,0.06)",
+              }}
+            />
+            <div style={{
+              position: "absolute",
+              bottom: 0,
+              left: "10px",
+              right: "10px",
+              height: "2px",
+              background: "linear-gradient(90deg, #8b5e3c, #c8956c)",
+              borderRadius: "0 0 8px 8px",
+              opacity: focused ? 1 : 0,
+              transition: "opacity 0.2s ease",
+            }} />
+          </div>
+          {draftName.trim() === "" && (
+            <p style={{
+              margin: 0,
+              fontSize: "11px",
+              color: "#c0756a",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            }}>
+              ⚠️ Se usará el nombre por defecto si se deja vacío
+            </p>
+          )}
+        </div>
       }
       onConfirm={handleConfirm}
       onCancel={onClose}

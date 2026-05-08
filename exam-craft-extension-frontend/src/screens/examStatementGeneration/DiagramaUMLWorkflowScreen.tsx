@@ -158,7 +158,7 @@ export default function DiagramUMLScreen({
 
                 <button
                   onClick={handleGenerate}
-                  className="btn-step primary"
+                  className="btn-step generate"
                   disabled={isLoading}
                 >
                   {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}

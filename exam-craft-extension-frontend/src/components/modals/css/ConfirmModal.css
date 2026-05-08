@@ -31,6 +31,14 @@
   color: #7a5800;
 }
 
+.confirm-modal-warning--plain {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
 .confirm-modal-actions {
   justify-content: center;
   gap: 15px;
