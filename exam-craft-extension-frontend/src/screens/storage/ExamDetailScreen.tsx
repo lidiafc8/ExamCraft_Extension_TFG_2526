@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { MermaidViewer } from "../../components/MermaidViewer";
 import { Header } from "../../components/Header";
 import { DeleteConfirmationModal } from "~src/components/modals/DeleteConfirmationModal";
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"; 
 import { cleanMermaidCode } from "../../components/mermaidCleaner";
 import "./css/StorageScreen.css";
 import "./css/ExamDetailScreen.css";
@@ -14,7 +15,7 @@ export interface ExamDetailScreenProps {
     onWelcome: () => void;
     onBack: () => void;
     onGoToFolders: () => void;
-    onDownload: () => void;
+    onDownload: (fileName: string) => void; // Recibe el nombre del modal
     onGitHubDeploy: () => void;
     onShowGeneratedCode: () => void;
     onDeleteProject: (id: string, e?: React.MouseEvent) => void;
@@ -39,19 +40,21 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
+    const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
 
     const mermaidCode = selectedProject?.extensionMermaid  || '';
     const introText   = selectedProject?.extensionStatement || '';
 
     const breadcrumbItems = [
-        { label: 'INICIO',              action: onWelcome },
+        { label: 'INICIO',               action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
         { label: selectedDomainFolder?.toUpperCase() || '', action: onBack },
     ];
 
     const currentTitle = selectedProject?.customName || `Examen de ${selectedProject?.domainName}`;
 
+    // Handlers
     const handleDeletePart = (sectionKey: string, sectionName: string) => {
         setSectionToDelete({ key: sectionKey, name: sectionName });
     };
@@ -66,6 +69,11 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     const confirmDeleteProject = () => {
         onDeleteProject(selectedProject?.id);
         setShowDeleteProjectModal(false);
+    };
+
+    const handleConfirmDownload = (fileName: string) => {
+        onDownload(fileName); // Ejecuta la utilidad corregida sin prompt
+        setShowDownloadModal(false);
     };
 
     return (
@@ -96,14 +104,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                                     role="button" 
                                     tabIndex={0} 
                                     aria-label="Cerrar menú"
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                        e.preventDefault();
-                                        setShowActionsMenu(false);
-                                        }
-                                    }}
-                                    />
-                                    
+                                />
                                 <div className="actions-dropdown">
                                     <button
                                         type="button"
@@ -115,7 +116,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                                     <button
                                         type="button"
                                         className="action-btn action-btn--download"
-                                        onClick={() => { onDownload(); setShowActionsMenu(false); }}
+                                        onClick={() => { setShowDownloadModal(true); setShowActionsMenu(false); }}
                                     >
                                         Descargar (.md)
                                     </button>
@@ -243,6 +244,8 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         </button>
                     </div>
 
+                    {/* MODALES */}
+
                     {showPreviewModal && (
                         <div className="preview-backdrop">
                             <div className="preview-modal">
@@ -258,7 +261,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                                 </div>
                                 <div className="preview-modal-body">
                                     <div className="exam-markdown-container">
-                                        <h1>{selectedProject?.customName || `Examen de ${selectedProject?.domainName}`}</h1>
+                                        <h1>{currentTitle}</h1>
                                         <h2>1. Extensión Funcional y Diagrama UML</h2>
                                         {introText && <p style={{ whiteSpace: 'pre-wrap' }}>{introText}</p>}
                                         {mermaidCode && (
@@ -282,6 +285,13 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             </div>
                         </div>
                     )}
+
+                    <DownloadConfirmModal
+                        isOpen={showDownloadModal}
+                        defaultFileName={currentTitle}
+                        onConfirm={handleConfirmDownload}
+                        onCancel={() => setShowDownloadModal(false)}
+                    />
 
                     <DeleteConfirmationModal
                         isOpen={!!sectionToDelete}

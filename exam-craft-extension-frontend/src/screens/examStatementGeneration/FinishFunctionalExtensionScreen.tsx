@@ -5,6 +5,7 @@ import { StepperHeader } from "../../components/WorkflowComponents"
 import "../../css/WorkFlowParts.css"
 import { downloadMarkdown } from "~src/utils/downloadUtils"
 import { SaveModal } from "~src/components/modals/SaveModal"
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal" // 1. Importamos el nuevo modal
 
 declare var chrome: any
 
@@ -34,12 +35,19 @@ export default function FinishFunctionalExtensionScreen({
   onStatementStep1,
 }: Props) {
   const [showSave, setShowSave] = useState(false)
+  const [showDownloadModal, setShowDownloadModal] = useState(false) 
 
-  const handleDownload = () => {
-    const content = `# Extensión Funcional - ${domainName}\n\n## Enunciado\n${extensionStatement || "No hay texto de enunciado."}\n\n${
-      extensionMermaid ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\`` : "*No se generó código Mermaid*"
+  const handleConfirmDownload = (fileName: string) => {
+    const content = `# Extensión Funcional - ${domainName}\n\n## Enunciado\n${
+      extensionStatement || "No hay texto de enunciado."
+    }\n\n${
+      extensionMermaid
+        ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\``
+        : "*No se generó código Mermaid*"
     }\n`
-    downloadMarkdown(content, `Extension_Funcional_${domainName}`)
+    
+    downloadMarkdown(content, fileName) 
+    setShowDownloadModal(false) 
   }
 
   const breadcrumbItems = [
@@ -80,22 +88,41 @@ export default function FinishFunctionalExtensionScreen({
               <div className="wf-column-three">
                 <div className="wf-column-title">Visualización del Modelo UML</div>
                 <div className="wf-diagram-area">
-                  {extensionMermaid
-                    ? <div><MermaidViewer chartCode={extensionMermaid} /></div>
-                    : <div>No se pudo extraer el diagrama del texto.</div>
-                  }
+                  {extensionMermaid ? (
+                    <div>
+                      <MermaidViewer chartCode={extensionMermaid} />
+                    </div>
+                  ) : (
+                    <div>No se pudo extraer el diagrama del texto.</div>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="wf-actions-row">
-              <button onClick={onBack} className="btn-back">Volver a UML</button>
-              <button onClick={handleDownload} className="btn-step btn-download">Descargar (.md)</button>
-              <button onClick={() => setShowSave(true)} className="btn-step primary">Guardar</button>
+              <button onClick={onBack} className="btn-back">
+                Volver a UML
+              </button>
+              <button
+                onClick={() => setShowDownloadModal(true)}
+                className="btn-step btn-download"
+              >
+                Descargar (.md)
+              </button>
+              <button onClick={() => setShowSave(true)} className="btn-step primary">
+                Guardar
+              </button>
             </div>
           </div>
         </div>
       </main>
+
+      <DownloadConfirmModal
+        isOpen={showDownloadModal}
+        defaultFileName={`Extension_Funcional_${domainName.replace(/\s+/g, "_")}`}
+        onConfirm={handleConfirmDownload}
+        onCancel={() => setShowDownloadModal(false)}
+      />
 
       {showSave && (
         <SaveModal

@@ -30,6 +30,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     const [showSolutionGeneratedCode, setShowSolutionGeneratedCode] = useState(false);
 
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
+    
     const projectsInFolder = projects.filter(p =>
         p.domainName && selectedDomainFolder && p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
     );
@@ -81,9 +82,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
     const handleDeleteSection = (sectionKey: string) => {
         if (!selectedProject) return;
-
         const updatedProject = { ...selectedProject, [sectionKey]: "" };
-
         const updateProjectsList = (prevProjects: any[]) => 
             prevProjects.map(p => (p.id === selectedProject.id ? updatedProject : p));
 
@@ -97,13 +96,10 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
     const handleDeleteTest = (testKey: string) => {
         if (!selectedProject?.id) return;
-
         const updatedProject = { ...selectedProject };
         const updatedTestMap = { ...(updatedProject.testPartsMap || {}) };
-
         delete updatedTestMap[testKey];
         updatedProject.testPartsMap = updatedTestMap;
-
         setSelectedProject(updatedProject);
 
         if (chrome?.storage?.local) {
@@ -113,65 +109,55 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     };
 
-    
-
-    const handleDownload = () => {
+    // --- SOLUCIÓN AL ERROR DE TRIM ---
+    // Ahora aceptamos el argumento 'fileName' que viene del modal
+    const handleDownload = (fileName: string) => {
         if (!selectedProject) return;
-        downloadProjectAsMarkdown(selectedProject);
+        // Pasamos el proyecto y el nombre elegido a la utilidad
+        downloadProjectAsMarkdown(selectedProject, fileName);
     };
 
     const getRepoConfig = (domain: string) => {
-    const isPetClinic = domain.includes("clínica veterinaria") || domain.includes("veterinaria");
-    return {
-        TEMPLATE_OWNER: "lidiafc8",
-        TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
-        TEST_BASE_PATH: isPetClinic
-            ? "src/test/java/org/springframework/samples/petclinic/grooming/"
-            : "src/test/java/es/us/dp1/chess/tournament/"
+        const isPetClinic = domain.includes("clínica veterinaria") || domain.includes("veterinaria");
+        return {
+            TEMPLATE_OWNER: "lidiafc8",
+            TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
+            TEST_BASE_PATH: isPetClinic
+                ? "src/test/java/org/springframework/samples/petclinic/grooming/"
+                : "src/test/java/es/us/dp1/chess/tournament/"
+        };
     };
-};
 
     const getOrPromptGitHubToken = (): string | null => {
         const existingToken = localStorage.getItem("github_token");
         if (existingToken) return existingToken;
-
         const newToken = globalThis.prompt(
             "Para crear repositorios en GitHub necesitas un Token de acceso (Personal Access Token).\n\n" +
             "Por favor, pégalo aquí (se guardará de forma segura en tu navegador para la próxima vez):"
         );
-
         if (!newToken) {
             alert("Operación cancelada. Se requiere un token de GitHub para continuar.");
             return null;
         }
-
         localStorage.setItem("github_token", newToken);
         return newToken;
     };
 
     const buildUploadList = (project: any): string => {
         const items = ["- README.md (Actualizado con el enunciado)"];
-        
         const testParts = Object.values(project.testPartsMap || {})
             .filter((p: any) => p?.fileName && p?.code);
-
         if (testParts.length > 0) {
             items.push(`- Tests de Java: ${testParts.map((p: any) => p.fileName).join(', ')}`);
         }
-
-        if (project.baseClasses?.trim()) {
-            items.push("- Clases base para la extensión creada.");
-        }
-        
+        if (project.baseClasses?.trim()) items.push("- Clases base para la extensión creada.");
         if (project.fullSolution?.trim()) {
             const solvedParts = [];
             if (project.attributeConstraints?.trim()) solvedParts.push("restricciones de atributos");
             if (project.entityRelationships?.trim()) solvedParts.push("relaciones entre entidades");
-
             const detailText = solvedParts.length > 0 ? ` (${solvedParts.join(" y ")})` : "";
             items.push(`- Rama 'solution' con las clases resueltas${detailText}.`);
         }
-
         return items.join("\n");
     };
 
@@ -179,67 +165,34 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         console.error("Error al desplegar:", error);
         const msg = error.message || "";
         const isAuthError = msg.includes("Bad credentials") || msg.includes("401") || msg.includes("Requires authentication");
-
         if (isAuthError) {
             localStorage.removeItem("github_token");
-            alert("El token de GitHub ha caducado, es inválido o no tiene permisos. Vuelve a intentarlo para introducir uno nuevo.");
+            alert("El token de GitHub ha caducado. Vuelve a intentarlo para introducir uno nuevo.");
         } else {
             alert(`Error: ${msg}`);
         }
     };
 
-   const handleGitHubDeploy = async () => {
-
+    const handleGitHubDeploy = async () => {
         const cleanProjectName = selectedProject.domainName
-            .normalize("NFD")
-            .replaceAll(/[\u0300-\u036f]/g, "")
-            .replaceAll(/[^a-z0-9]/gi, '-')
-            .toLowerCase();
-
+            .normalize("NFD").replaceAll(/[\u0300-\u036f]/g, "").replaceAll(/[^a-z0-9]/gi, '-').toLowerCase();
         const cleanCustomName = selectedProject.customName 
-            ? selectedProject.customName
-                .normalize("NFD")
-                .replaceAll(/[\u0300-\u036f]/g, "")
-                .replaceAll(/[^a-z0-9]/gi, '-')
-                .toLowerCase()
+            ? selectedProject.customName.normalize("NFD").replaceAll(/[\u0300-\u036f]/g, "").replaceAll(/[^a-z0-9]/gi, '-').toLowerCase()
             : "";
-
         const now = new Date();
-        const formattedDate = 
-            `${String(now.getDate()).padStart(2, '0')}` +
-            `${String(now.getMonth() + 1).padStart(2, '0')}` +
-            `${now.getFullYear()}` +
-            `${String(now.getHours()).padStart(2, '0')}` +
-            `${String(now.getMinutes()).padStart(2, '0')}`;
-
+        const formattedDate = `${String(now.getDate()).padStart(2, '0')}${String(now.getMonth() + 1).padStart(2, '0')}${now.getFullYear()}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
         const newRepoName = `examen-${cleanProjectName}-${cleanCustomName}-${formattedDate}`;
-        
         const { TEMPLATE_OWNER, TEMPLATE_REPO, TEST_BASE_PATH } = getRepoConfig(selectedProject.domainName.toLowerCase());
-
         const MY_TOKEN = getOrPromptGitHubToken();
         if (!MY_TOKEN) return;
-
         const uploadListString = buildUploadList(selectedProject);
-        const confirmacion = globalThis.confirm(
-            `¿Confirmas la creación del examen en GitHub?\n\n` +
-            `Dominio detectado: ${selectedProject.domainName}\n` +
-            `Plantilla seleccionada: ${TEMPLATE_OWNER}/${TEMPLATE_REPO}\n` +
-            `Nombre del repositorio a subir: ${newRepoName}\n\n` +
-            `Archivos a subir:\n${uploadListString}`
-        );
+        const confirmacion = globalThis.confirm(`¿Confirmas la creación del examen en GitHub?\n\nNombre: ${newRepoName}\n\nArchivos:\n${uploadListString}`);
         if (!confirmacion) return;
 
         setIsCreating(true);
         try {
-            const newRepoUrl = await GithubService.deployExam(
-                MY_TOKEN,
-                selectedProject,
-                newRepoName,
-                TEMPLATE_OWNER,
-                TEMPLATE_REPO,
-                TEST_BASE_PATH
-            );
-            alert("¡Repositorio creado y todos los archivos subidos con éxito!");
+            const newRepoUrl = await GithubService.deployExam(MY_TOKEN, selectedProject, newRepoName, TEMPLATE_OWNER, TEMPLATE_REPO, TEST_BASE_PATH);
+            alert("¡Repositorio creado con éxito!");
             globalThis.open(newRepoUrl, '_blank');
         } catch (error: any) {
             handleDeployError(error);
@@ -255,15 +208,8 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 selectedDomainFolder={selectedDomainFolder || ""}
                 onWelcome={onWelcome}
                 onBack={() => setShowGeneratedCode(false)}
-                onGoToExams={() => {
-                    setShowGeneratedCode(false);
-                    setSelectedProject(null);
-                }}
-                onGoToFolders={() => {
-                    setShowGeneratedCode(false);
-                    setSelectedProject(null);
-                    setSelectedDomainFolder(null);
-                }}
+                onGoToExams={() => { setShowGeneratedCode(false); setSelectedProject(null); }}
+                onGoToFolders={() => { setShowGeneratedCode(false); setSelectedProject(null); setSelectedDomainFolder(null); }}
                 onDeleteSection={handleDeleteSection}
                 onDeleteTest={handleDeleteTest}  
             />
@@ -277,15 +223,8 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 selectedDomainFolder={selectedDomainFolder || ""}
                 onWelcome={onWelcome}
                 onBack={() => setShowSolutionGeneratedCode(false)}  
-                onGoToExams={() => {
-                    setShowSolutionGeneratedCode(false);            
-                    setSelectedProject(null);
-                }}
-                onGoToFolders={() => {
-                    setShowSolutionGeneratedCode(false);             
-                    setSelectedProject(null);
-                    setSelectedDomainFolder(null);
-                }}
+                onGoToExams={() => { setShowSolutionGeneratedCode(false); setSelectedProject(null); }}
+                onGoToFolders={() => { setShowSolutionGeneratedCode(false); setSelectedProject(null); setSelectedDomainFolder(null); }}
                 onDeleteSection={handleDeleteSection}
             />
         );
@@ -299,10 +238,8 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 isCreating={isCreating}
                 onWelcome={onWelcome}
                 onBack={() => setSelectedProject(null)}
-                onGoToFolders={() => {
-                    setSelectedProject(null);
-                    setSelectedDomainFolder(null);
-                }}
+                onGoToFolders={() => { setSelectedProject(null); setSelectedDomainFolder(null); }}
+                // Pasamos la función que ahora recibe el nombre
                 onDownload={handleDownload}
                 onGitHubDeploy={handleGitHubDeploy}
                 onShowGeneratedCode={() => setShowGeneratedCode(true)}
