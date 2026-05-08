@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import logoExamCraft from "../../../assets/icon512.png";
 import hljs from 'highlight.js/lib/core';
 import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/github.css';
@@ -122,14 +121,15 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     };
 
     const getRepoConfig = (domain: string) => {
-        const isPetClinic = domain.includes("clínica veterinaria") || domain.includes("veterinaria");
-        return {
-            TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
-            TEST_BASE_PATH: isPetClinic
-                ? "src/test/java/org/springframework/samples/petclinic/grooming/"
-                : "src/test/java/es/us/dp1/chess/tournament/"
-        };
+    const isPetClinic = domain.includes("clínica veterinaria") || domain.includes("veterinaria");
+    return {
+        TEMPLATE_OWNER: "lidiafc8",
+        TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
+        TEST_BASE_PATH: isPetClinic
+            ? "src/test/java/org/springframework/samples/petclinic/grooming/"
+            : "src/test/java/es/us/dp1/chess/tournament/"
     };
+};
 
     const getSavedToken = (): string | null => {
         return localStorage.getItem("github_token");
@@ -173,13 +173,64 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         throw error;
     };
 
-    const getNewRepoName = () => {
+   const handleGitHubDeploy = async () => {
+
         const cleanProjectName = selectedProject.domainName
             .normalize("NFD")
             .replaceAll(/[\u0300-\u036f]/g, "")
             .replaceAll(/[^a-z0-9]/gi, '-')
             .toLowerCase();
-        return `examen-${cleanProjectName}-${Date.now()}`;
+
+        const cleanCustomName = selectedProject.customName 
+            ? selectedProject.customName
+                .normalize("NFD")
+                .replaceAll(/[\u0300-\u036f]/g, "")
+                .replaceAll(/[^a-z0-9]/gi, '-')
+                .toLowerCase()
+            : "";
+
+        const now = new Date();
+        const formattedDate = 
+            `${String(now.getDate()).padStart(2, '0')}` +
+            `${String(now.getMonth() + 1).padStart(2, '0')}` +
+            `${now.getFullYear()}` +
+            `${String(now.getHours()).padStart(2, '0')}` +
+            `${String(now.getMinutes()).padStart(2, '0')}`;
+
+        const newRepoName = `examen-${cleanProjectName}-${cleanCustomName}-${formattedDate}`;
+        
+        const { TEMPLATE_OWNER, TEMPLATE_REPO, TEST_BASE_PATH } = getRepoConfig(selectedProject.domainName.toLowerCase());
+
+        const MY_TOKEN = getOrPromptGitHubToken();
+        if (!MY_TOKEN) return;
+
+        const uploadListString = buildUploadList(selectedProject);
+        const confirmacion = globalThis.confirm(
+            `¿Confirmas la creación del examen en GitHub?\n\n` +
+            `Dominio detectado: ${selectedProject.domainName}\n` +
+            `Plantilla seleccionada: ${TEMPLATE_OWNER}/${TEMPLATE_REPO}\n` +
+            `Nombre del repositorio a subir: ${newRepoName}\n\n` +
+            `Archivos a subir:\n${uploadListString}`
+        );
+        if (!confirmacion) return;
+
+        setIsCreating(true);
+        try {
+            const newRepoUrl = await GithubService.deployExam(
+                MY_TOKEN,
+                selectedProject,
+                newRepoName,
+                TEMPLATE_OWNER,
+                TEMPLATE_REPO,
+                TEST_BASE_PATH
+            );
+            alert("¡Repositorio creado y todos los archivos subidos con éxito!");
+            globalThis.open(newRepoUrl, '_blank');
+        } catch (error: any) {
+            handleDeployError(error);
+        } finally {
+            setIsCreating(false);
+        }
     };
 
     if (selectedProject && showGeneratedCode) {
