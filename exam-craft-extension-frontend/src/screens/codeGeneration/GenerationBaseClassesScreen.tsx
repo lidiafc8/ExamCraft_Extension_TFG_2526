@@ -81,7 +81,9 @@ export default function GenerationBaseClassesScreen({
   onCreateExamByParts,
   onCodeGeneration,
 }: Props) {
-  const [selectionStep, setSelectionStep] = useState<"folders" | "exams" | "workflow">("folders")
+  const [selectionStep, setSelectionStep] = useState<"folders" | "exams" | "workflow">(
+    initialProject ? "workflow" : "folders"
+  )
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
   const [projects, setProjects] = useState<Project[]>([])
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
@@ -182,7 +184,7 @@ export default function GenerationBaseClassesScreen({
       {showSaveModal && selectedProject && (
         <SaveModal
           domainName={displayName(selectedProject)}
-          onSuccess={onWelcome}
+          onSuccess={() => setShowSaveModal(false)}
           onClose={() => setShowSaveModal(false)}
           buildPayload={() => ({
             ...selectedProject,
@@ -190,6 +192,9 @@ export default function GenerationBaseClassesScreen({
             updatedAt: new Date().toISOString(),
           })}
           existingKey={selectedProject.id}
+          skipPrompt
+          successMessage="Las clases base se han guardado correctamente."
+          successAction="Aceptar"
         />
       )}
 
@@ -222,7 +227,7 @@ export default function GenerationBaseClassesScreen({
                   isLoading={isLoading}
                   onPromptChange={setPromptText}
                   onGenerate={handleGenerate}
-                  onBack={() => setSelectionStep("exams")}
+                  onBack={() => fromAttributes ? onBack() : setSelectionStep("exams")}
                 />
               )}
               {internalStep === "result" && (

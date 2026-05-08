@@ -191,15 +191,16 @@ export default function AttributesConstraintsWorkflowScreen({
       {showSuccessModal && savedData && (
         <SuccessModal
           title="¡Guardado correctamente!"
-          message={`Las restricciones de atributos de ${displayName(savedData.project)} han sido actualizadas correctamente.\n\n¿Deseas continuar y generar los tests para estas restricciones ahora mismo?`}
+          message={`Las restricciones de atributos de ${displayName(savedData.project)} han sido actualizadas correctamente.\n\n
+          ¿Deseas continuar y generar los tests para estas restricciones ahora mismo?`}
           actions={[
             {
-              label: "No, volver al inicio",
+              label: "No",
               onClick: () => { setShowSuccessModal(false); onWelcome() },
               variant: "secondary",
             },
             {
-              label: "Sí, generar tests",
+              label: "Sí",
               onClick: handleSuccessPrimary,
               variant: "primary",
             },
@@ -261,6 +262,13 @@ export default function AttributesConstraintsWorkflowScreen({
                     onResponseChange={setResponseText}
                     footer={
                       <div className="wf-actions-row">
+                        <button
+                            onClick={handleGenerate}
+                            className="btn-step generate"
+                            disabled={isLoading}
+                          >
+                            {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                          </button>
                         <button onClick={handleDownload} className="btn-step btn-download">Descargar (.md)</button>
                         <button onClick={handleSaveToChrome} className="btn-step primary">Guardar</button>
                       </div>

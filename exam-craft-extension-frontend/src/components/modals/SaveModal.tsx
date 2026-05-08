@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { ConfirmModal } from "./ConfirmModal"
 import { SuccessModal } from "./SuccessModal"
 import { saveToChrome } from "~src/utils/chromeStorageUtils"
@@ -9,6 +9,9 @@ interface SaveModalProps {
   onClose: () => void
   buildPayload: (finalName: string) => Record<string, any>
   existingKey?: string
+  skipPrompt?: boolean
+  successMessage?: string
+  successAction?: string
 }
 
 type SaveState =
@@ -22,14 +25,17 @@ export const SaveModal: React.FC<SaveModalProps> = ({
   onClose,
   buildPayload,
   existingKey,
+  skipPrompt = false,
+  successMessage,
+  successAction = "Volver al inicio",
 }) => {
   const defaultName = `Examen de ${domainName}`
   const [saveState, setSaveState] = useState<SaveState>({ type: "prompt" })
   const [draftName, setDraftName] = useState(defaultName)
   const [focused, setFocused] = useState(false)
 
-  const handleConfirm = async () => {
-    const finalName = draftName.trim() || defaultName
+  const handleConfirm = async (nameOverride?: string) => {
+    const finalName = nameOverride ?? (draftName.trim() || defaultName)
     const key = existingKey ?? `project_${Date.now()}`
     try {
       await saveToChrome(key, buildPayload(finalName))
@@ -42,13 +48,19 @@ export const SaveModal: React.FC<SaveModalProps> = ({
     }
   }
 
+  useEffect(() => {
+    if (skipPrompt) {
+      handleConfirm(domainName)
+    }
+  }, [])
+
   if (saveState.type === "success") {
     return (
       <SuccessModal
         title="¡Guardado con éxito!"
-        message={`El examen "${saveState.savedName}" se ha guardado correctamente.`}
+        message={successMessage ?? `El examen "${saveState.savedName}" se ha guardado correctamente.`}
         actions={[
-          { label: "Volver al inicio", onClick: onSuccess, variant: "primary" }
+          { label: successAction, onClick: onSuccess, variant: "primary" },
         ]}
       />
     )
@@ -66,6 +78,8 @@ export const SaveModal: React.FC<SaveModalProps> = ({
       />
     )
   }
+
+  if (skipPrompt) return null
 
   return (
     <ConfirmModal
@@ -149,7 +163,7 @@ export const SaveModal: React.FC<SaveModalProps> = ({
           )}
         </div>
       }
-      onConfirm={handleConfirm}
+      onConfirm={() => handleConfirm()}
       onCancel={onClose}
       confirmLabel="Guardar"
       cancelLabel="Cancelar"

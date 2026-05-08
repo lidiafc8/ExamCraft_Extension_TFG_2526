@@ -99,7 +99,6 @@ export function SplitResultView({
   responseText,
   leftTitle = "Prompt enviado",
   rightTitle = "Propuesta del modelo",
-  regenerateLabel = "Volver a generar",
   onPromptChange,
   onRegenerate,
   onResponseChange,
@@ -117,9 +116,6 @@ export function SplitResultView({
             value={promptText}
             onChange={(e) => onPromptChange(e.target.value)}
           />
-          <button onClick={onRegenerate} className="btn-step generate" disabled={isLoading}>
-            {isLoading ? <div className="loading-spinner" /> : regenerateLabel}
-          </button>
         </div>
 
         <div className="wf-column">
