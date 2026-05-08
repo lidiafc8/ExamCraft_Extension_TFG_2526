@@ -9,7 +9,6 @@ import { ExamDetailScreen } from "./ExamDetailScreen";
 import { GeneratedCodeScreen } from "./GenerationCodeScreen";
 import { VisualSolutionCodeScreen } from "./VisualSolutionCodeScreen";
 import { GithubService } from "~src/services/githubService";
-import { GitHubDeployModal } from "~src/components/modals/GitHubDeployModal";
 
 declare var chrome: any;
 
@@ -29,7 +28,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     const [isCreating, setIsCreating] = useState(false);
     const [showGeneratedCode, setShowGeneratedCode] = useState(false);
     const [showSolutionGeneratedCode, setShowSolutionGeneratedCode] = useState(false);
-    const [showDeployModal, setShowDeployModal] = useState(false);
 
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
     const projectsInFolder = projects.filter(p =>
@@ -86,7 +84,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
         const updatedProject = { ...selectedProject, [sectionKey]: "" };
 
-        const updateProjectsList = (prevProjects: any[]) =>
+        const updateProjectsList = (prevProjects: any[]) => 
             prevProjects.map(p => (p.id === selectedProject.id ? updatedProject : p));
 
         if (globalThis.chrome?.storage?.local) {
@@ -115,6 +113,8 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     };
 
+    
+
     const handleDownload = () => {
         if (!selectedProject) return;
         downloadProjectAsMarkdown(selectedProject);
@@ -131,13 +131,27 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     };
 };
 
-    const getSavedToken = (): string | null => {
-        return localStorage.getItem("github_token");
+    const getOrPromptGitHubToken = (): string | null => {
+        const existingToken = localStorage.getItem("github_token");
+        if (existingToken) return existingToken;
+
+        const newToken = globalThis.prompt(
+            "Para crear repositorios en GitHub necesitas un Token de acceso (Personal Access Token).\n\n" +
+            "Por favor, pégalo aquí (se guardará de forma segura en tu navegador para la próxima vez):"
+        );
+
+        if (!newToken) {
+            alert("Operación cancelada. Se requiere un token de GitHub para continuar.");
+            return null;
+        }
+
+        localStorage.setItem("github_token", newToken);
+        return newToken;
     };
 
     const buildUploadList = (project: any): string => {
         const items = ["- README.md (Actualizado con el enunciado)"];
-
+        
         const testParts = Object.values(project.testPartsMap || {})
             .filter((p: any) => p?.fileName && p?.code);
 
@@ -148,7 +162,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         if (project.baseClasses?.trim()) {
             items.push("- Clases base para la extensión creada.");
         }
-
+        
         if (project.fullSolution?.trim()) {
             const solvedParts = [];
             if (project.attributeConstraints?.trim()) solvedParts.push("restricciones de atributos");
@@ -168,9 +182,10 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
         if (isAuthError) {
             localStorage.removeItem("github_token");
+            alert("El token de GitHub ha caducado, es inválido o no tiene permisos. Vuelve a intentarlo para introducir uno nuevo.");
+        } else {
+            alert(`Error: ${msg}`);
         }
-
-        throw error;
     };
 
    const handleGitHubDeploy = async () => {
@@ -250,24 +265,24 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                     setSelectedDomainFolder(null);
                 }}
                 onDeleteSection={handleDeleteSection}
-                onDeleteTest={handleDeleteTest}
+                onDeleteTest={handleDeleteTest}  
             />
         );
     }
 
     if (selectedProject && showSolutionGeneratedCode) {
         return (
-            <VisualSolutionCodeScreen
+            <VisualSolutionCodeScreen          
                 selectedProject={selectedProject}
                 selectedDomainFolder={selectedDomainFolder || ""}
                 onWelcome={onWelcome}
-                onBack={() => setShowSolutionGeneratedCode(false)}
+                onBack={() => setShowSolutionGeneratedCode(false)}  
                 onGoToExams={() => {
-                    setShowSolutionGeneratedCode(false);
+                    setShowSolutionGeneratedCode(false);            
                     setSelectedProject(null);
                 }}
                 onGoToFolders={() => {
-                    setShowSolutionGeneratedCode(false);
+                    setShowSolutionGeneratedCode(false);             
                     setSelectedProject(null);
                     setSelectedDomainFolder(null);
                 }}
@@ -278,51 +293,23 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
     if (selectedProject && !showGeneratedCode) {
         return (
-            <>
-                <ExamDetailScreen
-                    selectedProject={selectedProject}
-                    selectedDomainFolder={selectedDomainFolder || ""}
-                    isCreating={isCreating}
-                    onWelcome={onWelcome}
-                    onBack={() => setSelectedProject(null)}
-                    onGoToFolders={() => {
-                        setSelectedProject(null);
-                        setSelectedDomainFolder(null);
-                    }}
-                    onDownload={handleDownload}
-                    onGitHubDeploy={() => setShowDeployModal(true)}
-                    onShowGeneratedCode={() => setShowGeneratedCode(true)}
-                    onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
-                    onDeleteProject={handleDelete}
-                    onDeleteSection={handleDeleteSection}
-                />
-
-                {showDeployModal && (
-                    <GitHubDeployModal
-                        domainName={selectedProject.domainName}
-                        templateRepo={getRepoConfig(selectedProject.domainName.toLowerCase()).TEMPLATE_REPO}
-                        newRepoName={getNewRepoName()}
-                        uploadListString={buildUploadList(selectedProject)}
-                        savedToken={getSavedToken()}
-                        onConfirm={async (token) => {
-                            const { TEMPLATE_REPO, TEST_BASE_PATH } = getRepoConfig(selectedProject.domainName.toLowerCase());
-                            const newRepoName = getNewRepoName();
-                            localStorage.setItem("github_token", token);
-                            setIsCreating(true);
-                            try {
-                                return await GithubService.deployExam(token, selectedProject, newRepoName, TEMPLATE_REPO, TEST_BASE_PATH);
-                            } catch (error: any) {
-                                handleDeployError(error);
-                                throw error;
-                            } finally {
-                                setIsCreating(false);
-                            }
-                        }}
-                        onSuccess={onWelcome}
-                        onClose={() => setShowDeployModal(false)}
-                    />
-                )}
-            </>
+            <ExamDetailScreen
+                selectedProject={selectedProject}
+                selectedDomainFolder={selectedDomainFolder || ""}
+                isCreating={isCreating}
+                onWelcome={onWelcome}
+                onBack={() => setSelectedProject(null)}
+                onGoToFolders={() => {
+                    setSelectedProject(null);
+                    setSelectedDomainFolder(null);
+                }}
+                onDownload={handleDownload}
+                onGitHubDeploy={handleGitHubDeploy}
+                onShowGeneratedCode={() => setShowGeneratedCode(true)}
+                onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
+                onDeleteProject={handleDelete}
+                onDeleteSection={handleDeleteSection}
+            />
         );
     }
 
