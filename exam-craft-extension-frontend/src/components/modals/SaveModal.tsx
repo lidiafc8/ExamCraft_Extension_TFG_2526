@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { ConfirmModal } from "./ConfirmModal"
 import { SuccessModal } from "./SuccessModal"
 import { saveToChrome } from "~src/utils/chromeStorageUtils"
+import "./css/SaveModal.css"
 
 interface SaveModalProps {
   domainName: string
@@ -87,77 +88,28 @@ export const SaveModal: React.FC<SaveModalProps> = ({
       message="¿Con qué nombre quieres guardar este examen?"
       plainWarning
       warning={
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
-          <label style={{
-            fontSize: "11px",
-            fontWeight: 600,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "#8a7060",
-          }}>
+        <div className="save-modal-input-wrapper">
+          <label className="save-modal-label">
             Nombre del examen
           </label>
-          <div style={{ position: "relative", width: "100%" }}>
-            <span style={{
-              position: "absolute",
-              left: "13px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              fontSize: "15px",
-              color: focused ? "#5c3d2e" : "#b09080",
-              transition: "color 0.2s ease",
-              pointerEvents: "none",
-              userSelect: "none",
-            }}>
+          <div className="save-modal-input-container">
+            <span className={`save-modal-input-icon ${focused ? "save-modal-input-icon--focused" : ""}`}>
               ✏️
             </span>
             <input
               type="text"
+              className={`save-modal-input ${focused ? "save-modal-input--focused" : ""}`}
               value={draftName}
               onChange={e => setDraftName(e.target.value)}
               placeholder={defaultName}
               autoFocus
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "13px 16px 13px 40px",
-                fontSize: "15px",
-                fontWeight: 500,
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                color: "#2c1a0e",
-                background: focused ? "#fff" : "#fdf8f4",
-                border: `2px solid ${focused ? "#5c3d2e" : "#d4b8a8"}`,
-                borderRadius: "10px",
-                outline: "none",
-                transition: "all 0.2s ease",
-                boxShadow: focused
-                  ? "0 0 0 4px rgba(92, 61, 46, 0.12), 0 2px 8px rgba(92, 61, 46, 0.08)"
-                  : "0 1px 3px rgba(0,0,0,0.06)",
-              }}
             />
-            <div style={{
-              position: "absolute",
-              bottom: 0,
-              left: "10px",
-              right: "10px",
-              height: "2px",
-              background: "linear-gradient(90deg, #8b5e3c, #c8956c)",
-              borderRadius: "0 0 8px 8px",
-              opacity: focused ? 1 : 0,
-              transition: "opacity 0.2s ease",
-            }} />
+            <div className={`save-modal-input-underline ${focused ? "save-modal-input-underline--focused" : ""}`} />
           </div>
           {draftName.trim() === "" && (
-            <p style={{
-              margin: 0,
-              fontSize: "11px",
-              color: "#c0756a",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}>
+            <p className="save-modal-empty-warning">
               ⚠️ Se usará el nombre por defecto si se deja vacío
             </p>
           )}
