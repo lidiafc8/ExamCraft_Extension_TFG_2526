@@ -292,7 +292,7 @@ export default function AttributesConstraintsWorkflowScreen({
             setPendingProjectForBaseClass(null)
             onGoToBaseClass(p)
           }}
-          onCancel={() => setPendingProjectForBaseClass(null)}
+          onCancel={() => { setPendingProjectForBaseClass(null); onWelcome() } }
         />
       )}
     </>

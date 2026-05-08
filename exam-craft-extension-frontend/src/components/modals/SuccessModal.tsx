@@ -32,7 +32,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
           <button
             key={action.label}
             onClick={action.onClick}
-            className={`btn-step`}
+            className={`btn-step ${action.variant === "secondary" ? "secondary" : "primary"}`}
           >
             {action.label}
           </button>
