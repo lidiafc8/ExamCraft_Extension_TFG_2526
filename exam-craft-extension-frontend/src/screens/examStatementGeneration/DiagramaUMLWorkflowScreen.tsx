@@ -156,19 +156,21 @@ export default function DiagramUMLScreen({
 
                 </div>
 
-                <button
-                  onClick={handleGenerate}
-                  className="btn-step generate"
-                  disabled={isLoading}
-                >
-                  {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
-                </button>
-                <button
-                  className="btn-step primary"
-                  onClick={() => onFinishExtension(context.trim(), responseText.trim())}
-                >
-                  Confirmar Diagrama UML
-                </button>
+                <div className="wf-actions-row">
+                  <button
+                    onClick={handleGenerate}
+                    className="btn-step generate"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                  </button>
+                  <button
+                    className="btn-step primary"
+                    onClick={() => onFinishExtension(context.trim(), responseText.trim())}
+                  >
+                    Confirmar Diagrama UML
+                  </button>
+                </div>
               </>
             )}
           </div>
