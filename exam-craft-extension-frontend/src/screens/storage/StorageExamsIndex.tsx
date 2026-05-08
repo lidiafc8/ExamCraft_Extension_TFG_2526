@@ -126,7 +126,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         TEMPLATE_OWNER: "lidiafc8",
         TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
         TEST_BASE_PATH: isPetClinic
-            ? "src/test/java/org/springframework/samples/petclinic/grooming/"
+            ? "src/test/java/org/springframework/samples/petclinic/"
             : "src/test/java/es/us/dp1/chess/tournament/"
     };
 };
