@@ -5,7 +5,7 @@ import { StepperHeader } from "../../components/WorkflowComponents"
 import "../../css/WorkFlowParts.css"
 import { downloadMarkdown } from "~src/utils/downloadUtils"
 import { SaveModal } from "~src/components/modals/SaveModal"
-import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal" // 1. Importamos el nuevo modal
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal" 
 
 declare var chrome: any
 
