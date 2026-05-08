@@ -92,7 +92,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                             <div className="card-header">
                                 <h3>Archivos de Clases Base</h3>
                             </div>
-                            <div className="content-card">
+                            <div className="storage-content-card storage-content-card--grid">
                                 {parsedBaseClasses.length > 0 ? (
                                     parsedBaseClasses.map((block) => (
                                         <JavaCodeBlock
@@ -119,7 +119,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                             <div className="card-header">
                                 <h3>Archivos de Test</h3>
                             </div>
-                            <div className="content-card">
+                            <div className="storage-content-card storage-content-card--list">
                                 {tests.length > 0 ? (
                                     tests.map((part) => (
                                         <div key={part.mapKey} className="generated-test-item">
