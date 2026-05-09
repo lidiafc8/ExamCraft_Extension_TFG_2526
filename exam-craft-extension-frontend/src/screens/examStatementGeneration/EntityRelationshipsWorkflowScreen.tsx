@@ -190,8 +190,8 @@ export default function EntityRelationshipsWorkflowScreen({
           title="¡Guardado correctamente!"
           message={`Las relaciones entre entidades de ${projectDisplayName(savedData.project)} han sido actualizadas correctamente.\n\n¿Deseas continuar y generar los tests para estas relaciones ahora mismo?`}
           actions={[
-            { label: "No, volver al inicio", onClick: () => { setShowSuccessModal(false); onWelcome() }, variant: "secondary" },
-            { label: "Sí, generar tests", onClick: handlePrimarySuccess, variant: "primary" },
+            { label: "No", onClick: () => { setShowSuccessModal(false); onWelcome() }, variant: "secondary" },
+            { label: "Sí", onClick: handlePrimarySuccess, variant: "primary" },
           ]}
         />
       )}

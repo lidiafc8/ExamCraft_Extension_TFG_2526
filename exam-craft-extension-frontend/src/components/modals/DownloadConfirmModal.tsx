@@ -69,7 +69,7 @@ export const DownloadConfirmModal: React.FC<DownloadConfirmModalProps> = ({
             Cancelar
           </button>
           <button onClick={handleConfirm} className="btn-step primary">
-            Descargar
+            Descargar (.md)
           </button>
         </div>
       </div>

@@ -7,8 +7,8 @@ import DomainSelectionScreen from "../screens/examStatementGeneration/DomainSele
 import DiagramUMLScreen from "../screens/examStatementGeneration/DiagramaUMLWorkflowScreen"
 import FinishFunctionalExtensionScreen from "../screens/examStatementGeneration/FinishFunctionalExtensionScreen"
 import AttributesConstraintsWorkflowScreen from "~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen"
-import GenerationTestAtributesScreen from "../screens/codeGeneration/GenerationTestAtributesScreen"
-import GeneralGenerationTestScreen from "../screens/codeGeneration/GeneralGenerationTestScreen"
+import GenerationTestAtributesScreen from "../screens/codeGeneration/GenerationTestsScreen"
+import GeneralGenerationTestScreen from "../screens/codeGeneration/SelectionGenerationTest"
 import CodeGenerationScreen from "~src/screens/codeGeneration/CodeSelectionGenerateScreen"
 import GenerationBaseClassesScreen from "~src/screens/codeGeneration/GenerationBaseClassesScreen"
 import StorageExamsIndex from "../screens/storage/StorageExamsIndex"
@@ -121,21 +121,22 @@ export default function IndexTab() {
         <GenerationBaseClassesScreen 
           initialProject={selectedProject} 
           fromAttributes={cameFromAttributes || cameFromEntityRelationships} 
-          onGoToTests={(updatedProject) => { 
+          onGoToTests={(updatedProject) => {
+            const origin = cameFromEntityRelationships ? 'entityRelationships' : 'attributes'
             setSharedTestData({
               project: updatedProject,
               constraints: updatedProject.attributeConstraints || "",
               entityRelationships: updatedProject.entityRelationships || "",
-              baseClass: updatedProject.baseClasses || updatedProject.baseClass || ""
-            });
-            setTestOrigin(cameFromEntityRelationships ? 'entityRelationships' : 'attributes');
-            setScreen("testAttributes");
-          }} 
+              baseClass: updatedProject.baseClasses || updatedProject.baseClasses || "",
+            })
+            setTestOrigin(origin)
+            setScreen("testAttributes")
+          }}
           onBack={() => {
-            if (cameFromEntityRelationships) setScreen("entityRelationships");
-            else if (cameFromAttributes) setScreen("attributesConstraints");
-            else setScreen("codeGeneration");
-          }} 
+            if (cameFromEntityRelationships) setScreen("entityRelationships")
+            else if (cameFromAttributes) setScreen("attributesConstraints")
+            else setScreen("codeGeneration")
+          }}
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
@@ -225,10 +226,6 @@ export default function IndexTab() {
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onFunctionalExtension={() => setScreen("domainSelection")}
           onStatementStep1={() => setScreen("contextWorkflow")}
-          onCreateDiagram={(context) => {
-            setContextResponse(context)
-            setScreen("diagramUML")
-          }}
         />
       )}
 
