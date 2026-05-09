@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md"
-import { sendToGemini } from "../../services/geminiService"
+import { generateWithAI } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import { Header } from "~src/components/Header"
@@ -61,7 +61,7 @@ export default function DiagramUMLScreen({
             INSTRUCCIONES PRINCIPALES:
             ${promptText}
         `;
-            const result = await sendToGemini(finalPayload);
+            const result = await generateWithAI(finalPayload);
             const cleanResult = cleanMermaidCode(result);
 
             setResponseText(cleanResult);
@@ -69,7 +69,7 @@ export default function DiagramUMLScreen({
             setInternalStep('result');
 
             try {
-                await fetch("http://localhost:3001/save-log", {
+                await fetch("http://localhost:3000/save-log", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
