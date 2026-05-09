@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import logoExamCraft from "../../assets/icon512.png"
 import carpeta from "../../assets/images/archive.png"
 import examen from "../../assets/images/exam.png"
-import { sendToGemini } from "~src/services/geminiService"
+import { generateWithAI } from "~src/services/geminiService"
 
 declare var chrome: any;
 
@@ -170,12 +170,12 @@ export default function WorkflowScreen({
         ${promptText}
       `
       console.log(finalPayload);
-      const result = await sendToGemini(finalPayload)
+      const result = await generateWithAI(finalPayload)
       setResponseText(result)
       setInternalStep("result")
 
       try {
-        await fetch("http://localhost:3001/save-log", {
+        await fetch("http://localhost:3000/save-log", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

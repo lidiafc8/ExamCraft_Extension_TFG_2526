@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { Header } from "~src/components/Header"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md"
-import { sendToGemini } from "../../services/geminiService"
+import { generateWithAI } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
 import "../../css/WorkFlowParts.css"
 import "../../css/CommonText.css"
@@ -84,13 +84,13 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
 
         console.log("Enviando a Gemini:", finalPayload);
 
-        const result = await sendToGemini(finalPayload);
+        const result = await generateWithAI(finalPayload);
         
         setResponseText(result);
         setInternalStep('result');
 
         try {
-            await fetch("http://localhost:3001/save-log", {
+            await fetch("http://localhost:3000/save-log", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
