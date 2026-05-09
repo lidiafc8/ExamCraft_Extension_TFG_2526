@@ -9,6 +9,7 @@ import { ExamDetailScreen } from "./ExamDetailScreen";
 import { GeneratedCodeScreen } from "./GenerationCodeScreen";
 import { VisualSolutionCodeScreen } from "./VisualSolutionCodeScreen";
 import { GithubService } from "~src/services/githubService";
+import { DeleteConfirmationModal } from "~src/components/modals/DeleteConfirmationModal";
 
 declare var chrome: any;
 
@@ -28,9 +29,10 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     const [isCreating, setIsCreating] = useState(false);
     const [showGeneratedCode, setShowGeneratedCode] = useState(false);
     const [showSolutionGeneratedCode, setShowSolutionGeneratedCode] = useState(false);
+    const [deleteModal, setDeleteModal] = useState<{ id: string; name: string } | null>(null);
 
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
-    
+
     const projectsInFolder = projects.filter(p =>
         p.domainName && selectedDomainFolder && p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
     );
@@ -46,7 +48,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     }, []);
 
-
     const applyRenameToState = (id: string, newName: string) => {
         setProjects(prevProjects =>
             prevProjects.map(p => (p.id === id ? { ...p, customName: newName } : p))
@@ -56,16 +57,13 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
     const handleRename = (id: string, newName: string) => {
         const nameToSet = newName.trim();
-        if (!nameToSet) { 
-            setEditingId(null); 
-            return; 
+        if (!nameToSet) {
+            setEditingId(null);
+            return;
         }
-
         const projectToUpdate = projects.find(p => p.id === id);
         if (!projectToUpdate) return;
-        
         const updatedData = { ...projectToUpdate, customName: nameToSet };
-
         if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.set({ [id]: updatedData }, () => {
                 applyRenameToState(id, nameToSet);
@@ -73,16 +71,31 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     };
 
+    // Para DomainFolderScreen: borrado directo, el modal lo gestiona el propio DomainFolderScreen
+    const handleDeleteDirect = (id: string) => {
+        if (globalThis.chrome?.storage?.local) {
+            chrome.storage.local.remove(id, () => {
+                setProjects(prev => prev.filter(p => p.id !== id));
+                if (selectedProject?.id === id) setSelectedProject(null);
+            });
+        }
+    };
+
+    // Para ExamDetailScreen: abre el modal global del padre
     const handleDelete = (id: string, e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
-        const confirmDelete = globalThis.confirm("¿Estás seguro de que quieres borrar este examen? Esta acción no se puede deshacer.");
-        if (confirmDelete) {
-            if (globalThis.chrome?.storage?.local) {
-                chrome.storage.local.remove(id, () => {
-                    setProjects(prevProjects => prevProjects.filter(p => p.id !== id));
-                    if (selectedProject?.id === id) setSelectedProject(null);
-                });
-            }
+        const project = projects.find(p => p.id === id);
+        setDeleteModal({ id, name: project?.customName ?? id });
+    };
+
+    const handleConfirmDelete = () => {
+        if (!deleteModal) return;
+        if (globalThis.chrome?.storage?.local) {
+            chrome.storage.local.remove(deleteModal.id, () => {
+                setProjects(prev => prev.filter(p => p.id !== deleteModal.id));
+                if (selectedProject?.id === deleteModal.id) setSelectedProject(null);
+                setDeleteModal(null);
+            });
         }
     };
 
@@ -108,14 +121,15 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             chrome.storage.local.set({ [selectedProject.id]: updatedProject });
         }
     };
+
     const handleDownload = (fileName: string) => {
         if (!selectedProject) return;
         downloadProjectAsMarkdown(selectedProject, fileName);
     };
 
     const handleGitHubDeploy = async (token: string, project: any) => {
-        const isPetClinic = project.domainName.toLowerCase().includes("veterinaria") || 
-                            project.domainName.toLowerCase().includes("clínica");
+        const isPetClinic = project.domainName.toLowerCase().includes("veterinaria") ||
+            project.domainName.toLowerCase().includes("clínica");
 
         const cleanDomain = project.domainName
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -126,8 +140,8 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         const config = {
             owner: "lidiafc8",
             repo: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
-            path: isPetClinic 
-                ? "src/test/java/org/springframework/samples/petclinic/grooming/" 
+            path: isPetClinic
+                ? "src/test/java/org/springframework/samples/petclinic/grooming/"
                 : "src/test/java/es/us/dp1/chess/tournament/"
         };
 
@@ -140,81 +154,95 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             config.path
         );
     };
-    
 
+    const renderScreen = () => {
+        if (selectedProject && showGeneratedCode) {
+            return (
+                <GeneratedCodeScreen
+                    selectedProject={selectedProject}
+                    selectedDomainFolder={selectedDomainFolder || ""}
+                    onWelcome={onWelcome}
+                    onBack={() => setShowGeneratedCode(false)}
+                    onGoToExams={() => { setShowGeneratedCode(false); setSelectedProject(null); }}
+                    onGoToFolders={() => { setShowGeneratedCode(false); setSelectedProject(null); setSelectedDomainFolder(null); }}
+                    onDeleteSection={handleDeleteSection}
+                    onDeleteTest={handleDeleteTest}
+                />
+            );
+        }
 
-    if (selectedProject && showGeneratedCode) {
+        if (selectedProject && showSolutionGeneratedCode) {
+            return (
+                <VisualSolutionCodeScreen
+                    selectedProject={selectedProject}
+                    selectedDomainFolder={selectedDomainFolder || ""}
+                    onWelcome={onWelcome}
+                    onBack={() => setShowSolutionGeneratedCode(false)}
+                    onGoToExams={() => { setShowSolutionGeneratedCode(false); setSelectedProject(null); }}
+                    onGoToFolders={() => { setShowSolutionGeneratedCode(false); setSelectedProject(null); setSelectedDomainFolder(null); }}
+                    onDeleteSection={handleDeleteSection}
+                />
+            );
+        }
+
+        if (selectedProject && !showGeneratedCode) {
+            return (
+                <ExamDetailScreen
+                    selectedProject={selectedProject}
+                    selectedDomainFolder={selectedDomainFolder || ""}
+                    isCreating={isCreating}
+                    onWelcome={onWelcome}
+                    onBack={() => setSelectedProject(null)}
+                    onGoToFolders={() => { setSelectedProject(null); setSelectedDomainFolder(null); }}
+                    onDownload={handleDownload}
+                    onGitHubDeploy={handleGitHubDeploy}
+                    onShowGeneratedCode={() => setShowGeneratedCode(true)}
+                    onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
+                    onDeleteProject={handleDelete}        // modal global
+                    onDeleteSection={handleDeleteSection}
+                />
+            );
+        }
+
+        if (selectedDomainFolder) {
+            return (
+                <DomainFolderScreen
+                    selectedDomainFolder={selectedDomainFolder}
+                    projectsInFolder={projectsInFolder}
+                    editingId={editingId}
+                    tempName={tempName}
+                    onWelcome={onWelcome}
+                    onBack={() => setSelectedDomainFolder(null)}
+                    onSelectProject={(project) => setSelectedProject(project)}
+                    onDeleteProject={handleDeleteDirect}  // borrado directo, modal en DomainFolderScreen
+                    onRenameProject={handleRename}
+                    setEditingId={setEditingId}
+                    setTempName={setTempName}
+                />
+            );
+        }
+
         return (
-            <GeneratedCodeScreen
-                selectedProject={selectedProject}
-                selectedDomainFolder={selectedDomainFolder || ""}
+            <FoldersGridScreen
+                allowedFolders={allowedFolders}
+                projects={projects}
                 onWelcome={onWelcome}
-                onBack={() => setShowGeneratedCode(false)}
-                onGoToExams={() => { setShowGeneratedCode(false); setSelectedProject(null); }}
-                onGoToFolders={() => { setShowGeneratedCode(false); setSelectedProject(null); setSelectedDomainFolder(null); }}
-                onDeleteSection={handleDeleteSection}
-                onDeleteTest={handleDeleteTest}  
+                onSelectFolder={(folderName) => setSelectedDomainFolder(folderName)}
             />
         );
-    }
-
-    if (selectedProject && showSolutionGeneratedCode) {
-        return (
-            <VisualSolutionCodeScreen          
-                selectedProject={selectedProject}
-                selectedDomainFolder={selectedDomainFolder || ""}
-                onWelcome={onWelcome}
-                onBack={() => setShowSolutionGeneratedCode(false)}  
-                onGoToExams={() => { setShowSolutionGeneratedCode(false); setSelectedProject(null); }}
-                onGoToFolders={() => { setShowSolutionGeneratedCode(false); setSelectedProject(null); setSelectedDomainFolder(null); }}
-                onDeleteSection={handleDeleteSection}
-            />
-        );
-    }
-
-    if (selectedProject && !showGeneratedCode) {
-        return (
-            <ExamDetailScreen
-                selectedProject={selectedProject}
-                selectedDomainFolder={selectedDomainFolder || ""}
-                isCreating={isCreating}
-                onWelcome={onWelcome}
-                onBack={() => setSelectedProject(null)}
-                onGoToFolders={() => { setSelectedProject(null); setSelectedDomainFolder(null); }}
-                onDownload={handleDownload}
-                onGitHubDeploy={handleGitHubDeploy}
-                onShowGeneratedCode={() => setShowGeneratedCode(true)}
-                onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
-                onDeleteProject={handleDelete}
-                onDeleteSection={handleDeleteSection}
-            />
-        );
-    }
-
-    if (selectedDomainFolder) {
-        return (
-            <DomainFolderScreen
-                selectedDomainFolder={selectedDomainFolder}
-                projectsInFolder={projectsInFolder}
-                editingId={editingId}
-                tempName={tempName}
-                onWelcome={onWelcome}
-                onBack={() => setSelectedDomainFolder(null)}
-                onSelectProject={(project) => setSelectedProject(project)}
-                onDeleteProject={handleDelete}
-                onRenameProject={handleRename} 
-                setEditingId={setEditingId}
-                setTempName={setTempName}
-            />
-        );
-    }
+    };
 
     return (
-        <FoldersGridScreen
-            allowedFolders={allowedFolders}
-            projects={projects}
-            onWelcome={onWelcome}
-            onSelectFolder={(folderName) => setSelectedDomainFolder(folderName)}
-        />
+        <>
+            {renderScreen()}
+            {/* Modal global solo para ExamDetailScreen */}
+            <DeleteConfirmationModal
+                isOpen={deleteModal !== null}
+                itemName={deleteModal?.name ?? ""}
+                isExam
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setDeleteModal(null)}
+            />
+        </>
     );
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { ConfirmModal } from "./ConfirmModal"
 import { SuccessModal } from "./SuccessModal"
-import { saveToChrome } from "~src/utils/chromeStorageUtils"
+import { saveToChrome, getAllFromChrome } from "~src/utils/chromeStorageUtils"
 import "./css/SaveModal.css"
 
 interface SaveModalProps {
@@ -34,9 +34,32 @@ export const SaveModal: React.FC<SaveModalProps> = ({
   const [saveState, setSaveState] = useState<SaveState>({ type: "prompt" })
   const [draftName, setDraftName] = useState(defaultName)
   const [focused, setFocused] = useState(false)
+  const [duplicateError, setDuplicateError] = useState(false)
+
+  const checkDuplicate = async (finalName: string): Promise<boolean> => {
+    try {
+      const allItems = await getAllFromChrome()
+      return allItems.some(item => {
+        if (existingKey && item._key === existingKey) return false
+        return (
+          item.domainName === domainName &&
+          item.customName?.trim().toLowerCase() === finalName.trim().toLowerCase()
+        )
+      })
+    } catch {
+      return false
+    }
+  }
 
   const handleConfirm = async (nameOverride?: string) => {
     const finalName = nameOverride ?? (draftName.trim() || defaultName)
+
+    const isDuplicate = await checkDuplicate(finalName)
+    if (isDuplicate) {
+      setDuplicateError(true)
+      return
+    }
+
     const key = existingKey ?? `project_${Date.now()}`
     try {
       await saveToChrome(key, buildPayload(finalName))
@@ -49,6 +72,11 @@ export const SaveModal: React.FC<SaveModalProps> = ({
     }
   }
 
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDraftName(e.target.value)
+    if (duplicateError) setDuplicateError(false)
+  }
+
   useEffect(() => {
     if (skipPrompt) {
       handleConfirm(domainName)
@@ -59,7 +87,10 @@ export const SaveModal: React.FC<SaveModalProps> = ({
     return (
       <SuccessModal
         title="¡Guardado con éxito!"
-        message={successMessage ?? `El examen "${saveState.savedName}" se ha guardado correctamente.`}
+        message={
+          successMessage ??
+          `El examen "${saveState.savedName}" se ha guardado correctamente.`
+        }
         actions={[
           { label: successAction, onClick: onSuccess, variant: "primary" },
         ]}
@@ -89,26 +120,39 @@ export const SaveModal: React.FC<SaveModalProps> = ({
       plainWarning
       warning={
         <div className="save-modal-input-wrapper">
-          <label className="save-modal-label">
-            Nombre del examen
-          </label>
+          <label className="save-modal-label">Nombre del examen</label>
           <div className="save-modal-input-container">
-            <span className={`save-modal-input-icon ${focused ? "save-modal-input-icon--focused" : ""}`}>
+            <span
+              className={`save-modal-input-icon ${
+                focused ? "save-modal-input-icon--focused" : ""
+              }`}
+            >
               ✏️
             </span>
             <input
               type="text"
-              className={`save-modal-input ${focused ? "save-modal-input--focused" : ""}`}
+              className={`save-modal-input ${
+                focused ? "save-modal-input--focused" : ""
+              } ${duplicateError ? "save-modal-input--error" : ""}`}
               value={draftName}
-              onChange={e => setDraftName(e.target.value)}
+              onChange={handleNameChange}
               placeholder={defaultName}
               autoFocus
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
             />
-            <div className={`save-modal-input-underline ${focused ? "save-modal-input-underline--focused" : ""}`} />
+            <div
+              className={`save-modal-input-underline ${
+                focused ? "save-modal-input-underline--focused" : ""
+              } ${duplicateError ? "save-modal-input-underline--error" : ""}`}
+            />
           </div>
-          {draftName.trim() === "" && (
+          {duplicateError && (
+            <p className="save-modal-duplicate-error">
+              ❌ Ya existe un examen con ese nombre en "{domainName}". Elige otro.
+            </p>
+          )}
+          {!duplicateError && draftName.trim() === "" && (
             <p className="save-modal-empty-warning">
               ⚠️ Se usará el nombre por defecto si se deja vacío
             </p>

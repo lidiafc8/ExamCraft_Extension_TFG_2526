@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { MermaidViewer } from "../../components/MermaidViewer";
 import { Header } from "../../components/Header";
 import { DeleteConfirmationModal } from "~src/components/modals/DeleteConfirmationModal";
-import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"; 
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal";
 import { GitHubDeployModal } from "~src/components/modals/GitHubDeployModal";
 import { cleanMermaidCode } from "../../components/mermaidCleaner";
-import { GithubService } from "~src/services/githubService";
 import "./css/StorageScreen.css";
 import "./css/ExamDetailScreen.css";
 
@@ -40,17 +39,16 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 }) => {
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
-    const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [showDeployModal, setShowDeployModal] = useState(false);
     const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
 
-    const mermaidCode = selectedProject?.extensionMermaid  || '';
-    const introText   = selectedProject?.extensionStatement || '';
+    const mermaidCode = selectedProject?.extensionMermaid || '';
+    const introText = selectedProject?.extensionStatement || '';
     const currentTitle = selectedProject?.customName || `Examen de ${selectedProject?.domainName}`;
 
     const breadcrumbItems = [
-        { label: 'INICIO',               action: onWelcome },
+        { label: 'INICIO', action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
         { label: selectedDomainFolder?.toUpperCase() || '', action: onBack },
     ];
@@ -76,8 +74,8 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         return {
             TEMPLATE_OWNER: "lidiafc8",
             TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
-            TEST_BASE_PATH: isPetClinic 
-                ? "src/test/java/org/springframework/samples/petclinic/grooming/" 
+            TEST_BASE_PATH: isPetClinic
+                ? "src/test/java/org/springframework/samples/petclinic/grooming/"
                 : "src/test/java/es/us/dp1/chess/tournament/"
         };
     };
@@ -100,6 +98,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
             <div className="main-content">
                 <main className="storage-main exam-detail-main">
 
+                    {/* ── Menú de acciones ── */}
                     <div className="actions-menu-wrapper">
                         <button
                             type="button"
@@ -134,7 +133,10 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                                     <hr className="action-divider" />
                                     <button
                                         className="action-btn action-btn--delete"
-                                        onClick={() => { setShowDeleteProjectModal(true); setShowActionsMenu(false); }}
+                                        onClick={() => {
+                                            setShowActionsMenu(false);
+                                            onDeleteProject(selectedProject?.id);
+                                        }}
                                     >
                                         Eliminar
                                     </button>
@@ -143,6 +145,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         )}
                     </div>
 
+                    {/* ── Extensión Funcional ── */}
                     <div className="storage-section-heading">
                         <h2>Extensión Funcional</h2>
                     </div>
@@ -162,7 +165,8 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         </div>
                     </div>
 
-                        <div className="storage-section-heading">
+                    {/* ── Restricciones de Atributos ── */}
+                    <div className="storage-section-heading">
                         <h2>Restricciones de Atributos</h2>
                         {selectedProject?.attributeConstraints && (
                             <button
@@ -189,7 +193,22 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         )}
                     </div>
 
-                        <div className="wide-card">
+                    {/* ── Relaciones entre Entidades ── */}
+                    <div className="storage-section-heading">
+                        <h2>Relaciones entre Entidades</h2>
+                        {selectedProject?.entityRelationships && (
+                            <button
+                                type="button"
+                                className="storage-delete-btn"
+                                onClick={() => handleDeletePart('entityRelationships', 'Relaciones entre Entidades')}
+                                title="Eliminar Relaciones entre Entidades"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="wide-card">
                         <div className="card-header">
                             <h3>Definición de Relaciones</h3>
                         </div>
@@ -202,6 +221,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         )}
                     </div>
 
+                    {/* ── Código Generado ── */}
                     <div className="storage-section-heading" style={{ marginTop: '48px' }}>
                         <h2>Código Generado</h2>
                     </div>
@@ -223,6 +243,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         </button>
                     </div>
 
+                    {/* ── Modales ── */}
                     {showPreviewModal && (
                         <div className="preview-backdrop">
                             <div className="preview-modal">
@@ -233,11 +254,9 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                                 <div className="preview-modal-body">
                                     <div className="exam-markdown-container">
                                         <h1>{currentTitle}</h1>
-                                        
+
                                         <h2>1. Extensión Funcional y Diagrama UML</h2>
-                                        
                                         {introText && <p style={{ whiteSpace: 'pre-wrap' }}>{introText}</p>}
-                                        
                                         {mermaidCode && (
                                             <div className="preview-diagram-wrapper">
                                                 <div className="preview-diagram-blocker" />
@@ -277,13 +296,11 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             uploadListString={buildUploadListString()}
                             savedToken={localStorage.getItem("github_token")}
                             onClose={() => setShowDeployModal(false)}
-                            onSuccess={() => {
-                                setShowDeployModal(false);
-                            }}
+                            onSuccess={() => setShowDeployModal(false)}
                             onConfirm={async (token) => {
                                 const repoUrl = await onGitHubDeploy(
-                                    token, 
-                                    selectedProject, 
+                                    token,
+                                    selectedProject,
                                     `examen-${currentTitle.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
                                 );
                                 return repoUrl;
@@ -291,6 +308,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         />
                     )}
 
+                    {/* Solo secciones — el modal de borrar proyecto está en StorageExamsIndex */}
                     <DeleteConfirmationModal
                         isOpen={!!sectionToDelete}
                         itemName={sectionToDelete?.name || ''}
@@ -298,13 +316,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         onCancel={() => setSectionToDelete(null)}
                     />
 
-                    <DeleteConfirmationModal
-                        isOpen={showDeleteProjectModal}
-                        itemName={currentTitle}
-                        isExam={true}
-                        onConfirm={() => { onDeleteProject(selectedProject?.id); setShowDeleteProjectModal(false); }}
-                        onCancel={() => setShowDeleteProjectModal(false)}
-                    />
                 </main>
             </div>
         </div>
