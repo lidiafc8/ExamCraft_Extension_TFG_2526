@@ -5,6 +5,8 @@ import { parseJavaFiles } from "~src/utils/codeUtils";
 import { JavaCodeBlock } from "~src/components/JavaCodeBlock";
 import { DeleteConfirmationModal } from "~src/components/modals/DeleteConfirmationModal";
 import "./css/StorageScreen.css";
+import "./css/GeneratedCodeScreen.css";
+import "../../css/CommonText.css";
 
 export interface VisualSolutionCodeScreenProps {
     selectedProject: any;
@@ -56,7 +58,7 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                 <main className="storage-main">
 
                     <div className="storage-section-heading">
-                        <h2>Solución Completa </h2>
+                        <h2>Solución Completa</h2>
                         {parsedFullSolution.length > 0 && (
                             <button
                                 type="button"
@@ -72,11 +74,12 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                         )}
                     </div>
 
+                    <div className="storage-section-content">
                         <div className="wide-card">
                             <div className="card-header">
                                 <h3>Archivos de Solución</h3>
                             </div>
-                            <div className="content-card">
+                            <div className="storage-content-card storage-content-card--grid">
                                 {parsedFullSolution.length > 0 ? (
                                     parsedFullSolution.map((block) => (
                                         <JavaCodeBlock
@@ -91,8 +94,9 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                                     </p>
                                 )}
                             </div>
-                    </div> 
-                    
+                        </div>
+                    </div>
+
                     <div className="storage-bottom-actions">
                         <button type="button" onClick={onBack} className="btn-back">
                             Volver
