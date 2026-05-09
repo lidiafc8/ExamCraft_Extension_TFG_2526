@@ -104,7 +104,7 @@ app.post('/generate', async (req, res) => {
     try {
       const text = await executeProvider(providerId, prompt);
 
-      console.log(`[AI Service] Exam successfully generated using provider: ${providerId.toUpperCase()}`);
+      console.log(`[AI Service] Part successfully generated using provider: ${providerId.toUpperCase()}`);
       
       return res.json({ provider: providerId, text });
     } catch (err) {
