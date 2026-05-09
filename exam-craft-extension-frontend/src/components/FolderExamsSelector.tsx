@@ -17,6 +17,9 @@ interface FolderExamSelectorProps {
   onSelectProject: (project: Project) => void
   onBack: () => void
   displayName: (proj: Project) => string
+  filterProject?: (project: Project) => boolean
+  emptyFoldersMessage?: string
+  emptyProjectsMessage?: string
 }
 
 export const FolderExamSelector: React.FC<FolderExamSelectorProps> = ({
@@ -27,12 +30,17 @@ export const FolderExamSelector: React.FC<FolderExamSelectorProps> = ({
   onSelectProject,
   onBack,
   displayName,
+  filterProject,
+  emptyFoldersMessage = "No hay exámenes creados todavía.",
+  emptyProjectsMessage = "No hay exámenes en esta carpeta.",
 }) => {
+  const filteredProjects = filterProject ? projects.filter(filterProject) : projects
+
   const visibleFolders = allowedFolders.filter((f) =>
-    projects.some((p) => p.domainName?.toLowerCase() === f.toLowerCase())
+    filteredProjects.some((p) => p.domainName?.toLowerCase() === f.toLowerCase())
   )
 
-  const projectsInFolder = projects.filter(
+  const projectsInFolder = filteredProjects.filter(
     (p) => p.domainName && selectedFolder &&
       p.domainName.toLowerCase() === selectedFolder.toLowerCase()
   )
@@ -45,12 +53,11 @@ export const FolderExamSelector: React.FC<FolderExamSelectorProps> = ({
         <div className="cards-container">
           {visibleFolders.length === 0 ? (
             <div className="empty-container">
-              <p>No hay exámenes creados todavía.</p>
-              <p className="empty-subtext">Crea tu primer examen para verlo aquí.</p>
+              <p>{emptyFoldersMessage}</p>
             </div>
           ) : (
             visibleFolders.map((folderName) => {
-              const count = projects.filter(
+              const count = filteredProjects.filter(
                 (p) => p.domainName?.toLowerCase() === folderName.toLowerCase()
               ).length
               return (
@@ -75,7 +82,7 @@ export const FolderExamSelector: React.FC<FolderExamSelectorProps> = ({
       <div className="cards-container">
         {projectsInFolder.length === 0 ? (
           <div className="empty-container">
-            <p>No hay exámenes en esta carpeta.</p>
+            <p>{emptyProjectsMessage}</p>
           </div>
         ) : (
           projectsInFolder.map((proj) => (

@@ -226,6 +226,9 @@ export default function AttributesConstraintsWorkflowScreen({
               onSelectProject={handleSelectProject}
               onBack={onBack}
               displayName={displayName}
+              filterProject={(p) => !!p.baseClasses}
+              emptyFoldersMessage="No hay exámenes con clases base generadas. Genera primero las clases base."
+              emptyProjectsMessage="Ningún examen de esta carpeta tiene clases base generadas todavía."
             />
           )}
 

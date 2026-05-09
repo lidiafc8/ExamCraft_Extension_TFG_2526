@@ -225,16 +225,19 @@ export default function EntityRelationshipsWorkflowScreen({
       <main className="main-content">
 
         {step === "selection" && (
-          <FolderExamSelector
-            projects={projects}
-            allowedFolders={ALLOWED_FOLDERS}
-            selectedFolder={selectedFolder}
-            onSelectFolder={(folder) => setSelectedFolder(folder)}
-            onSelectProject={handleSelectProject}
-            onBack={onBack}
-            displayName={projectDisplayName}
-          />
-        )}
+        <FolderExamSelector
+          projects={projects}
+          allowedFolders={ALLOWED_FOLDERS}
+          selectedFolder={selectedFolder}
+          onSelectFolder={(folder) => setSelectedFolder(folder)}
+          onSelectProject={handleSelectProject}
+          onBack={onBack}
+          displayName={projectDisplayName}
+          filterProject={(p) => !!p.baseClasses}
+          emptyFoldersMessage="No hay exámenes con clases base generadas. Genera primero las clases base."
+          emptyProjectsMessage="Ningún examen de esta carpeta tiene clases base generadas todavía."
+        />
+      )}
 
         {step === "workflow" && selectedProject && (
           <div className="wf-layout-container">

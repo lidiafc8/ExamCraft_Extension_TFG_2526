@@ -127,7 +127,9 @@ export default function GeneralGenerationTestScreen({
                             proj.customName ||
                             `Examen de ${Array.isArray(proj.domainName) ? proj.domainName.join(', ') : proj.domainName}`
                         }
-                    />
+                        emptyFoldersMessage="No hay exámenes con clases base y partes generadas. Genera primero las clases base y al menos una parte del examen."
+                        emptyProjectsMessage="Ningún examen de esta carpeta tiene clases base y partes generadas todavía."
+                        />
                 )}
 
                 {step === 'parts' && selectedProject && (

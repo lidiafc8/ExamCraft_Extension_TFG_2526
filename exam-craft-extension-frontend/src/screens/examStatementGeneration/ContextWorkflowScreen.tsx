@@ -142,14 +142,19 @@ export default function ContextWorkflowScreen({
                   onPromptChange={setPromptText}
                   onRegenerate={handleGenerate}
                   onResponseChange={setResponseText}
-                  rightActions={
-                    <button onClick={() => setWizardStep(2)} className="btn-step success confirm">
-                      Confirmar y Continuar
-                    </button>
-                  }
                 />
                 <div className="wf-actions-row">
+                  <button
+                    onClick={handleGenerate}
+                    className="btn-step generate"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                  </button>
                   <button onClick={onBack} className="btn-back">Volver</button>
+                  <button onClick={() => setWizardStep(2)} className="btn-step success confirm">
+                    Confirmar y Continuar
+                  </button>
                 </div>
               </>
             )}
