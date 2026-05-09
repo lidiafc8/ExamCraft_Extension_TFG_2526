@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react"
-import carpeta from "../../../assets/images/archive.png"
-import examen from "../../../assets/images/exam.png"
 import attributesConstraintsPromptMarkdown from "bundle-text:../../prompts/generation-constraints-attributes/generation_attribute_constraints_from_statement.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { Header } from "~src/components/Header"
@@ -14,6 +12,7 @@ import "../../css/Cards.css"
 import "../storage/css/FoldersGridScreen.css"
 import { WarningModal } from "~src/components/modals/WarningModal"
 import { FolderExamSelector } from "~src/components/FolderExamsSelector"
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
 
 declare var chrome: any
 
@@ -62,6 +61,7 @@ export default function AttributesConstraintsWorkflowScreen({
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
   const [savedData, setSavedData] = useState<{ project: Project; result: string } | null>(null)
   const [promptText, setPromptText] = useState("")
   const [hiddenContext, setHiddenContext] = useState("")
@@ -77,15 +77,6 @@ export default function AttributesConstraintsWorkflowScreen({
       response: result,
     }),
   })
-
-  const visibleFolders = ALLOWED_FOLDERS.filter((f) =>
-    projects.some((p) => p.domainName?.toLowerCase() === f.toLowerCase())
-  )
-
-  const projectsInFolder = projects.filter(
-    (p) => p.domainName && selectedDomainFolder &&
-      p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
-  )
 
   useEffect(() => {
     if (step === "selection" && globalThis.chrome?.storage?.local) {
@@ -148,10 +139,11 @@ export default function AttributesConstraintsWorkflowScreen({
     }
   }
 
-  const handleDownload = () => {
+  const handleConfirmDownload = (fileName: string) => {
     if (!selectedProject || !responseText) return
-    const title = `Restricciones de Atributos - ${selectedProject.customName || selectedProject.domainName}`
-    downloadMarkdown(`# ${title}\n\n${responseText}`, `${DOWNLOAD_PREFIX}_${selectedProject.customName}`)
+    const title = `Restricciones de Atributos - ${displayName(selectedProject)}`
+    downloadMarkdown(`# ${title}\n\n${responseText}`, fileName)
+    setShowDownloadModal(false)
   }
 
   const handleSuccessPrimary = () => {
@@ -191,8 +183,7 @@ export default function AttributesConstraintsWorkflowScreen({
       {showSuccessModal && savedData && (
         <SuccessModal
           title="¡Guardado correctamente!"
-          message={`Las restricciones de atributos de ${displayName(savedData.project)} han sido actualizadas correctamente.\n\n
-          ¿Deseas continuar y generar los tests para estas restricciones ahora mismo?`}
+          message={`Las restricciones de atributos de ${displayName(savedData.project)} han sido actualizadas correctamente.\n\n¿Deseas continuar y generar los tests para estas restricciones ahora mismo?`}
           actions={[
             {
               label: "No",
@@ -226,9 +217,6 @@ export default function AttributesConstraintsWorkflowScreen({
               onSelectProject={handleSelectProject}
               onBack={onBack}
               displayName={displayName}
-              filterProject={(p) => !!p.baseClasses}
-              emptyFoldersMessage="No hay exámenes con clases base generadas. Genera primero las clases base."
-              emptyProjectsMessage="Ningún examen de esta carpeta tiene clases base generadas todavía."
             />
           )}
 
@@ -266,13 +254,18 @@ export default function AttributesConstraintsWorkflowScreen({
                     footer={
                       <div className="wf-actions-row">
                         <button
-                            onClick={handleGenerate}
-                            className="btn-step generate"
-                            disabled={isLoading}
-                          >
-                            {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
-                          </button>
-                        <button onClick={handleDownload} className="btn-step btn-download">Descargar (.md)</button>
+                          onClick={handleGenerate}
+                          className="btn-step generate"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                        </button>
+                        <button
+                          onClick={() => setShowDownloadModal(true)}
+                          className="btn-step btn-download"
+                        >
+                          Descargar (.md)
+                        </button>
                         <button onClick={handleSaveToChrome} className="btn-step primary">Guardar</button>
                       </div>
                     }
@@ -285,6 +278,13 @@ export default function AttributesConstraintsWorkflowScreen({
         </main>
       </div>
 
+      <DownloadConfirmModal
+        isOpen={showDownloadModal}
+        defaultFileName={`${DOWNLOAD_PREFIX}_${displayName(selectedProject || {} as Project).replace(/\s+/g, "_")}`}
+        onConfirm={handleConfirmDownload}
+        onCancel={() => setShowDownloadModal(false)}
+      />
+
       {pendingProjectForBaseClass && (
         <WarningModal
           title="Faltan las Clases Base"
@@ -295,7 +295,7 @@ export default function AttributesConstraintsWorkflowScreen({
             setPendingProjectForBaseClass(null)
             onGoToBaseClass(p)
           }}
-          onCancel={() => { setPendingProjectForBaseClass(null); onWelcome() } }
+          onCancel={() => { setPendingProjectForBaseClass(null); onWelcome() }}
         />
       )}
     </>

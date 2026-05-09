@@ -4,6 +4,7 @@ import { parseMasterPrompt } from "~src/utils/promptParser"
 import { Header } from "~src/components/Header"
 import { ConfirmModal } from "~src/components/modals/ConfirmModal"
 import { SuccessModal } from "~src/components/modals/SuccessModal"
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
 import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponents"
 import { useGeminiGeneration } from "~src/components/GeminiGeneration"
 import { getAllFromChrome, saveToChrome } from "~src/utils/chromeStorageUtils"
@@ -80,6 +81,7 @@ export default function GenerationSolutionCodeScreen({
   const [selectedProject, setSelectedProject] = useState<any>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [promptText, setPromptText] = useState("")
   const [hiddenContext, setHiddenContext] = useState("")
@@ -153,12 +155,13 @@ INSTRUCCIONES PRINCIPALES: ${promptText}
     }
   }
 
-  const handleDownload = () => {
+  const handleConfirmDownload = (fileName: string) => {
     if (!selectedProject || !responseText) return
     downloadMarkdown(
       `# Solución Completa - ${displayName(selectedProject)}\n\n${responseText}`,
-      `${DOWNLOAD_PREFIX}_${selectedProject.customName || selectedProject.domainName}`
+      fileName
     )
+    setShowDownloadModal(false)
   }
 
   return (
@@ -216,10 +219,17 @@ INSTRUCCIONES PRINCIPALES: ${promptText}
                     onResponseChange={setResponseText}
                     footer={
                       <div className="wf-actions-row">
-                        <button onClick={() => setInternalStep("input")} className="btn-step secondary">
-                          Volver al editor
+                        <button
+                          onClick={handleGenerate}
+                          className="btn-step generate"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
                         </button>
-                        <button onClick={handleDownload} className="btn-step btn-download">
+                        <button
+                          onClick={() => setShowDownloadModal(true)}
+                          className="btn-step btn-download"
+                        >
                           Descargar (.md)
                         </button>
                         <button onClick={handleSave} className="btn-step primary">
@@ -234,6 +244,13 @@ INSTRUCCIONES PRINCIPALES: ${promptText}
           </div>
         )}
       </main>
+
+      <DownloadConfirmModal
+        isOpen={showDownloadModal}
+        defaultFileName={`${DOWNLOAD_PREFIX}_${displayName(selectedProject || {}).replace(/\s+/g, "_")}`}
+        onConfirm={handleConfirmDownload}
+        onCancel={() => setShowDownloadModal(false)}
+      />
 
       {showConfirmModal && selectedProject && (
         <ConfirmModal
@@ -253,7 +270,7 @@ INSTRUCCIONES PRINCIPALES: ${promptText}
           title="¡Solución generada correctamente!"
           message={`El código solución para ${displayName(selectedProject)} ha sido guardado exitosamente.`}
           actions={[
-            { label: "Volver", onClick: onWelcome, variant: "primary" },
+            { label: "Volver al inicio", onClick: onWelcome, variant: "primary" },
           ]}
         />
       )}

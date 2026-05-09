@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { Header } from "~src/components/Header"
 import { parseMasterPrompt } from "~src/utils/promptParser"
 import { downloadMarkdown } from "~src/utils/downloadUtils"
 import { saveToChrome } from "~src/utils/chromeStorageUtils"
 import { SuccessModal } from "~src/components/modals/SuccessModal"
 import { ConfirmModal } from "~src/components/modals/ConfirmModal"
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
 import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponents"
 import { useGeminiGeneration } from "~src/components/GeminiGeneration"
 import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests_attributes.md"
@@ -103,6 +104,7 @@ export default function GenerationTestScreen({
   const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [currentConfig, setCurrentConfig] = useState(DOMAIN_CONFIG.default)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
 
   const isRelationships =
     source === "entityRelationships" ||
@@ -222,9 +224,9 @@ Genera ${isRelationships ? "(Test2.java)" : "(Test1.java)"} sin bloques markdown
     }
   }
 
-  const handleDownload = () => {
-    const projectName = initialData?.project?.customName || "Generado"
-    downloadMarkdown(responseText, `${isRelationships ? "Test2" : "Test1"}-${projectName}.java`)
+  const handleConfirmDownload = (customFileName: string) => {
+    downloadMarkdown(responseText, customFileName)
+    setShowDownloadModal(false)
   }
 
   const breadcrumbs = [
@@ -281,7 +283,10 @@ Genera ${isRelationships ? "(Test2.java)" : "(Test1.java)"} sin bloques markdown
                       >
                         {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
                       </button>
-                      <button onClick={handleDownload} className="btn-step btn-download">
+                      <button
+                        onClick={() => setShowDownloadModal(true)}
+                        className="btn-step btn-download"
+                      >
                         Descargar (.md)
                       </button>
                       <button onClick={handleSaveToChrome} className="btn-step btn-save">
@@ -296,12 +301,19 @@ Genera ${isRelationships ? "(Test2.java)" : "(Test1.java)"} sin bloques markdown
         </div>
       </main>
 
+      <DownloadConfirmModal
+        isOpen={showDownloadModal}
+        defaultFileName={`${isRelationships ? "Test2" : "Test1"}-${(initialData?.project?.customName || initialData?.project?.domainName || "Generado").replace(/\s+/g, "_")}`}
+        onConfirm={handleConfirmDownload}
+        onCancel={() => setShowDownloadModal(false)}
+      />
+
       {saveStatus === "success" && (
         <SuccessModal
           title="¡Tests guardados con éxito!"
           message={`El archivo ${fileName} se ha guardado correctamente en el proyecto.`}
           actions={[
-            { label: "Volver", onClick: onWelcome, variant: "primary" },
+            { label: "Volver al inicio", onClick: onWelcome, variant: "primary" },
           ]}
         />
       )}

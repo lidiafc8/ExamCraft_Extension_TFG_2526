@@ -6,6 +6,7 @@ import { useGeminiGeneration } from "~src/components/GeminiGeneration"
 import { Header } from "~src/components/Header"
 import { ConfirmModal } from "../../components/modals/ConfirmModal"
 import { SaveModal } from "../../components/modals/SaveModal"
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
 import { downloadMarkdown } from "~src/utils/downloadUtils"
 import "../../css/Cards.css"
 import "../storage/css/FoldersGridScreen.css"
@@ -90,6 +91,7 @@ export default function GenerationBaseClassesScreen({
   const [selectedProject, setSelectedProject] = useState<Project | null>(initialProject ?? null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
   const [promptText, setPromptText] = useState("")
   const [hiddenContext, setHiddenContext] = useState("")
 
@@ -103,10 +105,6 @@ export default function GenerationBaseClassesScreen({
       response: result,
     }),
   })
-
-  const projectsInFolder = projects.filter(
-    (p) => p.domainName && selectedFolder && p.domainName.toLowerCase() === selectedFolder.toLowerCase()
-  )
 
   const breadcrumbItems = fromAttributes
     ? [
@@ -163,10 +161,11 @@ export default function GenerationBaseClassesScreen({
     if (result) setInternalStep("result")
   }
 
-  const handleDownload = () => {
+  const handleConfirmDownload = (fileName: string) => {
     if (!selectedProject || !responseText) return
-    const title = `Clases Base - ${selectedProject.customName || selectedProject.domainName}`
-    downloadMarkdown(`# ${title}\n\n${responseText}`, `${DOWNLOAD_PREFIX}_${selectedProject.customName}`)
+    const title = `Clases Base - ${displayName(selectedProject)}`
+    downloadMarkdown(`# ${title}\n\n${responseText}`, fileName)
+    setShowDownloadModal(false)
   }
 
   return (
@@ -200,6 +199,13 @@ export default function GenerationBaseClassesScreen({
           successAction={fromAttributes ? "Ir a Tests" : "Volver al inicio"}
         />
       )}
+
+      <DownloadConfirmModal
+        isOpen={showDownloadModal}
+        defaultFileName={`${DOWNLOAD_PREFIX}_${displayName(selectedProject || {} as Project).replace(/\s+/g, "_")}`}
+        onConfirm={handleConfirmDownload}
+        onCancel={() => setShowDownloadModal(false)}
+      />
 
       <Header onWelcome={onWelcome} breadcrumbItems={breadcrumbItems} currentStep="CLASES BASE" />
 
@@ -244,7 +250,19 @@ export default function GenerationBaseClassesScreen({
                   rightTitle="Propuesta del código de las clases bases"
                   footer={
                     <div className="wf-actions-row">
-                      <button onClick={handleDownload} className="btn-step btn-download">Descargar (.md)</button>
+                      <button
+                        onClick={handleGenerate}
+                        className="btn-step generate"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                      </button>
+                      <button
+                        onClick={() => setShowDownloadModal(true)}
+                        className="btn-step btn-download"
+                      >
+                        Descargar (.md)
+                      </button>
                       <button onClick={() => setShowSaveModal(true)} className="btn-step primary">Guardar</button>
                     </div>
                   }

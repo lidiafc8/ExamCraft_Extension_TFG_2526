@@ -8,6 +8,7 @@ import { FolderExamSelector } from "~src/components/FolderExamsSelector"
 import { ConfirmModal } from "../../components/modals/ConfirmModal"
 import { SuccessModal } from "../../components/modals/SuccessModal"
 import { WarningModal } from "../../components/modals/WarningModal"
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
 import { downloadMarkdown } from "~src/utils/downloadUtils"
 import { saveToChrome } from "~src/utils/chromeStorageUtils"
 import "../../css/Cards.css"
@@ -56,6 +57,7 @@ export default function EntityRelationshipsWorkflowScreen({
 
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
   const [savedData, setSavedData] = useState<{ project: any; result: string } | null>(null)
   const [pendingProjectForBaseClass, setPendingProjectForBaseClass] = useState<any>(null)
 
@@ -141,12 +143,11 @@ export default function EntityRelationshipsWorkflowScreen({
     }
   }
 
-  const handleDownload = () => {
+  const handleConfirmDownload = (fileName: string) => {
     if (!selectedProject || !responseText) return
-    downloadMarkdown(
-      `# Relaciones entre Entidades - ${selectedProject.customName || selectedProject.domainName}\n\n${responseText}`,
-      `${DOWNLOAD_PREFIX}_${selectedProject.customName}`
-    )
+    const title = `Relaciones entre Entidades - ${projectDisplayName(selectedProject)}`
+    downloadMarkdown(`# ${title}\n\n${responseText}`, fileName)
+    setShowDownloadModal(false)
   }
 
   const handlePrimarySuccess = () => {
@@ -172,7 +173,6 @@ export default function EntityRelationshipsWorkflowScreen({
   return (
     <div className="exam-app">
 
-      {/* Modal: confirmar selección */}
       {showConfirmModal && selectedProject && (
         <ConfirmModal
           title="Confirmar Contexto"
@@ -184,7 +184,6 @@ export default function EntityRelationshipsWorkflowScreen({
         />
       )}
 
-      {/* Modal: guardado con éxito */}
       {showSuccessModal && savedData && (
         <SuccessModal
           title="¡Guardado correctamente!"
@@ -196,7 +195,6 @@ export default function EntityRelationshipsWorkflowScreen({
         />
       )}
 
-      {/* Modal: faltan clases base */}
       {pendingProjectForBaseClass && (
         <WarningModal
           title="Faltan las Clases Base"
@@ -212,6 +210,13 @@ export default function EntityRelationshipsWorkflowScreen({
         />
       )}
 
+      <DownloadConfirmModal
+        isOpen={showDownloadModal}
+        defaultFileName={`${DOWNLOAD_PREFIX}_${projectDisplayName(selectedProject || {}).replace(/\s+/g, "_")}`}
+        onConfirm={handleConfirmDownload}
+        onCancel={() => setShowDownloadModal(false)}
+      />
+
       <Header
         onWelcome={onWelcome}
         breadcrumbItems={[
@@ -225,19 +230,16 @@ export default function EntityRelationshipsWorkflowScreen({
       <main className="main-content">
 
         {step === "selection" && (
-        <FolderExamSelector
-          projects={projects}
-          allowedFolders={ALLOWED_FOLDERS}
-          selectedFolder={selectedFolder}
-          onSelectFolder={(folder) => setSelectedFolder(folder)}
-          onSelectProject={handleSelectProject}
-          onBack={onBack}
-          displayName={projectDisplayName}
-          filterProject={(p) => !!p.baseClasses}
-          emptyFoldersMessage="No hay exámenes con clases base generadas. Genera primero las clases base."
-          emptyProjectsMessage="Ningún examen de esta carpeta tiene clases base generadas todavía."
-        />
-      )}
+          <FolderExamSelector
+            projects={projects}
+            allowedFolders={ALLOWED_FOLDERS}
+            selectedFolder={selectedFolder}
+            onSelectFolder={(folder) => setSelectedFolder(folder)}
+            onSelectProject={handleSelectProject}
+            onBack={onBack}
+            displayName={projectDisplayName}
+          />
+        )}
 
         {step === "workflow" && selectedProject && (
           <div className="wf-layout-container">
@@ -271,7 +273,19 @@ export default function EntityRelationshipsWorkflowScreen({
                   onResponseChange={setResponseText}
                   footer={
                     <div className="wf-actions-row">
-                      <button onClick={handleDownload} className="btn-step btn-download">Descargar (.md)</button>
+                      <button
+                        onClick={handleGenerate}
+                        className="btn-step generate"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                      </button>
+                      <button
+                        onClick={() => setShowDownloadModal(true)}
+                        className="btn-step btn-download"
+                      >
+                        Descargar (.md)
+                      </button>
                       <button onClick={handleSave} className="btn-step primary">Guardar</button>
                     </div>
                   }
