@@ -151,6 +151,7 @@ export default function DiagramUMLScreen({
                     <span className="wf-column-title">Código Mermaid</span>
                     <div className="wf-diagram-code-inner">
                       <pre><code>{responseText}</code></pre>
+                      <pre><code>{isLoading ? "Generando..." : responseText}</code></pre>
                     </div>
                   </div>
 
