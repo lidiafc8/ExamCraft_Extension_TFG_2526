@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Header } from "~src/components/Header";
 import { parseMasterPrompt } from "~src/utils/promptParser";
-import { sendToGemini } from "~src/services/geminiService";
+import { generateWithAI } from "~src/services/geminiService";
 import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests_attributes.md";
 import testRelationshipsPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests_relationships.md";
 
@@ -167,7 +167,7 @@ ${promptText}
 Genera ${isEntityRelationshipsTest? `(Test2.java)`: `(Test1.java)`} sin bloques markdown.
 `.trim();
 
-            const result = await sendToGemini(finalPayload);
+            const result = await generateWithAI(finalPayload);
             if (!result) throw new Error("Respuesta vacía");
 
             const cleanResult = result.replaceAll(/```java/gi, "").replaceAll(/```/gi, "").replace(/^java/i, "").trim(); 
@@ -180,7 +180,7 @@ Genera ${isEntityRelationshipsTest? `(Test2.java)`: `(Test1.java)`} sin bloques 
                     ? "test_relationships_code_generation" 
                     : "test_attributes_code_generation";
 
-                await fetch("http://localhost:3001/save-log", {
+                await fetch("http://localhost:3000/save-log", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({

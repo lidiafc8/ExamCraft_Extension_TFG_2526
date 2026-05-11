@@ -201,7 +201,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         <button
                             type="button"
                             className="storage-delete-btn"
-                            onClick={() => handleDeletePart('entityRelations', 'Relaciones entre Entidades')}
+                            onClick={() => handleDeletePart('entityRelationships', 'Relaciones entre Entidades')}
                             title="Eliminar Relaciones entre Entidades"
                         >
                             ✕
