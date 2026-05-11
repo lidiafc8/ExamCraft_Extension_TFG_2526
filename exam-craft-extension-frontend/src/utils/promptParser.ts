@@ -26,7 +26,6 @@ export const parseMasterPrompt = (fullText: string): ParsedPrompt => {
     
     if (RESOURCE_MAP[filename]) {
         hiddenContext += `\n--- ARCHIVO / RECURSO: ${filename} ---\n${RESOURCE_MAP[filename]}\n`;
-        console.log(`Recurso cargado correctamente: ${filename}`);
     } else {
         console.log(`Recurso dinámico o no encontrado en map: '${filename}'. Se omitirá del context estático.`);
     }

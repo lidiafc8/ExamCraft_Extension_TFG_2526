@@ -98,7 +98,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
             <div className="main-content">
                 <main className="storage-main exam-detail-main">
 
-                    {/* ── Menú de acciones ── */}
                     <div className="actions-menu-wrapper">
                         <button
                             type="button"
@@ -145,7 +144,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         )}
                     </div>
 
-                    {/* ── Extensión Funcional ── */}
                     <div className="storage-section-heading">
                         <h2>Extensión Funcional</h2>
                     </div>
@@ -165,7 +163,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         </div>
                     </div>
 
-                    {/* ── Restricciones de Atributos ── */}
                     <div className="storage-section-heading">
                         <h2>Restricciones de Atributos</h2>
                         {selectedProject?.attributeConstraints && (
@@ -193,7 +190,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         )}
                     </div>
 
-                    {/* ── Relaciones entre Entidades ── */}
                     <div className="storage-section-heading">
                         <h2>Relaciones entre Entidades</h2>
                         {selectedProject?.entityRelationships && (
@@ -221,7 +217,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         )}
                     </div>
 
-                    {/* ── Código Generado ── */}
                     <div className="storage-section-heading" style={{ marginTop: '48px' }}>
                         <h2>Código Generado</h2>
                     </div>
@@ -243,7 +238,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         </button>
                     </div>
 
-                    {/* ── Modales ── */}
                     {showPreviewModal && (
                         <div className="preview-backdrop">
                             <div className="preview-modal">
@@ -308,7 +302,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         />
                     )}
 
-                    {/* Solo secciones — el modal de borrar proyecto está en StorageExamsIndex */}
                     <DeleteConfirmationModal
                         isOpen={!!sectionToDelete}
                         itemName={sectionToDelete?.name || ''}

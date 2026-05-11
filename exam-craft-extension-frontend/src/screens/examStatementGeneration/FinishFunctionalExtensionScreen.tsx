@@ -7,8 +7,6 @@ import { downloadMarkdown } from "~src/utils/downloadUtils"
 import { SaveModal } from "~src/components/modals/SaveModal"
 import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal" 
 
-declare var chrome: any
-
 interface Props {
   readonly domainName: string
   readonly extensionStatement: string

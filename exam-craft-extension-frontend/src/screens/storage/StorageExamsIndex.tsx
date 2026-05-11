@@ -71,7 +71,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     };
 
-    // Para DomainFolderScreen: borrado directo, el modal lo gestiona el propio DomainFolderScreen
     const handleDeleteDirect = (id: string) => {
         if (globalThis.chrome?.storage?.local) {
             chrome.storage.local.remove(id, () => {
@@ -81,7 +80,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         }
     };
 
-    // Para ExamDetailScreen: abre el modal global del padre
     const handleDelete = (id: string, e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
         const project = projects.find(p => p.id === id);
@@ -198,7 +196,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                     onGitHubDeploy={handleGitHubDeploy}
                     onShowGeneratedCode={() => setShowGeneratedCode(true)}
                     onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
-                    onDeleteProject={handleDelete}        // modal global
+                    onDeleteProject={handleDelete}        
                     onDeleteSection={handleDeleteSection}
                 />
             );
@@ -214,7 +212,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                     onWelcome={onWelcome}
                     onBack={() => setSelectedDomainFolder(null)}
                     onSelectProject={(project) => setSelectedProject(project)}
-                    onDeleteProject={handleDeleteDirect}  // borrado directo, modal en DomainFolderScreen
+                    onDeleteProject={handleDeleteDirect}  
                     onRenameProject={handleRename}
                     setEditingId={setEditingId}
                     setTempName={setTempName}
@@ -235,7 +233,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     return (
         <>
             {renderScreen()}
-            {/* Modal global solo para ExamDetailScreen */}
             <DeleteConfirmationModal
                 isOpen={deleteModal !== null}
                 itemName={deleteModal?.name ?? ""}

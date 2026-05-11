@@ -16,7 +16,6 @@ export const DownloadConfirmModal: React.FC<DownloadConfirmModalProps> = ({
 }) => {
   const [fileName, setFileName] = useState("");
 
-  // Inicializar el input con el nombre sugerido cuando se abre
   useEffect(() => {
     if (isOpen) {
       setFileName(defaultFileName.replace(/\s+/g, '_'));

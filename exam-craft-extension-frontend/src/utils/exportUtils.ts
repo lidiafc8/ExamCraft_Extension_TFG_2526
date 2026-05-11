@@ -31,26 +31,23 @@ export const downloadProjectAsMarkdown = (project: any, chosenName: string) => {
 
     const markdownContent = `# ${title}
 
-## 1. Extensión Funcional
-${introText || "No hay datos de extensión funcional."}
+        ## 1. Extensión Funcional
+        ${introText || "No hay datos de extensión funcional."}
 
-${finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`` : ''}
+        ${finalMermaidCode ? `\`\`\`mermaid\n${finalMermaidCode}\n\`\`\`` : ''}
 
-## 2. Restricciones de Atributos
-${project.attributeConstraints || "No se crearon restricciones de atributos para este examen."}
+        ## 2. Restricciones de Atributos
+        ${project.attributeConstraints || "No se crearon restricciones de atributos para este examen."}
 
-## 3. Relaciones entre Entidades
-${project.entityRelationships || "No se crearon relaciones entre entidades para este examen."}
+        ## 3. Relaciones entre Entidades
+        ${project.entityRelationships || "No se crearon relaciones entre entidades para este examen."}
 
-## 4. Tests de Java (JUnit)
-${testsMarkdown}
-`;
+        ## 4. Tests de Java (JUnit)
+        ${testsMarkdown}
+        `;
 
-    // --- LÓGICA DE NOMBRE CORREGIDA ---
-    // Usamos el nombre que viene del modal (chosenName)
     let finalFileName = chosenName.trim();
     
-    // Aseguramos la extensión .md
     if (!finalFileName.toLowerCase().endsWith('.md')) {
         finalFileName += '.md';
     }

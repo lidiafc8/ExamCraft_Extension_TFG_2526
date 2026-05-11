@@ -1,7 +1,7 @@
 import { useState } from "react"
 import WelcomeScreen from "../screens/principal/WelcomeScreen"
 import GithubScreen from "../screens/principal/GithubScreen"
-import CreateExamScreen from "../screens/chooseCreate/CreateExamScreen"
+import CreateExamScreen from "../screens/chooseCreate/CreateExamSelectionScreen"
 import CreateExamByPartsScreen from "../screens/chooseCreate/CreateExamByPartsScreen"
 import DomainSelectionScreen from "../screens/examStatementGeneration/DomainSelectionScreen"
 import DiagramUMLScreen from "../screens/examStatementGeneration/DiagramaUMLWorkflowScreen"
@@ -27,7 +27,6 @@ export default function IndexTab() {
 
   const [testOrigin, setTestOrigin] = useState<'attributes' | 'entityRelationships' | 'general'>('attributes');
 
-  // Estados de control de flujo
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [cameFromAttributes, setCameFromAttributes] = useState<boolean>(false);
   const [cameFromEntityRelationships, setCameFromEntityRelationships] = useState<boolean>(false);

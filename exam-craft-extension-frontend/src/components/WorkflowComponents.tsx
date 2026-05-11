@@ -100,7 +100,6 @@ export function SplitResultView({
   leftTitle = "Prompt enviado",
   rightTitle = "Propuesta del modelo",
   onPromptChange,
-  onRegenerate,
   onResponseChange,
   rightContent,
   rightActions,

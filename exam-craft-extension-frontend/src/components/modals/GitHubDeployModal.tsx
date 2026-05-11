@@ -19,7 +19,6 @@ export const GitHubDeployModal: React.FC<GitHubDeployModalProps> = ({
     const [status, setStatus] = useState<'confirm' | 'loading' | 'success' | 'error'>('confirm');
     const [token, setToken] = useState(savedToken ?? "");
     const [errorMsg, setErrorMsg] = useState("");
-    const [repoUrl, setRepoUrl] = useState("");
 
     const handleDeploy = async () => {
         if (!token.trim()) return;

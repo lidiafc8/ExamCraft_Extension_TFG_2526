@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import mermaid from "mermaid"
+import "./MermaidViewer.css"
 
 interface Props {
   chartCode: string
@@ -88,7 +89,7 @@ export function MermaidViewer({ chartCode }: Props) {
               clusterBkg: "#fff8f0",
               titleColor: "#333333",
               edgeLabelBackground: "#ffffff",
-          },
+            },
             securityLevel: "loose",
           })
           mermaidInitialized = true
@@ -96,18 +97,12 @@ export function MermaidViewer({ chartCode }: Props) {
         }
 
         const safeCode = sanitizeForRender(chartCode)
-
-        console.log("=== MermaidViewer recibe ===")
-        console.log(safeCode)
-        console.log("============================")
-
         const id = "mermaid-render-" + Date.now()
         const { svg: renderedSvg } = await mermaid.render(id, safeCode)
 
         if (!renderedSvg) throw new Error("No se generó SVG")
 
         const fixedSvg = fixSvgDimensions(renderedSvg)
-
         setSvg(fixedSvg)
         setScale(1)
         setPan({ x: 0, y: 0 })
@@ -145,13 +140,13 @@ export function MermaidViewer({ chartCode }: Props) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
-      <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "4px 8px" }}>
-        <button onClick={() => zoomBy(-0.2)} style={btnStyle}>− Zoom</button>
-        <span style={{ fontSize: 13, color: "#666", minWidth: 48, textAlign: "center" }}>
+      <div className="mermaid-toolbar">
+        <button onClick={() => zoomBy(-0.2)} className="mermaid-btn">− Zoom</button>
+        <span className="mermaid-zoom-label">
           {Math.round(scale * 100)}%
         </span>
-        <button onClick={() => zoomBy(0.2)} style={btnStyle}>+ Zoom</button>
-        <button onClick={() => { setScale(1); setPan({ x: 0, y: 0 }) }} style={btnStyle}>
+        <button onClick={() => zoomBy(0.2)} className="mermaid-btn">+ Zoom</button>
+        <button onClick={() => { setScale(1); setPan({ x: 0, y: 0 }) }} className="mermaid-btn">
           ⟳ Reset
         </button>
       </div>
@@ -162,53 +157,31 @@ export function MermaidViewer({ chartCode }: Props) {
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
-        style={{
-          overflow: "auto",
-          cursor: isPanning.current ? "grabbing" : "grab",
-          border: "1px solid #e0e0e0",
-          borderRadius: 10,
-          background: "#fafafa",
-          minHeight: 300,
-          width: "100%",
-          position: "relative",
-        }}
+        className="mermaid-outer-container"
       >
         {error ? (
-          <div style={{ color: "red", padding: 16, fontSize: 13 }}>
+          <div className="mermaid-error">
             <div>{error}</div>
             <details style={{ marginTop: 12 }}>
-              <summary style={{ cursor: "pointer", color: "#888" }}>Ver código que falló</summary>
-              <pre style={{ fontSize: 11, color: "#555", marginTop: 8, overflow: "auto", whiteSpace: "pre-wrap" }}>
-                {sanitizeForRender(chartCode)}
-              </pre>
+              <summary>Ver código que falló</summary>
+              <pre>{sanitizeForRender(chartCode)}</pre>
             </details>
           </div>
         ) : svg ? (
           <div
+            className="mermaid-inner-content"
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
               transformOrigin: "top left",
-              display: "inline-block",
-              padding: 16,
-              minWidth: "100%",
             }}
             dangerouslySetInnerHTML={{ __html: svg }}
           />
         ) : (
-          <div style={{ padding: 20, color: "#aaa", fontSize: 13 }}>
+          <div className="mermaid-loading">
             Renderizando...
           </div>
         )}
       </div>
     </div>
   )
-}
-
-const btnStyle: React.CSSProperties = {
-  padding: "4px 10px",
-  fontSize: 13,
-  borderRadius: 6,
-  border: "1px solid #ccc",
-  background: "#fff",
-  cursor: "pointer",
 }
