@@ -162,9 +162,9 @@
 .action-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
 .action-btn--preview  { background: #2e7d32; color: white; }
-.action-btn--download { background: #4a90e2; color: white; } 
+.action-btn--download { background: #4a90e2; color: white; }
 .action-btn--github   { background: #24292e; color: white; }
-.action-btn--delete   { background: #ff4d4f; color: white; } 
+.action-btn--delete   { background: #ff4d4f; color: white; }
 
 .action-divider {
   border: none;
@@ -186,8 +186,8 @@
 
 .preview-modal {
   background: var(--bg-card);
-  width: 100%;
-  max-width: 1100px;
+  width: 90vw;
+  max-width: 1400px;
   max-height: 90vh;
   border-radius: 14px;
   display: flex;
@@ -236,27 +236,11 @@
   margin: 20px 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
+  overflow: visible;
   background: #fafafa;
-  height: 500px;
   width: 100%;
   position: relative;
-}
-
-.preview-diagram-blocker {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  cursor: default;
-}
-
-.preview-diagram-wrapper [class*="zoom"],
-.preview-diagram-wrapper [class*="controls"],
-.preview-diagram-wrapper [class*="toolbar"],
-.preview-diagram-wrapper [class*="header"],
-.preview-diagram-wrapper button,
-.preview-diagram-wrapper > div > div:first-child {
-  display: none !important;
+  pointer-events: auto;
 }
 
 .exam-markdown-container {
@@ -284,7 +268,7 @@
 
 .exam-markdown-container p {
   text-align: left;
-  white-space: pre-wrap; 
+  white-space: pre-wrap;
   width: 100%;
   margin-top: 0;
 }

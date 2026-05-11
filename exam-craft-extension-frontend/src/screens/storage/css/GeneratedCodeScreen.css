@@ -4,6 +4,7 @@
 
 .generated-test-item {
   margin-bottom: 30px;
+  align-items: left;
 }
 
 .generated-test-item-actions {

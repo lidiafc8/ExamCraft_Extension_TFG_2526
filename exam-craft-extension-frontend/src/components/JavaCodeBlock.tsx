@@ -16,9 +16,18 @@ export const JavaCodeBlock: React.FC<JavaCodeBlockProps> = ({ filename, code }) 
         <div style={{ 
             minWidth: 0, 
             width: '100%', 
-            boxSizing: 'border-box' 
+            boxSizing: 'border-box',
+            textAlign: 'left',
         }}>
-            <h4 style={{ marginBottom: '8px', color: '#555', fontFamily: 'monospace', fontSize: '1rem', fontWeight: 600, wordBreak: 'break-word' }}>
+            <h4 style={{ 
+                marginBottom: '8px', 
+                color: '#555', 
+                fontFamily: 'monospace', 
+                fontSize: '1rem', 
+                fontWeight: 600, 
+                wordBreak: 'break-word',
+                textAlign: 'left',
+            }}>
                 {filename}
             </h4>
             <pre style={{ 
@@ -31,7 +40,8 @@ export const JavaCodeBlock: React.FC<JavaCodeBlockProps> = ({ filename, code }) 
                 padding: '20px', 
                 border: '1px solid #e1e4e8',
                 width: '100%', 
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                textAlign: 'left',
             }}>
                 <code className="hljs language-java" dangerouslySetInnerHTML={{ __html: highlighted }} />
             </pre>

@@ -253,7 +253,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                                         {introText && <p style={{ whiteSpace: 'pre-wrap' }}>{introText}</p>}
                                         {mermaidCode && (
                                             <div className="preview-diagram-wrapper">
-                                                <div className="preview-diagram-blocker" />
                                                 <MermaidViewer chartCode={cleanMermaidCode(mermaidCode)} />
                                             </div>
                                         )}
