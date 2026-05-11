@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import mermaid from "mermaid"
-import "./MermaidViewer.css"
+import "./css/MermaidViewer.css"
 
 interface Props {
   chartCode: string
