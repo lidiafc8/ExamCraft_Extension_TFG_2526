@@ -172,10 +172,37 @@ app.post('/save-log', (req, res) => {
 // 3. SERVER START
 // ============================================================================
 
+function printEndpoints(app) {
+  console.log('\n=== REGISTERED ENDPOINTS ===');
+
+  app._router.stack.forEach((middleware) => {
+    if (middleware.route) {
+      const methods = Object.keys(middleware.route.methods)
+        .map(method => method.toUpperCase())
+        .join(', ');
+
+      console.log(`${methods.padEnd(10)} ${middleware.route.path}`);
+    } 
+    else if (middleware.name === 'router') {
+      middleware.handle.stack.forEach((handler) => {
+        const route = handler.route;
+        if (route) {
+          const methods = Object.keys(route.methods)
+            .map(method => method.toUpperCase())
+            .join(', ');
+
+          console.log(`${methods.padEnd(10)} ${route.path}`);
+        }
+      });
+    }
+  });
+
+  console.log('============================\n');
+}
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Endpoints loaded: POST /generate, POST /save-log`);
 
   console.log(`Fallback order: ${FALLBACK_ORDER.join(' -> ')}`);
   
@@ -185,4 +212,7 @@ app.listen(PORT, () => {
     
     console.log(`- ${providerId.toUpperCase()}: ${numKeys} keys available (Model: ${provider.model})`);
   });
+
+  printEndpoints(app);
+  
 });
