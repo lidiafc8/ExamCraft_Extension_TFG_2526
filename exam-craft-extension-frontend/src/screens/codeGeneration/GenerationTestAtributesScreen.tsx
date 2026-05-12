@@ -52,18 +52,26 @@ export default function GenerationTestScreen({
         let TEMPLATE_REPO = "DP1-chess-template-exam";
         let ROOT_PACKAGE = "es.us.dp1.chess.tournament";
         let EXTRA_PACKAGES = [
-            "es.us.dp1.chess.tournament.user",
-            "es.us.dp1.chess.tournament.model",
-            "es.us.dp1.chess.tournament.exceptions"
+            "es.us.dp1.chess.tournament.user (para User, Authority)",
+            "es.us.dp1.chess.tournament.model (para BaseEntity, NamedEntity, Person)",
+            "es.us.dp1.chess.tournament.exceptions",
+            "es.us.dp1.chess.tournament.match (para ChessMatch, ChessBoard, Piece"
         ];
 
         if (domain.includes("clínica veterinaria") || domain.includes("veterinaria")) {
             TEMPLATE_REPO = "DP1-petClinic-template-exam";
             ROOT_PACKAGE = "org.springframework.samples.petclinic";
             EXTRA_PACKAGES = [
-                "org.springframework.samples.petclinic.user",
-                "org.springframework.samples.petclinic.model",
-                "org.springframework.samples.petclinic.exceptions"
+                "org.springframework.samples.petclinic.user (para User, Authority)",
+                "org.springframework.samples.petclinic.model (para BaseEntity, NamedEntity, Person)",
+                "org.springframework.samples.petclinic.exceptions",
+                "org.springframework.samples.petclinic.owner",
+                "org.springframework.samples.petclinic.vet (para Vet, Specialty)",
+                "org.springframework.samples.petclinic.pet (para Pet, PetType)",
+                "org.springframework.samples.petclinic.visit",
+                "org.springframework.samples.petclinic.clinic",
+                "org.springframework.samples.petclinic.clinicowner",
+                
             ];
         }
 

@@ -23,3 +23,4 @@ Para que el sistema automatizado pueda procesar tu respuesta, debes devolver CAD
 [RUTA_EXTRAIDA_DEL_CODIGO_BASE];
 ```java
 // Contenido completo de la clase con la solución completa aplicada
+```

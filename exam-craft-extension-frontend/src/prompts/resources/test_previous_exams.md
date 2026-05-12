@@ -1,6 +1,6 @@
-# CLASE COMÚN REFLEXIVETEST (TODOS LOS EXAMENES TIENEN QUE TENER ESTA CLASE DE TEST)
-```
-package org.springframework.samples.petclinic.grooming;
+# CLASE COMÚN ReflexiveTest (CLASE CON LOS MÉTODOS A UTILIZAR POR LOS TESTS)
+```java
+package org.springframework.samples.petclinic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -295,12 +295,849 @@ public abstract class ReflexiveTest {
 
     public <T> boolean isEntity(Class<T> clazz) {
         return classIsAnnotatedWith(clazz, Entity.class);
+    }    
+}
+
+```
+
+# EJEMPLOS PRINCIPALES. Fíjate principalmente en ellos y sigue su estructura.
+
+## Examen PetClinic ExamCraft
+
+## Enunciado
+
+En este ejercicio, añadiremos la funcionalidad de gestión de eventos y competiciones para las mascotas organizadas por la clínica. Concretamente, se proporcionará una clase “Event” que representa los distintos eventos (como concursos de belleza, carreras de agilidad o jornadas de vacunación) que la clínica puede organizar. Esta clase incluirá atributos para especificar el tipo de evento, la fecha de realización, la ubicación donde se llevará a cabo, el número máximo de participantes permitidos y el coste de inscripción para cada mascota. Además, tendremos la clase “Participation” que registrará la inscripción de una mascota en un evento específico. Esta clase contendrá la fecha en la que se realizó el registro, así como la puntuación obtenida y la posición final de la mascota en dicho evento, si es aplicable. La clase Participation se relacionará con la mascota que se inscribe y con el evento al que asiste.
+
+Las clases para las que realizaremos el mapeo objeto-relacional como entidades JPA se han señalado en rojo. Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias.
+
+classDiagram
+direction LR
+class NamedEntity  {
++String name
+}
+class Person  {
++String firstName
++String lastName
+}
+class Vet
+class Owner  {
++String address
++String city
+}
+class Specialty
+class Pet  {
++Date birthDate
++Double weight
+}
+class PetType
+class Visit  {
++Date date
++String description
+}
+class Event  {
++String type
++Date date
++String location
++Integer maxParticipants
++Double cost
+}
+class Participation  {
++LocalDate registeredOn
++Integer score
++Integer finalPosition
+}
+NamedEntity  <|--  Pet
+NamedEntity  <|--  Specialty
+NamedEntity  <|--  PetType
+NamedEntity  <|--  Event
+Person  <|--  Vet
+Person  <|--  Owner
+Owner "1" --> "0..n" Pet : owns
+Vet "0..n" --> "0..1" Specialty
+Visit "0..n" --> "1" Pet
+Visit "0..n" --> "1" Vet
+Pet "0..n" --> "1" PetType
+Participation "0..n" --> "1" Pet
+Participation "0..n" --> "1" Event
+
+---
+
+## Ejercicios a Resolver
+
+### Test 1 – Restricciones de atributos
+
+Modificar las clases “Event” y “Participation” para que sean entidades. Estas deben tener los siguientes atributos y restricciones:
+
+**Para ambas clases:**
+
+- El atributo de tipo entero (Integer) llamado “id” actuará como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
+
+**Para la clase Event:**
+
+- Un atributo de tipo cadena de caracteres (String) llamado “name” obligatorio (no puede ser nulo), que debe tener una longitud mínima de 5 caracteres y máxima de 60 y que no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.).
+- El atributo de tipo cadena caracteres (String) llamado “type” obligatorio que únicamente podrá tomar cuatro valores: “BELLEZA”, “AGILIDAD”, “VACUNACION”, “ADOPCION”.
+- El atributo de tipo fecha (LocalDate) llamado “date”, que representa la fecha en que se realiza el evento. Seguirá el formato “dd/MM/yyyy”. Este atributo debe ser obligatorio y se almacenará en la BD con el nombre de columna “event_date”.
+- Un atributo de tipo cadena de caracteres (String) llamado “location” obligatorio (no puede ser nulo), que debe tener una longitud mínima de 5 caracteres y máxima de 100 y que no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.).
+- El atributo de tipo entero (Integer) llamado “maxParticipants”, que representa el número máximo de mascotas que pueden inscribirse en el evento. Este atributo será obligatorio y tendrá un valor mínimo de 2 y un valor máximo de 1000.
+- El atributo de tipo doble (Double) llamado “cost”, que representa el coste de inscripción para cada mascota. Este atributo será obligatorio y tendrá un valor mínimo de 0.01 y un valor máximo de 500.0.
+
+**Para la clase Participation:**
+
+- El atributo de tipo fecha (LocalDate) llamado “registeredOn”, que representa la fecha en que la mascota se registra en el evento, seguirá el formato “dd/MM/yyyy”. Este atributo debe ser obligatorio. En la base de datos se almacenará con el nombre de columna “registration_date”.
+- El atributo de tipo entero (Integer) llamado “score”, que representa la puntuación obtenida por la mascota en el evento. Este atributo es opcional, y debe estar en el rango de valores de 0 a 100, ambos inclusive.
+- El atributo de tipo entero (Integer) llamado “finalPosition”, que representa la posición final de la mascota en el evento. Este atributo es opcional, y tendrá un valor mínimo de 1 y un valor máximo de 999.
+
+No modifique por ahora las anotaciones @Transient de las clases. Modificar las interfaces “EventRepository” y “ParticipationRepository” alojada en el mismo paquete para que extienda a CrudRepository.
+
+**Código del Test:**
+
+```java
+package org.springframework.samples.petclinic;
+
+import org.springframework.samples.petclinic.event.Event;
+import org.springframework.samples.petclinic.event.EventRepository;
+import org.springframework.samples.petclinic.participation.Participation;
+import org.springframework.samples.petclinic.participation.ParticipationRepository;
+import org.springframework.samples.petclinic.pet.Pet;
+import org.springframework.samples.petclinic.owner.Owner;
+import org.springframework.samples.petclinic.pet.PetType;
+import org.springframework.samples.petclinic.user.UserService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.repository.CrudRepository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Pattern;
+
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@ComponentScan(basePackages = {"org.springframework.samples.petclinic.event", "org.springframework.samples.petclinic.participation", "org.springframework.samples.petclinic.pet", "org.springframework.samples.petclinic.owner"})
+class Test1 extends ReflexiveTest {
+
+    @Autowired
+    private EventRepository eventRepository;
+
+    @Autowired
+    private ParticipationRepository participationRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @MockBean
+    private UserService userService;
+
+    @Test
+    void test1RepositoriesExist() {
+        assertNotNull(eventRepository, "The EventRepository should not be null.");
+        assertNotNull(participationRepository, "The ParticipationRepository should not be null.");
+        test1RepositoriesContainsMethod();
+    }
+
+    void test1RepositoriesContainsMethod() {
+        assertThat(eventRepository).isInstanceOf(CrudRepository.class);
+        assertThat(participationRepository).isInstanceOf(CrudRepository.class);
+    }
+
+    @Test
+    void test1CheckEventConstraints() {
+        Event validEvent = createValidEvent(entityManager);
+        
+        checkThatFieldsAreMandatory(validEvent, entityManager, "name", "type", "date", "location", "maxParticipants", "cost");
+
+        Map<String, List<Object>> invalidValues = Map.of(
+            "name", Arrays.asList("", "a", "aaaa", "a".repeat(61)),
+            "type", Arrays.asList("INVALID"),
+            "date", Arrays.asList((LocalDate) null),
+            "location", Arrays.asList("", "loca", "l".repeat(101)),
+            "maxParticipants", Arrays.asList(1, 1001),
+            "cost", Arrays.asList(-1.0, 500.01)
+        );
+        checkThatValuesAreNotValid(validEvent, invalidValues, entityManager);
+    }
+
+    @Test
+    void test1CheckParticipationConstraints() {
+        Participation validParticipation = createValidParticipation(entityManager);
+        
+        checkThatFieldsAreMandatory(validParticipation, entityManager, "registeredOn");
+
+        Map<String, List<Object>> invalidValues = Map.of(
+            "registeredOn", Arrays.asList((LocalDate) null),
+            "score", Arrays.asList(-1, 101),
+            "finalPosition", Arrays.asList(0, 1000)
+        );
+        checkThatValuesAreNotValid(validParticipation, invalidValues, entityManager);
+    }
+
+    @Test
+    void test1CheckEventAnnotations() {
+        assertTrue(classIsAnnotatedWith(Event.class, Entity.class));
+
+        checkThatFieldIsAnnotatedWith(Event.class, "id", Id.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "id", GeneratedValue.class);
+
+        checkThatFieldIsAnnotatedWith(Event.class, "name", NotNull.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "name", NotBlank.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "name", Size.class);
+
+        checkThatFieldIsAnnotatedWith(Event.class, "type", NotNull.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "type", Pattern.class);
+
+        checkThatFieldIsAnnotatedWith(Event.class, "date", NotNull.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "date", Column.class);
+
+        checkThatFieldIsAnnotatedWith(Event.class, "location", NotNull.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "location", NotBlank.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "location", Size.class);
+
+        checkThatFieldIsAnnotatedWith(Event.class, "maxParticipants", NotNull.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "maxParticipants", Min.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "maxParticipants", Max.class);
+
+        checkThatFieldIsAnnotatedWith(Event.class, "cost", NotNull.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "cost", Min.class);
+        checkThatFieldIsAnnotatedWith(Event.class, "cost", Max.class);
+    }
+
+    @Test
+    void test1CheckParticipationAnnotations() {
+        assertTrue(classIsAnnotatedWith(Participation.class, Entity.class));
+
+        checkThatFieldIsAnnotatedWith(Participation.class, "id", Id.class);
+        checkThatFieldIsAnnotatedWith(Participation.class, "id", GeneratedValue.class);
+
+        checkThatFieldIsAnnotatedWith(Participation.class, "registeredOn", NotNull.class);
+        checkThatFieldIsAnnotatedWith(Participation.class, "registeredOn", Column.class);
+
+        checkThatFieldIsAnnotatedWith(Participation.class, "score", Min.class);
+        checkThatFieldIsAnnotatedWith(Participation.class, "score", Max.class);
+
+        checkThatFieldIsAnnotatedWith(Participation.class, "finalPosition", Min.class);
+        checkThatFieldIsAnnotatedWith(Participation.class, "finalPosition", Max.class);
+    }
+
+    public static Event createValidEvent(EntityManager em) {
+        Event event = new Event();
+        setValue(event, "name", String.class, "Annual Dog Show");
+        setValue(event, "type", String.class, "BELLEZA");
+        setValue(event, "date", LocalDate.class, LocalDate.now().plusDays(7));
+        setValue(event, "location", String.class, "City Park Amphitheater");
+        setValue(event, "maxParticipants", Integer.class, 100);
+        setValue(event, "cost", Double.class, 25.0);
+        return event;
+    }
+
+    private Participation createValidParticipation(EntityManager em) {
+       
+        PetType type = new PetType();
+        setValue(type, "name", String.class, "dog");
+        em.persist(type); 
+
+        Owner owner = new Owner();
+        setValue(owner, "firstName", String.class, "Test");
+        setValue(owner, "lastName", String.class, "User");
+        setValue(owner, "address", String.class, "123 Street");
+        setValue(owner, "city", String.class, "Sevilla");
+        setValue(owner, "telephone", String.class, "123456789");
+        em.persist(owner);
+
+        Pet pet = new Pet();
+        setValue(pet, "name", String.class, "Leo");
+        setValue(pet, "birthDate", LocalDate.class, LocalDate.now());
+        setValue(pet, "type", PetType.class, type);
+        setValue(pet, "owner", Owner.class, owner);
+        em.persist(pet);
+
+        Event event = new Event();
+        setValue(event, "name", String.class, "Concurso Agility");
+        setValue(event, "type", String.class, "AGILIDAD");
+        setValue(event, "date", LocalDate.class, LocalDate.now().plusDays(10));
+        setValue(event, "location", String.class, "Parque Central");
+        setValue(event, "maxParticipants", Integer.class, 20);
+        setValue(event, "cost", Double.class, 10.0);
+        em.persist(event);
+
+        Participation participation = new Participation();
+        setValue(participation, "registeredOn", LocalDate.class, LocalDate.now());
+        setValue(participation, "score", Integer.class, 0);
+        setValue(participation, "finalPosition", Integer.class, 1);
+        setValue(participation, "pet", Pet.class, pet);
+        setValue(participation, "event", Event.class, event);
+
+        return participation;
+    }
+
+    @Test
+    void test1ValidEventIsPersisted() {
+        Event event = createValidEvent(entityManager);
+        assertDoesNotThrow(() -> eventRepository.save(event), "Saving a valid Event should not throw an exception.");
+        entityManager.flush();
+    }
+
+    @Test
+    void test1ValidParticipationIsPersisted() {
+        Participation participation = createValidParticipation(entityManager);
+        assertDoesNotThrow(() -> participationRepository.save(participation), "Saving a valid Participation should not throw an exception.");
+        entityManager.flush();
+    }
+}
+```
+
+### Test 2 – Relaciones entre las entidades
+Elimine las anotaciones @Transient de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior. Se pide crear las siguientes relaciones entre las entidades:
+
+Cree una relación unidireccional desde “Participation” hacia “Pet” que exprese la que aparece en el diagrama UML (mostrado en la primera página de este enunciado) respetando sus cardinalidades, usando el atributo “pet” en la clase “Participation”. Debe asegurarse de que la relación expresa adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, el atributo `pet` no puede ser nulo, puesto que la cardinalidad es 1 en el extremo de `Pet`.
+
+Además, se pide crear una relación unidireccional desde “Participation” hacia “Event” que represente la que aparece en el diagrama UML, tenga en cuenta la cardinalidad que tiene, usando el atributo “event” en la clase “Participation”. Debe asegurarse de que la relación expresa adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, el atributo `event` no puede ser nulo, puesto que la cardinalidad es 1 en el extremo de `Event`.
+
+**Código del Test:**
+```java
+package org.springframework.samples.petclinic;
+
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Test;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ManyToOne;
+
+import org.springframework.samples.petclinic.event.Event;
+import org.springframework.samples.petclinic.participation.Participation;
+import org.springframework.samples.petclinic.pet.Pet;
+import org.springframework.samples.petclinic.user.UserService;
+
+import java.time.LocalDate;
+
+@DataJpaTest(properties = {
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "spring.test.database.replace=none",
+    "spring.datasource.url=jdbc:h2:mem:petclinic"
+})
+@ComponentScan(basePackages = {
+    "org.springframework.samples.petclinic.event",
+    "org.springframework.samples.petclinic.participation",
+    "org.springframework.samples.petclinic.pet",
+    "org.springframework.samples.petclinic.model"
+})
+public class Test2 extends ReflexiveTest {
+
+    @Autowired(required = false)
+    protected EntityManager em;
+
+    @MockBean
+    private UserService userService;
+
+    @Test
+    public void test2ParticipationAnnotations() {
+        checkThatFieldIsAnnotatedWith(Participation.class, "pet", ManyToOne.class);
+        checkThatFieldIsAnnotatedWith(Participation.class, "event", ManyToOne.class);
+    }
+
+    @Test
+    public void test2ParticipationConstraints() {
+        Pet pet = new Pet();
+        setValue(pet, "name", String.class, "Buddy");
+        setValue(pet, "birthDate", LocalDate.class, LocalDate.now().minusYears(1));
+
+        Event event = new Event();
+        setValue(event, "name", String.class, "Spring Festival");
+        setValue(event, "type", String.class, "Festival");
+        setValue(event, "date", LocalDate.class, LocalDate.now().plusMonths(1));
+        setValue(event, "location", String.class, "Park");
+        setValue(event, "maxParticipants", Integer.class, 100);
+        setValue(event, "cost", Double.class, 10.0);
+
+        Participation participation = new Participation();
+        setValue(participation, "registeredOn", LocalDate.class, LocalDate.now());
+        setValue(participation, "pet", Pet.class, pet);
+        setValue(participation, "event", Event.class, event);
+
+        checkThatFieldsAreMandatory(participation, em, "pet", "event");
+    }
+}
+```
+
+## Examen Chess ExamCraft
+
+## Enunciado
+
+En este ejercicio, añadiremos la funcionalidad de gestión del sistema de puntuación ELO para los jugadores. Concretamente, se proporcionará una clase `User` que representa a los usuarios del sistema. Los jugadores, al participar en partidas de ajedrez, verán sus puntuaciones ELO actualizadas. Para gestionar esto, tendremos la clase `Rating`, que almacenará la puntuación ELO actual de un jugador. Esta clase incluirá el atributo `score` para la puntuación numérica del jugador y `lastUpdate` para registrar la fecha de la última modificación de dicha puntuación. Además, contaremos con la clase `RatingChange` para llevar un registro histórico de cada ajuste en la puntuación ELO. `RatingChange` tendrá un atributo `changeAmount` que indicará la variación de puntos (positiva o negativa) y `changeDate` para el momento exacto en que se produjo dicho cambio.
+
+Las relaciones entre estas entidades son las siguientes: cada `User` tendrá una única instancia de `Rating` que representa su puntuación actual. A su vez, cada `Rating` estará asociado a múltiples `RatingChange`, documentando la evolución de la puntuación del jugador. Finalmente, cada `RatingChange` se vinculará a la `ChessMatch` específica que motivó dicho ajuste de puntos.
+
+Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias.
+
+classDiagram
+direction LR
+class BaseEntity  {
++Int id
+}
+class Authorities  {
++String authority "NotBlank"
+}
+class User  {
++String username "Lenght(4,50)"
++String password "Lenght(8,50)"
+}
+class NamedEntity  {
++String name "NotBlank"
+}
+class ChessMatch  {
++LocalDateTime start
++LocalDateTime finish
++ChessMatchType type
++Long turnDuration
+}
+class ChessBoard  {
++Boolean creatorTurn
++LocalDateTime currentTurnStart
++Boolean jaque
+}
+class Piece  {
++PieceColor color
++PieceType type
++Integer xPosition
++Integer yPosition
+}
+class Rating  {
++Integer score
++LocalDate lastUpdate
+}
+class RatingChange  {
++Integer changeAmount
++LocalDate changeDate
+}
+BaseEntity  <|--  Authorities
+BaseEntity  <|--  NamedEntity
+NamedEntity  <|--  ChessMatch
+Authorities "0..n" --> User
+ChessMatch "1" * --> "1" ChessBoard
+ChessMatch "0..n" --> "1" User : creator
+ChessMatch "0..n" --> "1" User : opponent
+ChessBoard "1" * --> "0..n" Piece
+User "1" --> "1" Rating
+Rating "1" <-- "0..n" RatingChange
+RatingChange "0..n" --> "1" ChessMatch
+
+---
+
+## Ejercicios a Resolver
+
+### Test 1 – Restricciones de atributos
+
+Modificar las clases “Rating” y “RatingChange” para que sean entidades. Estas deben tener los siguientes atributos y restricciones:
+
+**Para ambas clases:**
+
+- El atributo de tipo entero (Integer) llamado “id” actuará como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
+
+**Para la clase Rating:**
+
+- Un atributo de tipo entero (Integer) llamado “score”, que representa la puntuación ELO actual del jugador. Este atributo será obligatorio (no puede ser nulo) y tendrá un valor mínimo de 0 y un valor máximo de 3000.
+- Un atributo de tipo fecha (LocalDate) llamado “lastUpdate”, que representa la fecha de la última actualización de la puntuación ELO del jugador. Este atributo debe ser obligatorio y seguirá el formato “dd/MM/yyyy” (puede usar como ejemplo la clase Pet y su fecha de nacimiento para ver cómo se especificar dicho formato, pero nótese que el patrón del formato es distinto).
+
+**Para la clase RatingChange:**
+
+- Un atributo de tipo entero (Integer) llamado “changeAmount”, que indica la variación de puntos ELO (positiva o negativa) que se ha producido. Este atributo será obligatorio (no puede ser nulo) y tendrá un valor mínimo de -200 y un valor máximo de 200.
+- Un atributo de tipo fecha (LocalDate) llamado “changeDate”, que representa la fecha exacta en que se registró el cambio de puntuación. Este atributo debe ser obligatorio y seguirá el formato “dd/MM/yyyy” (puede usar como ejemplo la clase Pet y su fecha de nacimiento para ver cómo se especificar dicho formato, pero nótese que el patrón del formato es distinto).
+
+No modifique por ahora las anotaciones @Transient de las clases. Modificar las interfaces “RatingRepository” y “RatingChangeRepository” alojada en el mismo paquete para que extienda a CrudRepository.
+
+**Código del Test:**
+
+```java
+package es.us.dp1.chess.tournament;
+
+import es.us.dp1.chess.tournament.match.ChessMatch;
+import es.us.dp1.chess.tournament.rating.Rating;
+import es.us.dp1.chess.tournament.rating.RatingRepository;
+import es.us.dp1.chess.tournament.ratingchange.RatingChange;
+import es.us.dp1.chess.tournament.ratingchange.RatingChangeRepository;
+import es.us.dp1.chess.tournament.user.Authorities;
+import es.us.dp1.chess.tournament.user.User;
+import es.us.dp1.chess.tournament.user.UserService;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.lang.reflect.Field;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@DataJpaTest(properties = {
+    "spring.sql.init.mode=never"
+})
+@ComponentScan(basePackages = {"es.us.dp1.chess.tournament.rating", "es.us.dp1.chess.tournament.ratingchange", "es.us.dp1.chess.tournament.user"})
+@Transactional
+public class Test1 extends ReflexiveTest {
+
+    @Autowired
+    private RatingRepository ratingRepository;
+
+    @Autowired
+    private RatingChangeRepository ratingChangeRepository;
+
+    @Autowired
+    private TestEntityManager tem;
+
+    @MockBean
+    private UserService userService;
+
+    @Test
+    void test1RepositoriesExist() {
+        assertNotNull(ratingRepository, "RatingRepository should be autowired");
+        assertNotNull(ratingChangeRepository, "RatingChangeRepository should be autowired");
+        test1RepositoriesContainsMethod();
+    }
+
+    void test1RepositoriesContainsMethod() {
+        assertTrue(
+            CrudRepository.class.isAssignableFrom(RatingRepository.class),
+            "RatingRepository should extend CrudRepository"
+        );
+        assertTrue(
+            CrudRepository.class.isAssignableFrom(RatingChangeRepository.class),
+            "RatingChangeRepository should extend CrudRepository"
+        );
+    }
+
+    @Test
+    void test1CheckRatingConstraints() {
+        Rating validRating = createValidRating(tem.getEntityManager());
+
+        checkThatFieldsAreMandatory(validRating, tem.getEntityManager(), "score", "lastUpdate");
+
+        Rating r1 = createValidRating(tem.getEntityManager());
+        checkThatValuesAreNotValid(r1, Map.of("score", List.of(-1)), tem.getEntityManager());
+
+        Rating r2 = createValidRating(tem.getEntityManager());
+        checkThatValuesAreNotValid(r2, Map.of("score", List.of(3001)), tem.getEntityManager());
+    }
+
+    @Test
+    void test1CheckRatingAnnotations() {
+        assertTrue(classIsAnnotatedWith(Rating.class, Entity.class),
+            "Rating should be annotated with @Entity");
+
+        checkThatFieldIsAnnotatedWith(Rating.class, "id", Id.class);
+        checkThatFieldIsAnnotatedWith(Rating.class, "id", GeneratedValue.class);
+        assertDoesNotThrow(() -> {
+            Field idField = Rating.class.getDeclaredField("id");
+            GeneratedValue gv = idField.getAnnotation(GeneratedValue.class);
+            assertNotNull(gv, "id should have @GeneratedValue");
+            assertEquals(GenerationType.IDENTITY, gv.strategy(), "id @GeneratedValue strategy should be IDENTITY");;
+        });
+
+        checkThatFieldIsAnnotatedWith(Rating.class, "score", NotNull.class);
+        checkThatFieldIsAnnotatedWith(Rating.class, "score", Min.class);
+        assertDoesNotThrow(() -> {
+            Field scoreField = Rating.class.getDeclaredField("score");
+            Min min = scoreField.getAnnotation(Min.class);
+            assertNotNull(min, "score should have @Min");
+            assertEquals(0L, min.value(), "score @Min value should be 0");
+            Max max = scoreField.getAnnotation(Max.class);
+            assertNotNull(max, "score should have @Max");
+            assertEquals(3000L, max.value(), "score @Max value should be 3000");
+        });
+        checkThatFieldIsAnnotatedWith(Rating.class, "score", Max.class);
+
+        checkThatFieldIsAnnotatedWith(Rating.class, "lastUpdate", NotNull.class);
+        checkThatFieldIsAnnotatedWithDateTimeFormat(Rating.class, "lastUpdate", "dd/MM/yyyy");
+    }
+
+    @Test
+    void test1ValidRatingIsPersisted() {
+        Rating rating = createValidRating(tem.getEntityManager());
+        assertDoesNotThrow(() -> {
+            ratingRepository.save(rating);
+            tem.flush();
+        }, "Valid Rating should be persisted without throwing exceptions");
+        assertNotNull(rating.getId(), "Persisted Rating should have an ID");
+        Optional<Rating> foundRating = ratingRepository.findById(rating.getId());
+        assertTrue(foundRating.isPresent(), "Persisted Rating should be retrievable");
+    }
+
+   
+
+    @Test
+    void test1CheckRatingChangeConstraints() {
+        RatingChange validRatingChange = createValidRatingChange(tem.getEntityManager());
+
+        checkThatFieldsAreMandatory(validRatingChange, tem.getEntityManager(), "changeAmount", "changeDate");
+
+        RatingChange rc1 = createValidRatingChange(tem.getEntityManager());
+        checkThatValuesAreNotValid(rc1, Map.of("changeAmount", List.of(-201)), tem.getEntityManager());
+
+        RatingChange rc2 = createValidRatingChange(tem.getEntityManager()  );
+        checkThatValuesAreNotValid(rc2, Map.of("changeAmount", List.of(201)), tem.getEntityManager());
+    }
+
+    @Test
+    void test1CheckRatingChangeAnnotations() {
+        assertTrue(classIsAnnotatedWith(RatingChange.class, Entity.class),
+            "RatingChange should be annotated with @Entity");
+
+        checkThatFieldIsAnnotatedWith(RatingChange.class, "id", Id.class);
+        checkThatFieldIsAnnotatedWith(RatingChange.class, "id", GeneratedValue.class);
+        assertDoesNotThrow(() -> {
+            Field idField = RatingChange.class.getDeclaredField("id");
+            GeneratedValue gv = idField.getAnnotation(GeneratedValue.class);
+            assertNotNull(gv, "id should have @GeneratedValue");
+            assertEquals(GenerationType.IDENTITY, gv.strategy(), "id @GeneratedValue strategy should be IDENTITY");
+        });
+
+        checkThatFieldIsAnnotatedWith(RatingChange.class, "changeAmount", NotNull.class);
+        checkThatFieldIsAnnotatedWith(RatingChange.class, "changeAmount", Min.class);
+        assertDoesNotThrow(() -> {
+            Field changeAmountField = RatingChange.class.getDeclaredField("changeAmount");
+            Min min = changeAmountField.getAnnotation(Min.class);
+            assertNotNull(min, "changeAmount should have @Min");
+            assertEquals(-200L, min.value(), "changeAmount @Min value should be -200");
+            Max max = changeAmountField.getAnnotation(Max.class);
+            assertNotNull(max, "changeAmount should have @Max");
+            assertEquals(200L, max.value(), "changeAmount @Max value should be 200");
+        });
+        checkThatFieldIsAnnotatedWith(RatingChange.class, "changeAmount", Max.class);
+
+        checkThatFieldIsAnnotatedWith(RatingChange.class, "changeDate", NotNull.class);
+        checkThatFieldIsAnnotatedWithDateTimeFormat(RatingChange.class, "changeDate", "dd/MM/yyyy");
+    }
+
+    @Test
+    void test1ValidRatingChangeIsPersisted() {
+        Rating rating = createValidRating(tem.getEntityManager());
+        Authorities auth = createValidAuthorities(tem.getEntityManager());
+        User creator = new User();
+        setValue(creator, "rating", Rating.class, createValidRating(tem.getEntityManager()));
+        setValue(creator, "authority", Authorities.class, auth);
+        setValue(creator, "username", String.class, "matchcreator");
+        setValue(creator, "password", String.class, "pass");
+        tem.persist(creator);
+
+        ChessMatch match = new ChessMatch();
+        setValue(match, "name", String.class, "Test Match");
+        setValue(match, "creator", User.class, creator);
+        tem.persist(match);
+
+        RatingChange ratingChange = new RatingChange();
+        setValue(ratingChange, "changeAmount", Integer.class, 10);
+        setValue(ratingChange, "changeDate", LocalDate.class, LocalDate.of(2023, 1, 16));
+        setValue(ratingChange, "rating", Rating.class, rating);
+        setValue(ratingChange, "chessMatch", ChessMatch.class, match);
+
+        assertDoesNotThrow(() -> {
+            ratingChangeRepository.save(ratingChange);
+            tem.flush();
+        }, "Valid RatingChange should be persisted without throwing exceptions");
+        assertNotNull(ratingChange.getId(), "Persisted RatingChange should have an ID");
+        Optional<RatingChange> foundRatingChange = ratingChangeRepository.findById(ratingChange.getId());
+        assertTrue(foundRatingChange.isPresent(), "Persisted RatingChange should be retrievable");
+    }
+
+    static Authorities createValidAuthorities(EntityManager em) {
+        Authorities authorities = new Authorities();
+        setValue(authorities, "authority", String.class, "PLAYER");
+        if (em != null) em.persist(authorities);
+        return authorities;
+    }
+
+    static Rating createValidRating(EntityManager em) {
+        Rating rating = new Rating();
+        setValue(rating, "score", Integer.class, 1500);
+        setValue(rating, "lastUpdate", LocalDate.class, LocalDate.of(2023, 1, 15));
+        if (em != null) em.persist(rating);
+        return rating;
+    }
+
+    static User createValidUser(EntityManager em) {
+        User user = new User();
+        setValue(user, "rating", Rating.class, createValidRating(em));
+        setValue(user, "authority", Authorities.class, createValidAuthorities(em));
+        setValue(user, "username", String.class, "testuser");
+        setValue(user, "password", String.class, "testpass");
+        return user;
+    }
+
+    static ChessMatch createValidChessMatch(EntityManager em) {
+        ChessMatch match = new ChessMatch();
+        setValue(match, "name", String.class, "Test Match");
+        User creator = createValidUser(em);
+        setValue(match, "creator", User.class, creator);
+        return match;
+    }
+
+    static RatingChange createValidRatingChange(EntityManager em) {
+        RatingChange ratingChange = new RatingChange();
+        setValue(ratingChange, "changeAmount", Integer.class, 10);
+        setValue(ratingChange, "changeDate", LocalDate.class, LocalDate.of(2023, 1, 16));
+        setValue(ratingChange, "rating", Rating.class, createValidRating(em));
+        setValue(ratingChange, "chessMatch", ChessMatch.class, createValidChessMatch(em));
+        return ratingChange;
+    }  
+}
+```
+
+### Test 2 – Relaciones entre las entidades
+Elimine las anotaciones @Transient de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior. Se pide crear las siguientes relaciones entre las entidades:
+
+Cree una relación unidireccional desde “User” hacia “Rating” que exprese la que aparece en el diagrama UML (mostrado en la primera página de este enunciado) respetando sus cardinalidades, usando el atributo “rating” de la clase “User”.
+
+Además, se pide crear dos relaciones unidireccionales desde “RatingChange” hacia “Rating” y hacia “ChessMatch” que representen las que aparecen en el diagrama UML, tenga en cuenta la cardinalidad que tienen (recuerde que en este caso, se tratan de relaciones de 0..n a 1), usando como nombre de los atributos “rating” y “chessMatch” en la clase “RatingChange”, correspondientemente. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, algunos atributos pueden ser nulos puesto que la cardinalidad es 0..n pero otros no, porque su cardinalidad en el extremo navegable de la relación es 1..n.
+
+**Código del Test:**
+```java
+package es.us.dp1.chess.tournament;
+
+import es.us.dp1.chess.tournament.user.Authorities;
+import es.us.dp1.chess.tournament.user.User;
+import es.us.dp1.chess.tournament.user.UserService;
+import es.us.dp1.chess.tournament.match.ChessMatch;
+import es.us.dp1.chess.tournament.rating.Rating;
+import es.us.dp1.chess.tournament.ratingchange.RatingChange;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+
+@DataJpaTest(properties = {
+    "spring.sql.init.mode=never"
+})
+@ComponentScan(basePackages = {
+    "es.us.dp1.chess.tournament.rating",
+    "es.us.dp1.chess.tournament.ratingchange"
+})
+public class Test2 extends ReflexiveTest {
+
+    @Autowired(required = false)
+    protected EntityManager em;
+
+    @MockBean
+    private UserService userService;
+
+
+    @Test
+    public void test2UserAnnotations() {
+        checkThatFieldIsAnnotatedWith(User.class, "rating", OneToOne.class);
+        checkThatFieldIsAnnotatedWith(User.class, "rating", JoinColumn.class);
+    }
+
+    @Test
+    public void test2RatingChangeAnnotations() {
+        checkThatFieldIsAnnotatedWith(RatingChange.class, "rating", ManyToOne.class);
+        checkThatFieldIsAnnotatedWith(RatingChange.class, "rating", JoinColumn.class);
+
+        checkThatFieldIsAnnotatedWith(RatingChange.class, "chessMatch", ManyToOne.class);
+        checkThatFieldIsAnnotatedWith(RatingChange.class, "chessMatch", JoinColumn.class);
     }
 
 
-    
+    @Test
+    public void test2UserConstraints() {
+        User user = createValidUser(em);
+        
+        checkThatFieldsAreMandatory(user, em, "rating");
+    }
+
+    @Test
+    public void test2RatingChangeConstraints() {
+        RatingChange ratingChange = createValidRatingChange(em);
+
+        checkThatFieldsAreMandatory(ratingChange, em, "rating");
+        checkThatFieldsAreMandatory(ratingChange, em, "chessMatch");
+    }
+
+    static Authorities createValidAuthorities(EntityManager em) {
+        Authorities authorities = new Authorities();
+        setValue(authorities, "authority", String.class, "PLAYER");
+        if (em != null) em.persist(authorities);
+        return authorities;
+    }
+
+    static Rating createValidRating(EntityManager em) {
+        Rating rating = new Rating();
+        setValue(rating, "score", Integer.class, 1500);
+        setValue(rating, "lastUpdate", LocalDate.class, LocalDate.of(2023, 1, 15));
+        if (em != null) em.persist(rating);
+        return rating;
+    }
+
+    static User createValidUser(EntityManager em) {
+        User user = new User();
+        setValue(user, "rating", Rating.class, createValidRating(em));
+        setValue(user, "authority", Authorities.class, createValidAuthorities(em));
+        setValue(user, "username", String.class, "testuser");
+        setValue(user, "password", String.class, "testpass");
+        return user;
+    }
+
+    static ChessMatch createValidChessMatch(EntityManager em) {
+        ChessMatch match = new ChessMatch();
+        setValue(match, "name", String.class, "Test Match");
+        User creator = createValidUser(em);
+        setValue(match, "creator", User.class, creator);
+        return match;
+    }
+
+    static RatingChange createValidRatingChange(EntityManager em) {
+        RatingChange ratingChange = new RatingChange();
+        setValue(ratingChange, "changeAmount", Integer.class, 10);
+        setValue(ratingChange, "changeDate", LocalDate.class, LocalDate.of(2023, 1, 16));
+        setValue(ratingChange, "rating", Rating.class, createValidRating(em));
+        setValue(ratingChange, "chessMatch", ChessMatch.class, createValidChessMatch(em));
+        return ratingChange;
+    }
 }
 ```
+
 
 # Control práctico de DP1 2024-2025 (Segunda Convocatoria Julio 2025)
 

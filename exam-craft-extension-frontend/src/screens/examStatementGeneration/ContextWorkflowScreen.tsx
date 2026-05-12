@@ -94,12 +94,12 @@ export default function ContextWorkflowScreen({ domainName, onBack, onWelcome, o
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    exercise: "statement_functional_extension",
-                    domain: domainName,
-                    hiddenContext,
-                    previousExtensions,
-                    visiblePrompt: promptText,
-                    response: result
+                    ejercicio: "statement_functional_extension",
+                    dominio: domainName,
+                    contextoOculto: hiddenContext,
+                    extensionesPrevias: previousExtensions,
+                    promptVisible: promptText,
+                    respuesta: result
                 })
             });
             console.log("Log enviado al servidor local correctamente.");
