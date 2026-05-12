@@ -26,7 +26,6 @@ export interface ExamDetailScreenProps {
 export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     selectedProject,
     selectedDomainFolder,
-    isCreating,
     onWelcome,
     onBack,
     onGoToFolders,
@@ -144,28 +143,8 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         )}
                     </div>
 
-<<<<<<< HEAD
                     <div className="storage-section-heading">
                         <h2>Extensión Funcional</h2>
-=======
-                <div className="storage-section-heading">
-                    <h2>Relaciones entre Entidades</h2>
-                    {selectedProject?.entityRelationships && (
-                        <button
-                            type="button"
-                            className="storage-delete-btn"
-                            onClick={() => handleDeletePart('entityRelationships', 'Relaciones entre Entidades')}
-                            title="Eliminar Relaciones entre Entidades"
-                        >
-                            ✕
-                        </button>
-                    )}
-                </div>
-
-                <div className="wide-card">
-                    <div className="card-header">
-                        <h3>Definición de Relaciones</h3>
->>>>>>> 0ef57d43c9cc74e781de44fd6b60fadca2761e66
                     </div>
 
                     <div className="two-col-grid">
