@@ -95,7 +95,7 @@ boolean isEntity(Class<T> clazz)
 - **Clases Rojas:** Tarea principal del alumno. Son las que debemos testear exhaustivamente (Restricciones, Anotaciones y Persistencia).
 - **Límite:** Máximo 2 entidades rojas por examen.
 - **Framework:** Java 17+, JUnit 5, Spring Boot (@DataJpaTest).
-- **Herencia:** La clase de test DEBE extender de `ReflexiveTest`.
+- **Herencia:** La clase de test DEBE extender de `ReflexiveTest` (IMPORTANTE: DEBE USARSE SI O SI ESTA CLASE PARA LA GENERACIÓN DE LOS TESTS, DEBE PONER ReflexiveTest en la parte de `extends...`)
 
 ---
 
@@ -115,6 +115,7 @@ boolean isEntity(Class<T> clazz)
 - **IMPORTANTE** los imports de las anotaciones a comprobar deberán venir de jakarta, NUNCA DE javax:
     - CORRECTO: jakarta.persistence.Column;
     - INCORRECTO: javax.persistence.Column;
+- **IMPORTANTE**: Omitir crear tests estáticos, para poder usar el método `super`.
 
 
 ### 2. Verificación de Repositorios
