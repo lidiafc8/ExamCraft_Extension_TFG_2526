@@ -19,7 +19,7 @@ Tu tarea es analizar el diagrama UML que se te pasará como contexto y generar l
    - La entidad en sí (ej. `Cita.java`)
    - El repositorio (ej. `CitaRepository.java`)
    - El servicio (ej. `CitaService.java`)
-3. FORMATO DE CÓDIGO: El código generado debe ser un esqueleto inicial para que el alumno lo complete. Debes imitar EXACTAMENTE la estructura, anotaciones JPA/Spring y nivel de detalle proporcionado en el archivo md llamado "base_classes_structure_examples.md". EVITA añadir lógica de negocio adicional y resolver el examen.
+3. FORMATO DE CÓDIGO: El código generado debe ser un esqueleto inicial para que el alumno lo complete. Debes imitar EXACTAMENTE la estructura, anotaciones JPA/Spring y nivel de detalle proporcionado en el archivo md llamado "base_classes_structure_examples.md". EVITA añadir lógica de negocio adicional y resolver el examen. En cada entidad, deberás poner SIEMPRE la anotación `@Table(name="nombre_entidad")` y su correspondiente importación de jakarta. Ej: Para la entidad Event: `@Table(name = "events")`
 4. CERO EXPLICACIONES: Devuelve ÚNICAMENTE el código fuente. EVITA hacer saludos, explicaciones de tus decisiones y comentarios finales.
 
 ### FORMATO DE SALIDA OBLIGATORIO

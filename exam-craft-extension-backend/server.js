@@ -104,7 +104,7 @@ app.post('/generate', async (req, res) => {
     try {
       const text = await executeProvider(providerId, prompt);
 
-      console.log(`[AI Service] Exam successfully generated using provider: ${providerId.toUpperCase()}`);
+      console.log(`[AI Service] Part successfully generated using provider: ${providerId.toUpperCase()}`);
       
       return res.json({ provider: providerId, text });
     } catch (err) {
@@ -141,7 +141,8 @@ app.post('/save-log', (req, res) => {
             `${String(now.getMonth() + 1).padStart(2, '0')}-` +
             `${now.getFullYear()}_` +
             `${String(now.getHours()).padStart(2, '0')}-` +
-            `${String(now.getMinutes()).padStart(2, '0')}`;
+            `${String(now.getMinutes()).padStart(2, '0')}-` +
+            `${String(now.getSeconds()).padStart(2, '0')}`;
     const filePath = path.join(folderPath, `ejecucion_${timestamp}.md`);
     const fieldOrder = Object.keys(dynamicFields);
 
