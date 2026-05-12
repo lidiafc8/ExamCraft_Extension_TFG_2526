@@ -5,7 +5,7 @@ function createKeyManager(keysArray, name = "API") {
   const keys = keysArray.filter(Boolean);
 
   if (keys.length === 0) {
-    console.error(`❌ No hay keys configuradas para ${name}`);
+    console.error(`There are no keys configured for ${name}`);
   }
 
   let index = 0;

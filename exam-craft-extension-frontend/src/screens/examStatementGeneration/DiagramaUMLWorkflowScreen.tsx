@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md"
+<<<<<<< HEAD
+=======
+import { generateWithAI } from "../../services/geminiService"
+>>>>>>> 0ef57d43c9cc74e781de44fd6b60fadca2761e66
 import { parseMasterPrompt } from "../../utils/promptParser"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import { Header } from "~src/components/Header"
@@ -64,6 +68,7 @@ export default function DiagramUMLScreen({
       ENUNCIADO / EXTENSIÓN FUNCIONAL (Sobre lo que tienes que hacer el diagrama):
       ${context}
 
+<<<<<<< HEAD
       INSTRUCCIONES PRINCIPALES:
       ${promptText}
     `
@@ -75,6 +80,13 @@ export default function DiagramUMLScreen({
       setInternalStep("result")
     }
   }
+=======
+            INSTRUCCIONES PRINCIPALES:
+            ${promptText}
+        `;
+            const result = await generateWithAI(finalPayload);
+            const cleanResult = cleanMermaidCode(result);
+>>>>>>> 0ef57d43c9cc74e781de44fd6b60fadca2761e66
 
   const breadcrumbItems = [
     { label: "INICIO", action: onWelcome },
@@ -84,6 +96,48 @@ export default function DiagramUMLScreen({
     { label: domainName.toUpperCase(), action: onStatementStep1 },
   ]
 
+<<<<<<< HEAD
+=======
+            try {
+                await fetch("http://localhost:3000/save-log", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        exercise: "diagram_uml_functional_extension",
+                        domain: domainName,
+                        hiddenContext,
+                        statementContext: context,
+                        visiblePrompt: promptText,
+                        response: cleanResult
+                    })
+                });
+                console.log("Log enviado al servidor local correctamente.");
+            } catch {
+                console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("Error al generar.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    const handleCombinationExtension = (context: string, responseText: string) => {
+        onFinishExtension(context.trim(), responseText.trim());
+    };
+
+    const breadcrumbItems = [
+        { label: 'INICIO', action: onWelcome },
+        { label: 'CREAR EXAMEN', action: onCreateExam },
+        { label: 'POR PARTES', action: onCreateExamByParts },
+        { label: 'EXTENSIÓN FUNCIONAL', action: onFunctionalExtension },
+        { label: domainName.toUpperCase(), action: onStatementStep1 },
+    ];
+
+    const currentTitle = "DIAGRAMA UML";
+    
+>>>>>>> 0ef57d43c9cc74e781de44fd6b60fadca2761e66
   return (
     <div className="exam-app">
       <Header
