@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { sendToGemini } from "../services/geminiService"
+import { generateWithAI  } from "../services/geminiService"
 
 interface UseGeminiGenerationOptions {
   logExerciseName: string
@@ -24,7 +24,7 @@ export function useGeminiGeneration({
     setIsLoading(true)
     setResponseText("")
     try {
-      const result = await sendToGemini(payload)
+      const result = await generateWithAI(payload)
       setResponseText(result)
 
       try {

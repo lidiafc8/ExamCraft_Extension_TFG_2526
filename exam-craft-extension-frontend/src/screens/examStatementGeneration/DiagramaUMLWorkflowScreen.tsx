@@ -65,44 +65,6 @@ export default function DiagramUMLScreen({
       ENUNCIADO / EXTENSIÓN FUNCIONAL (Sobre lo que tienes que hacer el diagrama):
       ${context}
 
-            INSTRUCCIONES PRINCIPALES:
-            ${promptText}
-        `;
-            const result = await generateWithAI(finalPayload);
-            const cleanResult = cleanMermaidCode(result);
-
-            setResponseText(cleanResult);
-            setCleanCode(cleanResult);
-            setInternalStep('result');
-
-            try {
-                await fetch("http://localhost:3000/save-log", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        ejercicio: "diagram_uml_functional_extension",
-                        dominio: domainName,
-                        contextoOculto: hiddenContext,
-                        examenSeleccionado: context,
-                        promptVisible: promptText,
-                        respuesta: cleanResult
-                    })
-                });
-                console.log("Log enviado al servidor local correctamente.");
-            } catch {
-                console.warn("Servidor de logs apagado. El log no se guardó en el repo.");
-            }
-
-        } catch (error) {
-            console.error(error);
-            alert("Error al generar.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    const handleCombinationExtension = (context: string, responseText: string) => {
-        onFinishExtension(context.trim(), responseText.trim());
-    };
       INSTRUCCIONES PRINCIPALES:
       ${promptText}
     `

@@ -91,42 +91,6 @@ export default function ContextWorkflowScreen({
     const result = await generate(payload)
     if (result) setInternalStep("result")
   }
-        INSTRUCCIONES PRINCIPALES:
-        ${promptText}
-        `;
-
-        console.log("Enviando a Gemini:", finalPayload);
-
-        const result = await generateWithAI(finalPayload);
-        
-        setResponseText(result);
-        setInternalStep('result');
-
-        try {
-            await fetch("http://localhost:3000/save-log", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    ejercicio: "statement_functional_extension",
-                    dominio: domainName,
-                    contextoOculto: hiddenContext,
-                    extensionesPrevias: previousExtensions,
-                    promptVisible: promptText,
-                    respuesta: result
-                })
-            });
-            console.log("Log enviado al servidor local correctamente.");
-        } catch (error) {
-            console.warn("Servidor de logs apagado. El log no se guardó en el repo.", error);
-        }
-
-    } catch (error) {
-        console.error(error);
-        alert("Error al generar.");
-    } finally {
-        setIsLoading(false);
-    }
-  };
 
   const breadcrumbItems = [
     { label: "INICIO", action: onWelcome },
