@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MermaidViewer } from "../../components/MermaidViewer";
 import { Header } from "../../components/Header";
 import { DeleteConfirmationModal } from "~src/components/modals/DeleteConfirmationModal";
 import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal";
 import { GitHubDeployModal } from "~src/components/modals/GitHubDeployModal";
 import { cleanMermaidCode } from "../../components/mermaidCleaner";
+import { generateWithAI } from "../../services/geminiService";
 import "./css/StorageScreen.css";
 import "./css/ExamDetailScreen.css";
 
@@ -21,6 +22,27 @@ export interface ExamDetailScreenProps {
     onDeleteProject: (id: string, e?: React.MouseEvent) => void;
     onShowSolutionGeneratedCode: () => void;
     onDeleteSection: (sectionKey: string) => void;
+    onUpdateProject: (updatedProject: any) => Promise<void>;
+}
+
+function buildCombined(intro: string, mermaid: string): string {
+    const i = intro || '';
+    const m = mermaid || '';
+    if (!i && !m) return '';
+    if (!m) return i;
+    const block = `\`\`\`mermaid\n${m}\n\`\`\``;
+    if (!i) return block;
+    return `${i}\n\n${block}`;
+}
+
+function parseMermaidFromCombined(combined: string): string {
+    const match = combined.match(/```mermaid\s*([\s\S]*?)```/);
+    return match ? match[1].trim() : '';
+}
+
+function parseIntroFromCombined(combined: string): string {
+    const idx = combined.indexOf('```mermaid');
+    return idx !== -1 ? combined.slice(0, idx).trim() : combined.trim();
 }
 
 export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
@@ -35,15 +57,46 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     onShowSolutionGeneratedCode,
     onDeleteProject,
     onDeleteSection,
+    onUpdateProject,
 }) => {
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [showDeployModal, setShowDeployModal] = useState(false);
     const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isRegeneratingDiagram, setIsRegeneratingDiagram] = useState(false);
 
-    const mermaidCode = selectedProject?.extensionMermaid || '';
-    const introText = selectedProject?.extensionStatement || '';
+    const [combinedText, setCombinedText] = useState(
+        buildCombined(selectedProject?.extensionStatement || '', selectedProject?.extensionMermaid || '')
+    );
+    const [attributeConstraints, setAttributeConstraints] = useState(selectedProject?.attributeConstraints || '');
+    const [entityRelationships, setEntityRelationships] = useState(selectedProject?.entityRelationships || '');
+
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const abortRef = useRef(false);
+
+    useEffect(() => {
+        setCombinedText(buildCombined(
+            selectedProject?.extensionStatement || '',
+            selectedProject?.extensionMermaid || ''
+        ));
+        setAttributeConstraints(selectedProject?.attributeConstraints || '');
+        setEntityRelationships(selectedProject?.entityRelationships || '');
+    }, [selectedProject]);
+
+    const liveMermaid =
+        parseMermaidFromCombined(combinedText) || (selectedProject?.extensionMermaid || '');
+
+    const originalCombined = buildCombined(
+        selectedProject?.extensionStatement || '',
+        selectedProject?.extensionMermaid || ''
+    );
+    const isDirty =
+        combinedText !== originalCombined ||
+        attributeConstraints !== (selectedProject?.attributeConstraints || '') ||
+        entityRelationships !== (selectedProject?.entityRelationships || '');
+
     const currentTitle = selectedProject?.customName || `Examen de ${selectedProject?.domainName}`;
 
     const breadcrumbItems = [
@@ -51,6 +104,49 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
         { label: selectedDomainFolder?.toUpperCase() || '', action: onBack },
     ];
+    const handleCombinedChange = (newValue: string) => {
+        setCombinedText(newValue);
+
+        const newIntro = parseIntroFromCombined(newValue);
+        const oldIntro = parseIntroFromCombined(combinedText);
+
+        if (newIntro === oldIntro) return;
+
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        abortRef.current = true; 
+
+        debounceTimer.current = setTimeout(async () => {
+            if (!newIntro.trim()) return;
+            abortRef.current = false;
+            setIsRegeneratingDiagram(true);
+            try {
+                const prompt = `Eres un experto en diseño de software. 
+                        A partir del siguiente enunciado de examen, genera ÚNICAMENTE el código de un diagrama de clases Mermaid (classDiagram) que represente las entidades y relaciones descritas.
+                        Devuelve SOLO el código Mermaid sin ningún texto adicional, sin explicaciones, sin bloques de código markdown, solo el código plano que empieza con "classDiagram".
+
+                        ENUNCIADO:
+                        ${newIntro}`;
+
+                const result = await generateWithAI(prompt);
+                if (abortRef.current) return;
+
+                if (result?.trim()) {
+                    const cleanResult = result
+                        .replace(/```mermaid\s*/g, '')
+                        .replace(/```\s*/g, '')
+                        .trim();
+                    setCombinedText(prev => {
+                        const intro = parseIntroFromCombined(prev);
+                        return buildCombined(intro, cleanResult);
+                    });
+                }
+            } catch (err) {
+                console.error("Error regenerando diagrama:", err);
+            } finally {
+                if (!abortRef.current) setIsRegeneratingDiagram(false);
+            }
+        }, 1500);
+    };
 
     const handleConfirmDownload = (fileName: string) => {
         onDownload(fileName);
@@ -68,6 +164,27 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         }
     };
 
+    const handleSave = async () => {
+        if (!selectedProject?.id) return;
+        setIsSaving(true);
+        try {
+            const extensionStatement = parseIntroFromCombined(combinedText);
+            const extensionMermaid = parseMermaidFromCombined(combinedText);
+            await onUpdateProject({
+                ...selectedProject,
+                extensionStatement,
+                extensionMermaid,
+                attributeConstraints,
+                entityRelationships,
+                updatedAt: new Date().toISOString(),
+            });
+        } catch (err) {
+            alert(err instanceof Error ? err.message : "No se pudo guardar.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const getRepoConfig = (domain: string) => {
         const isPetClinic = domain.toLowerCase().includes("veterinaria") || domain.toLowerCase().includes("clínica");
         return {
@@ -81,13 +198,12 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 
     const buildUploadListString = () => {
         const items = ["README.md (Enunciado y UML)"];
-        if (selectedProject?.attributeConstraints) items.push("Restricciones de atributos");
-        if (selectedProject?.entityRelationships) items.push("Relaciones entre entidades");
+        if (attributeConstraints) items.push("Restricciones de atributos");
+        if (entityRelationships) items.push("Relaciones entre entidades");
         if (selectedProject?.baseClasses) items.push("Clases base");
         if (selectedProject?.testPartsMap) items.push("Tests unitarios Java (JUnit)");
         if (selectedProject?.fullSolution) items.push("Solución completa");
-        
-        return items.join('\n'); 
+        return items.join('\n');
     };
 
     return (
@@ -152,15 +268,28 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 
                     <div className="two-col-grid">
                         <div className="content-card">
-                            <div className="card-header"><h3>Enunciado y Código Diagrama UML</h3></div>
+                            <div className="card-header">
+                                <h3>Enunciado y Código Diagrama UML</h3>
+                            </div>
                             <div className="card-body">
-                                <textarea className="wf-textarea" readOnly value={`${introText}\n\n${mermaidCode}`} />
+                                <textarea
+                                    className="wf-textarea"
+                                    value={combinedText}
+                                    onChange={e => handleCombinedChange(e.target.value)}
+                                />
                             </div>
                         </div>
                         <div className="content-card">
-                            <div className="card-header"><h3>Ilustración Diagrama UML</h3></div>
+                            <div className="card-header">
+                                <h3>
+                                    Ilustración Diagrama UML
+                                    {isRegeneratingDiagram && (
+                                        <span className="diagram-regenerating-indicator"> Regenerando...</span>
+                                    )}
+                                </h3>
+                            </div>
                             <div className="card-body diagram-panel">
-                                <MermaidViewer chartCode={cleanMermaidCode(mermaidCode)} />
+                                <MermaidViewer chartCode={cleanMermaidCode(liveMermaid)} />
                             </div>
                         </div>
                     </div>
@@ -184,7 +313,11 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             <h3>Definición de Restricciones</h3>
                         </div>
                         {selectedProject?.attributeConstraints ? (
-                            <textarea className="wide-textarea" readOnly value={selectedProject.attributeConstraints} />
+                            <textarea
+                                className="wide-textarea"
+                                value={attributeConstraints}
+                                onChange={e => setAttributeConstraints(e.target.value)}
+                            />
                         ) : (
                             <p className="storage-empty-state">
                                 Aún no se han creado las restricciones de atributos para este examen.
@@ -211,7 +344,11 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             <h3>Definición de Relaciones</h3>
                         </div>
                         {selectedProject?.entityRelationships ? (
-                            <textarea className="wide-textarea" readOnly value={selectedProject.entityRelationships} />
+                            <textarea
+                                className="wide-textarea"
+                                value={entityRelationships}
+                                onChange={e => setEntityRelationships(e.target.value)}
+                            />
                         ) : (
                             <p className="storage-empty-state">
                                 Aún no se han creado las relaciones entre entidades para este examen.
@@ -238,6 +375,16 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         <button type="button" className="btn-back" onClick={onBack}>
                             Volver
                         </button>
+                        {isDirty && (
+                            <button
+                                type="button"
+                                className="btn-save-changes"
+                                onClick={handleSave}
+                                disabled={isSaving || isRegeneratingDiagram}
+                            >
+                                {isSaving ? "Guardando…" : "Guardar cambios"}
+                            </button>
+                        )}
                     </div>
 
                     {showPreviewModal && (
@@ -252,22 +399,22 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                                         <h1>{currentTitle}</h1>
 
                                         <h2>1. Extensión Funcional y Diagrama UML</h2>
-                                        {introText && <p style={{ whiteSpace: 'pre-wrap' }}>{introText}</p>}
-                                        {mermaidCode && (
+                                        {combinedText && <p style={{ whiteSpace: 'pre-wrap' }}>{combinedText}</p>}
+                                        {liveMermaid && (
                                             <div className="preview-diagram-wrapper">
-                                                <MermaidViewer chartCode={cleanMermaidCode(mermaidCode)} />
+                                                <MermaidViewer chartCode={cleanMermaidCode(liveMermaid)} />
                                             </div>
                                         )}
 
                                         <h2>2. Restricciones de Atributos</h2>
-                                        {selectedProject?.attributeConstraints
-                                            ? <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProject.attributeConstraints}</p>
+                                        {attributeConstraints
+                                            ? <p style={{ whiteSpace: 'pre-wrap' }}>{attributeConstraints}</p>
                                             : <p style={{ textAlign: 'center' }}><em>Sin restricciones definidas</em></p>
                                         }
 
                                         <h2>3. Relaciones entre Entidades</h2>
-                                        {selectedProject?.entityRelationships
-                                            ? <p style={{ whiteSpace: 'pre-wrap' }}>{selectedProject.entityRelationships}</p>
+                                        {entityRelationships
+                                            ? <p style={{ whiteSpace: 'pre-wrap' }}>{entityRelationships}</p>
                                             : <p style={{ textAlign: 'center' }}><em>Sin relaciones definidas</em></p>
                                         }
                                     </div>
