@@ -19,6 +19,7 @@ interface Props {
   readonly onFunctionalExtension: () => void
   readonly onStatementStep1: () => void
   readonly onFinishExtension: (statement: string, mermaidCode: string) => void
+  readonly onComponents: () => void
 }
 
 const STEPS = [{ label: "Texto de enunciado" }, { label: "Diagrama UML" }]
@@ -33,6 +34,7 @@ export default function DiagramUMLScreen({
   onFunctionalExtension,
   onStatementStep1,
   onFinishExtension,
+  onComponents,
 }: Props) {
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
   const [promptText, setPromptText] = useState("")
@@ -81,6 +83,7 @@ export default function DiagramUMLScreen({
     { label: "INICIO", action: onWelcome },
     { label: "CREAR EXAMEN", action: onCreateExam },
     { label: "POR PARTES", action: onCreateExamByParts },
+    { label: 'ENUNCIADO', action: onComponents },
     { label: "EXTENSIÓN FUNCIONAL", action: onFunctionalExtension },
     { label: domainName.toUpperCase(), action: onStatementStep1 },
   ]
@@ -151,7 +154,13 @@ export default function DiagramUMLScreen({
                   <div className="wf-column-three">
                     <span className="wf-column-title">Código Mermaid</span>
                     <div className="wf-diagram-code-inner">
-                      <pre className="wf-result-box"><code>{isLoading ? "Generando..." : responseText}</code></pre>
+                      <textarea 
+                        className="wf-result-box"
+                        value={isLoading ? "Generando..." : responseText}
+                        onChange={(e) => setResponseText(e.target.value)}
+                        disabled={isLoading}
+                        spellCheck={false} 
+                      />
                     </div>
                   </div>
 

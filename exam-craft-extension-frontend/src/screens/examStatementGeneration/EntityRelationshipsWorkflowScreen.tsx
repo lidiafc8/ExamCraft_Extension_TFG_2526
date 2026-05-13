@@ -32,7 +32,7 @@ interface Props {
   readonly onCreateExam: () => void
   readonly onCreateTest: (data: { project: any; constraints: string; entityRelationships: string; baseClass: string; targetPart?: string }) => void
   readonly onGoToBaseClass: (project?: any) => void
-}
+  readonly onCreateExamByParts: () => void}
 
 const ALLOWED_FOLDERS = ["clínica veterinaria", "ajedrez"]
 const STORAGE_KEY = "entityRelationships"
@@ -47,6 +47,7 @@ export default function EntityRelationshipsWorkflowScreen({
   onCreateExam,
   onCreateTest,
   onGoToBaseClass,
+  onCreateExamByParts,
 }: Props) {
   const [step, setStep] = useState<"selection" | "workflow">("selection")
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
@@ -222,7 +223,8 @@ export default function EntityRelationshipsWorkflowScreen({
         breadcrumbItems={[
           { label: "INICIO", action: onWelcome },
           { label: "CREAR EXAMEN", action: onCreateExam },
-          { label: "POR PARTES", action: onBack },
+          { label: "POR PARTES", action: onCreateExamByParts },
+          { label: 'ENUNCIADO', action: onBack },
         ]}
         currentStep="RELACIONES ENTRE ENTIDADES"
       />

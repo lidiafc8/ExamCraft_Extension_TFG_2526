@@ -1,5 +1,7 @@
 # PROMPT PARA LA GENERACIÓN DE CÓDIGO SOLUCIÓN COMPLETA (RESTRICCIONES Y RELACIONES)
 
+## Prompt a utilizar:
+
 Actúa como un desarrollador Senior de Java y Spring Boot experto en la resolución de ejercicios universitarios. 
 
 Tu tarea es tomar un código base (esqueletos de clases) y completarlo aplicando estrictamente tanto las **Restricciones de Atributos** como las **Relaciones entre Entidades** definidas en los enunciados proporcionados. Además, tu implementación debe garantizar que pase con éxito todos los tests de validación proporcionados para ambas partes.

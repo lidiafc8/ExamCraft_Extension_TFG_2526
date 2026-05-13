@@ -33,6 +33,7 @@ interface Props {
   readonly onCreateExam: () => void
   readonly onCreateTest: (data: { project: Project; constraints: string; entityRelationships: string; baseClass: string }) => void
   readonly onGoToBaseClass: (project?: Project) => void
+  readonly onCreateExamByParts: () => void
 }
 
 const ALLOWED_FOLDERS = ["clínica veterinaria", "ajedrez"]
@@ -53,6 +54,7 @@ export default function AttributesConstraintsWorkflowScreen({
   onCreateExam,
   onCreateTest,
   onGoToBaseClass,
+  onCreateExamByParts,
 }: Props) {
   const [step, setStep] = useState<"selection" | "workflow">("selection")
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
@@ -164,7 +166,8 @@ export default function AttributesConstraintsWorkflowScreen({
   const breadcrumbItems = [
     { label: "INICIO", action: onWelcome },
     { label: "CREAR EXAMEN", action: onCreateExam },
-    { label: "POR PARTES", action: onBack },
+    { label: "POR PARTES", action: onCreateExamByParts },
+    { label: 'ENUNCIADO', action: onBack },
   ]
 
   return (

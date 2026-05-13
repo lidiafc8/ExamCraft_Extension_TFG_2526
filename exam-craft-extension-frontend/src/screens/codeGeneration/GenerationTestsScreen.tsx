@@ -27,6 +27,7 @@ interface Props {
   readonly onWelcome: () => void
   readonly onCreateExam: () => void
   readonly onCodeGeneration: () => void
+  readonly onComponents: () => void
 }
 
 const DOMAIN_CONFIG: Record<string, { repo: string; rootPackage: string; extraPackages: string[] }> = {
@@ -97,6 +98,7 @@ export default function GenerationTestScreen({
   onWelcome,
   onCreateExam,
   onCodeGeneration,
+  onComponents,
 }: Props) {
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
   const [promptText, setPromptText] = useState("")
@@ -233,6 +235,7 @@ Genera ${isRelationships ? "(Test2.java)" : "(Test1.java)"} sin bloques markdown
     { label: "INICIO", action: onWelcome },
     { label: "CREAR EXAMEN", action: onCreateExam },
     { label: "POR PARTES", action: onCreateExamByParts },
+    { label: 'ENUNCIADO', action: onComponents },
     ...(source === "general"
       ? [{ label: "CÓDIGO", action: onCodeGeneration }, { label: "TESTS", action: onBack }]
       : source === "attributes"

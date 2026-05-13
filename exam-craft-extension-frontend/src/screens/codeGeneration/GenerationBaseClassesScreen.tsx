@@ -20,6 +20,8 @@ interface Project {
   customName?: string
   extensionFinish?: string
   baseClasses?: string
+  attributeConstraints?: string
+  entityRelationships?: string
   updatedAt?: string
 }
 

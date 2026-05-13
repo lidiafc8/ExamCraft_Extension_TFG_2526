@@ -159,8 +159,7 @@ export default function GeneralGenerationTestScreen({
                                 })}
                         </div>
                         <div className="wf-actions-row">
-                            <button onClick={onBack} className="btn-back" style={{ marginTop: "20px" }}>Volver</button>
-                        </div>
+                            <button onClick={() => setStep('selector')} className="btn-back" style={{ marginTop: "20px" }}>Volver</button>                        </div>
                     </div>
                 )}
             </main>

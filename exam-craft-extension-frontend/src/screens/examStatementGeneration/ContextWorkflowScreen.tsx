@@ -17,6 +17,7 @@ interface Props {
   readonly onCreateExamByParts: () => void
   readonly onFunctionalExtension: () => void
   readonly onCreateDiagram: (text: string) => void
+  readonly onComponents: () => void
 }
 
 const STEPS = [{ label: "Texto de enunciado" }, { label: "Diagrama UML" }]
@@ -29,6 +30,7 @@ export default function ContextWorkflowScreen({
   onCreateExamByParts,
   onFunctionalExtension,
   onCreateDiagram,
+  onComponents,
 }: Props) {
   const [wizardStep, setWizardStep] = useState<1 | 2>(1)
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
@@ -96,6 +98,7 @@ export default function ContextWorkflowScreen({
     { label: "INICIO", action: onWelcome },
     { label: "CREAR EXAMEN", action: onCreateExam },
     { label: "POR PARTES", action: onCreateExamByParts },
+    { label: 'ENUNCIADO', action: onComponents },
     { label: "EXTENSIÓN FUNCIONAL", action: onFunctionalExtension },
   ]
 

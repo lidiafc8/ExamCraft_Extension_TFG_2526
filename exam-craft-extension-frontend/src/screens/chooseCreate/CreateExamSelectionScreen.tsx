@@ -34,7 +34,7 @@ export default function CreateExamScreen({ onBack, onCreateExamByParts }: Props)
             <span className="card-label">Crear examen por partes</span>
           </button>
 
-          <button className="action-card">
+          <button className="action-card disabled-card" disabled>
               <span className="complete-exam-icon"><img src={completeExamIcon} alt="Icono archivo" className="card-icon" /></span>
             <span className="card-label">Crear examen completo</span>
           </button>

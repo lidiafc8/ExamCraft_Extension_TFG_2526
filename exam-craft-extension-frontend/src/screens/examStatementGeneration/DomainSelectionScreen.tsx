@@ -9,16 +9,16 @@ interface Props {
   readonly onWelcome: () => void
   readonly onSelectDomain: (domainName: string) => void
   readonly onCreateExam: () => void
-  readonly onComponents: () => void
+  readonly onCreateExamByParts: () => void
 }
 
-export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectDomain, onCreateExam, onComponents }: Props) {
+export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectDomain, onCreateExam, onCreateExamByParts }: Props) {
   
   const breadcrumbItems = [
       { label: 'INICIO', action: onWelcome },
       { label: 'CREAR EXAMEN', action: onCreateExam },
-      { label: 'POR PARTES', action: onBack },
-      { label: 'COMPONENTES', action: onComponents },
+      { label: 'POR PARTES', action: onCreateExamByParts },
+      { label: 'ENUNCIADO', action: onBack },
   ];
 
   const currentTitle = "EXTENSIÓN FUNCIONAL";
@@ -52,8 +52,8 @@ export default function FunctionalExtensionScreen({ onBack, onWelcome, onSelectD
             <span className="card-label">Ajedrez</span>
           </button>
 
-          <button className="action-card">
-              <span className="soon-icon"><img src={comingSoon} alt="Icono comingSoon" className="card-icon"/></span>
+          <button className="action-card disabled-card" disabled>
+            <span className="soon-icon"><img src={comingSoon} alt="Icono comingSoon" className="card-icon"/></span>
             <span className="card-label">Crear nuevo dominio</span>
           </button>
 

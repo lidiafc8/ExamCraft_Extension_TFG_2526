@@ -17,6 +17,7 @@ interface Props {
   readonly onCreateExamByParts: () => void
   readonly onFunctionalExtension: () => void
   readonly onStatementStep1: () => void
+  readonly onComponents: () => void
 }
 
 const STEPS = [{ label: "Texto de enunciado" }, { label: "Diagrama UML" }]
@@ -31,6 +32,7 @@ export default function FinishFunctionalExtensionScreen({
   onCreateExamByParts,
   onFunctionalExtension,
   onStatementStep1,
+  onComponents
 }: Props) {
   const [showSave, setShowSave] = useState(false)
   const [showDownloadModal, setShowDownloadModal] = useState(false) 
@@ -52,6 +54,7 @@ export default function FinishFunctionalExtensionScreen({
     { label: "INICIO", action: onWelcome },
     { label: "CREAR EXAMEN", action: onCreateExam },
     { label: "POR PARTES", action: onCreateExamByParts },
+    { label: 'ENUNCIADO', action: onComponents },
     { label: "EXTENSIÓN FUNCIONAL", action: onFunctionalExtension },
     { label: domainName.toUpperCase(), action: onStatementStep1 },
   ]

@@ -13,9 +13,9 @@ import CodeGenerationScreen from "~src/screens/codeGeneration/CodeSelectionGener
 import GenerationBaseClassesScreen from "~src/screens/codeGeneration/GenerationBaseClassesScreen"
 import StorageExamsIndex from "../screens/storage/StorageExamsIndex"
 import EntityRelationshipsWorkflowScreen from "~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen"
-import PartsGenerationScreen from "~src/screens/chooseCreate/PartsGenetarionScreen"
 import ContextWorkflowScreen from "../screens/examStatementGeneration/ContextWorkflowScreen"
 import GenerationSolutionCodeScreen from "~src/screens/codeGeneration/GenerationSolutionCodeScreen"
+import StatementPartSelectionScreen from "~src/screens/chooseCreate/StatementPartSelectionScreen"
 
 export default function IndexTab() {
   const [selectedDomain, setSelectedDomain] = useState<string>("")
@@ -48,7 +48,7 @@ export default function IndexTab() {
     "testGeneral" |
     "codeGeneration" |
     "generateBaseClasses" |
-    "partsGeneration" |
+    "statementPartSelection" |
     "generationSolutionCode"
     
   >("welcome")
@@ -79,7 +79,7 @@ export default function IndexTab() {
         <CreateExamByPartsScreen 
         onBack={() => setScreen("createExam")} 
         onWelcome={() => setScreen("welcome")} 
-        onComponents={() => setScreen("partsGeneration")}
+        onComponents={() => setScreen("statementPartSelection")}
         onCodeGeneration={() => {
           setSelectedProject(null); 
           setCameFromAttributes(false);
@@ -88,14 +88,15 @@ export default function IndexTab() {
         />
       )}
 
-      {screen === "partsGeneration" && (
-        <PartsGenerationScreen 
+      {screen === "statementPartSelection" && (
+        <StatementPartSelectionScreen 
         onBack={() => setScreen("createExamByParts")} 
         onWelcome={() => setScreen("welcome")} 
         onFunctionalExtension={() => setScreen("domainSelection")}
         onAttributesConstraints={() => setScreen("attributesConstraints")}
         onEntityRelationships={() => setScreen("entityRelationships")}
-        onPartsGeneration={() => setScreen("createExamByParts")}
+        onCreateExamByParts={() => setScreen("createExamByParts")}
+        
         />
       )}
 
@@ -155,14 +156,14 @@ export default function IndexTab() {
 
       {screen === "domainSelection" && (
         <DomainSelectionScreen 
-        onBack={() => setScreen("partsGeneration")} 
+        onBack={() => setScreen("statementPartSelection")} 
           onWelcome={() => setScreen("welcome")} 
           onSelectDomain={(domainName) => {
               setSelectedDomain(domainName)  
               setScreen("contextWorkflow") 
           }}
          onCreateExam={() => setScreen("createExam")}
-         onComponents={() => setScreen("partsGeneration")}
+         onCreateExamByParts={() => setScreen("createExamByParts")}
         />
       )}
 
@@ -178,6 +179,7 @@ export default function IndexTab() {
             setContextResponse(context)
             setScreen("diagramUML")
           }}
+          onComponents={() => setScreen("statementPartSelection")}
         />
       )}
 
@@ -211,6 +213,7 @@ export default function IndexTab() {
               setExtensionMermaid(mermaid);
               setScreen("finishFunctionalExtension");
           }}
+          onComponents={() => setScreen("statementPartSelection")}
         />
       )}
 
@@ -225,6 +228,7 @@ export default function IndexTab() {
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onFunctionalExtension={() => setScreen("domainSelection")}
           onStatementStep1={() => setScreen("contextWorkflow")}
+          onComponents={() => setScreen("statementPartSelection")}
         />
       )}
 
@@ -234,9 +238,10 @@ export default function IndexTab() {
 
       {screen === "attributesConstraints" && (
         <AttributesConstraintsWorkflowScreen 
-          onBack={() => setScreen("partsGeneration")} 
+          onBack={() => setScreen("statementPartSelection")} 
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
+          onCreateExamByParts={() => setScreen("createExamByParts")}
           onGoToBaseClass={(project) => {
             setSelectedProject(project);
             setCameFromAttributes(true); 
@@ -252,7 +257,7 @@ export default function IndexTab() {
 
       {screen === "entityRelationships" && (
       <EntityRelationshipsWorkflowScreen 
-        onBack={() => setScreen("partsGeneration")} 
+        onBack={() => setScreen("statementPartSelection")} 
         onWelcome={() => setScreen("welcome")} 
         onCreateExam={() => setScreen("createExam")}
         onGoToBaseClass={(project) => {
@@ -271,6 +276,7 @@ export default function IndexTab() {
           
           setScreen("testAttributes"); 
         }}
+        onCreateExamByParts={() => setScreen("createExamByParts")}
       />
     )}
 
@@ -283,6 +289,7 @@ export default function IndexTab() {
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onCodeGeneration={() => setScreen("codeGeneration")}
+          onComponents={() => setScreen("statementPartSelection")}
         />
       )}
     </div>

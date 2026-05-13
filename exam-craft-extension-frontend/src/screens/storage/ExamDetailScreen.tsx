@@ -80,11 +80,14 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     };
 
     const buildUploadListString = () => {
-        const items = ["- README.md (Enunciado y UML)"];
-        if (selectedProject?.testPartsMap) items.push("- Tests unitarios Java (JUnit)");
-        if (selectedProject?.attributeConstraints) items.push("- Restricciones de atributos");
-        if (selectedProject?.entityRelationships) items.push("- Relaciones entre entidades");
-        return items.join("\n");
+        const items = ["README.md (Enunciado y UML)"];
+        if (selectedProject?.attributeConstraints) items.push("Restricciones de atributos");
+        if (selectedProject?.entityRelationships) items.push("Relaciones entre entidades");
+        if (selectedProject?.baseClasses) items.push("Clases base");
+        if (selectedProject?.testPartsMap) items.push("Tests unitarios Java (JUnit)");
+        if (selectedProject?.fullSolution) items.push("Solución completa");
+        
+        return items.join('\n'); 
     };
 
     return (

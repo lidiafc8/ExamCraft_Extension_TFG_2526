@@ -14,7 +14,7 @@ interface GitHubDeployModalProps {
 }
 
 export const GitHubDeployModal: React.FC<GitHubDeployModalProps> = ({
-    domainName, templateRepo, newRepoName, uploadListString, savedToken, onConfirm, onSuccess, onClose
+    newRepoName, uploadListString, savedToken, onConfirm, onSuccess, onClose
 }) => {
     const [status, setStatus] = useState<'confirm' | 'loading' | 'success' | 'error'>('confirm');
     const [token, setToken] = useState(savedToken ?? "");
@@ -38,6 +38,8 @@ export const GitHubDeployModal: React.FC<GitHubDeployModalProps> = ({
             setStatus('error');
         }
     };
+
+    const itemsArray = uploadListString.split('\n').filter(item => item.trim() !== '');
 
     if (status === 'success') {
         return (
@@ -67,10 +69,24 @@ export const GitHubDeployModal: React.FC<GitHubDeployModalProps> = ({
     return (
         <ConfirmModal
             title="CONFIRMAR SUBIDA A GITHUB"
-            message={`Repo: ${newRepoName}\n\nSe subirán:\n${uploadListString}`}
+            message={
+                <div style={{ textAlign: "left" }}>
+                    <p style={{ marginBottom: "12px" }}>
+                        <strong>Repo:</strong> {newRepoName}
+                    </p>
+                    <p style={{ margin: "0 0 8px 0" }}>Se subirán los siguientes elementos:</p>
+                    <ul style={{ margin: "0", paddingLeft: "24px", color: "#4a5568" }}>
+                        {itemsArray.map((item, index) => (
+                            <li key={index} style={{ marginBottom: "6px" }}>
+                                {item.replace(/^- /, '')}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            }
             warning={!savedToken && (
-                <div>
-                    <p>Se requiere Token de GitHub:</p>
+                <div style={{ marginTop: "16px" }}>
+                    <p style={{ marginBottom: "8px", fontWeight: "bold" }}>Se requiere Token de GitHub:</p>
                     <input 
                         type="password" 
                         className="wf-input" 
@@ -78,6 +94,7 @@ export const GitHubDeployModal: React.FC<GitHubDeployModalProps> = ({
                         value={token} 
                         onChange={e => setToken(e.target.value)} 
                         autoFocus
+                        style={{ width: "100%", padding: "8px", borderRadius: "4px" }}
                     />
                 </div>
             )}

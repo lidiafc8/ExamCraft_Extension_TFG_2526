@@ -3,7 +3,7 @@ import "./css/ConfirmModal.css";
 
 interface ConfirmModalProps {
   title: string;
-  message: string;
+  message: React.ReactNode; 
   warning?: React.ReactNode;
   plainWarning?: boolean;
   onConfirm: () => void;
@@ -28,9 +28,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       <h3 className="main-title small">
         {title}
       </h3>
-      <p className={`sucess-modal-description ${warning ? 'warning' : ''}`}>
+      <div className={`sucess-modal-description ${warning ? 'warning' : ''}`}>
         {message}
-      </p>
+      </div>
       {warning && (
         <div className={`confirm-modal-warning ${plainWarning ? 'confirm-modal-warning--plain' : ''}`}>
           {warning}
