@@ -25,18 +25,19 @@ export interface ExamDetailScreenProps {
     onUpdateProject: (updatedProject: any) => Promise<void>;
 }
 
+// --- FUNCIONES AUXILIARES FUERA DEL COMPONENTE (Reducen complejidad) ---
+
 function buildCombined(intro: string, mermaid: string): string {
     const i = intro || '';
     const m = mermaid || '';
     if (!i && !m) return '';
     if (!m) return i;
     const block = `\`\`\`mermaid\n${m}\n\`\`\``;
-    if (!i) return block;
-    return `${i}\n\n${block}`;
+    return i ? `${i}\n\n${block}` : block;
 }
 
 function parseMermaidFromCombined(combined: string): string {
-    const match = combined.match(/```mermaid\s*([\s\S]*?)```/);
+    const match = combined.match(/```mermaid\s*([\s\S]*?)```/); // NOSONAR
     return match ? match[1].trim() : '';
 }
 
@@ -44,6 +45,23 @@ function parseIntroFromCombined(combined: string): string {
     const idx = combined.indexOf('```mermaid');
     return idx !== -1 ? combined.slice(0, idx).trim() : combined.trim();
 }
+
+async function requestAIDiagram(enunciado: string) {
+    const prompt = `Eres un experto en diseño de software. 
+        A partir del siguiente enunciado de examen, genera ÚNICAMENTE el código de un diagrama de clases Mermaid (classDiagram) que represente las entidades y relaciones descritas.
+        Devuelve SOLO el código Mermaid sin ningún texto adicional, sin explicaciones, sin bloques de código markdown, solo el código plano que empieza con "classDiagram".
+
+        ENUNCIADO:
+        ${enunciado}`;
+
+    const result = await generateWithAI(prompt);
+    return result?.trim()
+        .replace(/```mermaid\s*/g, '')
+        .replace(/```\s*/g, '')
+        .trim() || '';
+}
+
+// --- COMPONENTE PRINCIPAL ---
 
 export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     selectedProject,
@@ -59,18 +77,21 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     onDeleteSection,
     onUpdateProject,
 }) => {
+    // Estados de UI
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [showDeployModal, setShowDeployModal] = useState(false);
     const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
+    
+    // Estados de Carga y Edición
     const [isSaving, setIsSaving] = useState(false);
     const [isRegeneratingDiagram, setIsRegeneratingDiagram] = useState(false);
-
     const [editingCombined, setEditingCombined] = useState(false);
     const [editingAttributeConstraints, setEditingAttributeConstraints] = useState(false);
     const [editingEntityRelationships, setEditingEntityRelationships] = useState(false);
 
+    // Estados de Datos
     const [combinedText, setCombinedText] = useState(
         buildCombined(selectedProject?.extensionStatement || '', selectedProject?.extensionMermaid || '')
     );
@@ -81,69 +102,36 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     const abortRef = useRef(false);
 
     useEffect(() => {
-        setCombinedText(buildCombined(
-            selectedProject?.extensionStatement || '',
-            selectedProject?.extensionMermaid || ''
-        ));
+        setCombinedText(buildCombined(selectedProject?.extensionStatement || '', selectedProject?.extensionMermaid || ''));
         setAttributeConstraints(selectedProject?.attributeConstraints || '');
         setEntityRelationships(selectedProject?.entityRelationships || '');
     }, [selectedProject]);
 
-    const liveMermaid =
-        parseMermaidFromCombined(combinedText) || (selectedProject?.extensionMermaid || '');
-
-    const originalCombined = buildCombined(
-        selectedProject?.extensionStatement || '',
-        selectedProject?.extensionMermaid || ''
-    );
-    const isDirty =
-        combinedText !== originalCombined ||
-        attributeConstraints !== (selectedProject?.attributeConstraints || '') ||
-        entityRelationships !== (selectedProject?.entityRelationships || '');
+    // Variables calculadas
+    const liveMermaid = parseMermaidFromCombined(combinedText) || (selectedProject?.extensionMermaid || '');
+    const originalCombined = buildCombined(selectedProject?.extensionStatement || '', selectedProject?.extensionMermaid || '');
+    const isDirty = combinedText !== originalCombined || 
+                    attributeConstraints !== (selectedProject?.attributeConstraints || '') || 
+                    entityRelationships !== (selectedProject?.entityRelationships || '');
 
     const currentTitle = selectedProject?.customName || `Examen de ${selectedProject?.domainName}`;
 
-    const breadcrumbItems = [
-        { label: 'INICIO', action: onWelcome },
-        { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
-        { label: selectedDomainFolder?.toUpperCase() || '', action: onBack },
-    ];
-
+    // Handlers
     const handleCombinedChange = (newValue: string) => {
         setCombinedText(newValue);
-
         const newIntro = parseIntroFromCombined(newValue);
-        const oldIntro = parseIntroFromCombined(combinedText);
-
-        if (newIntro === oldIntro) return;
+        if (newIntro === parseIntroFromCombined(combinedText) || !newIntro.trim()) return;
 
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
         abortRef.current = true;
 
         debounceTimer.current = setTimeout(async () => {
-            if (!newIntro.trim()) return;
             abortRef.current = false;
             setIsRegeneratingDiagram(true);
             try {
-                const prompt = `Eres un experto en diseño de software. 
-                        A partir del siguiente enunciado de examen, genera ÚNICAMENTE el código de un diagrama de clases Mermaid (classDiagram) que represente las entidades y relaciones descritas.
-                        Devuelve SOLO el código Mermaid sin ningún texto adicional, sin explicaciones, sin bloques de código markdown, solo el código plano que empieza con "classDiagram".
-
-                        ENUNCIADO:
-                        ${newIntro}`;
-
-                const result = await generateWithAI(prompt);
-                if (abortRef.current) return;
-
-                if (result?.trim()) {
-                    const cleanResult = result
-                        .replace(/```mermaid\s*/g, '') // NOSONAR javascript:S5852
-                        .replace(/```\s*/g, '')
-                        .trim();
-                    setCombinedText(prev => {
-                        const intro = parseIntroFromCombined(prev);
-                        return buildCombined(intro, cleanResult);
-                    });
+                const cleanResult = await requestAIDiagram(newIntro);
+                if (!abortRef.current && cleanResult) {
+                    setCombinedText(prev => buildCombined(parseIntroFromCombined(prev), cleanResult));
                 }
             } catch (err) {
                 console.error("Error regenerando diagrama:", err);
@@ -153,32 +141,14 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         }, 1500);
     };
 
-    const handleConfirmDownload = (fileName: string) => {
-        onDownload(fileName);
-        setShowDownloadModal(false);
-    };
-
-    const handleDeletePart = (sectionKey: string, sectionName: string) => {
-        setSectionToDelete({ key: sectionKey, name: sectionName });
-    };
-
-    const confirmDeletePart = () => {
-        if (sectionToDelete) {
-            onDeleteSection(sectionToDelete.key);
-            setSectionToDelete(null);
-        }
-    };
-
     const handleSave = async () => {
         if (!selectedProject?.id) return;
         setIsSaving(true);
         try {
-            const extensionStatement = parseIntroFromCombined(combinedText);
-            const extensionMermaid = parseMermaidFromCombined(combinedText);
             await onUpdateProject({
                 ...selectedProject,
-                extensionStatement,
-                extensionMermaid,
+                extensionStatement: parseIntroFromCombined(combinedText),
+                extensionMermaid: parseMermaidFromCombined(combinedText),
                 attributeConstraints,
                 entityRelationships,
                 updatedAt: new Date().toISOString(),
@@ -188,17 +158,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         } finally {
             setIsSaving(false);
         }
-    };
-
-    const getRepoConfig = (domain: string) => {
-        const isPetClinic = domain.toLowerCase().includes("veterinaria") || domain.toLowerCase().includes("clínica");
-        return {
-            TEMPLATE_OWNER: "lidiafc8",
-            TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
-            TEST_BASE_PATH: isPetClinic
-                ? "src/test/java/org/springframework/samples/petclinic/grooming/"
-                : "src/test/java/es/us/dp1/chess/tournament/"
-        };
     };
 
     const buildUploadListString = () => {
@@ -211,95 +170,60 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         return items.join('\n');
     };
 
+    const repoConfig = (domain: string) => {
+        const isPetClinic = domain.toLowerCase().includes("veterinaria") || domain.toLowerCase().includes("clínica");
+        return {
+            TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
+        };
+    };
+
     return (
         <div>
-            <Header
-                onWelcome={onWelcome}
-                breadcrumbItems={breadcrumbItems}
-                currentStep={currentTitle}
-            />
+            <Header onWelcome={onWelcome} currentStep={currentTitle} breadcrumbItems={[
+                { label: 'INICIO', action: onWelcome },
+                { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
+                { label: selectedDomainFolder?.toUpperCase() || '', action: onBack },
+            ]} />
+            
             <div className="main-content">
                 <main className="storage-main exam-detail-main">
-
+                    
+                    {/* MENU ACCIONES */}
                     <div className="actions-menu-wrapper">
-                        <button
-                            type="button"
-                            className="actions-menu-btn"
-                            onClick={() => setShowActionsMenu(!showActionsMenu)}
-                        >
-                            &#8942;
-                        </button>
-
+                        <button type="button" className="actions-menu-btn" onClick={() => setShowActionsMenu(!showActionsMenu)}>&#8942;</button>
                         {showActionsMenu && (
                             <>
                                 <div className="actions-overlay" onClick={() => setShowActionsMenu(false)} />
                                 <div className="actions-dropdown">
-                                    <button
-                                        className="action-btn action-btn--preview"
-                                        onClick={() => { setShowPreviewModal(true); setShowActionsMenu(false); }}
-                                    >
-                                        Previsualizar
-                                    </button>
-                                    <button
-                                        className="action-btn action-btn--download"
-                                        onClick={() => { setShowDownloadModal(true); setShowActionsMenu(false); }}
-                                    >
-                                        Descargar (.md)
-                                    </button>
-                                    <button
-                                        className="action-btn action-btn--github"
-                                        onClick={() => { setShowDeployModal(true); setShowActionsMenu(false); }}
-                                    >
-                                        Crear repositorio GitHub
-                                    </button>
+                                    <button className="action-btn" onClick={() => { setShowPreviewModal(true); setShowActionsMenu(false); }}>Previsualizar</button>
+                                    <button className="action-btn" onClick={() => { setShowDownloadModal(true); setShowActionsMenu(false); }}>Descargar (.md)</button>
+                                    <button className="action-btn" onClick={() => { setShowDeployModal(true); setShowActionsMenu(false); }}>Crear repositorio GitHub</button>
                                     <hr className="action-divider" />
-                                    <button
-                                        className="action-btn action-btn--delete"
-                                        onClick={() => {
-                                            setShowActionsMenu(false);
-                                            onDeleteProject(selectedProject?.id);
-                                        }}
-                                    >
-                                        Eliminar
-                                    </button>
+                                    <button className="action-btn action-btn--delete" onClick={() => { setShowActionsMenu(false); onDeleteProject(selectedProject?.id); }}>Eliminar</button>
                                 </div>
                             </>
                         )}
                     </div>
 
+                    {/* SECCIÓN EXTENSIÓN */}
                     <div className="storage-section-heading">
                         <h2>Extensión Funcional</h2>
-                        <button
-                            type="button"
-                            className={`btn-edit-toggle ${editingCombined ? 'btn-edit-toggle--active' : ''}`}
-                            onClick={() => setEditingCombined(prev => !prev)}
-                        >
+                        <button type="button" className={`btn-edit-toggle ${editingCombined ? 'btn-edit-toggle--active' : ''}`} onClick={() => setEditingCombined(!editingCombined)}>
                             {editingCombined ? '✎ Editando' : '🔒 No editable'}
                         </button>
                     </div>
 
                     <div className="two-col-grid">
                         <div className="content-card">
-                            <div className="card-header">
-                                <h3>Enunciado y Código Diagrama UML</h3>
-                            </div>
+                            <div className="card-header"><h3>Enunciado y Código Diagrama UML</h3></div>
                             <div className="card-body">
-                                <textarea
-                                    className="wf-textarea"
-                                    value={combinedText}
-                                    readOnly={!editingCombined}
-                                    onChange={editingCombined ? e => handleCombinedChange(e.target.value) : undefined}
-                                />
+                                <textarea className="wf-textarea" value={combinedText} readOnly={!editingCombined} 
+                                    onChange={editingCombined ? e => handleCombinedChange(e.target.value) : undefined} />
                             </div>
                         </div>
                         <div className="content-card">
                             <div className="card-header">
-                                <h3>
-                                    Ilustración Diagrama UML
-                                    {isRegeneratingDiagram && (
-                                        <span className="diagram-regenerating-indicator"> Regenerando...</span>
-                                    )}
-                                </h3>
+                                <h3>Ilustración Diagrama UML {isRegeneratingDiagram && <span className="diagram-regenerating-indicator"> Regenerando...</span>}</h3>
                             </div>
                             <div className="card-body diagram-panel">
                                 <MermaidViewer chartCode={cleanMermaidCode(liveMermaid)} />
@@ -307,123 +231,69 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         </div>
                     </div>
 
+                    {/* RESTRICCIONES DE ATRIBUTOS */}
                     <div className="storage-section-heading">
                         <h2>Restricciones de Atributos</h2>
                         <div className="section-heading-actions">
                             {selectedProject?.attributeConstraints && (
-                                <button
-                                    type="button"
-                                    className={`btn-edit-toggle ${editingAttributeConstraints ? 'btn-edit-toggle--active' : ''}`}
-                                    onClick={() => setEditingAttributeConstraints(prev => !prev)}
-                                >
-                                    {editingAttributeConstraints ? '✎ Editando' : '🔒 No editable'}
-                                </button>
-                            )}
-                            {selectedProject?.attributeConstraints && (
-                                <button
-                                    type="button"
-                                    className="storage-delete-btn"
-                                    onClick={() => handleDeletePart('attributeConstraints', 'Restricciones de Atributos')}
-                                    title="Eliminar Restricciones de Atributos"
-                                >
-                                    ✕
-                                </button>
+                                <>
+                                    <button type="button" className={`btn-edit-toggle ${editingAttributeConstraints ? 'btn-edit-toggle--active' : ''}`} onClick={() => setEditingAttributeConstraints(!editingAttributeConstraints)}>
+                                        {editingAttributeConstraints ? '✎ Editando' : '🔒 No editable'}
+                                    </button>
+                                    <button type="button" className="storage-delete-btn" onClick={() => setSectionToDelete({ key: 'attributeConstraints', name: 'Restricciones de Atributos' })}>✕</button>
+                                </>
                             )}
                         </div>
                     </div>
-
                     <div className="wide-card">
-                        <div className="card-header">
-                            <h3>Definición de Restricciones</h3>
-                        </div>
+                        <div className="card-header"><h3>Definición de Restricciones</h3></div>
                         {selectedProject?.attributeConstraints ? (
-                            <textarea
-                                className="wide-textarea"
-                                value={attributeConstraints}
-                                readOnly={!editingAttributeConstraints}
-                                onChange={editingAttributeConstraints ? e => setAttributeConstraints(e.target.value) : undefined}
-                            />
-                        ) : (
-                            <p className="storage-empty-state">
-                                Aún no se han creado las restricciones de atributos para este examen.
-                            </p>
-                        )}
+                            <textarea className="wide-textarea" value={attributeConstraints} readOnly={!editingAttributeConstraints} 
+                                onChange={editingAttributeConstraints ? e => setAttributeConstraints(e.target.value) : undefined} />
+                        ) : <p className="storage-empty-state">Aún no se han creado las restricciones de atributos.</p>}
                     </div>
 
+                    {/* RELACIONES ENTIDADES */}
                     <div className="storage-section-heading">
                         <h2>Relaciones entre Entidades</h2>
                         <div className="section-heading-actions">
                             {selectedProject?.entityRelationships && (
-                                <button
-                                    type="button"
-                                    className={`btn-edit-toggle ${editingEntityRelationships ? 'btn-edit-toggle--active' : ''}`}
-                                    onClick={() => setEditingEntityRelationships(prev => !prev)}
-                                >
-                                    {editingEntityRelationships ? '✎ Editando' : '🔒 No editable'}
-                                </button>
-                            )}
-                            {selectedProject?.entityRelationships && (
-                                <button
-                                    type="button"
-                                    className="storage-delete-btn"
-                                    onClick={() => handleDeletePart('entityRelationships', 'Relaciones entre Entidades')}
-                                    title="Eliminar Relaciones entre Entidades"
-                                >
-                                    ✕
-                                </button>
+                                <>
+                                    <button type="button" className={`btn-edit-toggle ${editingEntityRelationships ? 'btn-edit-toggle--active' : ''}`} onClick={() => setEditingEntityRelationships(!editingEntityRelationships)}>
+                                        {editingEntityRelationships ? '✎ Editando' : '🔒 No editable'}
+                                    </button>
+                                    <button type="button" className="storage-delete-btn" onClick={() => setSectionToDelete({ key: 'entityRelationships', name: 'Relaciones entre Entidades' })}>✕</button>
+                                </>
                             )}
                         </div>
                     </div>
-
                     <div className="wide-card">
-                        <div className="card-header">
-                            <h3>Definición de Relaciones</h3>
-                        </div>
+                        <div className="card-header"><h3>Definición de Relaciones</h3></div>
                         {selectedProject?.entityRelationships ? (
-                            <textarea
-                                className="wide-textarea"
-                                value={entityRelationships}
-                                readOnly={!editingEntityRelationships}
-                                onChange={editingEntityRelationships ? e => setEntityRelationships(e.target.value) : undefined}
-                            />
-                        ) : (
-                            <p className="storage-empty-state">
-                                Aún no se han creado las relaciones entre entidades para este examen.
-                            </p>
-                        )}
+                            <textarea className="wide-textarea" value={entityRelationships} readOnly={!editingEntityRelationships} 
+                                onChange={editingEntityRelationships ? e => setEntityRelationships(e.target.value) : undefined} />
+                        ) : <p className="storage-empty-state">Aún no se han creado las relaciones entre entidades.</p>}
                     </div>
 
-                    <div className="storage-section-heading" style={{ marginTop: '48px' }}>
-                        <h2>Código Generado</h2>
-                    </div>
-
+                    {/* BOTONES FINALES */}
+                    <div className="storage-section-heading" style={{ marginTop: '48px' }}><h2>Código Generado</h2></div>
                     <div className="wide-card">
                         <div className="code-buttons-row">
-                            <button type="button" className="btn-code" onClick={onShowGeneratedCode}>
-                                Ver Código Examen
-                            </button>
-                            <button type="button" className="btn-code" onClick={onShowSolutionGeneratedCode}>
-                                Ver Código Solución
-                            </button>
+                            <button type="button" className="btn-code" onClick={onShowGeneratedCode}>Ver Código Examen</button>
+                            <button type="button" className="btn-code" onClick={onShowSolutionGeneratedCode}>Ver Código Solución</button>
                         </div>
                     </div>
 
                     <div className="storage-bottom-actions">
-                        <button type="button" className="btn-back" onClick={onBack}>
-                            Volver
-                        </button>
+                        <button type="button" className="btn-back" onClick={onBack}>Volver</button>
                         {isDirty && (
-                            <button
-                                type="button"
-                                className="btn-save-changes"
-                                onClick={handleSave}
-                                disabled={isSaving || isRegeneratingDiagram}
-                            >
+                            <button type="button" className="btn-save-changes" onClick={handleSave} disabled={isSaving || isRegeneratingDiagram}>
                                 {isSaving ? "Guardando…" : "Guardar cambios"}
                             </button>
                         )}
                     </div>
 
+                    {/* MODALES */}
                     {showPreviewModal && (
                         <div className="preview-backdrop">
                             <div className="preview-modal">
@@ -434,65 +304,35 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                                 <div className="preview-modal-body">
                                     <div className="exam-markdown-container">
                                         <h1>{currentTitle}</h1>
-
                                         <h2>1. Extensión Funcional y Diagrama UML</h2>
-                                        {combinedText && <p style={{ whiteSpace: 'pre-wrap' }}>{combinedText}</p>}
-                                        {liveMermaid && (
-                                            <div className="preview-diagram-wrapper">
-                                                <MermaidViewer chartCode={cleanMermaidCode(liveMermaid)} />
-                                            </div>
-                                        )}
-
+                                        <p style={{ whiteSpace: 'pre-wrap' }}>{combinedText}</p>
+                                        <div className="preview-diagram-wrapper"><MermaidViewer chartCode={cleanMermaidCode(liveMermaid)} /></div>
                                         <h2>2. Restricciones de Atributos</h2>
-                                        {attributeConstraints
-                                            ? <p style={{ whiteSpace: 'pre-wrap' }}>{attributeConstraints}</p>
-                                            : <p style={{ textAlign: 'center' }}><em>Sin restricciones definidas</em></p>
-                                        }
-
+                                        <p style={{ whiteSpace: 'pre-wrap' }}>{attributeConstraints || "Sin restricciones"}</p>
                                         <h2>3. Relaciones entre Entidades</h2>
-                                        {entityRelationships
-                                            ? <p style={{ whiteSpace: 'pre-wrap' }}>{entityRelationships}</p>
-                                            : <p style={{ textAlign: 'center' }}><em>Sin relaciones definidas</em></p>
-                                        }
+                                        <p style={{ whiteSpace: 'pre-wrap' }}>{entityRelationships || "Sin relaciones"}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    <DownloadConfirmModal
-                        isOpen={showDownloadModal}
-                        defaultFileName={currentTitle}
-                        onConfirm={handleConfirmDownload}
-                        onCancel={() => setShowDownloadModal(false)}
-                    />
+                    <DownloadConfirmModal isOpen={showDownloadModal} defaultFileName={currentTitle} onConfirm={(fn) => { onDownload(fn); setShowDownloadModal(false); }} onCancel={() => setShowDownloadModal(false)} />
 
                     {showDeployModal && (
                         <GitHubDeployModal
                             domainName={selectedProject.domainName}
-                            templateRepo={getRepoConfig(selectedProject.domainName).TEMPLATE_REPO}
+                            templateRepo={repoConfig(selectedProject.domainName).TEMPLATE_REPO}
                             newRepoName={`examen-${currentTitle.toLowerCase().replace(/\s+/g, '-')}`}
                             uploadListString={buildUploadListString()}
                             savedToken={localStorage.getItem("github_token")}
                             onClose={() => setShowDeployModal(false)}
                             onSuccess={() => setShowDeployModal(false)}
-                            onConfirm={async (token) => {
-                                const repoUrl = await onGitHubDeploy(
-                                    token,
-                                    selectedProject,
-                                    `examen-${currentTitle.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
-                                );
-                                return repoUrl;
-                            }}
+                            onConfirm={async (token) => await onGitHubDeploy(token, selectedProject, `examen-${currentTitle.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`)}
                         />
                     )}
 
-                    <DeleteConfirmationModal
-                        isOpen={!!sectionToDelete}
-                        itemName={sectionToDelete?.name || ''}
-                        onConfirm={confirmDeletePart}
-                        onCancel={() => setSectionToDelete(null)}
-                    />
+                    <DeleteConfirmationModal isOpen={!!sectionToDelete} itemName={sectionToDelete?.name || ''} onConfirm={() => { onDeleteSection(sectionToDelete!.key); setSectionToDelete(null); }} onCancel={() => setSectionToDelete(null)} />
 
                 </main>
             </div>
