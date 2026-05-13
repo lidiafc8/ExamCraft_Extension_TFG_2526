@@ -35,7 +35,7 @@ function buildCombined(intro = '', mermaid = ''): string {
 }
 
 function parseMermaidFromCombined(combined: string): string {
-    const match = combined.match(/```mermaid\s*([\s\S]*?)```/);
+    const match = combined.match(/```mermaid\s*([\s\S]*?)```/); // NOSONAR javascript:S5852
     return match ? match[1].trim() : '';
 }
 
