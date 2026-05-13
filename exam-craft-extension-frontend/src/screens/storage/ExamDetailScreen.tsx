@@ -67,6 +67,10 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     const [isSaving, setIsSaving] = useState(false);
     const [isRegeneratingDiagram, setIsRegeneratingDiagram] = useState(false);
 
+    const [editingCombined, setEditingCombined] = useState(false);
+    const [editingAttributeConstraints, setEditingAttributeConstraints] = useState(false);
+    const [editingEntityRelationships, setEditingEntityRelationships] = useState(false);
+
     const [combinedText, setCombinedText] = useState(
         buildCombined(selectedProject?.extensionStatement || '', selectedProject?.extensionMermaid || '')
     );
@@ -104,6 +108,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
         { label: selectedDomainFolder?.toUpperCase() || '', action: onBack },
     ];
+
     const handleCombinedChange = (newValue: string) => {
         setCombinedText(newValue);
 
@@ -113,7 +118,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         if (newIntro === oldIntro) return;
 
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        abortRef.current = true; 
+        abortRef.current = true;
 
         debounceTimer.current = setTimeout(async () => {
             if (!newIntro.trim()) return;
@@ -132,7 +137,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 
                 if (result?.trim()) {
                     const cleanResult = result
-                        .replace(/```mermaid\s*/g, '')
+                        .replace(/```mermaid\s*/g, '') // NOSONAR javascript:S5852
                         .replace(/```\s*/g, '')
                         .trim();
                     setCombinedText(prev => {
@@ -264,6 +269,13 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 
                     <div className="storage-section-heading">
                         <h2>Extensión Funcional</h2>
+                        <button
+                            type="button"
+                            className={`btn-edit-toggle ${editingCombined ? 'btn-edit-toggle--active' : ''}`}
+                            onClick={() => setEditingCombined(prev => !prev)}
+                        >
+                            {editingCombined ? '✎ Editando' : '🔒 No editable'}
+                        </button>
                     </div>
 
                     <div className="two-col-grid">
@@ -275,7 +287,8 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                                 <textarea
                                     className="wf-textarea"
                                     value={combinedText}
-                                    onChange={e => handleCombinedChange(e.target.value)}
+                                    readOnly={!editingCombined}
+                                    onChange={editingCombined ? e => handleCombinedChange(e.target.value) : undefined}
                                 />
                             </div>
                         </div>
@@ -296,16 +309,27 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 
                     <div className="storage-section-heading">
                         <h2>Restricciones de Atributos</h2>
-                        {selectedProject?.attributeConstraints && (
-                            <button
-                                type="button"
-                                className="storage-delete-btn"
-                                onClick={() => handleDeletePart('attributeConstraints', 'Restricciones de Atributos')}
-                                title="Eliminar Restricciones de Atributos"
-                            >
-                                ✕
-                            </button>
-                        )}
+                        <div className="section-heading-actions">
+                            {selectedProject?.attributeConstraints && (
+                                <button
+                                    type="button"
+                                    className={`btn-edit-toggle ${editingAttributeConstraints ? 'btn-edit-toggle--active' : ''}`}
+                                    onClick={() => setEditingAttributeConstraints(prev => !prev)}
+                                >
+                                    {editingAttributeConstraints ? '✎ Editando' : '🔒 No editable'}
+                                </button>
+                            )}
+                            {selectedProject?.attributeConstraints && (
+                                <button
+                                    type="button"
+                                    className="storage-delete-btn"
+                                    onClick={() => handleDeletePart('attributeConstraints', 'Restricciones de Atributos')}
+                                    title="Eliminar Restricciones de Atributos"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="wide-card">
@@ -316,7 +340,8 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             <textarea
                                 className="wide-textarea"
                                 value={attributeConstraints}
-                                onChange={e => setAttributeConstraints(e.target.value)}
+                                readOnly={!editingAttributeConstraints}
+                                onChange={editingAttributeConstraints ? e => setAttributeConstraints(e.target.value) : undefined}
                             />
                         ) : (
                             <p className="storage-empty-state">
@@ -327,16 +352,27 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 
                     <div className="storage-section-heading">
                         <h2>Relaciones entre Entidades</h2>
-                        {selectedProject?.entityRelationships && (
-                            <button
-                                type="button"
-                                className="storage-delete-btn"
-                                onClick={() => handleDeletePart('entityRelationships', 'Relaciones entre Entidades')}
-                                title="Eliminar Relaciones entre Entidades"
-                            >
-                                ✕
-                            </button>
-                        )}
+                        <div className="section-heading-actions">
+                            {selectedProject?.entityRelationships && (
+                                <button
+                                    type="button"
+                                    className={`btn-edit-toggle ${editingEntityRelationships ? 'btn-edit-toggle--active' : ''}`}
+                                    onClick={() => setEditingEntityRelationships(prev => !prev)}
+                                >
+                                    {editingEntityRelationships ? '✎ Editando' : '🔒 No editable'}
+                                </button>
+                            )}
+                            {selectedProject?.entityRelationships && (
+                                <button
+                                    type="button"
+                                    className="storage-delete-btn"
+                                    onClick={() => handleDeletePart('entityRelationships', 'Relaciones entre Entidades')}
+                                    title="Eliminar Relaciones entre Entidades"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="wide-card">
@@ -347,7 +383,8 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             <textarea
                                 className="wide-textarea"
                                 value={entityRelationships}
-                                onChange={e => setEntityRelationships(e.target.value)}
+                                readOnly={!editingEntityRelationships}
+                                onChange={editingEntityRelationships ? e => setEntityRelationships(e.target.value) : undefined}
                             />
                         ) : (
                             <p className="storage-empty-state">

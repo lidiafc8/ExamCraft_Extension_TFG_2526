@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import 'highlight.js/styles/github.css';
 import { Header } from "~src/components/Header";
 import { parseJavaFiles } from "~src/utils/codeUtils";
@@ -16,6 +16,7 @@ export interface VisualSolutionCodeScreenProps {
     onGoToExams: () => void;
     onGoToFolders: () => void;
     onDeleteSection: (sectionKey: string) => void;
+    onUpdateProject?: (updatedProject: any) => Promise<void>;
 }
 
 export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> = ({
@@ -26,12 +27,20 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
     onGoToExams,
     onGoToFolders,
     onDeleteSection,
+    onUpdateProject,
 }) => {
     const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
-    
-    const parsedFullSolution = parseJavaFiles(
-        selectedProject?.fullSolution || ''
-    );
+    const [editingFullSolution, setEditingFullSolution] = useState(false);
+    const [fullSolutionRaw, setFullSolutionRaw] = useState<string>(selectedProject?.fullSolution || '');
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        setFullSolutionRaw(selectedProject?.fullSolution || '');
+    }, [selectedProject]);
+
+    const parsedFullSolution = parseJavaFiles(fullSolutionRaw);
+
+    const isDirty = fullSolutionRaw !== (selectedProject?.fullSolution || '');
 
     const breadcrumbItems = [
         { label: 'INICIO',              action: onWelcome },
@@ -47,6 +56,23 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
         }
     };
 
+    const handleSave = async () => {
+        if (!selectedProject?.id || !onUpdateProject) return;
+        setIsSaving(true);
+        try {
+            await onUpdateProject({
+                ...selectedProject,
+                fullSolution: fullSolutionRaw,
+                updatedAt: new Date().toISOString(),
+            });
+            setEditingFullSolution(false);
+        } catch (err) {
+            alert(err instanceof Error ? err.message : "No se pudo guardar.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     return (
         <div>
             <Header
@@ -57,21 +83,30 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
             <div className="main-content">
                 <main className="storage-main">
 
+                    {/* ── SOLUCIÓN COMPLETA ── */}
                     <div className="storage-section-heading">
                         <h2>Solución Completa</h2>
-                        {parsedFullSolution.length > 0 && (
-                            <button
-                                type="button"
-                                className="storage-delete-btn"
-                                onClick={() => setSectionToDelete({
-                                    key: 'fullSolution',
-                                    name: 'Solución Completa',
-                                })}
-                                title="Eliminar Solución Completa"
-                            >
-                                ✕
-                            </button>
-                        )}
+                        <div className="section-heading-actions">
+                            {parsedFullSolution.length > 0 && (
+                                <button
+                                    type="button"
+                                    className={`btn-edit-toggle ${editingFullSolution ? 'btn-edit-toggle--active' : ''}`}
+                                    onClick={() => setEditingFullSolution(prev => !prev)}
+                                >
+                                    {editingFullSolution ? '✎ Editando' : '🔒 No editable'}
+                                </button>
+                            )}
+                            {parsedFullSolution.length > 0 && (
+                                <button
+                                    type="button"
+                                    className="storage-delete-btn"
+                                    onClick={() => setSectionToDelete({ key: 'fullSolution', name: 'Solución Completa' })}
+                                    title="Eliminar Solución Completa"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="storage-section-content">
@@ -81,13 +116,22 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                             </div>
                             <div className="storage-content-card storage-content-card--grid">
                                 {parsedFullSolution.length > 0 ? (
-                                    parsedFullSolution.map((block) => (
-                                        <JavaCodeBlock
-                                            key={block.filename}
-                                            filename={block.filename}
-                                            code={block.code}
+                                    editingFullSolution ? (
+                                        <textarea
+                                            className="wide-textarea"
+                                            value={fullSolutionRaw}
+                                            readOnly={!editingFullSolution}
+                                            onChange={e => setFullSolutionRaw(e.target.value)}
                                         />
-                                    ))
+                                    ) : (
+                                        parsedFullSolution.map((block) => (
+                                            <JavaCodeBlock
+                                                key={block.filename}
+                                                filename={block.filename}
+                                                code={block.code}
+                                            />
+                                        ))
+                                    )
                                 ) : (
                                     <p className="storage-empty-state">
                                         Aún no se ha generado una solución completa para este examen.
@@ -101,6 +145,16 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                         <button type="button" onClick={onBack} className="btn-back">
                             Volver
                         </button>
+                        {isDirty && onUpdateProject && (
+                            <button
+                                type="button"
+                                className="btn-save-changes"
+                                onClick={handleSave}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? "Guardando…" : "Guardar cambios"}
+                            </button>
+                        )}
                     </div>
 
                     <DeleteConfirmationModal

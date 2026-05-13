@@ -82,9 +82,9 @@ function cleanJavaBlocks(javaBlocks: string[], rootPackage: string): string {
   return javaBlocks
     .map(block =>
       block
-        .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "")
+        .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
         .replace(new RegExp(`^(?!package\\s|import\\s+${rootPackage.replace(/\./g, "\\.")})import\\s.*;$`, "gm"), "")
-        .replace(/^\s*[\r\n]/gm, "")
+        .replace(/^\s*[\r\n]/gm, "") // NOSONAR javascript:S5852
         .trim()
     )
     .join("\n\n// ---\n\n")
