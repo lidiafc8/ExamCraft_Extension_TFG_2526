@@ -4,7 +4,8 @@
     align-items: center;
     gap: 10px;
     text-align: center;
-    color: #7a5c4f;
+    /* CORRECCIÓN: Marrón más oscuro (#5d4037) para contrastar con el fondo arena */
+    color: #5d4037; 
     font-size: 16px;
     font-weight: 500;
     margin-top: 20px;
@@ -17,12 +18,14 @@
 
 .empty-subtext {
     font-size: 15px;
-    color: #a07060;
+    /* CORRECCIÓN: Color más profundo (#7a5042) para que sea legible sobre el fondo */
+    color: #7a5042;
     margin-top: 4px;
 }
 
 .card-count {
     font-size: 15px;
+    /* El negro puro (#000000) es perfecto para el contraste, lo mantenemos */
     color: #000000;
     margin-top: 5px;
-} 
+}

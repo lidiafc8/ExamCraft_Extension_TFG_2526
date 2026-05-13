@@ -43,10 +43,11 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
     const isDirty = fullSolutionRaw !== (selectedProject?.fullSolution || '');
 
     const breadcrumbItems = [
-        { label: 'INICIO',              action: onWelcome },
+        { label: 'INICIO',               action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
-        { label: selectedDomainFolder?.toUpperCase(), action: onGoToExams },
-        { label: selectedProject?.customName || `Examen de ${selectedProject?.domainName}`, action: onBack },
+        // CORRECCIÓN: Manejo de undefined para evitar errores en toUpperCase
+        { label: (selectedDomainFolder || '').toUpperCase(), action: onGoToExams },
+        { label: selectedProject?.customName || `Examen de ${selectedProject?.domainName || ''}`, action: onBack },
     ];
 
     const confirmDelete = () => {
@@ -74,7 +75,7 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
     };
 
     return (
-        <div>
+        <div className="visual-solution-screen">
             <Header
                 onWelcome={onWelcome}
                 breadcrumbItems={breadcrumbItems}
@@ -120,7 +121,6 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                                         <textarea
                                             className="wide-textarea"
                                             value={fullSolutionRaw}
-                                            readOnly={!editingFullSolution}
                                             onChange={e => setFullSolutionRaw(e.target.value)}
                                         />
                                     ) : (
@@ -145,6 +145,7 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                         <button type="button" onClick={onBack} className="btn-back">
                             Volver
                         </button>
+                        {/* CORRECCIÓN: Botón de guardado vinculado al estado isSaving y isDirty */}
                         {isDirty && onUpdateProject && (
                             <button
                                 type="button"

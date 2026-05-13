@@ -74,8 +74,9 @@
   padding: 28px 24px;
 }
 
+/* CORRECCIÓN: Color de fondo más oscuro (#946150) para que el texto blanco sea legible */
 .btn-code {
-  background-color: #B48574;
+  background-color: #946150; 
   color: white;
   border: none;
   border-radius: var(--radius-sm);
@@ -86,12 +87,13 @@
   letter-spacing: 0.04em;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(176, 137, 104, 0.35);
+  box-shadow: 0 2px 8px rgba(148, 97, 80, 0.35);
 }
 
 .btn-code:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(176, 137, 104, 0.45);
+  box-shadow: 0 4px 16px rgba(148, 97, 80, 0.45);
+  background-color: #7a5042;
 }
 
 .btn-code:active {
@@ -161,10 +163,19 @@
 .action-btn:hover { filter: brightness(1.08); transform: scale(1.04); }
 .action-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-.action-btn--preview  { background: #2e7d32; color: white; }
-.action-btn--download { background: #4a90e2; color: white; }
+/* CORRECCIONES DE CONTRASTE EN BOTONES DE ACCIÓN */
+
+/* CORRECCIÓN image_2d886f: Verde más oscuro (#1e5422) */
+.action-btn--preview  { background: #1e5422; color: white; }
+
+/* CORRECCIÓN image_2d8852: Azul más oscuro (#1a73e8) */
+.action-btn--download { background: #1a73e8; color: white; }
+
+/* CORRECCIÓN image_2d8836: GitHub ya suele ser oscuro, pero aseguramos contraste */
 .action-btn--github   { background: #24292e; color: white; }
-.action-btn--delete   { background: #ff4d4f; color: white; }
+
+/* CORRECCIÓN image_2d882f: Rojo más profundo (#cf1322) */
+.action-btn--delete   { background: #cf1322; color: white; }
 
 .action-divider {
   border: none;
@@ -273,7 +284,7 @@
   margin-top: 0;
 }
 
-/* ── Edit toggle button ── */
+/* Edit toggle button */
 .btn-edit-toggle {
   display: inline-flex;
   align-items: center;

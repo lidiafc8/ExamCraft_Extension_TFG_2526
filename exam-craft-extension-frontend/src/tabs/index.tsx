@@ -1,29 +1,29 @@
-import { useState } from "react"
-import WelcomeScreen from "../screens/principal/WelcomeScreen"
-import GithubScreen from "../screens/principal/GithubScreen"
-import CreateExamScreen from "../screens/chooseCreate/CreateExamSelectionScreen"
-import CreateExamByPartsScreen from "../screens/chooseCreate/CreateExamByPartsScreen"
-import DomainSelectionScreen from "../screens/examStatementGeneration/DomainSelectionScreen"
-import DiagramUMLScreen from "../screens/examStatementGeneration/DiagramaUMLWorkflowScreen"
-import FinishFunctionalExtensionScreen from "../screens/examStatementGeneration/FinishFunctionalExtensionScreen"
-import AttributesConstraintsWorkflowScreen from "~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen"
-import GenerationTestAtributesScreen from "../screens/codeGeneration/GenerationTestsScreen"
-import GeneralGenerationTestScreen from "../screens/codeGeneration/SelectionGenerationTest"
-import CodeGenerationScreen from "~src/screens/codeGeneration/CodeSelectionGenerateScreen"
-import GenerationBaseClassesScreen from "~src/screens/codeGeneration/GenerationBaseClassesScreen"
-import StorageExamsIndex from "../screens/storage/StorageExamsIndex"
-import EntityRelationshipsWorkflowScreen from "~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen"
-import ContextWorkflowScreen from "../screens/examStatementGeneration/ContextWorkflowScreen"
-import GenerationSolutionCodeScreen from "~src/screens/codeGeneration/GenerationSolutionCodeScreen"
-import StatementPartSelectionScreen from "~src/screens/chooseCreate/StatementPartSelectionScreen"
+import React, { useState } from "react";
+import WelcomeScreen from "../screens/principal/WelcomeScreen";
+import GithubScreen from "../screens/principal/GithubScreen";
+import CreateExamScreen from "../screens/chooseCreate/CreateExamSelectionScreen";
+import CreateExamByPartsScreen from "../screens/chooseCreate/CreateExamByPartsScreen";
+import DomainSelectionScreen from "../screens/examStatementGeneration/DomainSelectionScreen";
+import DiagramUMLScreen from "../screens/examStatementGeneration/DiagramaUMLWorkflowScreen";
+import FinishFunctionalExtensionScreen from "../screens/examStatementGeneration/FinishFunctionalExtensionScreen";
+import AttributesConstraintsWorkflowScreen from "~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen";
+import GenerationTestAtributesScreen from "../screens/codeGeneration/GenerationTestsScreen";
+import GeneralGenerationTestScreen from "../screens/codeGeneration/SelectionGenerationTest";
+import CodeGenerationScreen from "~src/screens/codeGeneration/CodeSelectionGenerateScreen";
+import GenerationBaseClassesScreen from "~src/screens/codeGeneration/GenerationBaseClassesScreen";
+import StorageExamsIndex from "../screens/storage/StorageExamsIndex";
+import EntityRelationshipsWorkflowScreen from "~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen";
+import ContextWorkflowScreen from "../screens/examStatementGeneration/ContextWorkflowScreen";
+import GenerationSolutionCodeScreen from "~src/screens/codeGeneration/GenerationSolutionCodeScreen";
+import StatementPartSelectionScreen from "~src/screens/chooseCreate/StatementPartSelectionScreen";
 
 export default function IndexTab() {
-  const [selectedDomain, setSelectedDomain] = useState<string>("")
-  const [contextResponse, setContextResponse] = useState<string>("")
-  const [extensionStatement, setExtensionStatement] = useState<string>("")
-  const [extensionMermaid, setExtensionMermaid] = useState<string>("")
+  const [selectedDomain, setSelectedDomain] = useState<string>("");
+  const [contextResponse, setContextResponse] = useState<string>("");
+  const [extensionStatement, setExtensionStatement] = useState<string>("");
+  const [extensionMermaid, setExtensionMermaid] = useState<string>("");
   
-  const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string, entityRelationships: string, baseClass: string } | null>(null)
+  const [sharedTestData, setSharedTestData] = useState<{ project: any, constraints: string, entityRelationships: string, baseClass: string } | null>(null);
 
   const [testOrigin, setTestOrigin] = useState<'attributes' | 'entityRelationships' | 'general'>('attributes');
 
@@ -50,11 +50,21 @@ export default function IndexTab() {
     "generateBaseClasses" |
     "statementPartSelection" |
     "generationSolutionCode"
-    
-  >("welcome")
+  >("welcome");
+
+  // CORRECCIÓN: Función de apoyo para navegación de regreso limpia
+  const handleGoBackFromTests = () => {
+    if (testOrigin === 'attributes') {
+      setScreen("attributesConstraints");
+    } else if (testOrigin === 'entityRelationships') {
+      setScreen("entityRelationships");
+    } else {
+      setScreen("testGeneral");
+    }
+  };
 
   return (
-    <div>
+    <div className="app-container">
       {screen === "welcome" && (
         <WelcomeScreen 
           onStart={() => setScreen("github")} 
@@ -77,65 +87,62 @@ export default function IndexTab() {
 
       {screen === "createExamByParts" && (
         <CreateExamByPartsScreen 
-        onBack={() => setScreen("createExam")} 
-        onWelcome={() => setScreen("welcome")} 
-        onComponents={() => setScreen("statementPartSelection")}
-        onCodeGeneration={() => {
-          setSelectedProject(null); 
-          setCameFromAttributes(false);
-          setScreen("codeGeneration");
+          onBack={() => setScreen("createExam")} 
+          onWelcome={() => setScreen("welcome")} 
+          onComponents={() => setScreen("statementPartSelection")}
+          onCodeGeneration={() => {
+            setSelectedProject(null); 
+            setCameFromAttributes(false);
+            setScreen("codeGeneration");
           }}
         />
       )}
 
       {screen === "statementPartSelection" && (
         <StatementPartSelectionScreen 
-        onBack={() => setScreen("createExamByParts")} 
-        onWelcome={() => setScreen("welcome")} 
-        onFunctionalExtension={() => setScreen("domainSelection")}
-        onAttributesConstraints={() => setScreen("attributesConstraints")}
-        onEntityRelationships={() => setScreen("entityRelationships")}
-        onCreateExamByParts={() => setScreen("createExamByParts")}
-        
+          onBack={() => setScreen("createExamByParts")} 
+          onWelcome={() => setScreen("welcome")} 
+          onFunctionalExtension={() => setScreen("domainSelection")}
+          onAttributesConstraints={() => setScreen("attributesConstraints")}
+          onEntityRelationships={() => setScreen("entityRelationships")}
+          onCreateExamByParts={() => setScreen("createExamByParts")}
         />
       )}
 
       {screen === "codeGeneration" && (
         <CodeGenerationScreen 
-        onBack={() => setScreen("createExamByParts")} 
+          onBack={() => setScreen("createExamByParts")} 
           onWelcome={() => setScreen("welcome")} 
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onGenerateTest={() => setScreen("testGeneral")}
-          onGenerateBaseClasses={(project) => {
+          onGenerateBaseClasses={() => {
             setSelectedProject(null);
             setCameFromAttributes(false); 
             setScreen("generateBaseClasses");
           }}
-          onGenerateSolutionCode={ () => setScreen("generationSolutionCode")}
-            
+          onGenerateSolutionCode={() => setScreen("generationSolutionCode")}
         />
       )}
- 
 
       {screen === "generateBaseClasses" && (
         <GenerationBaseClassesScreen 
           initialProject={selectedProject} 
           fromAttributes={cameFromAttributes || cameFromEntityRelationships} 
           onGoToTests={(updatedProject) => {
-            const origin = cameFromEntityRelationships ? 'entityRelationships' : 'attributes'
+            const origin = cameFromEntityRelationships ? 'entityRelationships' : 'attributes';
             setSharedTestData({
               project: updatedProject,
               constraints: updatedProject.attributeConstraints || "",
               entityRelationships: updatedProject.entityRelationships || "",
-              baseClass: updatedProject.baseClasses || updatedProject.baseClasses || "",
-            })
-            setTestOrigin(origin)
-            setScreen("testAttributes")
+              baseClass: updatedProject.baseClasses || "",
+            });
+            setTestOrigin(origin);
+            setScreen("testAttributes");
           }}
           onBack={() => {
-            if (cameFromEntityRelationships) setScreen("entityRelationships")
-            else if (cameFromAttributes) setScreen("attributesConstraints")
-            else setScreen("codeGeneration")
+            if (cameFromEntityRelationships) setScreen("entityRelationships");
+            else if (cameFromAttributes) setScreen("attributesConstraints");
+            else setScreen("codeGeneration");
           }}
           onWelcome={() => setScreen("welcome")}
           onCreateExam={() => setScreen("createExam")}
@@ -156,14 +163,14 @@ export default function IndexTab() {
 
       {screen === "domainSelection" && (
         <DomainSelectionScreen 
-        onBack={() => setScreen("statementPartSelection")} 
+          onBack={() => setScreen("statementPartSelection")} 
           onWelcome={() => setScreen("welcome")} 
           onSelectDomain={(domainName) => {
-              setSelectedDomain(domainName)  
-              setScreen("contextWorkflow") 
+              setSelectedDomain(domainName);
+              setScreen("contextWorkflow"); 
           }}
-         onCreateExam={() => setScreen("createExam")}
-         onCreateExamByParts={() => setScreen("createExamByParts")}
+          onCreateExam={() => setScreen("createExam")}
+          onCreateExamByParts={() => setScreen("createExamByParts")}
         />
       )}
 
@@ -176,8 +183,8 @@ export default function IndexTab() {
           onCreateExamByParts={() => setScreen("createExamByParts")}
           onFunctionalExtension={() => setScreen("domainSelection")}
           onCreateDiagram={(context) => {
-            setContextResponse(context)
-            setScreen("diagramUML")
+            setContextResponse(context);
+            setScreen("diagramUML");
           }}
           onComponents={() => setScreen("statementPartSelection")}
         />
@@ -256,35 +263,29 @@ export default function IndexTab() {
       )}
 
       {screen === "entityRelationships" && (
-      <EntityRelationshipsWorkflowScreen 
-        onBack={() => setScreen("statementPartSelection")} 
-        onWelcome={() => setScreen("welcome")} 
-        onCreateExam={() => setScreen("createExam")}
-        onGoToBaseClass={(project) => {
-          setSelectedProject(project);
-          setCameFromEntityRelationships(true);
-          setScreen("generateBaseClasses");
-        }}
-        onCreateTest={(data) => {
-          setSharedTestData(data);
-          
-          if (data.targetPart === "test2_relationships") {
-            setTestOrigin('entityRelationships');
-          } else {
-            setTestOrigin('attributes'); 
-          }
-          
-          setScreen("testAttributes"); 
-        }}
-        onCreateExamByParts={() => setScreen("createExamByParts")}
-      />
-    )}
+        <EntityRelationshipsWorkflowScreen 
+          onBack={() => setScreen("statementPartSelection")} 
+          onWelcome={() => setScreen("welcome")} 
+          onCreateExam={() => setScreen("createExam")}
+          onGoToBaseClass={(project) => {
+            setSelectedProject(project);
+            setCameFromEntityRelationships(true);
+            setScreen("generateBaseClasses");
+          }}
+          onCreateTest={(data) => {
+            setSharedTestData(data);
+            setTestOrigin(data.targetPart === "test2_relationships" ? 'entityRelationships' : 'attributes');
+            setScreen("testAttributes"); 
+          }}
+          onCreateExamByParts={() => setScreen("createExamByParts")}
+        />
+      )}
 
       {screen === "testAttributes" && (
         <GenerationTestAtributesScreen 
           initialData={sharedTestData} 
           source={testOrigin} 
-          onBack={() => setScreen(testOrigin === 'attributes' ? "attributesConstraints" : "testGeneral")} 
+          onBack={handleGoBackFromTests} 
           onWelcome={() => setScreen("welcome")} 
           onCreateExam={() => setScreen("createExam")}
           onCreateExamByParts={() => setScreen("createExamByParts")}
@@ -293,5 +294,5 @@ export default function IndexTab() {
         />
       )}
     </div>
-  )
+  );
 }

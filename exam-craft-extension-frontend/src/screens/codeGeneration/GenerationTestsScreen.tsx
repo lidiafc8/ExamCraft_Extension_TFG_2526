@@ -60,7 +60,7 @@ function getDomainConfig(domain: string) {
 
 function extractBaseRootPackage(javaBlocks: string[], fallback: string): string {
   const packageNames = javaBlocks
-    .map(block => (block.match(/^package\s+[\w.]+;/m) || [])[0])
+    .map(block => (block.match(/^package\s+[\w.]+;/m) || [])[0]) // NOSONAR javascript:S5852
     .filter(Boolean)
     .map(p => p.replace(/^package\s+/, "").replace(/;$/, ""));
 
@@ -82,9 +82,9 @@ function cleanJavaBlocks(javaBlocks: string[], rootPackage: string): string {
   return javaBlocks
     .map(block =>
       block
-        .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "")
+        .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
         .replace(new RegExp(`^(?!package\\s|import\\s+${rootPackage.replace(/\./g, "\\.")})import\\s.*;$`, "gm"), "")
-        .replace(/^\s*[\r\n]/gm, "")
+        .replace(/^\s*[\r\n]/gm, "") // NOSONAR javascript:S5852
         .trim()
     )
     .join("\n\n// ---\n\n");

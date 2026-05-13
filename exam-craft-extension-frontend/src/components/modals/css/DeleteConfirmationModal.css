@@ -1,3 +1,5 @@
+/* --- ESTILOS DEL MODAL DE BORRADO (CORREGIDOS) --- */
+
 .delete-modal-overlay {
   position: fixed;
   top: 0;
@@ -13,7 +15,7 @@
 }
 
 .delete-modal-card {
-  background-color: #fff;
+  background-color: #ffffff;
   border-radius: 12px;
   padding: 30px;
   max-width: 450px;
@@ -33,25 +35,25 @@
   height: 60px;
   border-radius: 50%;
   background-color: #fff1f0;
-  /* CORRECCIÓN: Rojo más oscuro (#cf1322) para contrastar con el fondo rosa claro */
+  /* CORRECCIÓN: Rojo oscuro (#cf1322) para que resalte sobre el fondo rosa claro */
   color: #cf1322;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 32px;
-  /* CORRECCIÓN: Borde ligeramente más oscuro para definición */
+  /* CORRECCIÓN: Borde ligeramente más oscuro para mejor definición visual */
   border: 2px solid #ffa39e;
 }
 
 .delete-modal-title {
   margin: 0 0 15px 0;
-  color: #333;
+  color: #333333;
   font-size: 22px;
 }
 
 .delete-modal-message {
-  /* CORRECCIÓN: Un gris un poco más oscuro (#444 en vez de #555) para mejor lectura */
-  color: #444;
+  /* CORRECCIÓN: Gris oscuro (#444444) para asegurar legibilidad AA */
+  color: #444444;
   line-height: 1.6;
   margin: 0 0 25px 0;
   font-size: 16px;
@@ -59,7 +61,7 @@
 
 .delete-modal-warning {
   font-size: 14px;
-  /* CORRECCIÓN: #717171 es el gris más claro que pasa el test de contraste sobre blanco */
+  /* CORRECCIÓN: #717171 es el gris más claro permitido sobre blanco para texto pequeño */
   color: #717171;
 }
 
@@ -73,8 +75,8 @@
   padding: 12px 24px;
   border-radius: 8px;
   border: 1px solid #d9d9d9;
-  background-color: #fff;
-  color: #333;
+  background-color: #ffffff;
+  color: #333333;
   cursor: pointer;
   font-weight: bold;
   flex: 1;
@@ -84,15 +86,16 @@
 .delete-modal-btn-cancel:hover,
 .delete-modal-btn-cancel:focus {
   background-color: #f5f5f5;
+  outline: none;
 }
 
 .delete-modal-btn-confirm {
   padding: 12px 24px;
   border-radius: 8px;
   border: none;
-  /* CORRECCIÓN: Rojo más intenso (#e62e2e) para que el texto blanco sea legible */
+  /* CORRECCIÓN: Rojo intenso (#e62e2e) para que el texto blanco sea 100% legible */
   background-color: #e62e2e;
-  color: #fff;
+  color: #ffffff;
   cursor: pointer;
   font-weight: bold;
   flex: 1;
@@ -101,6 +104,7 @@
 
 .delete-modal-btn-confirm:hover,
 .delete-modal-btn-confirm:focus {
-  /* CORRECCIÓN: Un rojo más profundo para el estado hover */
+  /* CORRECCIÓN: Tono más oscuro para el estado interactivo */
   background-color: #b91c1c;
+  outline: none;
 }

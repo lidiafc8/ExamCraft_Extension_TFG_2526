@@ -32,10 +32,11 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     onUpdateProject,
 }) => {
     const [itemToDelete, setItemToDelete] = useState<{ type: 'section' | 'test'; key: string; name: string } | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
 
     const [editingBaseClasses, setEditingBaseClasses] = useState(false);
     const [editingTestKey, setEditingTestKey] = useState<string | null>(null);
+    // CORRECCIÓN: Definimos el estado isSaving que faltaba (Error image_2d8f18)
+    const [isSaving, setIsSaving] = useState(false);
 
     const [baseClassesRaw, setBaseClassesRaw] = useState<string>(selectedProject.baseClasses || '');
     const [testCodesMap, setTestCodesMap] = useState<Record<string, string>>(() => {
@@ -74,10 +75,11 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     const isDirty = isBaseClassesDirty || isTestsDirty;
 
     const breadcrumbItems = [
-        { label: 'INICIO',              action: onWelcome },
+        { label: 'INICIO', action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
-        { label: selectedDomainFolder?.toUpperCase(), action: onGoToExams },
-        { label: selectedProject.customName || `Examen de ${selectedProject.domainName}`, action: onBack },
+        // CORRECCIÓN: Manejo de undefined para breadcrumbs (Error image_2d8f38)
+        { label: (selectedDomainFolder || '').toUpperCase(), action: onGoToExams },
+        { label: selectedProject.customName || `Examen de ${selectedProject.domainName || ''}`, action: onBack },
     ];
 
     const confirmDelete = () => {
@@ -119,7 +121,7 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     };
 
     return (
-        <div>
+        <div className="generated-code-screen">
             <Header
                 onWelcome={onWelcome}
                 breadcrumbItems={breadcrumbItems}
@@ -250,6 +252,16 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
                         <button type="button" onClick={onBack} className="btn-back">
                             Volver
                         </button>
+                        {isDirty && (
+                            <button 
+                                type="button" 
+                                className="btn-save-changes" 
+                                onClick={handleSave}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? "Guardando..." : "Guardar cambios"}
+                            </button>
+                        )}
                     </div>
 
                     <DeleteConfirmationModal

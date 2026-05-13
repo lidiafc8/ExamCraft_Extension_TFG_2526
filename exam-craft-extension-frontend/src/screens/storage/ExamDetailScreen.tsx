@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MermaidViewer } from "../../components/MermaidViewer";
 import { Header } from "../../components/Header";
 import { DeleteConfirmationModal } from "~src/components/modals/DeleteConfirmationModal";
@@ -97,7 +97,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const abortRef = useRef(false);
 
-    // Efecto para sincronizar datos iniciales
     useEffect(() => {
         if (selectedProject) {
             setCombinedText(buildCombined(selectedProject.extensionStatement || '', selectedProject.extensionMermaid || ''));
@@ -121,7 +120,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         setCombinedText(newValue);
         const newIntro = parseIntroFromCombined(newValue);
         
-        // Evitar regenerar si el texto del enunciado no ha cambiado realmente
         if (newIntro === parseIntroFromCombined(combinedText) || !newIntro.trim()) return;
 
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -194,17 +192,16 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                     <div className="actions-menu-wrapper">
                         <button type="button" className="actions-menu-btn" onClick={() => setShowActionsMenu(!showActionsMenu)}>&#8942;</button>
                         {showActionsMenu && (
-                            <>
-                                {/* CORRECCIÓN: role="presentation" para accesibilidad */}
+                            <div className="actions-dropdown-container">
                                 <div className="actions-overlay" role="presentation" onClick={() => setShowActionsMenu(false)} />
                                 <div className="actions-dropdown">
-                                    <button className="action-btn" onClick={() => { setShowPreviewModal(true); setShowActionsMenu(false); }}>Previsualizar</button>
-                                    <button className="action-btn" onClick={() => { setShowDownloadModal(true); setShowActionsMenu(false); }}>Descargar (.md)</button>
-                                    <button className="action-btn" onClick={() => { setShowDeployModal(true); setShowActionsMenu(false); }}>Crear repositorio GitHub</button>
+                                    <button type="button" className="action-btn" onClick={() => { setShowPreviewModal(true); setShowActionsMenu(false); }}>Previsualizar</button>
+                                    <button type="button" className="action-btn" onClick={() => { setShowDownloadModal(true); setShowActionsMenu(false); }}>Descargar (.md)</button>
+                                    <button type="button" className="action-btn" onClick={() => { setShowDeployModal(true); setShowActionsMenu(false); }}>Crear repositorio GitHub</button>
                                     <hr className="action-divider" />
-                                    <button className="action-btn action-btn--delete" onClick={() => { setShowActionsMenu(false); onDeleteProject(selectedProject?.id); }}>Eliminar</button>
+                                    <button type="button" className="action-btn action-btn--delete" onClick={() => { setShowActionsMenu(false); onDeleteProject(selectedProject?.id); }}>Eliminar</button>
                                 </div>
-                            </>
+                            </div>
                         )}
                     </div>
 
@@ -276,6 +273,17 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             <textarea className="wide-textarea" value={entityRelationships} readOnly={!editingEntityRelationships} 
                                 onChange={editingEntityRelationships ? e => setEntityRelationships(e.target.value) : undefined} />
                         ) : <p className="storage-empty-state">Aún no se han creado las relaciones entre entidades.</p>}
+                    </div>
+
+                    {/* SECCIÓN CÓDIGO GENERADO */}
+                    <div className="storage-section-heading" style={{ marginTop: '48px' }}>
+                        <h2>Código Generado</h2>
+                    </div>
+                    <div className="wide-card">
+                        <div className="code-buttons-row">
+                            <button type="button" className="btn-code" onClick={onShowGeneratedCode}>Ver Código Examen</button>
+                            <button type="button" className="btn-code" onClick={onShowSolutionGeneratedCode}>Ver Código Solución</button>
+                        </div>
                     </div>
 
                     <div className="storage-bottom-actions">
