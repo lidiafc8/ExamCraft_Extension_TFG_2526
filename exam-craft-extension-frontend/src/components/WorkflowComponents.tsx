@@ -1,5 +1,26 @@
 import React from "react"
 
+// --- FUNCIONES AUXILIARES (Para bajar complejidad cognitiva) ---
+
+/**
+ * Determina la clase de estado del paso para evitar ternarios anidados en el JSX.
+ * Corrige la advertencia: "Extract this nested ternary operation into an independent statement."
+ */
+const getStepStateClass = (stepNumber: number, currentStep: number): string => {
+  if (stepNumber < currentStep) return "step-completed";
+  if (stepNumber === currentStep) return "step-active";
+  return "step-inactive";
+};
+
+/**
+ * Calcula el color de la línea de progreso.
+ */
+const getLineBackground = (stepNumber: number, currentStep: number): string => {
+  return stepNumber < currentStep ? "#4CAF50" : "#e0e0e0";
+};
+
+// --- COMPONENTES ---
+
 interface StepDef { label: string }
 
 interface StepperHeaderProps {
@@ -11,11 +32,8 @@ export function StepperHeader({ steps, currentStep }: StepperHeaderProps) {
   return (
     <div className="stepper-container">
       {steps.map((step, i) => {
-        const n = i + 1
-        const stateClass =
-          n < currentStep ? "step-completed" :
-          n === currentStep ? "step-active" :
-          "step-inactive"
+        const n = i + 1;
+        const stateClass = getStepStateClass(n, currentStep);
 
         return (
           <React.Fragment key={step.label}>
@@ -26,11 +44,11 @@ export function StepperHeader({ steps, currentStep }: StepperHeaderProps) {
             {i < steps.length - 1 && (
               <div
                 className="step-line"
-                style={{ background: n < currentStep ? "#4CAF50" : "#e0e0e0" }}
+                style={{ background: getLineBackground(n, currentStep) }}
               />
             )}
           </React.Fragment>
-        )
+        );
       })}
     </div>
   )
