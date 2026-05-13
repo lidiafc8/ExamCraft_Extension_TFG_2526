@@ -1,7 +1,20 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
 import generationCodeSolutionPrompt from "bundle-text:../../prompts/generation-exam-repository/solution/generation_code_solution.md"
 import { parseMasterPrompt } from "~src/utils/promptParser"
-import WorkflowScreen from "../../components/WorkflowScreen"
+import { Header } from "~src/components/Header"
+import { ConfirmModal } from "~src/components/modals/ConfirmModal"
+import { SuccessModal } from "~src/components/modals/SuccessModal"
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
+import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponents"
+import { useGeminiGeneration } from "~src/components/GeminiGeneration"
+import { getAllFromChrome, saveToChrome } from "~src/utils/chromeStorageUtils"
+import { downloadMarkdown } from "~src/utils/downloadUtils"
+import { FolderExamSelector } from "~src/components/FolderExamsSelector"
+import "./css/GenerationSolution.css"
+
+const ALLOWED_FOLDERS = ["clínica veterinaria", "ajedrez"]
+const STORAGE_KEY = "fullSolution"
+const DOWNLOAD_PREFIX = "Solucion_Completa"
 
 interface Props {
   readonly onBack: () => void
@@ -11,34 +24,47 @@ interface Props {
   readonly onCodeGeneration: () => void
 }
 
-interface InstructionContentProps {
-  project: any;
+function filterProject(project: any): boolean {
+  const hasBaseClasses = !!(project.baseClasses?.trim())
+  const hasCompleteConstraints = !!(project.attributeConstraints?.trim()) && !!(project.testPartsMap?.test1_attributes?.code?.trim())
+  const hasCompleteRelationships = !!(project.entityRelationships?.trim()) && !!(project.testPartsMap?.test2_relationships?.code?.trim())
+  return hasBaseClasses && (hasCompleteConstraints || hasCompleteRelationships)
 }
 
-function InstructionContent({ project }: InstructionContentProps) {
-  const hasConstraints = !!(project?.attributeConstraints);
-  const hasRelations = !!(project?.entityRelationships); 
+function buildPrompt(project: any): { visibleText: string; hiddenContext: string } {
+  const { visibleText, hiddenContext } = parseMasterPrompt(generationCodeSolutionPrompt)
+  return {
+    visibleText: visibleText
+      .replaceAll("{enunciado_restricciones}", project.attributeConstraints || "No hay restricciones de atributos.")
+      .replaceAll("{enunciado_relaciones}", project.entityRelationships || "No hay relaciones entre entidades.")
+      .replaceAll("{codigo_tests_restricciones}", project.testPartsMap?.test1_attributes?.code || "No se detectaron tests de atributos.")
+      .replaceAll("{codigo_tests_relaciones}", project.testPartsMap?.test2_relationships?.code || "No se detectaron tests de relaciones.")
+      .replaceAll("{codigo_base_localstorage}", project.baseClasses || ""),
+    hiddenContext,
+  }
+}
 
+const displayName = (proj: any) => proj?.customName || `Examen de ${proj?.domainName}`
+
+function InstructionContent({ project }: { project: any }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+    <div className="container">
       <p>
-        Este es el prompt que se usará para generar el <strong>Código Solución Completo</strong> del examen seleccionado. 
+        Este es el prompt que se usará para generar el <strong>Código Solución Completo</strong> del examen seleccionado.
         La IA tomará las clases base iniciales y aplicará las soluciones para todas las partes detectadas.
         Al terminar, pulsa en <strong>"Generar"</strong>.
       </p>
-
-      <div style={{ backgroundColor: "#f6f8fa", padding: "15px", borderRadius: "8px", border: "1px solid #e1e4e8" }}>
-        <p style={{ margin: "0 0 8px 0", fontSize: "0.95em", fontWeight: 600, color: "#333" }}>
+      <div className="info-box">
+        <p className="info-box-title">
           Partes detectadas en este proyecto:
         </p>
-        <ul style={{ margin: 0, paddingLeft: "24px", fontSize: "0.9em", color: "#555" }}>
-          {hasConstraints && <li>Enunciado de Restricciones de Atributos</li>}
-          {hasRelations && <li>Enunciado de Relaciones entre Entidades</li>}
+        <ul className="info-box-list">
+          {project?.attributeConstraints && <li>Enunciado de Restricciones de Atributos</li>}
+          {project?.entityRelationships && <li>Enunciado de Relaciones entre Entidades</li>}
         </ul>
       </div>
-      
     </div>
-  );
+  )
 }
 
 export default function GenerationSolutionCodeScreen({
@@ -46,92 +72,219 @@ export default function GenerationSolutionCodeScreen({
   onWelcome,
   onCreateExam,
   onCreateExamByParts,
-  onCodeGeneration
+  onCodeGeneration,
 }: Props) {
+  const [step, setStep] = useState<"selection" | "workflow">("selection")
+  const [internalStep, setInternalStep] = useState<"input" | "result">("input")
+  const [projects, setProjects] = useState<any[]>([])
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
+  const [selectedProject, setSelectedProject] = useState<any>(null)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [promptText, setPromptText] = useState("")
+  const [hiddenContext, setHiddenContext] = useState("")
+
+  const { responseText, isLoading, setResponseText, generate } = useGeminiGeneration({
+    logExerciseName: "full_solution_generation",
+    buildLogPayload: (result) => ({
+      dominio: selectedProject?.domainName,
+      contextoOculto: hiddenContext,
+      examenSeleccionado: selectedProject?.extensionFinish,
+      promptVisible: promptText,
+      respuesta: result,
+    }),
+  })
+
+  const breadcrumbItems = [
+    { label: "INICIO", action: onWelcome },
+    { label: "CREAR EXAMEN", action: onCreateExam },
+    { label: "POR PARTES", action: onCreateExamByParts },
+    { label: "CÓDIGO", action: onCodeGeneration },
+  ]
+
+  useEffect(() => {
+    getAllFromChrome()
+      .then(items => setProjects(items.filter(i => i._key?.startsWith("project_"))))
+      .catch(() => setProjects([]))
+  }, [])
+
+  useEffect(() => {
+    if (selectedProject?.domainName) {
+      const { visibleText, hiddenContext: hc } = buildPrompt(selectedProject)
+      setPromptText(visibleText)
+      setHiddenContext(hc)
+    }
+  }, [selectedProject])
+
+  const handleConfirmSelection = () => {
+    setShowConfirmModal(false)
+    setStep("workflow")
+    setInternalStep("input")
+  }
+
+  const handleCancel = () => {
+    setShowConfirmModal(false)
+    setSelectedProject(null)
+  }
+
+  const handleGenerate = async () => {
+    const finalPayload = `
+CONTEXTO Y RECURSOS (Información interna):
+[RECURSOS ESTÁTICOS Y EJEMPLOS]: ${hiddenContext}
+[ENUNCIADO Y DIAGRAMA DEL EXAMEN SELECCIONADO]: ${selectedProject?.extensionFinish}
+INSTRUCCIONES PRINCIPALES: ${promptText}
+    `.trim()
+
+    const result = await generate(finalPayload)
+    if (result) setInternalStep("result")
+  }
+
+  const handleSave = async () => {
+    if (!selectedProject?.id) return
+    try {
+      await saveToChrome(selectedProject.id, {
+        ...selectedProject,
+        [STORAGE_KEY]: responseText,
+        updatedAt: new Date().toISOString(),
+      })
+      setShowSuccessModal(true)
+    } catch (err: any) {
+      setSaveError(err.message ?? "No se pudo guardar.")
+    }
+  }
+
+  const handleConfirmDownload = (fileName: string) => {
+    if (!selectedProject || !responseText) return
+    downloadMarkdown(
+      `# Solución Completa - ${displayName(selectedProject)}\n\n${responseText}`,
+      fileName
+    )
+    setShowDownloadModal(false)
+  }
+
   return (
-    <WorkflowScreen
-      onBack={onBack}
-      onWelcome={onWelcome}
-      breadcrumbItems={[
-        { label: "INICIO", action: onWelcome },
-        { label: "CREAR EXAMEN", action: onCreateExam },
-        { label: "POR PARTES", action: onCreateExamByParts },
-        { label: "CÓDIGO", action: onCodeGeneration }
-      ]}
-      currentStep="SOLUCIÓN"
+    <div className="exam-app">
+      <Header
+        onWelcome={onWelcome}
+        breadcrumbItems={breadcrumbItems}
+        currentStep="SOLUCIÓN"
+      />
 
-      selectionTitle="Selecciona un examen"
-      selectionDescription="Para generar el codigo solución es necesario elegir un examen que cuente con las clases base generadas y al menos un ejercicio completo (enunciado + tests correspondientes). Haz clic en la carpeta correspondiente."
-      
-      workflowInputTitle="Generación de Código Solución"
-      workflowResultTitle={(name) => `Generar Solución Completa: ${name}`}
-      
-      instructionText={(project) => <InstructionContent project={project} />}
-      
-      confirmTitle="Confirmar Generación"
-      confirmDescription={(name) =>
-        `¿Deseas generar el código solución para el examen ${name}?`
-      }
-      
-      confirmWarning={(project) =>
-        project.fullSolution
-          ? "Este examen ya tiene un código solución. Si continúas, se reemplazará por la nueva versión."
-          : null
-      }
-      
-      confirmButtonLabel={(project) =>
-        project.fullSolution ? "Generar y reemplazar" : "Confirmar y generar"
-      }
-      
-      successTitle="¡Solución generada correctamente!"
-      successDescription={(name) =>
-        `El código solución para ${name} ha sido guardado exitosamente.`
-      }
-      saveButtonLabel="Guardar"
+      <main className="main-content">
+        {step === "selection" && (
+          <FolderExamSelector
+            projects={projects.filter(filterProject)}
+            allowedFolders={ALLOWED_FOLDERS}
+            selectedFolder={selectedFolder}
+            onSelectFolder={(folder) => setSelectedFolder(folder || null)}
+            onSelectProject={(proj) => { setSelectedProject(proj); setShowConfirmModal(true) }}
+            onBack={onBack}
+            displayName={displayName}
+            emptyFoldersMessage="No hay exámenes con clases base y partes generadas. Genera primero las clases base y al menos una parte del examen."
+            emptyProjectsMessage="Ningún examen de esta carpeta tiene clases base y partes generadas todavía."
+          />
+        )}
 
-      allowedFolders={["clínica veterinaria", "ajedrez"]}
-      
-      storageKey="fullSolution" 
-      
-      filterProject={(project) => {
-        const hasBaseClasses = !!(project.baseClasses && project.baseClasses.trim() !== "");
-        
-        const hasConstraintsStatement = !!(project.attributeConstraints && project.attributeConstraints.trim() !== "");
-        const hasConstraintsTests = !!(project.testPartsMap?.test1_attributes?.code?.trim());
-        const hasCompleteConstraints = hasConstraintsStatement && hasConstraintsTests;
+        {step === "workflow" && selectedProject && (
+          <div className="wf-layout-container">
+            <div className="wf-wide-wrapper">
+              {internalStep === "input" && (
+                <PromptEditor
+                  title="Generación de Código Solución"
+                  description={<InstructionContent project={selectedProject} />}
+                  promptText={promptText}
+                  isLoading={isLoading}
+                  generateLabel="Generar"
+                  onPromptChange={setPromptText}
+                  onGenerate={handleGenerate}
+                  onBack={() => setStep("selection")}
+                />
+              )}
 
-        const hasRelationsStatement = !!(project.entityRelationships && project.entityRelationships.trim() !== "");
-        const hasRelationshipsTests = !!(project.testPartsMap?.test2_relationships?.code?.trim());
-        const hasCompleteRelationships = hasRelationsStatement && hasRelationshipsTests;
+              {internalStep === "result" && (
+                <>
+                  <h2 className="result-title">
+                    Generar Solución Completa: {displayName(selectedProject)}
+                  </h2>
+                  <SplitResultView
+                    promptText={promptText}
+                    isLoading={isLoading}
+                    responseText={responseText}
+                    leftTitle="Prompt enviado"
+                    rightTitle="Propuesta del modelo"
+                    onPromptChange={setPromptText}
+                    onRegenerate={handleGenerate}
+                    onResponseChange={setResponseText}
+                    footer={
+                      <div className="wf-actions-row">
+                        <button
+                          onClick={handleGenerate}
+                          className="btn-step generate"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                        </button>
+                        <button
+                          onClick={() => setShowDownloadModal(true)}
+                          className="btn-step btn-download"
+                        >
+                          Descargar (.md)
+                        </button>
+                        <button onClick={handleSave} className="btn-step primary">
+                          Guardar
+                        </button>
+                      </div>
+                    }
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </main>
 
-        return hasBaseClasses && (hasCompleteConstraints || hasCompleteRelationships);
-      }}
-      
-      buildPrompt={(project) => {
-        const { visibleText, hiddenContext } = parseMasterPrompt(generationCodeSolutionPrompt);
-        
-        const attributeConstraintsStatement = project.attributeConstraints || "No hay restricciones de atributos.";
-        const entityRelationsStatement = project.entityRelationships || "No hay relaciones entre entidades.";
-        const testsCodeAttributes = project.testPartsMap?.test1_attributes?.code || "No se detectaron tests de atributos.";
-        const testsCodeRelations = project.testPartsMap?.test2_relationships?.code || "No se detectaron tests de relaciones.";
-        
-        const baseClassesCode = project.baseClasses || "";
+      <DownloadConfirmModal
+        isOpen={showDownloadModal}
+        defaultFileName={`${DOWNLOAD_PREFIX}_${displayName(selectedProject || {}).replace(/\s+/g, "_")}`}
+        onConfirm={handleConfirmDownload}
+        onCancel={() => setShowDownloadModal(false)}
+      />
 
-        return {
-          visibleText: visibleText
-            .replaceAll("{enunciado_restricciones}", attributeConstraintsStatement)
-            .replaceAll("{enunciado_relaciones}", entityRelationsStatement)
-            .replaceAll("{codigo_tests_restricciones}", testsCodeAttributes)
-            .replaceAll("{codigo_tests_relaciones}", testsCodeRelations)
-            .replaceAll("{codigo_base_localstorage}", baseClassesCode),
-          hiddenContext,
-        }
-      }}
-      
-      logExerciseName="full_solution_generation"
-      downloadPrefix="Solucion_Completa"
-      downloadTitle={(p) => `Solución Completa - ${p.customName || p.domainName}`}
-      onSaved={() => onWelcome()}
-    />
+      {showConfirmModal && selectedProject && (
+        <ConfirmModal
+          title="Confirmar Generación"
+          message={`¿Deseas generar el código solución para el examen ${displayName(selectedProject)}?`}
+          warning={selectedProject[STORAGE_KEY]
+            ? "Este examen ya tiene un código solución. Si continúas, se reemplazará por la nueva versión."
+            : undefined
+          }
+          onConfirm={handleConfirmSelection}
+          onCancel={handleCancel}
+        />
+      )}
+
+      {showSuccessModal && (
+        <SuccessModal
+          title="¡Solución generada correctamente!"
+          message={`El código solución para ${displayName(selectedProject)} ha sido guardado exitosamente.`}
+          actions={[
+            { label: "Volver al inicio", onClick: onWelcome, variant: "primary" },
+          ]}
+        />
+      )}
+
+      {saveError && (
+        <ConfirmModal
+          title="Error al guardar"
+          message={saveError}
+          confirmLabel="Reintentar"
+          cancelLabel="Volver al inicio"
+          onConfirm={() => { setSaveError(null); handleSave() }}
+          onCancel={onWelcome}
+        />
+      )}
+    </div>
   )
 }

@@ -1,0 +1,83 @@
+.save-modal-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.save-modal-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a7060;
+}
+
+.save-modal-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.save-modal-input-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: #b09080;
+  transition: color 0.2s ease;
+  pointer-events: none;
+  user-select: none;
+}
+
+.save-modal-input-icon--focused {
+  color: #5c3d2e;
+}
+
+.save-modal-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 16px 13px 40px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #2c1a0e;
+  background: #fdf8f4;
+  border: 2px solid #d4b8a8;
+  border-radius: 10px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.save-modal-input:focus,
+.save-modal-input--focused {
+  background: #fff;
+  border-color: #5c3d2e;
+  box-shadow: 0 0 0 4px rgba(92, 61, 46, 0.12), 0 2px 8px rgba(92, 61, 46, 0.08);
+}
+
+.save-modal-input-underline {
+  position: absolute;
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background: linear-gradient(90deg, #8b5e3c, #c8956c);
+  border-radius: 0 0 8px 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.save-modal-input-underline--focused {
+  opacity: 1;
+}
+
+.save-modal-empty-warning {
+  margin: 0;
+  font-size: 11px;
+  color: #c0756a;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

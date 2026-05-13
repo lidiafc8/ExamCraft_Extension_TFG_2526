@@ -10,7 +10,6 @@
 
 .menu-btn {
   background-color: #A67C6D; 
-  color: white; /* NOSONAR */
   font-size: 1.3rem;
   font-weight: bold;
   padding: 20px 30px;     
@@ -37,7 +36,6 @@
 
 .menu-btn1 {
   background-color: #A67C6D; 
-  color: white; /* NOSONAR */
   font-size: 1.3rem;
   font-weight: bold;
   padding: 20px 30px;     

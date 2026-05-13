@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.info-box {
+  background-color: #f6f8fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e1e4e8;
+}
+
+.info-box-title {
+  margin: 0 0 8px 0;
+  font-size: 0.95em;
+  font-weight: 600;
+  color: #333;
+}
+
+.info-box-list {
+  margin: 0;
+  padding-left: 24px;
+  font-size: 0.9em;
+  color: #555;
+}

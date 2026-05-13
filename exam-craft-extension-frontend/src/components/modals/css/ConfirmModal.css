@@ -1,0 +1,55 @@
+.confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirm-modal-card {
+  max-width: 400px;
+  width: 90%;
+  padding: 30px;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 12px;
+}
+
+.confirm-modal-warning {
+  background-color: #fff8e1;
+  border: 1px solid #f9a825;
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #7a5800;
+}
+
+.confirm-modal-warning--plain {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.confirm-modal-actions {
+  justify-content: center;
+  gap: 15px;
+}
+
+.sucess-modal-description {
+  margin-bottom: 25px;
+  color: #555;
+  font-size: 15px;
+}
+
+.sucess-modal-description.warning {
+  margin-bottom: 15px;
+}

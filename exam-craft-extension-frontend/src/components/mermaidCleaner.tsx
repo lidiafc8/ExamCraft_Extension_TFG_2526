@@ -23,24 +23,19 @@ export function cleanMermaidCode(rawText: string): string {
         .replace(/<\|--/g, ' <|-- ')
         .replace(/%%/g, '\n%%');
 
-    // Normaliza composición/agregación con espacio suelto: "* -->" -> "*-->"
     cleanResult = cleanResult
         .replace(/\*\s+-->/g, '*-->')
         .replace(/o\s+-->/g, 'o-->');
 
-    // Normaliza "-->" con espacios extra
     cleanResult = cleanResult.replace(/\s*-->\s*/g, ' --> '); // NOSONAR javascript:S5852
 
-    // Elimina multiplicidad vacía ""
     cleanResult = cleanResult.replace(/\s*""\s*/g, ' '); // NOSONAR javascript:S5852
 
-    // Procesa línea a línea para evitar que dos relaciones colisionen
     cleanResult = cleanResult
         .split('\n')
         .map(line => {
             const trimmed = line.trim();
 
-            // Relación con label: ClassA "mult" ClassB : label → ClassA --> "mult" ClassB : label
             const withLabel = trimmed.match(
                 /^([A-Za-z0-9_]+)\s+"([^"]+)"\s+([A-Za-z0-9_]+)\s*:\s*(.+)$/ // NOSONAR javascript:S5852
             );
@@ -48,7 +43,6 @@ export function cleanMermaidCode(rawText: string): string {
                 return `${withLabel[1]} --> "${withLabel[2]}" ${withLabel[3]} : ${withLabel[4]}`;
             }
 
-            // Relación sin flecha ni label: ClassA "mult" ClassB → ClassA --> "mult" ClassB
             const noArrow = trimmed.match(
                 /^([A-Za-z0-9_]+)\s+"([^"]+)"\s+([A-Za-z0-9_]+)\s*$/
             );

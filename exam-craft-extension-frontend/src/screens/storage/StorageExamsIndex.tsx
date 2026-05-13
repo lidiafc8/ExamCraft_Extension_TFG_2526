@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import hljs from 'highlight.js/lib/core';
 import java from 'highlight.js/lib/languages/java';
 import 'highlight.js/styles/github.css';
 import { downloadProjectAsMarkdown } from "~src/utils/exportUtils";
 import { FoldersGridScreen } from "./FoldersGridScreen";
-import { DomainFolderScreen } from "./DomainFolderScreen";
+import { DomainFolderScreen } from "./ExamSelectionScreen";
 import { ExamDetailScreen } from "./ExamDetailScreen";
 import { GeneratedCodeScreen } from "./GenerationCodeScreen";
 import { VisualSolutionCodeScreen } from "./VisualSolutionCodeScreen";
 import { GithubService } from "~src/services/githubService";
+import { DeleteConfirmationModal } from "~src/components/modals/DeleteConfirmationModal";
 
 declare var chrome: any;
-
 hljs.registerLanguage('java', java);
 
 interface Props {
@@ -22,321 +22,158 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     const [projects, setProjects] = useState<any[]>([]);
     const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null);
     const [selectedProject, setSelectedProject] = useState<any>(null);
-
     const [editingId, setEditingId] = useState<string | null>(null);
     const [tempName, setTempName] = useState("");
-    const [isCreating, setIsCreating] = useState(false);
     const [showGeneratedCode, setShowGeneratedCode] = useState(false);
     const [showSolutionGeneratedCode, setShowSolutionGeneratedCode] = useState(false);
+    const [deleteModal, setDeleteModal] = useState<{ id: string; name: string } | null>(null);
 
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
-    const projectsInFolder = projects.filter(p =>
-        p.domainName && selectedDomainFolder && p.domainName.toLowerCase() === selectedDomainFolder.toLowerCase()
-    );
 
     useEffect(() => {
-        if (globalThis.chrome?.storage?.local) {
-            chrome.storage.local.get(null, (items) => {
-                const projectList = Object.keys(items)
-                    .filter(key => key.startsWith('project_'))
-                    .map(key => ({ id: key, ...items[key] }));
-                setProjects(projectList);
-            });
-        }
+        if (!globalThis.chrome?.storage?.local) return;
+
+        chrome.storage.local.get(null, (items: Record<string, any>) => {
+            const projectList = Object.keys(items)
+                .filter(key => key.startsWith('project_'))
+                .map(key => ({ id: key, ...items[key] }));
+            setProjects(projectList);
+        });
     }, []);
 
-    const applyRenameToState = (id: string, newName: string) => {
-        setProjects(prevProjects =>
-            prevProjects.map(p => (p.id === id ? { ...p, customName: newName } : p))
-        );
-        setEditingId(null);
+    const updateProjectInState = (id: string, updatedData: any) => {
+        setProjects(prev => prev.map(p => (p.id === id ? updatedData : p)));
+        if (selectedProject?.id === id) setSelectedProject(updatedData);
     };
 
-    const handleRename = (id: string) => {
-        if (!tempName.trim()) { setEditingId(null); return; }
-        const projectToUpdate = projects.find(p => p.id === id);
-        if (!projectToUpdate) return;
-        const newName = tempName.trim();
-        const updatedData = { ...projectToUpdate, customName: newName };
-
-        if (globalThis.chrome?.storage?.local) {
-            chrome.storage.local.set({ [id]: updatedData }, () => {
-                applyRenameToState(id, newName);
-            });
-        }
+    const removeProjectFromState = (id: string) => {
+        setProjects(prev => prev.filter(p => p.id !== id));
+        if (selectedProject?.id === id) setSelectedProject(null);
     };
 
-    const handleDelete = (id: string, e?: React.MouseEvent) => {
-        if (e) e.stopPropagation();
-        const confirmDelete = globalThis.confirm("¿Estás seguro de que quieres borrar este examen? Esta acción no se puede deshacer.");
-        if (confirmDelete) {
-            if (globalThis.chrome?.storage?.local) {
-                chrome.storage.local.remove(id, () => {
-                    setProjects(prevProjects => prevProjects.filter(p => p.id !== id));
-                    if (selectedProject?.id === id) setSelectedProject(null);
-                });
-            }
-        }
+    const handleRename = (id: string, newName: string) => {
+        const nameToSet = newName.trim();
+        if (!nameToSet) return setEditingId(null);
+
+        const project = projects.find(p => p.id === id);
+        if (!project || !globalThis.chrome?.storage?.local) return;
+
+        const updatedData = { ...project, customName: nameToSet };
+        chrome.storage.local.set({ [id]: updatedData }, () => {
+            updateProjectInState(id, updatedData);
+            setEditingId(null);
+        });
+    };
+
+    const handleDeleteDirect = (id: string) => {
+        if (!globalThis.chrome?.storage?.local) return;
+        chrome.storage.local.remove(id, () => removeProjectFromState(id));
+    };
+
+    const handleConfirmDelete = () => {
+        if (!deleteModal || !globalThis.chrome?.storage?.local) return;
+        chrome.storage.local.remove(deleteModal.id, () => {
+            removeProjectFromState(deleteModal.id);
+            setDeleteModal(null);
+        });
     };
 
     const handleDeleteSection = (sectionKey: string) => {
-        if (!selectedProject) return;
-
+        if (!selectedProject || !globalThis.chrome?.storage?.local) return;
         const updatedProject = { ...selectedProject, [sectionKey]: "" };
-
-        const updateProjectsList = (prevProjects: any[]) => 
-            prevProjects.map(p => (p.id === selectedProject.id ? updatedProject : p));
-
-        if (globalThis.chrome?.storage?.local) {
-            chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
-                setProjects(updateProjectsList);
-                setSelectedProject(updatedProject);
-            });
-        }
+        chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
+            updateProjectInState(selectedProject.id, updatedProject);
+        });
     };
 
-    const handleDeleteTest = (testKey: string) => {
-        if (!selectedProject?.id) return;
-
-        const updatedProject = { ...selectedProject };
-        const updatedTestMap = { ...(updatedProject.testPartsMap || {}) };
-
-        delete updatedTestMap[testKey];
-        updatedProject.testPartsMap = updatedTestMap;
-
-        setSelectedProject(updatedProject);
-
-        if (chrome?.storage?.local) {
-            chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
-                console.log(`Test ${testKey} eliminado correctamente.`);
-            });
-        }
-    };
-
-    
-
-    const handleDownload = () => {
-        if (!selectedProject) return;
-        downloadProjectAsMarkdown(selectedProject);
-    };
-
-    const getRepoConfig = (domain: string) => {
-    const isPetClinic = domain.includes("clínica veterinaria") || domain.includes("veterinaria");
-    return {
-        TEMPLATE_OWNER: "lidiafc8",
-        TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
-        TEST_BASE_PATH: isPetClinic
-            ? "src/test/java/org/springframework/samples/petclinic/"
-            : "src/test/java/es/us/dp1/chess/tournament/"
-    };
-};
-
-    const getOrPromptGitHubToken = (): string | null => {
-        const existingToken = localStorage.getItem("github_token");
-        if (existingToken) return existingToken;
-
-        const newToken = globalThis.prompt(
-            "Para crear repositorios en GitHub necesitas un Token de acceso (Personal Access Token).\n\n" +
-            "Por favor, pégalo aquí (se guardará de forma segura en tu navegador para la próxima vez):"
-        );
-
-        if (!newToken) {
-            alert("Operación cancelada. Se requiere un token de GitHub para continuar.");
-            return null;
-        }
-
-        localStorage.setItem("github_token", newToken);
-        return newToken;
-    };
-
-    const buildUploadList = (project: any): string => {
-        const items = ["- README.md (Actualizado con el enunciado)"];
+    const handleGitHubDeploy = async (token: string, project: any) => {
+        const isPetClinic = project.domainName.toLowerCase().match(/veterinaria|clínica/);
+        const cleanDomain = project.domainName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/gi, '-').toLowerCase();
         
-        const testParts = Object.values(project.testPartsMap || {})
-            .filter((p: any) => p?.fileName && p?.code);
+        const config = {
+            owner: "lidiafc8",
+            repo: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
+            path: isPetClinic ? "src/test/java/org/springframework/samples/petclinic/grooming/" : "src/test/java/es/us/dp1/chess/tournament/"
+        };
 
-        if (testParts.length > 0) {
-            items.push(`- Tests de Java: ${testParts.map((p: any) => p.fileName).join(', ')}`);
-        }
-
-        if (project.baseClasses?.trim()) {
-            items.push("- Clases base para la extensión creada.");
-        }
-        
-        if (project.fullSolution?.trim()) {
-            const solvedParts = [];
-            if (project.attributeConstraints?.trim()) solvedParts.push("restricciones de atributos");
-            if (project.entityRelationships?.trim()) solvedParts.push("relaciones entre entidades");
-
-            const detailText = solvedParts.length > 0 ? ` (${solvedParts.join(" y ")})` : "";
-            items.push(`- Rama 'solution' con las clases resueltas${detailText}.`);
-        }
-
-        return items.join("\n");
+        return await GithubService.deployExam(token, project, `examen-${cleanDomain}-${Date.now()}`, config.owner, config.repo, config.path);
     };
 
-    const handleDeployError = (error: any) => {
-        console.error("Error al desplegar:", error);
-        const msg = error.message || "";
-        const isAuthError = msg.includes("Bad credentials") || msg.includes("401") || msg.includes("Requires authentication");
-
-        if (isAuthError) {
-            localStorage.removeItem("github_token");
-            alert("El token de GitHub ha caducado, es inválido o no tiene permisos. Vuelve a intentarlo para introducir uno nuevo.");
-        } else {
-            alert(`Error: ${msg}`);
-        }
-    };
-
-   const handleGitHubDeploy = async () => {
-
-        const cleanProjectName = selectedProject.domainName
-            .normalize("NFD")
-            .replaceAll(/[\u0300-\u036f]/g, "")
-            .replaceAll(/[^a-z0-9]/gi, '-')
-            .toLowerCase();
-
-        const cleanCustomName = selectedProject.customName 
-            ? selectedProject.customName
-                .normalize("NFD")
-                .replaceAll(/[\u0300-\u036f]/g, "")
-                .replaceAll(/[^a-z0-9]/gi, '-')
-                .toLowerCase()
-            : "";
-
-        const now = new Date();
-        const formattedDate = 
-            `${String(now.getDate()).padStart(2, '0')}` +
-            `${String(now.getMonth() + 1).padStart(2, '0')}` +
-            `${now.getFullYear()}` +
-            `${String(now.getHours()).padStart(2, '0')}` +
-            `${String(now.getMinutes()).padStart(2, '0')}`;
-
-        const newRepoName = `examen-${cleanProjectName}-${cleanCustomName}-${formattedDate}`;
-        
-        const { TEMPLATE_OWNER, TEMPLATE_REPO, TEST_BASE_PATH } = getRepoConfig(selectedProject.domainName.toLowerCase());
-
-        const MY_TOKEN = getOrPromptGitHubToken();
-        if (!MY_TOKEN) return;
-
-        const uploadListString = buildUploadList(selectedProject);
-        const confirmacion = globalThis.confirm(
-            `¿Confirmas la creación del examen en GitHub?\n\n` +
-            `Dominio detectado: ${selectedProject.domainName}\n` +
-            `Plantilla seleccionada: ${TEMPLATE_OWNER}/${TEMPLATE_REPO}\n` +
-            `Nombre del repositorio a subir: ${newRepoName}\n\n` +
-            `Archivos a subir:\n${uploadListString}`
-        );
-        if (!confirmacion) return;
-
-        setIsCreating(true);
-        try {
-            const newRepoUrl = await GithubService.deployExam(
-                MY_TOKEN,
-                selectedProject,
-                newRepoName,
-                TEMPLATE_OWNER,
-                TEMPLATE_REPO,
-                TEST_BASE_PATH
-            );
-            alert("¡Repositorio creado y todos los archivos subidos con éxito!");
-            globalThis.open(newRepoUrl, '_blank');
-        } catch (error: any) {
-            handleDeployError(error);
-        } finally {
-            setIsCreating(false);
-        }
-    };
-
-    if (selectedProject && showGeneratedCode) {
-        return (
-            <GeneratedCodeScreen
-                selectedProject={selectedProject}
-                selectedDomainFolder={selectedDomainFolder || ""}
-                onWelcome={onWelcome}
+    const renderActiveExamScreen = () => {
+        if (showGeneratedCode) {
+            return <GeneratedCodeScreen 
+                selectedProject={selectedProject} 
+                selectedDomainFolder={selectedDomainFolder!} 
+                onWelcome={onWelcome} 
                 onBack={() => setShowGeneratedCode(false)}
-                onGoToExams={() => {
-                    setShowGeneratedCode(false);
-                    setSelectedProject(null);
-                }}
-                onGoToFolders={() => {
-                    setShowGeneratedCode(false);
-                    setSelectedProject(null);
-                    setSelectedDomainFolder(null);
-                }}
+                onGoToExams={() => { setShowGeneratedCode(false); setSelectedProject(null); }}
+                onGoToFolders={() => { setShowGeneratedCode(false); setSelectedProject(null); setSelectedDomainFolder(null); }}
                 onDeleteSection={handleDeleteSection}
-                onDeleteTest={handleDeleteTest}  
-            />
-        );
-    }
-
-    if (selectedProject && showSolutionGeneratedCode) {
-        return (
-            <VisualSolutionCodeScreen          
-                selectedProject={selectedProject}
-                selectedDomainFolder={selectedDomainFolder || ""}
+                onDeleteTest={() => {}} 
+            />;
+        }
+        if (showSolutionGeneratedCode) {
+            return <VisualSolutionCodeScreen 
+                selectedProject={selectedProject} 
+                selectedDomainFolder={selectedDomainFolder!} 
                 onWelcome={onWelcome}
-                onBack={() => setShowSolutionGeneratedCode(false)}  
-                onGoToExams={() => {
-                    setShowSolutionGeneratedCode(false);            
-                    setSelectedProject(null);
-                }}
-                onGoToFolders={() => {
-                    setShowSolutionGeneratedCode(false);             
-                    setSelectedProject(null);
-                    setSelectedDomainFolder(null);
-                }}
+                onBack={() => setShowSolutionGeneratedCode(false)}
+                onGoToExams={() => { setShowSolutionGeneratedCode(false); setSelectedProject(null); }}
+                onGoToFolders={() => { setShowSolutionGeneratedCode(false); setSelectedProject(null); setSelectedDomainFolder(null); }}
                 onDeleteSection={handleDeleteSection}
-            />
-        );
-    }
+            />;
+        }
+        return <ExamDetailScreen 
+            selectedProject={selectedProject} 
+            selectedDomainFolder={selectedDomainFolder!} 
+            isCreating={false} 
+            onWelcome={onWelcome} 
+            onBack={() => setSelectedProject(null)}
+            onGoToFolders={() => { setSelectedProject(null); setSelectedDomainFolder(null); }}
+            onDownload={(name) => downloadProjectAsMarkdown(selectedProject, name)}
+            onGitHubDeploy={handleGitHubDeploy}
+            onShowGeneratedCode={() => setShowGeneratedCode(true)}
+            onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
+            onDeleteProject={(id) => setDeleteModal({ id, name: selectedProject.customName })}
+            onDeleteSection={handleDeleteSection}
+            onUpdateProject={async () => {}}
+        />;
+    };
 
-    if (selectedProject && !showGeneratedCode) {
-        return (
-            <ExamDetailScreen
-                selectedProject={selectedProject}
-                selectedDomainFolder={selectedDomainFolder || ""}
-                isCreating={isCreating}
-                onWelcome={onWelcome}
-                onBack={() => setSelectedProject(null)}
-                onGoToFolders={() => {
-                    setSelectedProject(null);
-                    setSelectedDomainFolder(null);
-                }}
-                onDownload={handleDownload}
-                onGitHubDeploy={handleGitHubDeploy}
-                onShowGeneratedCode={() => setShowGeneratedCode(true)}
-                onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
-                onDeleteProject={handleDelete}
-                onDeleteSection={handleDeleteSection}
-            />
-        );
-    }
-
-    if (selectedDomainFolder) {
-        return (
-            <DomainFolderScreen
-                selectedDomainFolder={selectedDomainFolder}
+    const renderFolderContent = () => {
+        if (selectedDomainFolder) {
+            const projectsInFolder = projects.filter(p => p.domainName?.toLowerCase() === selectedDomainFolder.toLowerCase());
+            return <DomainFolderScreen 
+                selectedDomainFolder={selectedDomainFolder} 
                 projectsInFolder={projectsInFolder}
-                editingId={editingId}
-                tempName={tempName}
-                onWelcome={onWelcome}
+                editingId={editingId} 
+                tempName={tempName} 
+                onWelcome={onWelcome} 
                 onBack={() => setSelectedDomainFolder(null)}
-                onSelectProject={(project) => setSelectedProject(project)}
-                onDeleteProject={handleDelete}
+                onSelectProject={setSelectedProject} 
+                onDeleteProject={handleDeleteDirect} 
                 onRenameProject={handleRename}
-                setEditingId={setEditingId}
-                setTempName={setTempName}
-            />
-        );
-    }
+                setEditingId={setEditingId} 
+                setTempName={setTempName} 
+            />;
+        }
+        return <FoldersGridScreen 
+            allowedFolders={allowedFolders} 
+            projects={projects} 
+            onWelcome={onWelcome} 
+            onSelectFolder={setSelectedDomainFolder} 
+        />;
+    };
 
     return (
-        <FoldersGridScreen
-            allowedFolders={allowedFolders}
-            projects={projects}
-            onWelcome={onWelcome}
-            onSelectFolder={(folderName) => setSelectedDomainFolder(folderName)}
-        />
+        <>
+            {selectedProject ? renderActiveExamScreen() : renderFolderContent()}
+            <DeleteConfirmationModal 
+                isOpen={deleteModal !== null} 
+                itemName={deleteModal?.name ?? ""} 
+                isExam onConfirm={handleConfirmDelete} 
+                onCancel={() => setDeleteModal(null)} 
+            />
+        </>
     );
 }

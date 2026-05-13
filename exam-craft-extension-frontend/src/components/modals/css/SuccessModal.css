@@ -1,0 +1,43 @@
+.success-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.success-modal-card {
+  max-width: 400px;
+  width: 90%;
+  padding: 30px;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 12px;
+}
+
+.success-modal-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.success-modal-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+}
+
+.success-modal-actions .btn-step {
+  flex: 1;
+}
+
+.success-modal-description {
+  margin-bottom: 25px; 
+  color: #555;
+  font-size: 15px;
+}

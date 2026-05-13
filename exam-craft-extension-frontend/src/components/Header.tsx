@@ -21,7 +21,6 @@ export const Header: React.FC<HeaderProps> = ({ onWelcome, breadcrumbItems, curr
                     type="button"
                     className="logo-icon" 
                     onClick={onWelcome} 
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', outline: 'none' }}
                     aria-label="Ir a inicio"
                 >
                     <img src={logoExamCraft} alt="Logo ExamCraft" width="60" height="60" />

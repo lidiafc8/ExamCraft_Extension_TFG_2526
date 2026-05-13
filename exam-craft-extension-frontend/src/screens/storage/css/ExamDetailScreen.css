@@ -1,13 +1,7 @@
-/* ============================================================
-   ExamDetailScreen — específico
-   Importa StorageScreens.css para los estilos comunes
-   ============================================================ */
-
 .exam-detail-main {
   position: relative;
 }
 
-/* ── Two col grid ── */
 .two-col-grid {
   display: grid;
   grid-template-columns: 1fr 1.6fr;
@@ -16,7 +10,6 @@
   min-height: 560px;
 }
 
-/* ── Card body ── */
 .card-body {
   flex: 1;
   overflow: hidden;
@@ -57,7 +50,6 @@
   background: #fafafa;
 }
 
-/* ── Wide textarea ── */
 .wide-textarea {
   width: 100%;
   min-height: 380px;
@@ -73,7 +65,6 @@
   box-sizing: border-box;
 }
 
-/* ── Code buttons ── */
 .code-buttons-row {
   display: flex;
   flex-direction: row;
@@ -84,7 +75,7 @@
 }
 
 .btn-code {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  background-color: #946150; 
   color: white;
   border: none;
   border-radius: var(--radius-sm);
@@ -95,19 +86,19 @@
   letter-spacing: 0.04em;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(176, 137, 104, 0.35);
+  box-shadow: 0 2px 8px rgba(148, 97, 80, 0.35);
 }
 
 .btn-code:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(176, 137, 104, 0.45);
+  box-shadow: 0 4px 16px rgba(148, 97, 80, 0.45);
+  background-color: #7a5042;
 }
 
 .btn-code:active {
   transform: translateY(0);
 }
 
-/* ── Actions menu ── */
 .actions-menu-wrapper {
   position: absolute;
   top: 22px;
@@ -171,10 +162,13 @@
 .action-btn:hover { filter: brightness(1.08); transform: scale(1.04); }
 .action-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-.action-btn--preview  { background: #2e7d32; color: white; }
-.action-btn--download { background: #4a90e2; color: white; } /* NOSONAR */
+.action-btn--preview  { background: #1e5422; color: white; }
+
+.action-btn--download { background: #1a73e8; color: white; }
+
 .action-btn--github   { background: #24292e; color: white; }
-.action-btn--delete   { background: #ff4d4f; color: white; } /* NOSONAR */
+
+.action-btn--delete   { background: #cf1322; color: white; }
 
 .action-divider {
   border: none;
@@ -182,7 +176,6 @@
   margin: 4px 0;
 }
 
-/* ── Preview modal ── */
 .preview-backdrop {
   position: fixed;
   inset: 0;
@@ -197,8 +190,8 @@
 
 .preview-modal {
   background: var(--bg-card);
-  width: 100%;
-  max-width: 1100px;
+  width: 90vw;
+  max-width: 1400px;
   max-height: 90vh;
   border-radius: 14px;
   display: flex;
@@ -247,27 +240,11 @@
   margin: 20px 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
+  overflow: visible;
   background: #fafafa;
-  height: 500px;
   width: 100%;
   position: relative;
-}
-
-.preview-diagram-blocker {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  cursor: default;
-}
-
-.preview-diagram-wrapper [class*="zoom"],
-.preview-diagram-wrapper [class*="controls"],
-.preview-diagram-wrapper [class*="toolbar"],
-.preview-diagram-wrapper [class*="header"],
-.preview-diagram-wrapper button,
-.preview-diagram-wrapper > div > div:first-child {
-  display: none !important;
+  pointer-events: auto;
 }
 
 .exam-markdown-container {
@@ -279,13 +256,78 @@
   line-height: 1.75;
   font-size: 0.95rem;
   color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .exam-markdown-container h1,
-.exam-markdown-container h2,
-.exam-markdown-container h3 {
-  font-family: var(--font-display);
+.exam-markdown-container h2 {
+  text-align: center;
+  width: 100%;
+  margin-bottom: 20px;
   color: var(--accent-dark);
+}
+
+.exam-markdown-container p {
+  text-align: left;
+  white-space: pre-wrap;
+  width: 100%;
+  margin-top: 0;
+}
+
+.btn-edit-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 14px;
+  border-radius: 50px;
+  cursor: pointer;
+  border: 1.5px solid #c9a98a;
+  background: #fdf6f1;
+  color: #a07050;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 3px rgba(176, 133, 100, 0.12);
+  white-space: nowrap;
+}
+
+.btn-edit-toggle:hover {
+  background: #f5e9de;
+  border-color: #b48574;
+  color: #7a5038;
+  box-shadow: 0 2px 8px rgba(176, 133, 100, 0.22);
+  transform: translateY(-1px);
+}
+
+.btn-edit-toggle--active {
+  border-color: #b48574;
+  background: #b48574;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(176, 133, 100, 0.4);
+}
+
+.btn-edit-toggle--active:hover {
+  background: #a07060;
+  border-color: #a07060;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.section-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-readonly-text {
+  white-space: pre-wrap;
+  margin: 0 16px 16px;
+  color: inherit;
 }
 
 @media (max-width: 960px) {
