@@ -52,7 +52,6 @@ export default function IndexTab() {
     "generationSolutionCode"
   >("welcome");
 
-  // CORRECCIÓN: Función de apoyo para navegación de regreso limpia
   const handleGoBackFromTests = () => {
     if (testOrigin === 'attributes') {
       setScreen("attributesConstraints");

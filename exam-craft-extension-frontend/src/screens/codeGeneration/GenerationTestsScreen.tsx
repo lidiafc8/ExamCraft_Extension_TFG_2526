@@ -230,8 +230,6 @@ Genera ${isRelationships ? "(Test2.java)" : "(Test1.java)"} sin bloques markdown
     downloadMarkdown(responseText, customFileName);
     setShowDownloadModal(false);
   };
-
-  // --- CORRECCIÓN: EVITAR TERNARIOS ANIDADOS ---
   const getDynamicBreadcrumbs = () => {
     if (source === "general") {
       return [

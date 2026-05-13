@@ -74,7 +74,6 @@
   padding: 28px 24px;
 }
 
-/* CORRECCIÓN: Color de fondo más oscuro (#946150) para que el texto blanco sea legible */
 .btn-code {
   background-color: #946150; 
   color: white;
@@ -163,18 +162,12 @@
 .action-btn:hover { filter: brightness(1.08); transform: scale(1.04); }
 .action-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-/* CORRECCIONES DE CONTRASTE EN BOTONES DE ACCIÓN */
-
-/* CORRECCIÓN image_2d886f: Verde más oscuro (#1e5422) */
 .action-btn--preview  { background: #1e5422; color: white; }
 
-/* CORRECCIÓN image_2d8852: Azul más oscuro (#1a73e8) */
 .action-btn--download { background: #1a73e8; color: white; }
 
-/* CORRECCIÓN image_2d8836: GitHub ya suele ser oscuro, pero aseguramos contraste */
 .action-btn--github   { background: #24292e; color: white; }
 
-/* CORRECCIÓN image_2d882f: Rojo más profundo (#cf1322) */
 .action-btn--delete   { background: #cf1322; color: white; }
 
 .action-divider {
@@ -284,7 +277,6 @@
   margin-top: 0;
 }
 
-/* Edit toggle button */
 .btn-edit-toggle {
   display: inline-flex;
   align-items: center;

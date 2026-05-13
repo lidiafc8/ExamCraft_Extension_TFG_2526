@@ -25,8 +25,6 @@ export interface ExamDetailScreenProps {
     onUpdateProject: (updatedProject: any) => Promise<void>;
 }
 
-// --- FUNCIONES AUXILIARES CORREGIDAS (Parámetros por defecto) ---
-
 function buildCombined(intro = '', mermaid = ''): string {
     if (!intro && !mermaid) return '';
     if (!mermaid) return intro;
@@ -59,8 +57,6 @@ async function requestAIDiagram(enunciado: string) {
         .trim() || '';
 }
 
-// --- COMPONENTE PRINCIPAL ---
-
 export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     selectedProject,
     selectedDomainFolder,
@@ -75,21 +71,18 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     onDeleteSection,
     onUpdateProject,
 }) => {
-    // Estados de UI
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [showDeployModal, setShowDeployModal] = useState(false);
     const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
     
-    // Estados de Carga y Edición
     const [isSaving, setIsSaving] = useState(false);
     const [isRegeneratingDiagram, setIsRegeneratingDiagram] = useState(false);
     const [editingCombined, setEditingCombined] = useState(false);
     const [editingAttributeConstraints, setEditingAttributeConstraints] = useState(false);
     const [editingEntityRelationships, setEditingEntityRelationships] = useState(false);
 
-    // Estados de Datos
     const [combinedText, setCombinedText] = useState('');
     const [attributeConstraints, setAttributeConstraints] = useState('');
     const [entityRelationships, setEntityRelationships] = useState('');
@@ -105,7 +98,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         }
     }, [selectedProject]);
 
-    // Variables calculadas
     const liveMermaid = parseMermaidFromCombined(combinedText) || (selectedProject?.extensionMermaid || '');
     const originalCombined = buildCombined(selectedProject?.extensionStatement || '', selectedProject?.extensionMermaid || '');
     
@@ -115,7 +107,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 
     const currentTitle = selectedProject?.customName || `Examen de ${selectedProject?.domainName || 'Sin Nombre'}`;
 
-    // Handlers
     const handleCombinedChange = (newValue: string) => {
         setCombinedText(newValue);
         const newIntro = parseIntroFromCombined(newValue);
@@ -188,7 +179,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
             <div className="main-content">
                 <main className="storage-main exam-detail-main">
                     
-                    {/* MENU ACCIONES */}
                     <div className="actions-menu-wrapper">
                         <button type="button" className="actions-menu-btn" onClick={() => setShowActionsMenu(!showActionsMenu)}>&#8942;</button>
                         {showActionsMenu && (
@@ -205,7 +195,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         )}
                     </div>
 
-                    {/* SECCIÓN EXTENSIÓN */}
                     <div className="storage-section-heading">
                         <h2>Extensión Funcional</h2>
                         <button type="button" className={`btn-edit-toggle ${editingCombined ? 'btn-edit-toggle--active' : ''}`} onClick={() => setEditingCombined(!editingCombined)}>
@@ -231,7 +220,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         </div>
                     </div>
 
-                    {/* RESTRICCIONES DE ATRIBUTOS */}
                     <div className="storage-section-heading">
                         <h2>Restricciones de Atributos</h2>
                         <div className="section-heading-actions">
@@ -253,7 +241,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         ) : <p className="storage-empty-state">Aún no se han creado las restricciones de atributos.</p>}
                     </div>
 
-                    {/* RELACIONES ENTIDADES */}
                     <div className="storage-section-heading">
                         <h2>Relaciones entre Entidades</h2>
                         <div className="section-heading-actions">
@@ -275,7 +262,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         ) : <p className="storage-empty-state">Aún no se han creado las relaciones entre entidades.</p>}
                     </div>
 
-                    {/* SECCIÓN CÓDIGO GENERADO */}
                     <div className="storage-section-heading" style={{ marginTop: '48px' }}>
                         <h2>Código Generado</h2>
                     </div>
@@ -294,8 +280,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             </button>
                         )}
                     </div>
-
-                    {/* MODALES */}
+                    
                     {showPreviewModal && (
                         <div className="preview-backdrop">
                             <div className="preview-modal">

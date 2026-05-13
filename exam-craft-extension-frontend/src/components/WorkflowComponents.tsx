@@ -1,25 +1,15 @@
 import React from "react"
 
-// --- FUNCIONES AUXILIARES (Para bajar complejidad cognitiva) ---
-
-/**
- * Determina la clase de estado del paso para evitar ternarios anidados en el JSX.
- * Corrige la advertencia: "Extract this nested ternary operation into an independent statement."
- */
 const getStepStateClass = (stepNumber: number, currentStep: number): string => {
   if (stepNumber < currentStep) return "step-completed";
   if (stepNumber === currentStep) return "step-active";
   return "step-inactive";
 };
 
-/**
- * Calcula el color de la línea de progreso.
- */
 const getLineBackground = (stepNumber: number, currentStep: number): string => {
   return stepNumber < currentStep ? "#4CAF50" : "#e0e0e0";
 };
 
-// --- COMPONENTES ---
 
 interface StepDef { label: string }
 

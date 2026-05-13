@@ -35,7 +35,6 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
 
     const [editingBaseClasses, setEditingBaseClasses] = useState(false);
     const [editingTestKey, setEditingTestKey] = useState<string | null>(null);
-    // CORRECCIÓN: Definimos el estado isSaving que faltaba (Error image_2d8f18)
     const [isSaving, setIsSaving] = useState(false);
 
     const [baseClassesRaw, setBaseClassesRaw] = useState<string>(selectedProject.baseClasses || '');
@@ -77,7 +76,6 @@ export const GeneratedCodeScreen: React.FC<GeneratedCodeScreenProps> = ({
     const breadcrumbItems = [
         { label: 'INICIO', action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
-        // CORRECCIÓN: Manejo de undefined para breadcrumbs (Error image_2d8f38)
         { label: (selectedDomainFolder || '').toUpperCase(), action: onGoToExams },
         { label: selectedProject.customName || `Examen de ${selectedProject.domainName || ''}`, action: onBack },
     ];

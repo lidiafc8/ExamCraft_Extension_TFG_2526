@@ -39,7 +39,6 @@ export const GitHubDeployModal: React.FC<GitHubDeployModalProps> = ({
         }
     };
 
-    // Procesamos la lista de items una sola vez
     const itemsArray = uploadListString
         .split('\n')
         .map(item => item.trim())
@@ -81,9 +80,6 @@ export const GitHubDeployModal: React.FC<GitHubDeployModalProps> = ({
                     <p style={{ margin: "0 0 8px 0" }}>Se subirán los siguientes elementos:</p>
                     <ul style={{ margin: "0", paddingLeft: "24px", color: "#4a5568" }}>
                         {itemsArray.map((item) => (
-                            /* CORRECCIÓN: Usamos 'item' como key en lugar de 'index'.
-                               Esto soluciona la advertencia "Do not use Array index in keys".
-                            */
                             <li key={item} style={{ marginBottom: "6px" }}>
                                 {item.replace(/^- /, '')}
                             </li>

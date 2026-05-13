@@ -27,12 +27,10 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
     onGoToExams,
     onGoToFolders,
     onDeleteSection,
-    onUpdateProject,
 }) => {
     const [sectionToDelete, setSectionToDelete] = useState<{ key: string; name: string } | null>(null);
     const [editingFullSolution, setEditingFullSolution] = useState(false);
     const [fullSolutionRaw, setFullSolutionRaw] = useState<string>(selectedProject?.fullSolution || '');
-    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         setFullSolutionRaw(selectedProject?.fullSolution || '');
@@ -40,12 +38,10 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
 
     const parsedFullSolution = parseJavaFiles(fullSolutionRaw);
 
-    const isDirty = fullSolutionRaw !== (selectedProject?.fullSolution || '');
 
     const breadcrumbItems = [
         { label: 'INICIO',               action: onWelcome },
         { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
-        // CORRECCIÓN: Manejo de undefined para evitar errores en toUpperCase
         { label: (selectedDomainFolder || '').toUpperCase(), action: onGoToExams },
         { label: selectedProject?.customName || `Examen de ${selectedProject?.domainName || ''}`, action: onBack },
     ];
@@ -54,23 +50,6 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
         if (sectionToDelete) {
             onDeleteSection(sectionToDelete.key);
             setSectionToDelete(null);
-        }
-    };
-
-    const handleSave = async () => {
-        if (!selectedProject?.id || !onUpdateProject) return;
-        setIsSaving(true);
-        try {
-            await onUpdateProject({
-                ...selectedProject,
-                fullSolution: fullSolutionRaw,
-                updatedAt: new Date().toISOString(),
-            });
-            setEditingFullSolution(false);
-        } catch (err) {
-            alert(err instanceof Error ? err.message : "No se pudo guardar.");
-        } finally {
-            setIsSaving(false);
         }
     };
 
@@ -84,7 +63,6 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
             <div className="main-content">
                 <main className="storage-main">
 
-                    {/* ── SOLUCIÓN COMPLETA ── */}
                     <div className="storage-section-heading">
                         <h2>Solución Completa</h2>
                         <div className="section-heading-actions">
@@ -145,17 +123,6 @@ export const VisualSolutionCodeScreen: React.FC<VisualSolutionCodeScreenProps> =
                         <button type="button" onClick={onBack} className="btn-back">
                             Volver
                         </button>
-                        {/* CORRECCIÓN: Botón de guardado vinculado al estado isSaving y isDirty */}
-                        {isDirty && onUpdateProject && (
-                            <button
-                                type="button"
-                                className="btn-save-changes"
-                                onClick={handleSave}
-                                disabled={isSaving}
-                            >
-                                {isSaving ? "Guardando…" : "Guardar cambios"}
-                            </button>
-                        )}
                     </div>
 
                     <DeleteConfirmationModal

@@ -30,7 +30,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
 
     const allowedFolders = ["clínica veterinaria", "ajedrez"];
 
-    // --- Lógica de Carga Inicial ---
     useEffect(() => {
         if (!globalThis.chrome?.storage?.local) return;
 
@@ -42,7 +41,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         });
     }, []);
 
-    // --- Helpers de Estado ---
     const updateProjectInState = (id: string, updatedData: any) => {
         setProjects(prev => prev.map(p => (p.id === id ? updatedData : p)));
         if (selectedProject?.id === id) setSelectedProject(updatedData);
@@ -53,7 +51,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         if (selectedProject?.id === id) setSelectedProject(null);
     };
 
-    // --- Handlers de Acciones (Refactorizados para evitar anidamiento) ---
     const handleRename = (id: string, newName: string) => {
         const nameToSet = newName.trim();
         if (!nameToSet) return setEditingId(null);
@@ -102,7 +99,6 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
         return await GithubService.deployExam(token, project, `examen-${cleanDomain}-${Date.now()}`, config.owner, config.repo, config.path);
     };
 
-    // --- Sub-componentes de Renderizado (Para bajar Complejidad Cognitiva) ---
     const renderActiveExamScreen = () => {
         if (showGeneratedCode) {
             return <GeneratedCodeScreen 
@@ -113,7 +109,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
                 onGoToExams={() => { setShowGeneratedCode(false); setSelectedProject(null); }}
                 onGoToFolders={() => { setShowGeneratedCode(false); setSelectedProject(null); setSelectedDomainFolder(null); }}
                 onDeleteSection={handleDeleteSection}
-                onDeleteTest={() => {}} // Implementar si es necesario
+                onDeleteTest={() => {}} 
             />;
         }
         if (showSolutionGeneratedCode) {
@@ -140,7 +136,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             onShowSolutionGeneratedCode={() => setShowSolutionGeneratedCode(true)}
             onDeleteProject={(id) => setDeleteModal({ id, name: selectedProject.customName })}
             onDeleteSection={handleDeleteSection}
-            onUpdateProject={async () => {}} // Implementar según lógica de actualización
+            onUpdateProject={async () => {}}
         />;
     };
 
