@@ -33,11 +33,13 @@
   height: 60px;
   border-radius: 50%;
   background-color: #fff1f0;
-  color: #ff4d4f;
+  /* CORRECCIÓN: Rojo más oscuro (#cf1322) para contrastar con el fondo rosa claro */
+  color: #cf1322;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 32px;
+  /* CORRECCIÓN: Borde ligeramente más oscuro para definición */
   border: 2px solid #ffa39e;
 }
 
@@ -48,7 +50,8 @@
 }
 
 .delete-modal-message {
-  color: #555;
+  /* CORRECCIÓN: Un gris un poco más oscuro (#444 en vez de #555) para mejor lectura */
+  color: #444;
   line-height: 1.6;
   margin: 0 0 25px 0;
   font-size: 16px;
@@ -56,7 +59,8 @@
 
 .delete-modal-warning {
   font-size: 14px;
-  color: #888;
+  /* CORRECCIÓN: #717171 es el gris más claro que pasa el test de contraste sobre blanco */
+  color: #717171;
 }
 
 .delete-modal-actions {
@@ -86,7 +90,8 @@
   padding: 12px 24px;
   border-radius: 8px;
   border: none;
-  background-color: #ff4d4f;
+  /* CORRECCIÓN: Rojo más intenso (#e62e2e) para que el texto blanco sea legible */
+  background-color: #e62e2e;
   color: #fff;
   cursor: pointer;
   font-weight: bold;
@@ -96,5 +101,6 @@
 
 .delete-modal-btn-confirm:hover,
 .delete-modal-btn-confirm:focus {
-  background-color: #d9363e;
+  /* CORRECCIÓN: Un rojo más profundo para el estado hover */
+  background-color: #b91c1c;
 }

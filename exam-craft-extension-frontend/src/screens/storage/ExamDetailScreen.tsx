@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { MermaidViewer } from "../../components/MermaidViewer";
 import { Header } from "../../components/Header";
 import { DeleteConfirmationModal } from "~src/components/modals/DeleteConfirmationModal";
@@ -25,19 +25,17 @@ export interface ExamDetailScreenProps {
     onUpdateProject: (updatedProject: any) => Promise<void>;
 }
 
-// --- FUNCIONES AUXILIARES FUERA DEL COMPONENTE (Reducen complejidad) ---
+// --- FUNCIONES AUXILIARES CORREGIDAS (Parámetros por defecto) ---
 
-function buildCombined(intro: string, mermaid: string): string {
-    const i = intro || '';
-    const m = mermaid || '';
-    if (!i && !m) return '';
-    if (!m) return i;
-    const block = `\`\`\`mermaid\n${m}\n\`\`\``;
-    return i ? `${i}\n\n${block}` : block;
+function buildCombined(intro = '', mermaid = ''): string {
+    if (!intro && !mermaid) return '';
+    if (!mermaid) return intro;
+    const block = `\`\`\`mermaid\n${mermaid}\n\`\`\``;
+    return intro ? `${intro}\n\n${block}` : block;
 }
 
 function parseMermaidFromCombined(combined: string): string {
-    const match = combined.match(/```mermaid\s*([\s\S]*?)```/); // NOSONAR
+    const match = combined.match(/```mermaid\s*([\s\S]*?)```/);
     return match ? match[1].trim() : '';
 }
 
@@ -92,34 +90,38 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     const [editingEntityRelationships, setEditingEntityRelationships] = useState(false);
 
     // Estados de Datos
-    const [combinedText, setCombinedText] = useState(
-        buildCombined(selectedProject?.extensionStatement || '', selectedProject?.extensionMermaid || '')
-    );
-    const [attributeConstraints, setAttributeConstraints] = useState(selectedProject?.attributeConstraints || '');
-    const [entityRelationships, setEntityRelationships] = useState(selectedProject?.entityRelationships || '');
+    const [combinedText, setCombinedText] = useState('');
+    const [attributeConstraints, setAttributeConstraints] = useState('');
+    const [entityRelationships, setEntityRelationships] = useState('');
 
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const abortRef = useRef(false);
 
+    // Efecto para sincronizar datos iniciales
     useEffect(() => {
-        setCombinedText(buildCombined(selectedProject?.extensionStatement || '', selectedProject?.extensionMermaid || ''));
-        setAttributeConstraints(selectedProject?.attributeConstraints || '');
-        setEntityRelationships(selectedProject?.entityRelationships || '');
+        if (selectedProject) {
+            setCombinedText(buildCombined(selectedProject.extensionStatement || '', selectedProject.extensionMermaid || ''));
+            setAttributeConstraints(selectedProject.attributeConstraints || '');
+            setEntityRelationships(selectedProject.entityRelationships || '');
+        }
     }, [selectedProject]);
 
     // Variables calculadas
     const liveMermaid = parseMermaidFromCombined(combinedText) || (selectedProject?.extensionMermaid || '');
     const originalCombined = buildCombined(selectedProject?.extensionStatement || '', selectedProject?.extensionMermaid || '');
+    
     const isDirty = combinedText !== originalCombined || 
                     attributeConstraints !== (selectedProject?.attributeConstraints || '') || 
                     entityRelationships !== (selectedProject?.entityRelationships || '');
 
-    const currentTitle = selectedProject?.customName || `Examen de ${selectedProject?.domainName}`;
+    const currentTitle = selectedProject?.customName || `Examen de ${selectedProject?.domainName || 'Sin Nombre'}`;
 
     // Handlers
     const handleCombinedChange = (newValue: string) => {
         setCombinedText(newValue);
         const newIntro = parseIntroFromCombined(newValue);
+        
+        // Evitar regenerar si el texto del enunciado no ha cambiado realmente
         if (newIntro === parseIntroFromCombined(combinedText) || !newIntro.trim()) return;
 
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -170,7 +172,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         return items.join('\n');
     };
 
-    const repoConfig = (domain: string) => {
+    const repoConfig = (domain = '') => {
         const isPetClinic = domain.toLowerCase().includes("veterinaria") || domain.toLowerCase().includes("clínica");
         return {
             TEMPLATE_REPO: isPetClinic ? "DP1-petClinic-template-exam" : "DP1-chess-template-exam",
@@ -178,7 +180,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
     };
 
     return (
-        <div>
+        <div className="exam-detail-page">
             <Header onWelcome={onWelcome} currentStep={currentTitle} breadcrumbItems={[
                 { label: 'INICIO', action: onWelcome },
                 { label: 'EXÁMENES ANTERIORES', action: onGoToFolders },
@@ -193,7 +195,8 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         <button type="button" className="actions-menu-btn" onClick={() => setShowActionsMenu(!showActionsMenu)}>&#8942;</button>
                         {showActionsMenu && (
                             <>
-                                <div className="actions-overlay" onClick={() => setShowActionsMenu(false)} />
+                                {/* CORRECCIÓN: role="presentation" para accesibilidad */}
+                                <div className="actions-overlay" role="presentation" onClick={() => setShowActionsMenu(false)} />
                                 <div className="actions-dropdown">
                                     <button className="action-btn" onClick={() => { setShowPreviewModal(true); setShowActionsMenu(false); }}>Previsualizar</button>
                                     <button className="action-btn" onClick={() => { setShowDownloadModal(true); setShowActionsMenu(false); }}>Descargar (.md)</button>
@@ -275,15 +278,6 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                         ) : <p className="storage-empty-state">Aún no se han creado las relaciones entre entidades.</p>}
                     </div>
 
-                    {/* BOTONES FINALES */}
-                    <div className="storage-section-heading" style={{ marginTop: '48px' }}><h2>Código Generado</h2></div>
-                    <div className="wide-card">
-                        <div className="code-buttons-row">
-                            <button type="button" className="btn-code" onClick={onShowGeneratedCode}>Ver Código Examen</button>
-                            <button type="button" className="btn-code" onClick={onShowSolutionGeneratedCode}>Ver Código Solución</button>
-                        </div>
-                    </div>
-
                     <div className="storage-bottom-actions">
                         <button type="button" className="btn-back" onClick={onBack}>Volver</button>
                         {isDirty && (
@@ -299,7 +293,7 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             <div className="preview-modal">
                                 <div className="preview-modal-header">
                                     <h2>Previsualización del Examen</h2>
-                                    <button className="preview-close-btn" onClick={() => setShowPreviewModal(false)}>✖</button>
+                                    <button type="button" className="preview-close-btn" onClick={() => setShowPreviewModal(false)}>✖</button>
                                 </div>
                                 <div className="preview-modal-body">
                                     <div className="exam-markdown-container">
@@ -321,11 +315,11 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
 
                     {showDeployModal && (
                         <GitHubDeployModal
-                            domainName={selectedProject.domainName}
-                            templateRepo={repoConfig(selectedProject.domainName).TEMPLATE_REPO}
+                            domainName={selectedProject?.domainName || ''}
+                            templateRepo={repoConfig(selectedProject?.domainName).TEMPLATE_REPO}
                             newRepoName={`examen-${currentTitle.toLowerCase().replace(/\s+/g, '-')}`}
                             uploadListString={buildUploadListString()}
-                            savedToken={localStorage.getItem("github_token")}
+                            savedToken={localStorage.getItem("github_token") || ''}
                             onClose={() => setShowDeployModal(false)}
                             onSuccess={() => setShowDeployModal(false)}
                             onConfirm={async (token) => await onGitHubDeploy(token, selectedProject, `examen-${currentTitle.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`)}

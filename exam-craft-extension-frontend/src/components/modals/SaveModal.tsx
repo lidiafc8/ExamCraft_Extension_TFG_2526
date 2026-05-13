@@ -39,11 +39,12 @@ export const SaveModal: React.FC<SaveModalProps> = ({
   const checkDuplicate = async (finalName: string): Promise<boolean> => {
     try {
       const allItems = await getAllFromChrome()
+      const searchName = finalName.trim().toLowerCase()
       return allItems.some(item => {
         if (existingKey && item._key === existingKey) return false
         return (
           item.domainName === domainName &&
-          item.customName?.trim().toLowerCase() === finalName.trim().toLowerCase()
+          item.customName?.trim().toLowerCase() === searchName
         )
       })
     } catch {
@@ -54,8 +55,7 @@ export const SaveModal: React.FC<SaveModalProps> = ({
   const handleConfirm = async (nameOverride?: string) => {
     const finalName = nameOverride ?? (draftName.trim() || defaultName)
 
-    const isDuplicate = await checkDuplicate(finalName)
-    if (isDuplicate) {
+    if (await checkDuplicate(finalName)) {
       setDuplicateError(true)
       return
     }
@@ -72,11 +72,6 @@ export const SaveModal: React.FC<SaveModalProps> = ({
     }
   }
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDraftName(e.target.value)
-    if (duplicateError) setDuplicateError(false)
-  }
-
   useEffect(() => {
     if (skipPrompt) {
       handleConfirm(domainName)
@@ -87,13 +82,8 @@ export const SaveModal: React.FC<SaveModalProps> = ({
     return (
       <SuccessModal
         title="¡Guardado con éxito!"
-        message={
-          successMessage ??
-          `El examen "${saveState.savedName}" se ha guardado correctamente.`
-        }
-        actions={[
-          { label: successAction, onClick: onSuccess, variant: "primary" },
-        ]}
+        message={successMessage ?? `El examen "${saveState.savedName}" se ha guardado correctamente.`}
+        actions={[{ label: successAction, onClick: onSuccess, variant: "primary" }]}
       />
     )
   }
@@ -113,6 +103,8 @@ export const SaveModal: React.FC<SaveModalProps> = ({
 
   if (skipPrompt) return null
 
+  const inputId = "input-nombre-examen"
+
   return (
     <ConfirmModal
       title="Guardar examen"
@@ -120,32 +112,26 @@ export const SaveModal: React.FC<SaveModalProps> = ({
       plainWarning
       warning={
         <div className="save-modal-input-wrapper">
-          <label className="save-modal-label">Nombre del examen</label>
+          <label htmlFor={inputId} className="save-modal-label">Nombre del examen</label>
           <div className="save-modal-input-container">
-            <span
-              className={`save-modal-input-icon ${
-                focused ? "save-modal-input-icon--focused" : ""
-              }`}
-            >
+            <span className={`save-modal-input-icon ${focused ? "save-modal-input-icon--focused" : ""}`}>
               ✏️
             </span>
             <input
+              id={inputId}
               type="text"
-              className={`save-modal-input ${
-                focused ? "save-modal-input--focused" : ""
-              } ${duplicateError ? "save-modal-input--error" : ""}`}
+              className={`save-modal-input ${focused ? "save-modal-input--focused" : ""} ${duplicateError ? "save-modal-input--error" : ""}`}
               value={draftName}
-              onChange={handleNameChange}
+              onChange={(e) => {
+                setDraftName(e.target.value)
+                if (duplicateError) setDuplicateError(false)
+              }}
               placeholder={defaultName}
               autoFocus
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
             />
-            <div
-              className={`save-modal-input-underline ${
-                focused ? "save-modal-input-underline--focused" : ""
-              } ${duplicateError ? "save-modal-input-underline--error" : ""}`}
-            />
+            <div className={`save-modal-input-underline ${focused ? "save-modal-input-underline--focused" : ""} ${duplicateError ? "save-modal-input-underline--error" : ""}`} />
           </div>
           {duplicateError && (
             <p className="save-modal-duplicate-error">
