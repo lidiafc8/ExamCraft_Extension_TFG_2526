@@ -185,9 +185,9 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
                             <div className="actions-dropdown-container">
                                 <div className="actions-overlay" role="presentation" onClick={() => setShowActionsMenu(false)} />
                                 <div className="actions-dropdown">
-                                    <button type="button" className="action-btn" onClick={() => { setShowPreviewModal(true); setShowActionsMenu(false); }}>Previsualizar</button>
-                                    <button type="button" className="action-btn" onClick={() => { setShowDownloadModal(true); setShowActionsMenu(false); }}>Descargar (.md)</button>
-                                    <button type="button" className="action-btn" onClick={() => { setShowDeployModal(true); setShowActionsMenu(false); }}>Crear repositorio GitHub</button>
+                                    <button type="button" className="action-btn action-btn--preview" onClick={() => { setShowPreviewModal(true); setShowActionsMenu(false); }}>Previsualizar</button>
+                                    <button type="button" className="action-btn action-btn--download" onClick={() => { setShowDownloadModal(true); setShowActionsMenu(false); }}>Descargar (.md)</button>
+                                    <button type="button" className="action-btn action-btn--github" onClick={() => { setShowDeployModal(true); setShowActionsMenu(false); }}>Crear repositorio GitHub</button>
                                     <hr className="action-divider" />
                                     <button type="button" className="action-btn action-btn--delete" onClick={() => { setShowActionsMenu(false); onDeleteProject(selectedProject?.id); }}>Eliminar</button>
                                 </div>

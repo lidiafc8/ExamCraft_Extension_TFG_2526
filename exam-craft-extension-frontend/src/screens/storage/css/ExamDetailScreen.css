@@ -161,13 +161,13 @@
 .action-btn:hover { filter: brightness(1.08); transform: scale(1.04); }
 .action-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-.action-btn--preview  { background: #1e5422; color: white; }
+.action-btn--preview  { background-color: #1e5422; color: white; }
 
-.action-btn--download { background: #1a73e8; color: white; }
+.action-btn--download { background-color: #1a73e8; color: white; }
 
-.action-btn--github   { background: #24292e; color: white; }
+.action-btn--github   { background-color: #24292e; color: white; }
 
-.action-btn--delete   { background: #cf1322; color: white; }
+.action-btn--delete   { background-color: #cf1322; color: white; }
 
 .action-divider {
   border: none;
