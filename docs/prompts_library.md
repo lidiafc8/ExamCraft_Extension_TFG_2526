@@ -13,6 +13,7 @@
 | 1.1 | 07/04/2026 | Lidia Ning Fernández Casillas | Adición de prompt para la generación de solución. |
 | 1.2 | 02/05/2026 | Lidia Ning Fernández Casillas | Actualización de prompts existentes y adición de otros nuevos.  |
 | 1.3 | 04/05/2026 | Lidia Ning Fernández Casillas | Logo y control de versiones añadido. |
+| 1.4 | 13/05/2026 | Lidia Ning Fernández Casillas | Actualización de prompts existentes. |
 
 Este documento recoge todos los prompts desarrollados para la extensión **ExamCraft**, organizados de forma clara para facilitar su uso, mantenimiento y mejora.
 
@@ -149,9 +150,17 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
     -  Para las nuevas clases a implementar por el alumno, es decir, clases rojas, añadirás toda su estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), acorde a la extensión funcional generada.
 
-    -  Para las relaciones, si estas tienen un nombre asignado, este debe constar en el diagrama.
+    -  Para las relaciones, asigna siempre un nombre a estas, ya que deberá constar en el diagrama.
 
-    -    REGLA ESTRICTA DE FORMATO: Genera código Mermaid válido y estándar. Bajo ninguna circunstancia utilices comandos de estilo (como style, classDef o linkStyle). Limítate exclusivamente a definir las clases, sus atributos, métodos y las relaciones entre ellas. Separa cada instrucción con un salto de línea.
+    - **COLOREADO DE RELACIONES:** A cada relación entre entidades que hayas generado y que ÚNICAMENTE salgan de las nuevas clases a implementar por el alumno, es decir, de las clases rojas, deberás asignarle el color rojo. Siguiendo este ejemplo:
+    `ChessPuzzle "0..n" --> "1" TacticalTheme: <font color=red>theme</font>`
+
+    - **COLOREADO DE CLASES ROJAS**: Para ÚNICAMENTE las nuevas clases a implementar por el alumno, es decir, clases rojas, añade el color rojo. Este estilo deberás añadirlo al final de todo el código Mermaid siguiendo este ejemplo:
+    `style ChessPuzzle stroke:red,color:red`
+    `style PuzzleAttempt stroke:red,color:red`
+    Para el resto de clases de las que partimos deberás EVITAR A TODA COSTA colorearlas de ningún color. Déjalas sin nada.
+
+    -    REGLA ESTRICTA DE FORMATO: Genera código Mermaid válido y estándar. Limítate exclusivamente a definir las clases (coloreando de rojo las que deberá implementar el alumno), sus atributos, métodos y las relaciones (coloreando de rojo las relaciones que salgan de las clases rojas) entre ellas. Separa cada instrucción con un salto de línea.
 
     REGLAS ESTRICTAS DE SINTAXIS MERMAID (obligatorio cumplir todas):
 
@@ -163,7 +172,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     - CORRECTO: `Owner "1" --> "0..n" Pet : owns`
     - INCORRECTO: `Owner \"1\" --> \"0..n\" Pet : owns`
 
-    3. NUNCA uses `style`, `classDef` ni `linkStyle`.
+    3. EVITA usar `classDef` ni `linkStyle`.
 
     4. NUNCA pongas texto introductorio ni explicaciones antes o después del código.
     El resultado debe empezar DIRECTAMENTE con `classDiagram` y nada más.
@@ -175,7 +184,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     - Asociación:  `Owner "1" --> "0..n" Pet : owns`
     - Sin nombre:  `Visit "0..n" --> "1" Vet`
 
-    7. ESTRUCTURA DE LLAVES OBLIGATORIA: Incluso si una clase no tiene atributos, NO uses el formato compacto `{}`. Usa siempre saltos de línea.
+    7. ESTRUCTURA DE LLAVES OBLIGATORIA: Incluso si una clase no tiene atributos, EVITA usar el formato compacto `{}`. Usa siempre saltos de línea.
     - CORRECTO:
         class Vet {
         }
@@ -256,7 +265,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     -	Al final del enunciado generado, añadirás este párrafo:
 
         *“No modifique por ahora las anotaciones @Transient de las clases. Modificar las interfaces [repositorios de entidades nuevas a implementar por el alumno (rojas), no siendo enumerados] alojada en el mismo paquete para que extienda a CrudRepository.”*
-        
+
     ```
 
 ### Prompt 4 📝
@@ -326,7 +335,6 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
         *“Elimine las anotaciones @Transient de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior, (así como del atributo [atributo] de la clase [clase]). Se pide crear las siguientes relaciones entre las entidades:”*
 
         *“Además, se pide crear dos relaciones [direccionalidad] desde “[clase origen]” hacia “[clase destino]” que representen las que aparecen en el diagrama UML, tenga en cuenta la cardinalidad que tienen usando como nombre de los atributos “[nombre de atributo] ” y “[nombre de atributo]” en la clase “[clase]”. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, algunos atributos pueden ser nulos puesto que la cardinalidad es 0..n pero otros no, porque su cardinalidad en el extremo navegable de la relación es 1..n.”*
-
      ```
 
 
@@ -347,31 +355,39 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     ```text
     # PROMPT PARA LA GENERACIÓN DE CLASES BASE A SUBIR AL REPOSITORIO EXAMEN
 
+    ## Recursos a proporcionar:
+    * `base_classes_structure_examples_previous_exams.md`
+
+    ## Prompt a utilizar:
+
     Actúa como un desarrollador Senior de Java y Spring Boot experto en la creación de esqueletos de código para exámenes universitarios. 
 
-    Tu tarea es analizar un diagrama UML y generar las clases base (Entidad, Repositorio y Servicio) únicamente para las entidades nuevas que el alumno debe desarrollar, siguiendo estrictamente una plantilla de estilo.
+    Tu tarea es analizar el diagrama UML que se te pasará como contexto y generar las clases base (Entidad, Repositorio y Servicio) únicamente para las entidades nuevas que el alumno debe desarrollar, siguiendo estrictamente una plantilla de estilo.
 
     ### DATOS DE ENTRADA
     - Dominio del proyecto: {dominio}
-    - Clases que YA EXISTEN en el repositorio (NO debes generarlas bajo ninguna circunstancia): {clases_existentes}
-    - Diagrama UML completo (formato Mermaid): {diagrama_uml}
-    - Ejemplos de estructura base esperada (plantillas): {ejemplos_base}
+    - Clases que YA EXISTEN en el repositorio (debes EVITAR generarlas en todos los casos): {clases_existentes}
 
     ### REGLAS DE GENERACIÓN (ESTRICTAS)
-    1. IDENTIFICACIÓN: Compara las entidades del "Diagrama UML" con las "Clases que YA EXISTEN". Genera código ÚNICAMENTE para las entidades del UML que estén AUSENTES en la lista de clases existentes.
+    1. IDENTIFICACIÓN: Compara las entidades del "Diagrama UML" con las "Clases que YA EXISTEN". Genera código ÚNICAMENTE para las entidades del UML que estén AUSENTES en la lista de clases existentes. Por ejemplo, si la clase `Lugar` se encuentra en la lista de clases existentes, OMITIRÁS la creación tanto de la entidad, el repositorio y el servicio correspondiente a ella.
     2. ESTRUCTURA DE ARCHIVOS: Para cada entidad nueva identificada (ej. `Cita`), debes crear una carpeta con su nombre en minúsculas y dentro tres archivos:
     - La entidad en sí (ej. `Cita.java`)
     - El repositorio (ej. `CitaRepository.java`)
     - El servicio (ej. `CitaService.java`)
-    3. FORMATO DE CÓDIGO: El código generado debe ser un esqueleto inicial para que el alumno lo complete. Debes imitar EXACTAMENTE la estructura, anotaciones JPA/Spring y nivel de detalle proporcionado en los "Ejemplos de estructura base esperada". EVITA añadir lógica de negocio adicional y resolver el examen.
+    3. FORMATO DE CÓDIGO: El código generado debe ser un esqueleto inicial para que el alumno lo complete. Debes imitar EXACTAMENTE la estructura, anotaciones JPA/Spring y nivel de detalle proporcionado en el archivo md llamado "base_classes_structure_examples.md". EVITA añadir lógica de negocio adicional y resolver el examen. En cada entidad, deberás poner SIEMPRE la anotación `@Table(name="nombre_entidad")` y su correspondiente importación de jakarta. Ej: Para la entidad Event: `@Table(name = "events")`
     4. CERO EXPLICACIONES: Devuelve ÚNICAMENTE el código fuente. EVITA hacer saludos, explicaciones de tus decisiones y comentarios finales.
 
     ### FORMATO DE SALIDA OBLIGATORIO
     Para que el sistema automatizado pueda procesar tu respuesta, debes devolver cada archivo utilizando exactamente este formato (fíjate en la ruta de la carpeta):
 
-    ### [nombrecarpeta]/[NombreClase].java
-    ```java
-    // Código Java aquí
+    - Para el dominio **Clínica Veterinaria** (IMPORTANTE LAS MAYÚSCULAS Y MINÚSCULAS, DEBEN SEGUIR EL FORMATO INDICADO): src/main/java/org/springframework/samples/petclinic/[nombreCarpeta]/[NombreClase].java;
+        ```java
+        // Código Java aquí
+        ```
+    - Para el dominio **Ajedrez** (IMPORTANTE LAS MAYÚSCULAS Y MINÚSCULAS, DEBEN SEGUIR EL FORMATO INDICADO): src/main/java/es/us/dp1/chess/tournament/[nombreCarpeta]/[NombreClase].java;
+        ```java
+        // Código Java aquí
+        ```
     ```
 
 
@@ -391,67 +407,179 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     # PROMPT COMPLETO PARA GENERACIÓN DE TESTS DE RESTRICCIONES DE ATRIBUTOS
 
     ## Recursos a proporcionar:
-    * `generation_test.md`
+    * `test_previous_exams.md`
 
     ## Prompt a utilizar:
+    Nuestra misión es generar el test de un examen de la asignatura "Diseño y Pruebas". Actuamos como profesores evaluando conocimientos de JPA y mapeo objeto-relacional. Te proporcionaré el enunciado, el diagrama UML en Mermaid y, **CRÍTICAMENTE, el Código Base de las clases ya generadas**.
 
-    Nuestra misión es generar, a partir de un enunciado dado, el test del ejercicio de un examen, tomando el rol de profesores para una asignatura llamada Diseño y Pruebas, para evaluar los conocimientos de los alumnos sobre mapeo objeto relacional en JPA, manejo de estas entidades y base de datos, entre otras más. Concretamente te pasaré el enunciado y el diagrama UML en código Mermaid que lo acompaña, elementos en los que te tendrás que basar para proporcionarme la solución, pero antes, te daré información de contexto que necesitarás como recurso y entender mejor qué características tiene este examen:
+    Por favor, no uses Wildcard Imports (asteriscos). Genera todos los imports de forma explícita, uno por cada clase utilizada. IMPORTANTE CENTRARSE EN LAS CLASES QUE SE PROPORCIONA COMO CÓDIGO BASE, DE SU LOCALIZACIÓN PARA PODER PONER CORRECTAMENTE LOS IMPORTS DE DONDE SE SACAN LAS CLASES.
 
-    -	Hay que tomar el rol de profesor siempre, estamos generando un examen, hay que ponerse en los zapatos del profesorado.
-    -	Tenemos dos tipos de exámenes, uno enfocado a una clínica veterinaria y otro al juego del ajedrez.
-    -	Respecto al diagrama UML:
+    ---
 
-        - 	Concepto de colores de clases:  
-            - **Clases negras**: El núcleo del sistema. Clases estables que se usan como contexto, pero que quedan fuera de la tarea de implementación. 
-            - **Clases rojas**: La tarea principal del alumno, se deben crear desde 0. Las clases vienen creadas pero su contenido está vacío.
+    ## REGLA ABSOLUTA — PAQUETES: LEE EL CÓDIGO BASE, EVITA INVENTAR
 
-            - Las clases negras son la base de la que partimos siempre en todos los exámenes, el dominio común a todos los exámenes dependiendo de qué tipo (clínica o ajedrez) de examen estemos generando y las rojas, pueden variar según la extensión funcional que se le añada.
+    Esta es la regla más importante del prompt. Debes seguirla antes que cualquier otra cosa.
+    Además, para las clases que no estén implementadas en el código base, buscarla en el repositorio pasado, como Pet, viene de pet.Pet
 
-        -	Relaciones, cardinalidad y direccionalidad:
+    **Procedimiento obligatorio antes de escribir un solo import:**
 
-            - Relaciones rojas entre clases rojas: el alumno deberá añadir el atributo con su anotación de relación correspondiente. 
+    1. Localiza la sección `=== PAQUETES DE LA PLANTILLA DEL PROYECTO ===` del contexto. En ella se te especificará la estructura de los paquetes a importar.
+    2. Para cada clase que necesites importar, busca su `package` en el código base proporcionado.
+    3. Construye el import como: `import <package_de_esa_clase>.<NombreClase>;`
+    - Deberás tener cuidado y poner los nombres de las clases nueva generadas, ya que no siempre es Achievement; deberás coger las clases del contexto que se te proporciona de la extensión funcional.
 
-            - Tendremos relaciones únicamente unidireccionales.
+    **Ejemplo concreto:**
+    - Si el código base de `Achievement.java` empieza con `package es.us.dp1.chess.tournament.achievement;`
+    - El import correcto en el test es: `import es.us.dp1.chess.tournament.achievement.Achievement;`
+    - Teniendo en cuenta las mayúsculas y minúsculas de las clases para evitar el error en los tests
+    - NUNCA: `import org.springframework.samples.chessgame.model.Achievement;`
+    - NUNCA: `import org.springframework.samples.petClinic.model.Achievement;`
 
-            - La cardinalidad podrá ser de 1..1, 1, 0..1, 0..n, 1..n. Las relaciones muchos a muchos se omitirán en todos los casos.
+    **Aplica lo mismo para `@ComponentScan`:**
+    Al definir los paquetes, SIEMPRE poner los paquetes individuales necesarios, evitar globalizar en uno todo:
+    - CORRECTO: `@ComponentScan(basePackages = {"es.us.dp1.chess.tournament.achievement", "es.us.dp1.chess.tournament.userAchievement"})`
+    - INCORRECTO: `@ComponentScan(basePackages = {"org.springframework.samples.chessgame.repository", "org.springframework.samples.chessgame.model"})`
+    - INCORRECTO: `@ComponentScan(basePackages = {"es.us.dp1.chess.tournament"})`
 
-    -	Límite de 2 entidades de color rojo, es decir, a implementar por completo por el alumno, debido al tiempo disponible para realizar el examen.
+    **El paquete del propio test (`package ...` en la primera línea) también debe derivarse del código base**, usando el prefijo de donde se crean los test. Ejemplo: si el prefijo raíz es `es.us.dp1.chess.tournament`, el paquete del test será `es.us.dp1.chess.tournament`.
 
-    Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica de los tests que te paso en el archivo md “generation_test”, donde vienen tests de ejemplos que se han realizado para otros enunciado de examenes, quiero que me generes los tests de los distintos ejercicios del examen.
+    Si una clase (como `ReflexiveTest`, `NamedEntity`, etc.) no aparece en el código base proporcionado, usa el mismo prefijo raíz detectado para inferir su paquete. Nunca uses `org.springframework.samples.*` salvo que ese prefijo aparezca explícitamente en el código base.
 
-    Deberá cumplir estos requisitos:
+    Para las diferentes comprobaciones, vamos a llamar a los métodos que nos proporciona la clase ReflexiveTest que te paso dentro del archivo `test_previous_exams`. **IMPORTANTE:** tienes que llamar con el MISMO NOMBRE a los métodos que utilices, además de pasarle los MISMOS tipos de argumentos que pide cada método. A continuación, te proporciono una lista con todos los métodos disponibles y sus correspondientes argumentos necesarios. Los analizarás todos para usarlos correctamente en el test:
+        ```java
+        void checkThatFieldIsAnnotatedWithDateTimeFormat(Class aClass, String fieldname,String format)
 
-    -	Para generar los tests de los ejercicios es necesario usar lenguaje y framework: Java 17+, JUnit 5, Spring Boot (@DataJpaTest). 
+        void checkThatFieldIsAnnotatedWith(Class aClass, String fieldname,Class annotationClass)
 
-    -	Los tests tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
+        boolean  isFieldAnnotatedWith(Class aClass, String fieldname,Class annotationClass) throws NoSuchFieldException, SecurityException
 
-    -	La clase DEBE extender de la clase base ReflexiveTest proporcionada por la asignatura..
+        boolean classIsAnnotatedWith(Class class1, Class class2)
+
+        boolean classHasMethod(Object targetObject, String methodName, Class<?> ... parameterTypes)
+
+        void checkThatFieldsAreMandatory(Object validEntity,EntityManager em,String ... fieldnames )
+
+        void checkThatFieldIsMandatory(Object validEntity,String fieldname,Class<?> type,EntityManager em)
+
+        void checkThatValuesAreNotValid(Object validEntity,Map<String,List<Object>> invalidValues,EntityManager em)
+
+        void checkThatValueIsNotValid(Object validEntity,String fieldname,Object value,Class<?> type, EntityManager em)
+
+        Object setValue(Object object,String fieldname,Class<?> type, Object value)
+
+        Object invokeMethodReflexivelyWithParamTypes(Object targetObject, String methodName, Class<?>[] parameterTypes,Object ... parameterValues)
+
+        Object invokeMethodReflexively(Object o, String methodName, Object ... params)
+
+        void checkLinkedById(Class myClass,Integer id1,String methodName,Integer id2,EntityManager em)
+
+        Object getFieldValueReflexively(Object o, String fieldName)
+
+        void checkTransactional(Class<?> myClass,String methodName, Class<?>... parameterTypes)
+
+        boolean isMethodAnnotatedWithTest(Method method)
+
+        boolean isMethodAnnotatedWithBeforeEach(Method method)
+
+        boolean isMethodAnnotatedWithAfterEach(Method method)
+
+        void checkTransactionalRollback(Class<?> myClass,String methodName,Class<?>[] paramTypes,Class<? extends Exception> exceptionClass)
+
+        boolean isEntity(Class<T> clazz)
+        ```
+
+    ---
+
+    ## Reglas de Coherencia Adicionales
+    2.  **Fidelidad al Código Base:** Si una clase en el código base tiene un atributo con un nombre específico (ej. `checkInDate`), el test debe usar ese nombre exacto, ignorando lo que diga cualquier otro ejemplo externo.
+    3.  **Manejo de Relaciones:** Si en el Código Base una relación está marcada como `@Transient`, el test debe tratarla según las instrucciones del enunciado, pero siempre importando la clase desde su paquete real.
+
+    ---
+
+    ## Especificaciones del Examen
+    - **Clases Negras:** Núcleo estable (Contexto). No se testea su implementación interna, pero se usan para crear objetos válidos (ej. `Owner`, `Pet`).
+    - **Clases Rojas:** Tarea principal del alumno. Son las que debemos testear exhaustivamente (Restricciones, Anotaciones y Persistencia).
+    - **Límite:** Máximo 2 entidades rojas por examen.
+    - **Framework:** Java 17+, JUnit 5, Spring Boot (@DataJpaTest).
+    - **Herencia:** La clase de test DEBE extender de `ReflexiveTest` (IMPORTANTE: DEBE USARSE SI O SI ESTA CLASE PARA LA GENERACIÓN DE LOS TESTS, DEBE PONER ReflexiveTest en la parte de `extends...`)
+
+    ---
+
+    ## Estructura Estricta Requerida para Test1.java
+
+    ### 1. Configuración e Inyección
+    - El nombre ESTRICTO del paquete donde se tiene que generar el test es:
+        - Clínica Veterinaria: `package org.springframework.samples.petclinic`
+        - Ajedrez: `package es.us.dp1.chess.tournament`
+    - Inyecta los Repositorios de las entidades rojas y el `EntityManager` mediante `@Autowired` (NUNCA `TestEntityManager`).
+    - Inyecta SIEMPRE como `@MockBean` el servicio `UserService`: 
+        ```java
+            @MockBean
+            private UserService userService;
+        ```
+    - Usa `@ComponentScan` apuntando a los paquetes reales detectados en el Código Base (ver Regla Absoluta).
+    - **IMPORTANTE** los imports de las anotaciones a comprobar deberán venir de jakarta, NUNCA DE javax:
+        - CORRECTO: jakarta.persistence.Column;
+        - INCORRECTO: javax.persistence.Column;
+    - **IMPORTANTE**: Omitir crear tests estáticos, para poder usar el método `super`.
 
 
-    ### Para el ejercicio Test1 :
+    ### 2. Verificación de Repositorios
+    Los tests que validan los repositorios, cuando extienden a CRUD Repository no es necesario validar todos los métodos que se proporcionan inicialmente en las clases base, ya que la anotación CRUD los contiene, por lo que la estructura del test sería:
 
-    Requisitos que debe de cumplir:
+        ```java
+        @Test
+            void test1RepositoriesExist() {
+                assertNotNull(ratingRepository, "RatingRepository should be autowired");
+                assertNotNull(ratingChangeRepository, "RatingChangeRepository should be autowired");
+                test1RepositoriesContainsMethod();
+            }
 
-    - Inyecta el Repositorio de la nueva entidad y el EntityManager usando @Autowired.
-    - Crea el método test1RepositoriesExist(), anótalo con @Test y verifica que el repositorio siempre tiene que tener un valor, nunca null (assertNotNull).
-    - Crea el método test1RepositoriesContainsMethod(). ESTRICTAMENTE PROHIBIDO anotarlo con @Test. Este método debe ser llamado internamente desde el final de test1RepositoriesExist() dentro de un bloque if (repositorio != null) para evitar un NullPointerException si la inyección falla.
-    - Crea el método @Test public void test1Check[NOMBRE_ENTIDAD]Constraints().
-    - Analiza el UML proporcionado. Identifica los campos obligatorios e invoca el método heredado checkThatFieldsAreMandatory(entidad, em, "campo1", "campo2", ...).
-    - Analiza las restricciones del UML (tamaños, mínimos, máximos, nulos). Construye un mapa con los casos negativos (valores frontera y particiones de equivalencia).
-    - ESTRICTAMENTE PROHIBIDO usar new HashMap<>() o .put(). Inicializa el mapa en una sola instrucción con Java moderno: Map<String, List<Object>> invalidValues = Map.of("campo1", List.of(...), "campo2", List.of(...));.
-    - Invoca el método heredado checkThatValuesAreNotValid(entidad, invalidValues, em).
-    - Crea el método @Test public void test1Check[NOMBRE_ENTIDAD]Annotations().
-    - Usa el método heredado classIsAnnotatedWith(Clase.class, Entity.class) para verificar @Entity.
-    - Si la entidad tiene algún atributo Enum, usa reflexión para verificar que tiene la anotación @Enumerated(EnumType.STRING).
-    - Crea un método public static [Entidad] createValid[NOMBRE_ENTIDAD](EntityManager em).
-    - Usa EXCLUSIVAMENTE el método heredado setValue(entidad, "atributo", Tipo.class, valor) para asignar datos válidos a todos los atributos de la entidad, evadiendo así fallos de compilación si el alumno se le ha olvidado crear los setters.
-    - Crea el método @Test public void test1Valid[NOMBRE_ENTIDAD]IsPersisted(). Obtén una instancia válida, guárdala con el repositorio y haz un .flush() dentro de un assertDoesNotThrow.
+            void test1RepositoriesContainsMethod() {
+                assertTrue(
+                    CrudRepository.class.isAssignableFrom(RatingRepository.class),
+                    "RatingRepository should extend CrudRepository"
+                );
+                assertTrue(
+                    CrudRepository.class.isAssignableFrom(RatingChangeRepository.class),
+                    "RatingChangeRepository should extend CrudRepository"
+                );
+            }
 
-    Por favor, bajo ninguna circustnacia generes nada de comentarios, solo los tests para copiar lo que me devuelvas directamente para ejecutarlo.
+        ```
 
-    Tampoco pongas nada de ```java y ``` 
+    - **test1RepositoriesExist():** Verifica `assertNotNull`. Al final, debe llamar a `test1RepositoriesContainsMethod()` solo si el repo no es nulo.
+    - **test1RepositoriesContainsMethod():** (SIN @Test) Verifica que el repo tiene el método `.count()` o similar mediante reflexión/interfaz.
 
-    Genera el código completo de Test1.java aplicando estas reglas a la entidad principal descrita en el UML de este examen en particular.
+
+    ### 3. Validación de Restricciones (Constraints)
+
+    - **test1Check[NOMBRE_ENTIDAD]Constraints():**
+        - Invoca `checkThatFieldsAreMandatory` con los campos `NotNull/NotBlank` identificados.
+        - Crea el mapa `invalidValues` usando `Map.of(...)`. **PROHIBIDO usar `new HashMap()`**.
+        - Los valores de prueba deben ser coherentes con el tipo de dato del Código Base (si es `Double`, usa `0.0`; si es `Integer`, `0`).
+        - Invoca `checkThatValuesAreNotValid`.
+        - En atributos que sean de tipo Double, NUNCA PONER `columnDefinition = "double(5,2)"` ya que dará error. La forma correcta es por ejemplo: `@Column(name = "cost")`
+
+    ### 4. Verificación de Anotaciones
+    - **test1Check[NOMBRE_ENTIDAD]Annotations():**
+        - Verifica `@Entity` con `classIsAnnotatedWith`.
+        - Verifica `@Enumerated(EnumType.STRING)` si hay Enums.
+        - Verifica `@Size`, `@Positive`, `@FutureOrPresent`, etc., según el UML.
+
+    ### 5. Métodos Auxiliares y Persistencia
+    - **createValid[NOMBRE_ENTIDAD](EntityManager em):** Método estático que construye una instancia válida.
+    - **IMPORTANTE:** Usa EXCLUSIVAMENTE `setValue(objeto, "atributo", Tipo.class, valor)` para asignar datos, evitando fallos si no existen setters.
+    - **test1Valid[NOMBRE_ENTIDAD]IsPersisted():** Verifica que `repo.save()` no lanza excepciones (`assertDoesNotThrow`) y haz `.flush()`.
+    - Todos los métodos auxiliares que sean necesarios deberán crearse en la misma clase, el test DEBE ser autosuficiente.
+    - Al crear alguna entidad válida en un método auxiliar, SIEMPRE crear primero los objetos padre, es decir, si un Pet tiene un Owner, primero se deberá crear el Owner y después el Pet. Esto evitará errores de persistencia.
+    ---
+
+    ## Restricciones de Salida (Formato)
+    - **PROHIBIDO** generar comentarios explicativos.
+    - **PROHIBIDO** envolver el código en bloques de código markdown (sin \`\`\`java).
+    - **PROHIBIDO** incluir texto antes o después del código.
+    - Entrega el código listo para ser copiado y pegado en un archivo `.java`.
     ```
 
 ### Prompt 7 📝
@@ -472,24 +600,24 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     ## Recursos a proporcionar:
     * `test_previous_exams.md`
 
-    ## Prompt a utilizar
+    ## Prompt a utilizar:
     Nuestra misión es generar el test de un examen de la asignatura "Diseño y Pruebas". Actuamos como profesores evaluando conocimientos de JPA y mapeo objeto-relacional. Te proporcionaré el enunciado, el diagrama UML en Mermaid y, **CRÍTICAMENTE, el Código Base de las clases ya generadas**.
 
     Por favor, no uses Wildcard Imports (asteriscos). Genera todos los imports de forma explícita, uno por cada clase utilizada. IMPORTANTE CENTRARSE EN LAS CLASES QUE SE PROPORCIONA COMO CÓDIGO BASE, DE SU LOCALIZACIÓN PARA PODER PONER CORRECTAMENTE LOS IMPORTS DE DONDE SE SACAN LAS CLASES.
 
     ---
 
-    ## REGLA ABSOLUTA — PAQUETES: LEE EL CÓDIGO BASE, EVITA INVENTAR COSAS
+    ## REGLA ABSOLUTA — PAQUETES: LEE EL CÓDIGO BASE, EVITA INVENTAR
 
     Esta es la regla más importante del prompt. Debes seguirla antes que cualquier otra cosa.
     Además, para las clases que no estén implementadas en el código base, buscarla en el repositorio pasado, como Pet, viene de pet.Pet
 
     **Procedimiento obligatorio antes de escribir un solo import:**
 
-    1. Localiza la sección `=== PAQUETES DE LA PLANTILLA DEL PROYECTO ===` del contexto.
+    1. Localiza la sección `=== PAQUETES DE LA PLANTILLA DEL PROYECTO ===` del contexto. En ella se te especificará la estructura de los paquetes a importar.
     2. Para cada clase que necesites importar, busca su `package` en el código base proporcionado.
     3. Construye el import como: `import <package_de_esa_clase>.<NombreClase>;`
-    - Pero ten en cuenta en poner los nombres de las clases nueva generadas, no es siempre Achievement; sino q coja las clases del contexto que se le pase de la extensión funcional.
+    - Deberás tener cuidado y poner los nombres de las clases nueva generadas, ya que no siempre es Achievement; deberás coger las clases del contexto que se te proporciona de la extensión funcional.
 
     **Ejemplo concreto:**
     - Si el código base de `Achievement.java` empieza con `package es.us.dp1.chess.tournament.achievement;`
@@ -499,14 +627,57 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     - NUNCA: `import org.springframework.samples.petClinic.model.Achievement;`
 
     **Aplica lo mismo para `@ComponentScan`:**
+    Al definir los paquetes, SIEMPRE poner los paquetes individuales necesarios, evitar globalizar en uno todo:
     - CORRECTO: `@ComponentScan(basePackages = {"es.us.dp1.chess.tournament.achievement", "es.us.dp1.chess.tournament.userAchievement"})`
     - INCORRECTO: `@ComponentScan(basePackages = {"org.springframework.samples.chessgame.repository", "org.springframework.samples.chessgame.model"})`
+    - INCORRECTO: `@ComponentScan(basePackages = {"es.us.dp1.chess.tournament"})`
 
     **El paquete del propio test (`package ...` en la primera línea) también debe derivarse del código base**, usando el prefijo de donde se crean los test. Ejemplo: si el prefijo raíz es `es.us.dp1.chess.tournament`, el paquete del test será `es.us.dp1.chess.tournament`.
 
     Si una clase (como `ReflexiveTest`, `NamedEntity`, etc.) no aparece en el código base proporcionado, usa el mismo prefijo raíz detectado para inferir su paquete. Nunca uses `org.springframework.samples.*` salvo que ese prefijo aparezca explícitamente en el código base.
 
-    Tienes que tener en cuenta como los métodos se llaman en ReflexiveTest
+    Para las diferentes comprobaciones, vamos a llamar a los métodos que nos proporciona la clase ReflexiveTest que te paso dentro del archivo `test_previous_exams`. **IMPORTANTE:** tienes que llamar con el MISMO NOMBRE a los métodos que utilices, además de pasarle los MISMOS tipos de argumentos que pide cada método. A continuación, te proporciono una lista con todos los métodos disponibles y sus correspondientes argumentos necesarios. Los analizarás todos para usarlos correctamente en el test:
+        ```java
+        void checkThatFieldIsAnnotatedWithDateTimeFormat(Class aClass, String fieldname,String format)
+
+        void checkThatFieldIsAnnotatedWith(Class aClass, String fieldname,Class annotationClass)
+
+        boolean  isFieldAnnotatedWith(Class aClass, String fieldname,Class annotationClass)
+
+        boolean classIsAnnotatedWith(Class class1, Class class2)
+
+        boolean classHasMethod(Object targetObject, String methodName, Class<?> ... parameterTypes)
+
+        void checkThatFieldsAreMandatory(Object validEntity,EntityManager em,String ... fieldnames )
+
+        void checkThatFieldIsMandatory(Object validEntity,String fieldname,Class<?> type,EntityManager em)
+
+        void checkThatValuesAreNotValid(Object validEntity,Map<String,List<Object>> invalidValues,EntityManager em)
+
+        void checkThatValueIsNotValid(Object validEntity,String fieldname,Object value,Class<?> type, EntityManager em)
+
+        Object setValue(Object object,String fieldname,Class<?> type, Object value)
+
+        Object invokeMethodReflexivelyWithParamTypes(Object targetObject, String methodName, Class<?>[] parameterTypes,Object ... parameterValues)
+
+        Object invokeMethodReflexively(Object o, String methodName, Object ... params)
+
+        void checkLinkedById(Class myClass,Integer id1,String methodName,Integer id2,EntityManager em)
+
+        Object getFieldValueReflexively(Object o, String fieldName)
+
+        void checkTransactional(Class<?> myClass,String methodName, Class<?>... parameterTypes)
+
+        boolean isMethodAnnotatedWithTest(Method method)
+
+        boolean isMethodAnnotatedWithBeforeEach(Method method)
+
+        boolean isMethodAnnotatedWithAfterEach(Method method)
+
+        void checkTransactionalRollback(Class<?> myClass,String methodName,Class<?>[] paramTypes,Class<? extends Exception> exceptionClass)
+
+        boolean isEntity(Class<T> clazz)
+        ```
 
     ---
 
@@ -526,13 +697,26 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     ---
 
 
-    ## Estructura Estricta Requerida para la Test2.java
+    ## Estructura Estricta Requerida para Test2.java
 
     Debes generar una clase de pruebas que siga EXACTAMENTE el patrón de diseño proporcionado, siguiendo los ejemplos proporcionados en el archivo markdown "test_previous_exams" anotados como **Test 2: Relaciones entre las entidades**. La clase evaluará lo necesario apoyándose en los métodos de la clase padre `ReflexiveTest`.
 
     ### 1. Configuración de la Clase e Inyección de Dependencias
-    - **Clase y Herencia:** La clase debe ser pública, estar anotada obligatoriamente con `@DataJpaTest()` y heredar de `ReflexiveTest`.
-    - **Inyección:** Inyecta EXCLUSIVAMENTE el `EntityManager` utilizando `@Autowired(required = false)`. No inyectes repositorios a menos que la creación de la entidad base lo requiera de forma crítica.
+    - **Clase y Herencia:** La clase debe ser pública, estar anotada obligatoriamente con `@DataJpaTest()` y heredar de `ReflexiveTest` (IMPORTANTE: DEBE USARSE SI O SI ESTA CLASE PARA LA GENERACIÓN DE LOS TESTS, DEBE PONER ReflexiveTest en la parte de `extends...`)
+    - **Inyección:** Inyecta EXCLUSIVAMENTE el `EntityManager` utilizando `@Autowired(required = false)` (NUNCA TestEntityManager). Evita inyectar repositorios a menos que la creación de la entidad base lo requiera de forma crítica.
+    - El nombre ESTRICTO del paquete donde se tiene que generar el test es:
+        - Clínica Veterinaria: `package org.springframework.samples.petclinic`
+        - Ajedrez: `package es.us.dp1.chess.tournament`
+    - Inyecta SIEMPRE como `@MockBean` el servicio `UserService`: 
+        ```java
+            @MockBean
+            private UserService userService;
+        ```
+    - Usa `@ComponentScan` apuntando a los paquetes reales detectados en el Código Base (ver Regla Absoluta).
+    - **IMPORTANTE** los imports de las anotaciones a comprobar deberán venir de jakarta, NUNCA DE javax:
+        - CORRECTO: jakarta.persistence.Column;
+        - INCORRECTO: javax.persistence.Column;
+
 
     ### 2. Verificación de Anotaciones (Relaciones JPA)
     - **Nomenclatura del Método:** Crea un método llamado `test[Num][NombreEntidad]Annotations()` por cada entidad a evaluar (ej. `test2TreatmentAnnotations()`). Debe ser `public void` y llevar la anotación `@Test`.
@@ -549,11 +733,15 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     - **Formato exacto:** checkThatFieldsAreMandatory(e, em, "nombreDelAtributoRelacion");
 
 
-    ### 4. Reglas Críticas de Sintaxis y Reflexión
-    - **Asignación de Valores (Si generas métodos auxiliares):** Si necesitas construir entidades de prueba localmente, usa EXCLUSIVAMENTE `setValue(objeto, "atributo", Tipo.class, valor)` proporcionado por `ReflexiveTest` para eludir la ausencia de métodos *setter* en el código base.
+    ### 4. Métodos Auxiliares y Reglas Críticas de Sintaxis
+    - **createValid[NOMBRE_ENTIDAD](EntityManager em):** Método estático que construye una instancia válida.
+    - **IMPORTANTE:** Usa EXCLUSIVAMENTE `setValue(objeto, "atributo", Tipo.class, valor)` proporcionado por `ReflexiveTest` para asignar datos, evitando fallos si no existen setters.
     - **Evita aserciones estándar:** NO uses `assertNotNull`, `assertDoesNotThrow` ni pruebes repositorios con `.save()` a menos que se te pida explícitamente. Cíñete a los métodos de aserción de `ReflexiveTest` (`checkThatFieldIsAnnotatedWith` y `checkThatFieldsAreMandatory`).
     - **Separación de responsabilidades**: Mantén estrictamente separados los métodos que comprueban anotaciones de los métodos que comprueban restricciones de validación.
     - **Limpieza**: Omite comentarios innecesarios, importaciones no utilizadas y explicaciones adicionales. Devuelve únicamente el código Java solicitado.
+    - **IMPORTANTE**: Omitir crear tests estáticos, para poder usar el método `super`.
+    - Todos los métodos auxiliares que sean necesarios deberán crearse en la misma clase, el test DEBE ser autosuficiente.
+    - Al crear alguna entidad válida en un método auxiliar, SIEMPRE crear primero los objetos padre, es decir, si un Pet tiene un Owner, primero se deberá crear el Owner y después el Pet. Esto evitará errores de persistencia.
 
     ---
 
@@ -578,7 +766,9 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
 - **Prompt:**  
     ```text
-   # PROMPT PARA LA GENERACIÓN DE CÓDIGO SOLUCIÓN COMPLETA (RESTRICCIONES Y RELACIONES)
+    # PROMPT PARA LA GENERACIÓN DE CÓDIGO SOLUCIÓN COMPLETA (RESTRICCIONES Y RELACIONES)
+
+    ## Prompt a utilizar:
 
     Actúa como un desarrollador Senior de Java y Spring Boot experto en la resolución de ejercicios universitarios. 
 
@@ -603,6 +793,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     [RUTA_EXTRAIDA_DEL_CODIGO_BASE];
     ```java
     // Contenido completo de la clase con la solución completa aplicada
+    ```
     ```
 
 ### Prompt 9 📝
