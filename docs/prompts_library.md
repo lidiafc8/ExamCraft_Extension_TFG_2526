@@ -150,9 +150,17 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
 
     -  Para las nuevas clases a implementar por el alumno, es decir, clases rojas, añadirás toda su estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), acorde a la extensión funcional generada.
 
-    -  Para las relaciones, si estas tienen un nombre asignado, este debe constar en el diagrama.
+    -  Para las relaciones, asigna siempre un nombre a estas, ya que deberá constar en el diagrama.
 
-    -    REGLA ESTRICTA DE FORMATO: Genera código Mermaid válido y estándar. Bajo ninguna circunstancia utilices comandos de estilo (como style, classDef o linkStyle). Limítate exclusivamente a definir las clases, sus atributos, métodos y las relaciones entre ellas. Separa cada instrucción con un salto de línea.
+    - **COLOREADO DE RELACIONES:** A cada relación entre entidades que hayas generado y que ÚNICAMENTE salgan de las nuevas clases a implementar por el alumno, es decir, de las clases rojas, deberás asignarle el color rojo. Siguiendo este ejemplo:
+    `ChessPuzzle "0..n" --> "1" TacticalTheme: <font color=red>theme</font>`
+
+    - **COLOREADO DE CLASES ROJAS**: Para ÚNICAMENTE las nuevas clases a implementar por el alumno, es decir, clases rojas, añade el color rojo. Este estilo deberás añadirlo al final de todo el código Mermaid siguiendo este ejemplo:
+    `style ChessPuzzle stroke:red,color:red`
+    `style PuzzleAttempt stroke:red,color:red`
+    Para el resto de clases de las que partimos deberás EVITAR A TODA COSTA colorearlas de ningún color. Déjalas sin nada.
+
+    -    REGLA ESTRICTA DE FORMATO: Genera código Mermaid válido y estándar. Limítate exclusivamente a definir las clases (coloreando de rojo las que deberá implementar el alumno), sus atributos, métodos y las relaciones (coloreando de rojo las relaciones que salgan de las clases rojas) entre ellas. Separa cada instrucción con un salto de línea.
 
     REGLAS ESTRICTAS DE SINTAXIS MERMAID (obligatorio cumplir todas):
 
@@ -164,7 +172,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     - CORRECTO: `Owner "1" --> "0..n" Pet : owns`
     - INCORRECTO: `Owner \"1\" --> \"0..n\" Pet : owns`
 
-    3. NUNCA uses `style`, `classDef` ni `linkStyle`.
+    3. EVITA usar `classDef` ni `linkStyle`.
 
     4. NUNCA pongas texto introductorio ni explicaciones antes o después del código.
     El resultado debe empezar DIRECTAMENTE con `classDiagram` y nada más.
@@ -176,7 +184,7 @@ Este documento recoge todos los prompts desarrollados para la extensión **ExamC
     - Asociación:  `Owner "1" --> "0..n" Pet : owns`
     - Sin nombre:  `Visit "0..n" --> "1" Vet`
 
-    7. ESTRUCTURA DE LLAVES OBLIGATORIA: Incluso si una clase no tiene atributos, NO uses el formato compacto `{}`. Usa siempre saltos de línea.
+    7. ESTRUCTURA DE LLAVES OBLIGATORIA: Incluso si una clase no tiene atributos, EVITA usar el formato compacto `{}`. Usa siempre saltos de línea.
     - CORRECTO:
         class Vet {
         }
