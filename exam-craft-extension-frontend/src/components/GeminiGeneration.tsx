@@ -36,14 +36,13 @@ export function useGeminiGeneration({
       } catch {
         console.warn("Servidor de logs apagado. El log no se guardó en el repo.")
       }
-
+      setIsLoading(false)
       return result
     } catch (error) {
       console.error(error)
       alert("Error al generar.")
-      return null
-    } finally {
       setIsLoading(false)
+      return null
     }
   }
 
