@@ -1,13 +1,9 @@
-/// <reference types="vitest/globals" />
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-// ---------------------------------------------------------------------------
-// MOCKS
-// ---------------------------------------------------------------------------
 vi.mock("mermaid", () => ({
   default: {
     initialize: vi.fn(),
@@ -20,9 +16,6 @@ vi.mock("mermaid", () => ({
 import mermaid from "mermaid";
 import { MermaidViewer, sanitizeForRender } from "./MermaidViewer";
 
-// ---------------------------------------------------------------------------
-// SETUP
-// ---------------------------------------------------------------------------
 const mockSvgElement = {
   getAttribute: vi.fn((attr: string) => (attr === "viewBox" ? null : "100")),
   setAttribute: vi.fn(),
@@ -49,9 +42,6 @@ beforeEach(() => {
   } as any));
 });
 
-// ---------------------------------------------------------------------------
-// Helper
-// ---------------------------------------------------------------------------
 const renderAndWait = async (chartCode = "graph TD\nA-->B") => {
   const result = render(<MermaidViewer chartCode={chartCode} />);
   await waitFor(() =>
@@ -60,9 +50,6 @@ const renderAndWait = async (chartCode = "graph TD\nA-->B") => {
   return result;
 };
 
-// ---------------------------------------------------------------------------
-// sanitizeForRender – tests unitarios puros (línea 13)
-// ---------------------------------------------------------------------------
 describe("sanitizeForRender – función pura", () => {
   it("línea 13: retorna string vacío con input vacío", () => {
     expect(sanitizeForRender("")).toBe("");
@@ -107,9 +94,6 @@ describe("sanitizeForRender – función pura", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// RENDERIZADO BÁSICO
-// ---------------------------------------------------------------------------
 describe("MermaidViewer – renderizado básico", () => {
   it("renderiza el contenedor principal", () => {
     const { container } = render(<MermaidViewer chartCode="" />);
@@ -169,9 +153,6 @@ describe("MermaidViewer – renderizado básico", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// ESTADOS DE ERROR
-// ---------------------------------------------------------------------------
 describe("MermaidViewer – estados de error", () => {
   it("muestra el mensaje de error cuando mermaid.render falla", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
@@ -230,9 +211,6 @@ describe("MermaidViewer – estados de error", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// ZOOM – toolbar
-// ---------------------------------------------------------------------------
 describe("MermaidViewer – zoom con toolbar", () => {
   it("aumenta el zoom al hacer click en '+ Zoom'", async () => {
     render(<MermaidViewer chartCode="graph TD" />);
@@ -276,9 +254,6 @@ describe("MermaidViewer – zoom con toolbar", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// ZOOM – rueda del ratón
-// ---------------------------------------------------------------------------
 describe("MermaidViewer – zoom con rueda del ratón", () => {
   it("reduce el zoom con scroll hacia abajo (deltaY > 0)", async () => {
     const { container } = render(<MermaidViewer chartCode="graph TD" />);
@@ -295,9 +270,6 @@ describe("MermaidViewer – zoom con rueda del ratón", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// PANNING
-// ---------------------------------------------------------------------------
 describe("MermaidViewer – panning", () => {
   it("el contenido empieza en translate(0px, 0px) scale(1)", async () => {
     const { container } = await renderAndWait();
@@ -362,9 +334,6 @@ describe("MermaidViewer – panning", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// CASOS NEGATIVOS
-// ---------------------------------------------------------------------------
 describe("MermaidViewer – casos negativos", () => {
   it("no muestra error con código válido", async () => {
     await renderAndWait();

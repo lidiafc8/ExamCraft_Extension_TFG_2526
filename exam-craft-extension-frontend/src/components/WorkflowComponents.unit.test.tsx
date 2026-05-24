@@ -1,4 +1,3 @@
-/// <reference types="vitest/globals" />
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, screen, cleanup } from "@testing-library/react";
@@ -15,10 +14,6 @@ const steps = [
   { label: "Paso 2" },
   { label: "Paso 3" },
 ];
-
-// ===========================================================================
-// STEPPER HEADER
-// ===========================================================================
 
 describe("StepperHeader – renderizado", () => {
   it("renderiza el contenedor del stepper", () => {
@@ -132,10 +127,6 @@ describe("StepperHeader – casos límite", () => {
     wrappers.forEach(w => expect(w).toHaveClass("step-inactive"));
   });
 });
-
-// ===========================================================================
-// PROMPT EDITOR
-// ===========================================================================
 
 const promptBaseProps = {
   promptText: "Mi prompt inicial",
@@ -277,10 +268,6 @@ describe("PromptEditor – casos límite", () => {
     expect(screen.getByTestId("desc-node")).toBeInTheDocument();
   });
 });
-
-// ===========================================================================
-// SPLIT RESULT VIEW
-// ===========================================================================
 
 const splitBaseProps = {
   promptText: "Prompt enviado",

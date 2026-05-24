@@ -1,4 +1,3 @@
-/// <reference types="vitest/globals" />
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
@@ -6,7 +5,6 @@ import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FolderExamSelector } from "./FolderExamsSelector";
 
-// Mock para evitar errores con las importaciones de imágenes (.png) en el entorno de Node
 vi.mock("../../assets/images/archive.png", () => ({ default: "mock-carpeta-img" }));
 vi.mock("../../assets/images/exam.png", () => ({ default: "mock-examen-img" }));
 
@@ -21,7 +19,7 @@ const mockAllowedFolders = ["Matemáticas", "Historia", "Ciencia"];
 const baseProps = {
   projects: mockProjects,
   allowedFolders: mockAllowedFolders,
-  selectedFolder: null, // Vista inicial de carpetas
+  selectedFolder: null, 
   onSelectFolder: vi.fn(),
   onSelectProject: vi.fn(),
   onBack: vi.fn(),
@@ -40,20 +38,16 @@ describe("FolderExamSelector – Vista Inicial (selectedFolder = null)", () => {
     expect(screen.getByText("MIS EXÁMENES")).toBeInTheDocument();
     expect(screen.getByText("Selecciona un dominio")).toBeInTheDocument();
     
-    // Deben aparecer MATEMÁTICAS e HISTORIA (tienen proyectos vinculados)
     expect(screen.getByText("MATEMÁTICAS")).toBeInTheDocument();
     expect(screen.getByText("HISTORIA")).toBeInTheDocument();
     
-    // "Ciencia" no tiene ningún examen asignado, por lo que no debe pintarse en las carpetas visibles
     expect(screen.queryByText("CIENCIA")).not.toBeInTheDocument();
   });
 
   it("calcula y renderiza el número correcto de exámenes por carpeta en formato plural y singular", () => {
     render(<FolderExamSelector {...baseProps} />);
 
-    // Matemáticas tiene 2 exámenes (Plural)
     expect(screen.getByText("2 EXÁMENES")).toBeInTheDocument();
-    // Historia tiene 1 examen (Singular)
     expect(screen.getByText("1 EXAMEN")).toBeInTheDocument();
   });
 
@@ -79,7 +73,7 @@ describe("FolderExamSelector – Vista Inicial (selectedFolder = null)", () => {
     render(
       <FolderExamSelector 
         {...baseProps} 
-        projects={[]} // Pasamos lista de proyectos vacía
+        projects={[]} 
         emptyFoldersMessage="¡Bandeja de entrada vacía!" 
       />
     );
@@ -95,21 +89,17 @@ describe("FolderExamSelector – Vista de Carpeta Seleccionada", () => {
 
     expect(screen.getByText("Exámenes de MATEMÁTICAS")).toBeInTheDocument();
     
-    // Deben aparecer los nombres mapeados por la función displayName
     expect(screen.getByText("Parcial Álgebra")).toBeInTheDocument();
     expect(screen.getByText("Final Cálculo")).toBeInTheDocument();
     
-    // No debe aparecer el examen de Historia
     expect(screen.queryByText("Examen Siglo XX")).not.toBeInTheDocument();
   });
 
   it("ejecuta onSelectProject al hacer click en el icono/botón de un examen específico", async () => {
     render(<FolderExamSelector {...baseProps} selectedFolder="Matemáticas" />);
 
-    // Buscamos los botones que abren el examen (tienen el atributo title="Abrir examen")
     const botonesAbrir = screen.getAllByRole("button", { name: "Abrir examen" });
     
-    // Pulsamos el primero ("Parcial Álgebra", id: "1")
     await userEvent.click(botonesAbrir[0]);
 
     expect(baseProps.onSelectProject).toHaveBeenCalledWith(mockProjects[0]);
@@ -128,7 +118,7 @@ describe("FolderExamSelector – Vista de Carpeta Seleccionada", () => {
     render(
       <FolderExamSelector 
         {...baseProps} 
-        selectedFolder="Ciencia" // Carpeta válida pero sin proyectos
+        selectedFolder="Ciencia" 
         emptyProjectsMessage="No encontramos nada aquí." 
       />
     );
@@ -139,7 +129,6 @@ describe("FolderExamSelector – Vista de Carpeta Seleccionada", () => {
 
 describe("FolderExamSelector – Filtros y Casos Límite", () => {
   it("aplica la propiedad opcional filterProject si viene definida (Cubre rama condicional)", () => {
-    // Definimos un filtro para que solo muestre exámenes que contengan la palabra "Final"
     const customFilter = (p: typeof mockProjects[0]) => p.customName.includes("Final");
 
     render(
@@ -150,9 +139,7 @@ describe("FolderExamSelector – Filtros y Casos Límite", () => {
       />
     );
 
-    // "Final Cálculo" cumple la condición
     expect(screen.getByText("Final Cálculo")).toBeInTheDocument();
-    // "Parcial Álgebra" es ignorado por el filtro
     expect(screen.queryByText("Parcial Álgebra")).not.toBeInTheDocument();
   });
 });

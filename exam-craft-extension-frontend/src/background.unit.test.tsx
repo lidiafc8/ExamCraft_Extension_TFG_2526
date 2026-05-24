@@ -1,4 +1,3 @@
-/// <reference types="vitest/globals" />
 import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
 
 const mockCreate = vi.fn();
