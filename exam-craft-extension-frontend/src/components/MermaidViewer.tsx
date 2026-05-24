@@ -9,7 +9,7 @@ interface Props {
 let mermaidInitialized = false
 let currentTheme = ""
 
-function sanitizeForRender(code: string): string {
+export function sanitizeForRender(code: string): string {
   if (!code) return ""
   let result = code
 
