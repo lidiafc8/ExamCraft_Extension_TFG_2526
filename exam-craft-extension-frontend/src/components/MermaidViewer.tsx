@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react"
 import mermaid from "mermaid"
+import { useEffect, useRef, useState } from "react"
+
 import "./css/MermaidViewer.css"
 
 interface Props {
@@ -14,22 +15,22 @@ function sanitizeForRender(code: string): string {
   let result = code
 
   result = result
-    .replaceAll('\\n', '\n')
+    .replaceAll("\\n", "\n")
     .replaceAll('\\"', '"')
     .replaceAll("\\'", "'")
 
   result = result
-    .replace(/{\s*}/g, '')
-    .replace(/{/g, ' {\n')
-    .replace(/}/g, '\n}\n')
-    .replace(/<\|--/g, ' <|-- ')
-    .replace(/-->/g, ' --> ')
-    .replace(/<--/g, ' <-- ')
+    .replace(/{\s*}/g, "")
+    .replace(/{/g, " {\n")
+    .replace(/}/g, "\n}\n")
+    .replace(/<\|--/g, " <|-- ")
+    .replace(/-->/g, " --> ")
+    .replace(/<--/g, " <-- ")
 
   result = result
     .split("\n")
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && !line.startsWith("%%"))
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("%%"))
     .join("\n")
 
   return result.trim()
@@ -88,9 +89,9 @@ export function MermaidViewer({ chartCode }: Props) {
               nodeBorder: "#d4a96a",
               clusterBkg: "#fff8f0",
               titleColor: "#333333",
-              edgeLabelBackground: "#ffffff",
+              edgeLabelBackground: "#ffffff"
             },
-            securityLevel: "loose",
+            securityLevel: "loose"
           })
           mermaidInitialized = true
           currentTheme = "beige"
@@ -116,7 +117,7 @@ export function MermaidViewer({ chartCode }: Props) {
   }, [chartCode])
 
   const zoomBy = (delta: number) =>
-    setScale(s => Math.max(0.15, Math.min(5, s + delta)))
+    setScale((s) => Math.max(0.15, Math.min(5, s + delta)))
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault()
@@ -132,21 +133,36 @@ export function MermaidViewer({ chartCode }: Props) {
     if (!isPanning.current) return
     setPan({
       x: startPos.current.px + e.clientX - startPos.current.mx,
-      y: startPos.current.py + e.clientY - startPos.current.my,
+      y: startPos.current.py + e.clientY - startPos.current.my
     })
   }
 
-  const onMouseUp = () => { isPanning.current = false }
+  const onMouseUp = () => {
+    isPanning.current = false
+  }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        width: "100%"
+      }}>
       <div className="mermaid-toolbar">
-        <button onClick={() => zoomBy(-0.2)} className="mermaid-btn">− Zoom</button>
-        <span className="mermaid-zoom-label">
-          {Math.round(scale * 100)}%
-        </span>
-        <button onClick={() => zoomBy(0.2)} className="mermaid-btn">+ Zoom</button>
-        <button onClick={() => { setScale(1); setPan({ x: 0, y: 0 }) }} className="mermaid-btn">
+        <button onClick={() => zoomBy(-0.2)} className="mermaid-btn">
+          − Zoom
+        </button>
+        <span className="mermaid-zoom-label">{Math.round(scale * 100)}%</span>
+        <button onClick={() => zoomBy(0.2)} className="mermaid-btn">
+          + Zoom
+        </button>
+        <button
+          onClick={() => {
+            setScale(1)
+            setPan({ x: 0, y: 0 })
+          }}
+          className="mermaid-btn">
           ⟳ Reset
         </button>
       </div>
@@ -157,8 +173,7 @@ export function MermaidViewer({ chartCode }: Props) {
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
-        className="mermaid-outer-container"
-      >
+        className="mermaid-outer-container">
         {error ? (
           <div className="mermaid-error">
             <div>{error}</div>
@@ -172,14 +187,12 @@ export function MermaidViewer({ chartCode }: Props) {
             className="mermaid-inner-content"
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
-              transformOrigin: "top left",
+              transformOrigin: "top left"
             }}
             dangerouslySetInnerHTML={{ __html: svg }}
           />
         ) : (
-          <div className="mermaid-loading">
-            Renderizando...
-          </div>
+          <div className="mermaid-loading">Renderizando...</div>
         )}
       </div>
     </div>

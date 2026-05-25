@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react"
+import React, { useEffect, useState } from "react"
+
+import { getAllFromChrome, saveToChrome } from "~src/utils/chromeStorageUtils"
+
 import { ConfirmModal } from "./ConfirmModal"
 import { SuccessModal } from "./SuccessModal"
-import { saveToChrome, getAllFromChrome } from "~src/utils/chromeStorageUtils"
+
 import "./css/SaveModal.css"
 
 interface SaveModalProps {
@@ -28,7 +31,7 @@ export const SaveModal: React.FC<SaveModalProps> = ({
   existingKey,
   skipPrompt = false,
   successMessage,
-  successAction = "Volver al inicio",
+  successAction = "Volver al inicio"
 }) => {
   const defaultName = `Examen de ${domainName}`
   const [saveState, setSaveState] = useState<SaveState>({ type: "prompt" })
@@ -40,7 +43,7 @@ export const SaveModal: React.FC<SaveModalProps> = ({
     try {
       const allItems = await getAllFromChrome()
       const searchName = finalName.trim().toLowerCase()
-      return allItems.some(item => {
+      return allItems.some((item) => {
         if (existingKey && item._key === existingKey) return false
         return (
           item.domainName === domainName &&
@@ -67,7 +70,7 @@ export const SaveModal: React.FC<SaveModalProps> = ({
     } catch (error) {
       setSaveState({
         type: "error",
-        message: error instanceof Error ? error.message : "No se pudo guardar.",
+        message: error instanceof Error ? error.message : "No se pudo guardar."
       })
     }
   }
@@ -82,8 +85,13 @@ export const SaveModal: React.FC<SaveModalProps> = ({
     return (
       <SuccessModal
         title="¡Guardado con éxito!"
-        message={successMessage ?? `El examen "${saveState.savedName}" se ha guardado correctamente.`}
-        actions={[{ label: successAction, onClick: onSuccess, variant: "primary" }]}
+        message={
+          successMessage ??
+          `El examen "${saveState.savedName}" se ha guardado correctamente.`
+        }
+        actions={[
+          { label: successAction, onClick: onSuccess, variant: "primary" }
+        ]}
       />
     )
   }
@@ -112,9 +120,12 @@ export const SaveModal: React.FC<SaveModalProps> = ({
       plainWarning
       warning={
         <div className="save-modal-input-wrapper">
-          <label htmlFor={inputId} className="save-modal-label">Nombre del examen</label>
+          <label htmlFor={inputId} className="save-modal-label">
+            Nombre del examen
+          </label>
           <div className="save-modal-input-container">
-            <span className={`save-modal-input-icon ${focused ? "save-modal-input-icon--focused" : ""}`}>
+            <span
+              className={`save-modal-input-icon ${focused ? "save-modal-input-icon--focused" : ""}`}>
               ✏️
             </span>
             <input
@@ -131,11 +142,14 @@ export const SaveModal: React.FC<SaveModalProps> = ({
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
             />
-            <div className={`save-modal-input-underline ${focused ? "save-modal-input-underline--focused" : ""} ${duplicateError ? "save-modal-input-underline--error" : ""}`} />
+            <div
+              className={`save-modal-input-underline ${focused ? "save-modal-input-underline--focused" : ""} ${duplicateError ? "save-modal-input-underline--error" : ""}`}
+            />
           </div>
           {duplicateError && (
             <p className="save-modal-duplicate-error">
-              ❌ Ya existe un examen con ese nombre en "{domainName}". Elige otro.
+              ❌ Ya existe un examen con ese nombre en "{domainName}". Elige
+              otro.
             </p>
           )}
           {!duplicateError && draftName.trim() === "" && (

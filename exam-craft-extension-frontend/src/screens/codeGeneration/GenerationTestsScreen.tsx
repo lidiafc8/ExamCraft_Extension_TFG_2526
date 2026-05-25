@@ -1,44 +1,51 @@
-import React, { useEffect, useState } from "react";
-import { Header } from "~src/components/Header";
-import { parseMasterPrompt } from "~src/utils/promptParser";
-import { downloadMarkdown } from "~src/utils/downloadUtils";
-import { saveToChrome } from "~src/utils/chromeStorageUtils";
-import { SuccessModal } from "~src/components/modals/SuccessModal";
-import { ConfirmModal } from "~src/components/modals/ConfirmModal";
-import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal";
-import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponents";
-import { useGeminiGeneration } from "~src/components/GeminiGeneration";
-import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests_attributes.md";
-import testRelationshipsPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests_relationships.md";
+import testAttributesPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests_attributes.md"
+import testRelationshipsPromptMarkdown from "bundle-text:../../prompts/generation-exam-repository/exam/generation_tests_relationships.md"
+import React, { useEffect, useState } from "react"
 
-declare var chrome: any;
+import { useGeminiGeneration } from "~src/components/GeminiGeneration"
+import { Header } from "~src/components/Header"
+import { ConfirmModal } from "~src/components/modals/ConfirmModal"
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
+import { SuccessModal } from "~src/components/modals/SuccessModal"
+import {
+  PromptEditor,
+  SplitResultView
+} from "~src/components/WorkflowComponents"
+import { saveToChrome } from "~src/utils/chromeStorageUtils"
+import { downloadMarkdown } from "~src/utils/downloadUtils"
+import { parseMasterPrompt } from "~src/utils/promptParser"
+
+declare var chrome: any
 
 interface Props {
   readonly initialData: {
-    project: any;
-    constraints: string;
-    entityRelationships: string;
-    baseClass: string;
-    targetType?: "attributes" | "entityRelationships";
-  } | null;
-  readonly source: "attributes" | "entityRelationships" | "general";
-  readonly onBack: () => void;
-  readonly onCreateExamByParts: () => void;
-  readonly onWelcome: () => void;
-  readonly onCreateExam: () => void;
-  readonly onCodeGeneration: () => void;
-  readonly onComponents: () => void;
+    project: any
+    constraints: string
+    entityRelationships: string
+    baseClass: string
+    targetType?: "attributes" | "entityRelationships"
+  } | null
+  readonly source: "attributes" | "entityRelationships" | "general"
+  readonly onBack: () => void
+  readonly onCreateExamByParts: () => void
+  readonly onWelcome: () => void
+  readonly onCreateExam: () => void
+  readonly onCodeGeneration: () => void
+  readonly onComponents: () => void
 }
 
-const DOMAIN_CONFIG: Record<string, { repo: string; rootPackage: string; extraPackages: string[] }> = {
+const DOMAIN_CONFIG: Record<
+  string,
+  { repo: string; rootPackage: string; extraPackages: string[] }
+> = {
   default: {
     repo: "DP1-chess-template-exam",
     rootPackage: "es.us.dp1.chess.tournament",
     extraPackages: [
       "es.us.dp1.chess.tournament.user",
       "es.us.dp1.chess.tournament.model",
-      "es.us.dp1.chess.tournament.exceptions",
-    ],
+      "es.us.dp1.chess.tournament.exceptions"
+    ]
   },
   veterinaria: {
     repo: "DP1-petClinic-template-exam",
@@ -46,48 +53,60 @@ const DOMAIN_CONFIG: Record<string, { repo: string; rootPackage: string; extraPa
     extraPackages: [
       "org.springframework.samples.petclinic.user",
       "org.springframework.samples.petclinic.model",
-      "org.springframework.samples.petclinic.exceptions",
-    ],
-  },
-};
-
-function getDomainConfig(domain: string) {
-  if (domain.includes("clínica veterinaria") || domain.includes("veterinaria")) {
-    return DOMAIN_CONFIG.veterinaria;
+      "org.springframework.samples.petclinic.exceptions"
+    ]
   }
-  return DOMAIN_CONFIG.default;
 }
 
-function extractBaseRootPackage(javaBlocks: string[], fallback: string): string {
-  const packageNames = javaBlocks
-    .map(block => (block.match(/^package\s+[\w.]+;/m) || [])[0]) // NOSONAR javascript:S5852
-    .filter(Boolean)
-    .map(p => p.replace(/^package\s+/, "").replace(/;$/, ""));
+function getDomainConfig(domain: string) {
+  if (
+    domain.includes("clínica veterinaria") ||
+    domain.includes("veterinaria")
+  ) {
+    return DOMAIN_CONFIG.veterinaria
+  }
+  return DOMAIN_CONFIG.default
+}
 
-  if (packageNames.length === 0) return fallback;
+function extractBaseRootPackage(
+  javaBlocks: string[],
+  fallback: string
+): string {
+  const packageNames = javaBlocks
+    .map((block) => (block.match(/^package\s+[\w.]+;/m) || [])[0]) // NOSONAR javascript:S5852
+    .filter(Boolean)
+    .map((p) => p.replace(/^package\s+/, "").replace(/;$/, ""))
+
+  if (packageNames.length === 0) return fallback
 
   return packageNames.reduce((a, b) => {
-    const partsA = a.split(".");
-    const partsB = b.split(".");
-    const common: string[] = [];
+    const partsA = a.split(".")
+    const partsB = b.split(".")
+    const common: string[] = []
     for (let i = 0; i < Math.min(partsA.length, partsB.length); i++) {
-      if (partsA[i] === partsB[i]) common.push(partsA[i]);
-      else break;
+      if (partsA[i] === partsB[i]) common.push(partsA[i])
+      else break
     }
-    return common.join(".");
-  }, packageNames[0]);
+    return common.join(".")
+  }, packageNames[0])
 }
 
 function cleanJavaBlocks(javaBlocks: string[], rootPackage: string): string {
   return javaBlocks
-    .map(block =>
+    .map((block) =>
       block
         .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "") // NOSONAR javascript:S5852
-        .replace(new RegExp(`^(?!package\\s|import\\s+${rootPackage.replace(/\./g, "\\.")})import\\s.*;$`, "gm"), "")
+        .replace(
+          new RegExp(
+            `^(?!package\\s|import\\s+${rootPackage.replace(/\./g, "\\.")})import\\s.*;$`,
+            "gm"
+          ),
+          ""
+        )
         .replace(/^\s*[\r\n]/gm, "") // NOSONAR javascript:S5852
         .trim()
     )
-    .join("\n\n// ---\n\n");
+    .join("\n\n// ---\n\n")
 }
 
 export default function GenerationTestScreen({
@@ -98,54 +117,74 @@ export default function GenerationTestScreen({
   onWelcome,
   onCreateExam,
   onCodeGeneration,
-  onComponents,
+  onComponents
 }: Props) {
-  const [internalStep, setInternalStep] = useState<"input" | "result">("input");
-  const [promptText, setPromptText] = useState("");
-  const [hiddenContext, setHiddenContext] = useState("");
-  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [currentConfig, setCurrentConfig] = useState(DOMAIN_CONFIG.default);
-  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [internalStep, setInternalStep] = useState<"input" | "result">("input")
+  const [promptText, setPromptText] = useState("")
+  const [hiddenContext, setHiddenContext] = useState("")
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
+    "idle"
+  )
+  const [errorMessage, setErrorMessage] = useState("")
+  const [currentConfig, setCurrentConfig] = useState(DOMAIN_CONFIG.default)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
 
   const isRelationships =
     source === "entityRelationships" ||
-    (source === "general" && initialData?.targetType === "entityRelationships");
+    (source === "general" && initialData?.targetType === "entityRelationships")
 
-  const partKey = isRelationships ? "test2_relationships" : "test1_attributes";
-  const fileName = isRelationships ? "Test2.java" : "Test1.java";
-  const currentStepLabel = isRelationships ? "TESTS DE RELACIONES" : "TESTS DE RESTRICCIONES";
+  const partKey = isRelationships ? "test2_relationships" : "test1_attributes"
+  const fileName = isRelationships ? "Test2.java" : "Test1.java"
+  const currentStepLabel = isRelationships
+    ? "TESTS DE RELACIONES"
+    : "TESTS DE RESTRICCIONES"
 
-  const { responseText, isLoading, setResponseText, generate } = useGeminiGeneration({
-    logExerciseName: isRelationships
-      ? "test_relationships_code_generation"
-      : "test_attributes_code_generation",
-    buildLogPayload: (result) => ({
-      dominio: initialData?.project?.domainName || "",
-      contextoOculto: hiddenContext,
-      examenSeleccionado: initialData?.project?.extensionFinish || "",
-      promptVisible: promptText,
-      respuesta: result,
-    }),
-  });
+  const { responseText, isLoading, setResponseText, generate } =
+    useGeminiGeneration({
+      logExerciseName: isRelationships
+        ? "test_relationships_code_generation"
+        : "test_attributes_code_generation",
+      buildLogPayload: (result) => ({
+        dominio: initialData?.project?.domainName || "",
+        contextoOculto: hiddenContext,
+        examenSeleccionado: initialData?.project?.extensionFinish || "",
+        promptVisible: promptText,
+        respuesta: result
+      })
+    })
 
   useEffect(() => {
-    if (!initialData?.project) return;
+    if (!initialData?.project) return
 
-    const domain = (initialData.project.domainName || "").toLowerCase();
-    const config = getDomainConfig(domain);
-    setCurrentConfig(config);
+    const domain = (initialData.project.domainName || "").toLowerCase()
+    const config = getDomainConfig(domain)
+    setCurrentConfig(config)
 
-    const baseClassesRaw = initialData.baseClass || initialData.project.baseClasses || initialData.project.javaCode || "";
-    const enunciadoGeneral = initialData.project.extensionFinish || "";
-    const targetPromptMarkdown = isRelationships ? testRelationshipsPromptMarkdown : testAttributesPromptMarkdown;
+    const baseClassesRaw =
+      initialData.baseClass ||
+      initialData.project.baseClasses ||
+      initialData.project.javaCode ||
+      ""
+    const enunciadoGeneral = initialData.project.extensionFinish || ""
+    const targetPromptMarkdown = isRelationships
+      ? testRelationshipsPromptMarkdown
+      : testAttributesPromptMarkdown
     const contextToEvaluate = isRelationships
-      ? initialData.entityRelationships || initialData.project.entityRelationships || ""
-      : initialData.constraints || initialData.project.attributeConstraints || "";
+      ? initialData.entityRelationships ||
+        initialData.project.entityRelationships ||
+        ""
+      : initialData.constraints ||
+        initialData.project.attributeConstraints ||
+        ""
 
-    const javaBlocks = [...baseClassesRaw.matchAll(/```java\n([\s\S]*?)```/g)].map(m => m[1].trim());
-    const baseRootPackage = extractBaseRootPackage(javaBlocks, config.rootPackage);
-    const codigoLimpio = cleanJavaBlocks(javaBlocks, config.rootPackage);
+    const javaBlocks = [
+      ...baseClassesRaw.matchAll(/```java\n([\s\S]*?)```/g)
+    ].map((m) => m[1].trim())
+    const baseRootPackage = extractBaseRootPackage(
+      javaBlocks,
+      config.rootPackage
+    )
+    const codigoLimpio = cleanJavaBlocks(javaBlocks, config.rootPackage)
 
     const contextInfo = `
 === PAQUETES DE LA PLANTILLA DEL PROYECTO ===
@@ -164,16 +203,22 @@ ${enunciadoGeneral}
 
 === REGLAS A EVALUAR (RESTRICCIONES / RELACIONES) ===
 ${contextToEvaluate}
-`;
-    const { visibleText, hiddenContext: parsedHidden } = parseMasterPrompt(targetPromptMarkdown || "");
-    const finalPrompt = (visibleText || "").split(/\{\{DOMAIN\}\}/gi).join(domain).trim();
+`
+    const { visibleText, hiddenContext: parsedHidden } = parseMasterPrompt(
+      targetPromptMarkdown || ""
+    )
+    const finalPrompt = (visibleText || "")
+      .split(/\{\{DOMAIN\}\}/gi)
+      .join(domain)
+      .trim()
 
-    setPromptText(finalPrompt);
-    setHiddenContext(`${parsedHidden}\n\n${contextInfo}`);
-  }, [initialData, source, isRelationships]);
+    setPromptText(finalPrompt)
+    setHiddenContext(`${parsedHidden}\n\n${contextInfo}`)
+  }, [initialData, source, isRelationships])
 
   const handleGenerate = async () => {
-    const buildFinalPayload = () => `
+    const buildFinalPayload = () =>
+      `
 ${hiddenContext}
 
 ${promptText}
@@ -185,71 +230,73 @@ ${promptText}
 4. Usa las clases reales del código fuente proporcionado.
 
 Genera ${isRelationships ? "(Test2.java)" : "(Test1.java)"} sin bloques markdown.
-`.trim();
+`.trim()
 
-    const result = await generate(buildFinalPayload());
-    if (!result) return;
+    const result = await generate(buildFinalPayload())
+    if (!result) return
 
     const clean = result
       .replaceAll(/```java/gi, "")
       .replaceAll(/```/gi, "")
       .replace(/^java/i, "")
-      .trim();
+      .trim()
 
-    setResponseText(clean);
-    setInternalStep("result");
-  };
+    setResponseText(clean)
+    setInternalStep("result")
+  }
 
   const handleSaveToChrome = async () => {
-    const projectId = initialData?.project?.id;
-    if (!projectId) return;
+    const projectId = initialData?.project?.id
+    if (!projectId) return
 
     try {
       const existing = await new Promise<Record<string, any>>((resolve) => {
-        chrome.storage.local.get([projectId], (result: any) => resolve(result[projectId] || {}));
-      });
+        chrome.storage.local.get([projectId], (result: any) =>
+          resolve(result[projectId] || {})
+        )
+      })
 
-      const testParts = existing.testPartsMap || {};
-      testParts[partKey] = { fileName, code: responseText };
+      const testParts = existing.testPartsMap || {}
+      testParts[partKey] = { fileName, code: responseText }
 
       await saveToChrome(projectId, {
         ...existing,
         ...initialData!.project,
         testPartsMap: testParts,
-        updatedAt: new Date().toISOString(),
-      });
+        updatedAt: new Date().toISOString()
+      })
 
-      setSaveStatus("success");
+      setSaveStatus("success")
     } catch (err: any) {
-      setErrorMessage(err.message ?? "No se pudo guardar.");
-      setSaveStatus("error");
+      setErrorMessage(err.message ?? "No se pudo guardar.")
+      setSaveStatus("error")
     }
-  };
+  }
 
   const handleConfirmDownload = (customFileName: string) => {
-    downloadMarkdown(responseText, customFileName);
-    setShowDownloadModal(false);
-  };
+    downloadMarkdown(responseText, customFileName)
+    setShowDownloadModal(false)
+  }
   const getDynamicBreadcrumbs = () => {
     if (source === "general") {
       return [
         { label: "CÓDIGO", action: onCodeGeneration },
         { label: "TESTS", action: onBack }
-      ];
+      ]
     }
     if (source === "attributes") {
-      return [{ label: "RESTRICCIONES", action: onBack }];
+      return [{ label: "RESTRICCIONES", action: onBack }]
     }
-    return [{ label: "RELACIONES ENTRE ENTIDADES", action: onBack }];
-  };
+    return [{ label: "RELACIONES ENTRE ENTIDADES", action: onBack }]
+  }
 
   const breadcrumbs = [
     { label: "INICIO", action: onWelcome },
     { label: "CREAR EXAMEN", action: onCreateExam },
     { label: "POR PARTES", action: onCreateExamByParts },
-    { label: 'ENUNCIADO', action: onComponents },
-    ...getDynamicBreadcrumbs(),
-  ];
+    { label: "ENUNCIADO", action: onComponents },
+    ...getDynamicBreadcrumbs()
+  ]
 
   return (
     <div className="exam-app">
@@ -275,7 +322,9 @@ Genera ${isRelationships ? "(Test2.java)" : "(Test1.java)"} sin bloques markdown
 
             {internalStep === "result" && (
               <>
-                <h2 className="result-title">Código generado para {fileName}</h2>
+                <h2 className="result-title">
+                  Código generado para {fileName}
+                </h2>
                 <SplitResultView
                   promptText={promptText}
                   isLoading={isLoading}
@@ -290,17 +339,21 @@ Genera ${isRelationships ? "(Test2.java)" : "(Test1.java)"} sin bloques markdown
                       <button
                         onClick={handleGenerate}
                         className="btn-step generate"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                        disabled={isLoading}>
+                        {isLoading ? (
+                          <div className="loading-spinner" />
+                        ) : (
+                          "Volver a generar"
+                        )}
                       </button>
                       <button
                         onClick={() => setShowDownloadModal(true)}
-                        className="btn-step btn-download"
-                      >
+                        className="btn-step btn-download">
                         Descargar (.md)
                       </button>
-                      <button onClick={handleSaveToChrome} className="btn-step btn-save">
+                      <button
+                        onClick={handleSaveToChrome}
+                        className="btn-step btn-save">
                         Guardar
                       </button>
                     </div>
@@ -324,7 +377,11 @@ Genera ${isRelationships ? "(Test2.java)" : "(Test1.java)"} sin bloques markdown
           title="¡Tests guardados con éxito!"
           message={`El archivo ${fileName} se ha guardado correctamente en el proyecto.`}
           actions={[
-            { label: "Volver al inicio", onClick: onWelcome, variant: "primary" },
+            {
+              label: "Volver al inicio",
+              onClick: onWelcome,
+              variant: "primary"
+            }
           ]}
         />
       )}
@@ -338,5 +395,5 @@ Genera ${isRelationships ? "(Test2.java)" : "(Test1.java)"} sin bloques markdown
         />
       )}
     </div>
-  );
+  )
 }

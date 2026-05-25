@@ -1,11 +1,15 @@
 import React, { useState } from "react"
-import { MermaidViewer } from "../../components/MermaidViewer"
+
 import { Header } from "~src/components/Header"
+
+import { MermaidViewer } from "../../components/MermaidViewer"
 import { StepperHeader } from "../../components/WorkflowComponents"
+
 import "../../css/WorkFlowParts.css"
-import { downloadMarkdown } from "~src/utils/downloadUtils"
+
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
 import { SaveModal } from "~src/components/modals/SaveModal"
-import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal" 
+import { downloadMarkdown } from "~src/utils/downloadUtils"
 
 interface Props {
   readonly domainName: string
@@ -35,7 +39,7 @@ export default function FinishFunctionalExtensionScreen({
   onComponents
 }: Props) {
   const [showSave, setShowSave] = useState(false)
-  const [showDownloadModal, setShowDownloadModal] = useState(false) 
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
 
   const handleConfirmDownload = (fileName: string) => {
     const content = `# Extensión Funcional - ${domainName}\n\n## Enunciado\n${
@@ -45,18 +49,18 @@ export default function FinishFunctionalExtensionScreen({
         ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\``
         : "*No se generó código Mermaid*"
     }\n`
-    
-    downloadMarkdown(content, fileName) 
-    setShowDownloadModal(false) 
+
+    downloadMarkdown(content, fileName)
+    setShowDownloadModal(false)
   }
 
   const breadcrumbItems = [
     { label: "INICIO", action: onWelcome },
     { label: "CREAR EXAMEN", action: onCreateExam },
     { label: "POR PARTES", action: onCreateExamByParts },
-    { label: 'ENUNCIADO', action: onComponents },
+    { label: "ENUNCIADO", action: onComponents },
     { label: "EXTENSIÓN FUNCIONAL", action: onFunctionalExtension },
-    { label: domainName.toUpperCase(), action: onStatementStep1 },
+    { label: domainName.toUpperCase(), action: onStatementStep1 }
   ]
 
   return (
@@ -87,7 +91,9 @@ export default function FinishFunctionalExtensionScreen({
               </div>
 
               <div className="wf-column-three">
-                <div className="wf-column-title">Visualización del Modelo UML</div>
+                <div className="wf-column-title">
+                  Visualización del Modelo UML
+                </div>
                 <div className="wf-diagram-area">
                   {extensionMermaid ? (
                     <div>
@@ -106,11 +112,12 @@ export default function FinishFunctionalExtensionScreen({
               </button>
               <button
                 onClick={() => setShowDownloadModal(true)}
-                className="btn-step btn-download"
-              >
+                className="btn-step btn-download">
                 Descargar (.md)
               </button>
-              <button onClick={() => setShowSave(true)} className="btn-step primary">
+              <button
+                onClick={() => setShowSave(true)}
+                className="btn-step primary">
                 Guardar
               </button>
             </div>
@@ -136,9 +143,11 @@ export default function FinishFunctionalExtensionScreen({
             extensionStatement,
             extensionMermaid,
             extensionFinish: `${extensionStatement}\n\n${
-              extensionMermaid ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\`` : ""
+              extensionMermaid
+                ? `\`\`\`mermaid\n${extensionMermaid}\n\`\`\``
+                : ""
             }`.trim(),
-            savedAt: new Date().toISOString(),
+            savedAt: new Date().toISOString()
           })}
         />
       )}

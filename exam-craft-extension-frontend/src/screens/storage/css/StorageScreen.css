@@ -1,21 +1,21 @@
 :root {
-  --bg-page:        #f5f0eb;
-  --bg-card:        #ffffff;
-  --bg-code:        #1e1e2e;
-  --accent:         #b08968;
-  --accent-dark:    #8a6748;
-  --accent-light:   #e8d5c4;
-  --text-primary:   #1a1a1a;
+  --bg-page: #f5f0eb;
+  --bg-card: #ffffff;
+  --bg-code: #1e1e2e;
+  --accent: #b08968;
+  --accent-dark: #8a6748;
+  --accent-light: #e8d5c4;
+  --text-primary: #1a1a1a;
   --text-secondary: #555555;
-  --text-muted:     #999999;
-  --border:         #e2d5c8;
-  --shadow-card:    0 2px 12px rgba(176, 137, 104, 0.12);
-  --shadow-hover:   0 6px 24px rgba(176, 137, 104, 0.22);
-  --radius:         10px;
-  --radius-sm:      6px;
-  --font-display:   'Segoe UI', 'Roboto', sans-serif;
-  --font-body:      'Segoe UI', 'Roboto', sans-serif;
-  --font-code:      'Segoe UI', 'Roboto', sans-serif;
+  --text-muted: #999999;
+  --border: #e2d5c8;
+  --shadow-card: 0 2px 12px rgba(176, 137, 104, 0.12);
+  --shadow-hover: 0 6px 24px rgba(176, 137, 104, 0.22);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --font-display: "Segoe UI", "Roboto", sans-serif;
+  --font-body: "Segoe UI", "Roboto", sans-serif;
+  --font-code: "Segoe UI", "Roboto", sans-serif;
 }
 
 .wide-card {
@@ -42,7 +42,7 @@
 }
 
 .card-header {
-  background-color: #B48574;
+  background-color: #b48574;
   padding: 14px 20px;
   border-bottom: 1px solid var(--border);
 }
@@ -54,7 +54,7 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color:  #3d2d27;
+  color: #3d2d27;
   margin: 0;
 }
 
@@ -66,7 +66,7 @@
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
-  background-color: #EFDECD; 
+  background-color: #efdecd;
 }
 
 .storage-main {
@@ -75,7 +75,7 @@
   width: 100%;
   padding: 32px 40px 100px;
   flex: 1;
-  background-color: #EFDECD; 
+  background-color: #efdecd;
 }
 
 .storage-section-heading {
@@ -112,7 +112,7 @@
   width: 100%;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)); 
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
   align-items: left;
 }

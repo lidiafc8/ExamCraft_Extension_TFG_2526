@@ -1,6 +1,8 @@
 import React from "react"
+
 import carpeta from "../../assets/images/archive.png"
 import examen from "../../assets/images/exam.png"
+
 import "../../src/css/Cards.css"
 
 interface Project {
@@ -23,11 +25,11 @@ interface FolderExamSelectorProps {
 }
 
 const getProjectsInFolder = (projects: Project[], folder: string | null) => {
-  if (!folder) return [];
+  if (!folder) return []
   return projects.filter(
     (p) => p.domainName?.toLowerCase() === folder.toLowerCase()
-  );
-};
+  )
+}
 
 export const FolderExamSelector: React.FC<FolderExamSelectorProps> = ({
   projects,
@@ -39,15 +41,19 @@ export const FolderExamSelector: React.FC<FolderExamSelectorProps> = ({
   displayName,
   filterProject,
   emptyFoldersMessage = "No hay exámenes creados todavía.",
-  emptyProjectsMessage = "No hay exámenes en esta carpeta.",
+  emptyProjectsMessage = "No hay exámenes en esta carpeta."
 }) => {
-  const filteredProjects = filterProject ? projects.filter(filterProject) : projects
+  const filteredProjects = filterProject
+    ? projects.filter(filterProject)
+    : projects
 
   const visibleFolders = allowedFolders.filter((f) =>
-    filteredProjects.some((p) => p.domainName?.toLowerCase() === f.toLowerCase())
+    filteredProjects.some(
+      (p) => p.domainName?.toLowerCase() === f.toLowerCase()
+    )
   )
 
-  const projectsInFolder = getProjectsInFolder(filteredProjects, selectedFolder);
+  const projectsInFolder = getProjectsInFolder(filteredProjects, selectedFolder)
 
   if (!selectedFolder) {
     return (
@@ -64,18 +70,31 @@ export const FolderExamSelector: React.FC<FolderExamSelectorProps> = ({
               const count = filteredProjects.filter(
                 (p) => p.domainName?.toLowerCase() === folderName.toLowerCase()
               ).length
-              
+
               return (
-                <button key={folderName} type="button" className="action-card" onClick={() => onSelectFolder(folderName)}>
-                  <span><img src={carpeta} alt="Carpeta" className="card-icon" /></span>
+                <button
+                  key={folderName}
+                  type="button"
+                  className="action-card"
+                  onClick={() => onSelectFolder(folderName)}>
+                  <span>
+                    <img src={carpeta} alt="Carpeta" className="card-icon" />
+                  </span>
                   <span className="card-label">{folderName.toUpperCase()}</span>
-                  <span className="card-count">{count} {count === 1 ? "EXAMEN" : "EXÁMENES"}</span>
+                  <span className="card-count">
+                    {count} {count === 1 ? "EXAMEN" : "EXÁMENES"}
+                  </span>
                 </button>
               )
             })
           )}
         </div>
-        <button onClick={onBack} className="btn-back" style={{ marginTop: "20px" }}>Volver</button>
+        <button
+          onClick={onBack}
+          className="btn-back"
+          style={{ marginTop: "20px" }}>
+          Volver
+        </button>
       </div>
     )
   }
@@ -83,7 +102,9 @@ export const FolderExamSelector: React.FC<FolderExamSelectorProps> = ({
   return (
     <div>
       <h1 className="main-title">Exámenes de {selectedFolder.toUpperCase()}</h1>
-      <div className="subtitle-badge">Selecciona el examen que deseas utilizar como contexto.</div>
+      <div className="subtitle-badge">
+        Selecciona el examen que deseas utilizar como contexto.
+      </div>
       <div className="cards-container">
         {projectsInFolder.length === 0 ? (
           <div className="empty-container">
@@ -92,7 +113,10 @@ export const FolderExamSelector: React.FC<FolderExamSelectorProps> = ({
         ) : (
           projectsInFolder.map((proj) => (
             <div key={proj.id} className="action-card">
-              <button className="btn-icon" onClick={() => onSelectProject(proj)} title="Abrir examen">
+              <button
+                className="btn-icon"
+                onClick={() => onSelectProject(proj)}
+                title="Abrir examen">
                 <img src={examen} alt="Abrir examen" />
               </button>
               <span className="card-label">{displayName(proj)}</span>
@@ -100,7 +124,12 @@ export const FolderExamSelector: React.FC<FolderExamSelectorProps> = ({
           ))
         )}
       </div>
-      <button onClick={() => onSelectFolder("")} className="btn-back" style={{ marginTop: "20px" }}>Volver</button>
+      <button
+        onClick={() => onSelectFolder("")}
+        className="btn-back"
+        style={{ marginTop: "20px" }}>
+        Volver
+      </button>
     </div>
   )
 }

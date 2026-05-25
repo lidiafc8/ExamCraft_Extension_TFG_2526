@@ -3,6 +3,7 @@
 ## Entidades (se deberán adaptar a los atributos concretos siguiendo el diagrama UML)
 
 ### Dominio Ajedrez
+
 ```java
 package es.us.dp1.chess.tournament.round;
 
@@ -27,6 +28,7 @@ public class Round {
     List<User> participants;
 }
 ```
+
 ```java
 package es.us.dp1.chess.tournament.tournament;
 
@@ -43,19 +45,20 @@ import jakarta.persistence.Transient;
 @Getter
 @Setter
 public class Tournament {
-    
+
     String name;
-    
+
     Integer prize;
-    
+
     LocalDate startDate;
-    
-    LocalDate endDate;   
-    
+
+    LocalDate endDate;
+
     @Transient
     List<User> participants;
 }
 ```
+
 ```java
 package es.us.dp1.chess.tournament.challenge;
 
@@ -107,14 +110,15 @@ import lombok.Setter;
 @Setter
 public class Symptom {
     String virulence;
-    
+
     @Transient
     Set<Disease> includes;
-    
+
     @Transient
     Set<Disease> excludes;
 }
 ```
+
 ```java
 package org.springframework.samples.petclinic.treatment;
 
@@ -136,6 +140,7 @@ public class Treatment {
     Set<Disease> recommendedFor;
 }
 ```
+
 ```java
 package org.springframework.samples.petclinic.coupon;
 
@@ -147,12 +152,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Coupon {
-    
+
     LocalDate startDate;
-    
+
     LocalDate expiryDate;
-    
-    GroomingPackage groomingPackage;    
+
+    GroomingPackage groomingPackage;
 
 }
 ```
@@ -178,7 +183,7 @@ public class GroomingConsumed {
     String comment;
 
     Visit appliedDuring;
-    
+
     Coupon consumed;
 
     List<GroomingType> typeConsumed;
@@ -205,7 +210,7 @@ public class Medicine{
     LocalDate endDate;  //fecha de fin de la medicación
 
     @Transient
-    Set<Disease> prescribedfor; 
+    Set<Disease> prescribedfor;
 
 }
 ```
@@ -222,7 +227,7 @@ import lombok.Setter;
 @Setter
 public class Symptom {
     String description;
-    
+
     @Transient
     Set<Disease> includedDiseases;
 
@@ -347,7 +352,7 @@ public interface SymptomRepository {
     List<Symptom> findAll();
 
     Symptom save(Symptom any);
-    
+
 }
 ```
 
@@ -364,7 +369,7 @@ public interface TreatmentRepository {
     List<Treatment> findAll();
 
     Treatment save(Treatment any);
-    
+
 }
 ```
 
@@ -383,10 +388,9 @@ public interface AllergyRepository {
     List<Allergy> findAll();
 
     Allergy save(Allergy any);
-    
+
 }
 ```
-
 
 ## Servicios (para cada una de las entidades a crear)
 
@@ -430,6 +434,7 @@ public class TournamentService {
         this.tournamentRepository = tournamentRepository;
     }
 ```
+
 ### Dominio Clínica Veterinaria
 
 ```java
@@ -485,21 +490,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service 
+@Service
 public class AllergyService {
     AllergyRepository repo;
-    
-    
+
+
     public AllergyService(AllergyRepository sr){
         this.repo=sr;
     }
-     
+
     public List<Allergy> getAll() {
-        return repo.findAll(); 
+        return repo.findAll();
     }
 
     public Allergy save(Allergy s) {
-        return repo.save(s); 
+        return repo.save(s);
     }
 }
 ```

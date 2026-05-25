@@ -1,16 +1,16 @@
 .btn-floating-github {
   position: fixed;
-  bottom: 50px;                         
+  bottom: 50px;
   right: 30px;
-  background-color: #3E2723;
-  color: #FDF5E6;
+  background-color: #3e2723;
+  color: #fdf5e6;
   border: none;
   padding: 16px 30px;
   border-radius: 50px;
   font-weight: bold;
   font-size: 16px;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s;
 }
 
@@ -24,7 +24,7 @@
   border-radius: 20px;
   padding: 40px;
   width: 90%;
-  max-width: 900px; 
+  max-width: 900px;
   box-shadow: 0 4px 15px rgba(62, 39, 35, 0.1);
   display: flex;
   flex-direction: column;
@@ -32,10 +32,10 @@
   margin: 0 auto;
 }
 
-.profiles-grid { 
-  display: grid; 
-  grid-template-columns: 1fr 1fr; 
-  gap: 20px; 
+.profiles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
   align-items: stretch;
 }
 
@@ -46,8 +46,8 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  border: 2px solid #A67C6D;
-  min-height: 100px;  
+  border: 2px solid #a67c6d;
+  min-height: 100px;
   height: 100%;
 }
 
@@ -63,7 +63,7 @@
 .user-name {
   font-size: 20px;
   font-weight: 700;
-  color: #3E2723;
+  color: #3e2723;
   margin: 0;
   padding: 0;
   line-height: 1;
@@ -84,16 +84,16 @@
   width: 80px;
   height: 80px;
   border: 2px solid;
-  object-fit: cover;  
-  flex-shrink: 0;   
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
-.repo-card { 
-  background-color: #A67C6D; 
-  padding: 20px;   
-  border-radius: 15px; 
+.repo-card {
+  background-color: #a67c6d;
+  padding: 20px;
+  border-radius: 15px;
   text-align: center;
-  font-size: 16px; 
+  font-size: 16px;
 }
 
 .repo-card h3 {
@@ -119,12 +119,12 @@
   margin-bottom: 16px;
 }
 
-.repo-link { 
-  display: inline-block; 
-  background-color: #FDF5E6; 
-  color: #3E2723; 
-  padding: 8px 20px; 
-  border-radius: 20px; 
-  text-decoration: none; 
-  font-weight: bold; 
+.repo-link {
+  display: inline-block;
+  background-color: #fdf5e6;
+  color: #3e2723;
+  padding: 8px 20px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
 }

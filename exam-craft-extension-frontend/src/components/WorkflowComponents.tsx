@@ -1,17 +1,18 @@
 import React from "react"
 
 const getStepStateClass = (stepNumber: number, currentStep: number): string => {
-  if (stepNumber < currentStep) return "step-completed";
-  if (stepNumber === currentStep) return "step-active";
-  return "step-inactive";
-};
+  if (stepNumber < currentStep) return "step-completed"
+  if (stepNumber === currentStep) return "step-active"
+  return "step-inactive"
+}
 
 const getLineBackground = (stepNumber: number, currentStep: number): string => {
-  return stepNumber < currentStep ? "#4CAF50" : "#e0e0e0";
-};
+  return stepNumber < currentStep ? "#4CAF50" : "#e0e0e0"
+}
 
-
-interface StepDef { label: string }
+interface StepDef {
+  label: string
+}
 
 interface StepperHeaderProps {
   steps: StepDef[]
@@ -22,8 +23,8 @@ export function StepperHeader({ steps, currentStep }: StepperHeaderProps) {
   return (
     <div className="stepper-container">
       {steps.map((step, i) => {
-        const n = i + 1;
-        const stateClass = getStepStateClass(n, currentStep);
+        const n = i + 1
+        const stateClass = getStepStateClass(n, currentStep)
 
         return (
           <React.Fragment key={step.label}>
@@ -38,7 +39,7 @@ export function StepperHeader({ steps, currentStep }: StepperHeaderProps) {
               />
             )}
           </React.Fragment>
-        );
+        )
       })}
     </div>
   )
@@ -63,7 +64,7 @@ export function PromptEditor({
   generateLabel = "Generar",
   onPromptChange,
   onGenerate,
-  onBack,
+  onBack
 }: PromptEditorProps) {
   return (
     <div className="content-card-wf">
@@ -77,8 +78,15 @@ export function PromptEditor({
       />
 
       <div className="wf-actions-row">
-        {onBack && <button onClick={onBack} className="btn-back">Volver</button>}
-        <button onClick={onGenerate} className="btn-step primary" disabled={isLoading}>
+        {onBack && (
+          <button onClick={onBack} className="btn-back">
+            Volver
+          </button>
+        )}
+        <button
+          onClick={onGenerate}
+          className="btn-step primary"
+          disabled={isLoading}>
           {isLoading ? <div className="loading-spinner" /> : generateLabel}
         </button>
       </div>
@@ -111,7 +119,7 @@ export function SplitResultView({
   onResponseChange,
   rightContent,
   rightActions,
-  footer,
+  footer
 }: SplitResultViewProps) {
   return (
     <>
@@ -128,8 +136,8 @@ export function SplitResultView({
         <div className="wf-column">
           <span className="wf-column-title">{rightTitle}</span>
 
-          {rightContent ?? (
-            isLoading ? (
+          {rightContent ??
+            (isLoading ? (
               <div className="wf-result-box">Generando...</div>
             ) : (
               <textarea
@@ -137,10 +145,11 @@ export function SplitResultView({
                 value={responseText}
                 onChange={(e) => onResponseChange(e.target.value)}
               />
-            )
-          )}
+            ))}
 
-          {rightActions && <div style={{ marginTop: "10px" }}>{rightActions}</div>}
+          {rightActions && (
+            <div style={{ marginTop: "10px" }}>{rightActions}</div>
+          )}
         </div>
       </div>
 
