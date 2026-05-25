@@ -15,16 +15,16 @@ export const parseJavaFiles = (rawText: string) => {
 
     const pathsBefore = [
       ...textBefore.matchAll(
-        /(?:\/\/[\s\wáéíóú]*[:\s-]*)?([a-zA-Z0-9_./\-]+\.java)/gi
+        /(?:\/\/[\s\wáéíóú]*[:\s-]*)?([a-zA-Z0-9_./\-]+\.java)/gi // NOSONAR javascript:S5852
       )
-    ] // NOSONAR javascript:S5852
+    ] 
 
     if (pathsBefore.length > 0) {
       path = pathsBefore[pathsBefore.length - 1][1]
     } else {
       const pathInsideMatch = rawCode.match(
-        /^[\s*/]*(?:Archivo|Path)?[\s:]*([a-zA-Z0-9_./\-]+\.java)/i
-      ) // NOSONAR javascript:S5852
+        /^[\s*/]*(?:Archivo|Path)?[\s:]*([a-zA-Z0-9_./\-]+\.java)/i // NOSONAR javascript:S5852
+      ) 
 
       if (pathInsideMatch) {
         path = pathInsideMatch[1]
