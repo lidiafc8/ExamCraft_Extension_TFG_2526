@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react"
-import type { GithubUser } from "../../models/GithubUser"
-import type { GithubRepo } from "../../models/GithubRepo"
-import { GithubService } from "../../services/githubService"
+import { useEffect, useState } from "react"
+
 import { Header } from "~src/components/Header"
-import './css/GitHub.css';
-import '../../css/CommonText.css';
+
+import type { GithubRepo } from "../../models/GithubRepo"
+import type { GithubUser } from "../../models/GithubUser"
+import { GithubService } from "../../services/githubService"
+
+import "./css/GitHub.css"
+import "../../css/CommonText.css"
 
 interface Props {
   readonly onBack: () => void
@@ -35,54 +38,69 @@ export default function GithubScreen({ onBack }: Props) {
     setLoading(false)
   }
 
-  useEffect(() => { cargarDatos() }, [])
+  useEffect(() => {
+    cargarDatos()
+  }, [])
 
   return (
     <div>
-      <Header 
-        onWelcome={onBack} 
-        breadcrumbItems={[]} 
-        currentStep="GITHUB INFO" 
+      <Header
+        onWelcome={onBack}
+        breadcrumbItems={[]}
+        currentStep="GITHUB INFO"
       />
 
       <main className="main-content">
-        
-        <h2 className="main-title">
-            Equipo de Desarrollo
-        </h2>
+        <h2 className="main-title">Equipo de Desarrollo</h2>
 
         <div className="content-card-github">
           {loading && (
-              <div className="subtitle-badge">Obteniendo datos de GitHub...</div>
+            <div className="subtitle-badge">Obteniendo datos de GitHub...</div>
           )}
-    
+
           {!loading && (
             <div className="profiles-grid">
               <div className="user-card">
                 {lidiaUser ? (
                   <>
-                    <img src={lidiaUser.avatar_url} alt="Lidia" className="avatar"/>
+                    <img
+                      src={lidiaUser.avatar_url}
+                      alt="Lidia"
+                      className="avatar"
+                    />
                     <div className="user-details">
                       <p className="user-name">{lidiaUser.login}</p>
-                      <p className="user-repos">Repos: {lidiaUser.public_repos}</p>
+                      <p className="user-repos">
+                        Repos: {lidiaUser.public_repos}
+                      </p>
                     </div>
                   </>
                 ) : (
-                  <div className="user-details"><h3>Cargando...</h3></div>
+                  <div className="user-details">
+                    <h3>Cargando...</h3>
+                  </div>
                 )}
               </div>
 
               <div className="user-card">
                 {mariaUser ? (
                   <>
-                    <img src={mariaUser.avatar_url} alt="Maria" className="avatar"/>
+                    <img
+                      src={mariaUser.avatar_url}
+                      alt="Maria"
+                      className="avatar"
+                    />
                     <div className="user-details">
                       <p className="user-name">{mariaUser.login}</p>
-                      <p className="user-repos">Repos: {mariaUser.public_repos}</p>
+                      <p className="user-repos">
+                        Repos: {mariaUser.public_repos}
+                      </p>
                     </div>
                   </>
                 ) : (
-                  <div className="user-details"><h3>Cargando...</h3></div>
+                  <div className="user-details">
+                    <h3>Cargando...</h3>
+                  </div>
                 )}
               </div>
             </div>
@@ -92,10 +110,8 @@ export default function GithubScreen({ onBack }: Props) {
             <div className="repo-card">
               <h3>Proyecto Actual</h3>
 
-              <div className="repo-name">
-                {repo.name}
-              </div>
-        
+              <div className="repo-name">{repo.name}</div>
+
               <p className="repo-desc">
                 "{repo.description || "TFG Universidad de Sevilla"}"
               </p>
@@ -104,12 +120,11 @@ export default function GithubScreen({ onBack }: Props) {
                 ⭐ Estrellas: {repo.stargazers_count}
               </div>
 
-              <a 
-                href={repo.html_url} 
-                target="_blank" 
+              <a
+                href={repo.html_url}
+                target="_blank"
                 rel="noopener noreferrer"
-                className="repo-link"
-              >
+                className="repo-link">
                 Ver en GitHub 🔗
               </a>
             </div>
@@ -117,7 +132,7 @@ export default function GithubScreen({ onBack }: Props) {
         </div>
 
         <button onClick={onBack} className="btn-back">
-            Volver
+          Volver
         </button>
       </main>
     </div>

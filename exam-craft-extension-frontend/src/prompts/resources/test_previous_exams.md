@@ -1,4 +1,5 @@
 # CLASE COMÚN ReflexiveTest (CLASE CON LOS MÉTODOS A UTILIZAR POR LOS TESTS)
+
 ```java
 package org.springframework.samples.petclinic;
 
@@ -34,7 +35,7 @@ import jakarta.validation.ValidatorFactory;
 public abstract class ReflexiveTest {
 
     protected static final String LONGER_THAN_60_STRING = "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados, lentejas los viernes, algún palomino de añadidura los domingos, consumían las tres partes de su hacienda.";
-    
+
     public void checkThatFieldIsAnnotatedWithDateTimeFormat(Class aClass, String fieldname,String format){
         try{
             Field date=aClass.getDeclaredField(fieldname);
@@ -42,7 +43,7 @@ public abstract class ReflexiveTest {
             assertNotNull(dateformat, "The treatmentStart (date) property is not annotated with a DateTimeFormat");
             assertEquals(dateformat.pattern(),format);
 
-        
+
         }catch(NoSuchFieldException ex){
             fail("The "+aClass.getName()+" class should have a field that is not present: "+ex.getMessage());
         }
@@ -72,7 +73,7 @@ public abstract class ReflexiveTest {
 
     public boolean classHasMethod(Object targetObject, String methodName, Class<?> ... parameterTypes) {
         try {
-            Method method = targetObject.getClass().getMethod(methodName, parameterTypes);            
+            Method method = targetObject.getClass().getMethod(methodName, parameterTypes);
             return true;
         } catch (NoSuchMethodException e) {
             return false;
@@ -87,19 +88,19 @@ public abstract class ReflexiveTest {
     public void checkThatFieldIsMandatory(Object validEntity,String fieldname,Class<?> type,EntityManager em){
         checkThatValueIsNotValid(validEntity, fieldname, null,type, em);
     }
-    
+
     public void checkThatValuesAreNotValid(Object validEntity,Map<String,List<Object>> invalidValues,EntityManager em){
         for(String fieldName:invalidValues.keySet())
             for(Object invalidValue:invalidValues.get(fieldName))
                 checkThatValueIsNotValid(validEntity, fieldName, invalidValue,null, em);
     }
-    
+
     public void checkThatValueIsNotValid(Object validEntity,String fieldname,Object value,Class<?> type, EntityManager em){
         try{
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-            Validator validator = factory.getValidator();            
+            Validator validator = factory.getValidator();
             assumeTrue(validator.validate(validEntity).isEmpty());
-            Object originalValue=setValue(validEntity,fieldname,type,value);                        
+            Object originalValue=setValue(validEntity,fieldname,type,value);
             Set<ConstraintViolation<Object>> violations=validator.validate(validEntity);
             if(violations.isEmpty()){
                 if(isEntity(validEntity.getClass())) {
@@ -112,7 +113,7 @@ public abstract class ReflexiveTest {
             setValue(validEntity,fieldname,type, originalValue);
         }catch (IllegalArgumentException e) {
             fail("The property "+fieldname+" of class "+validEntity.getClass().getName()+" was not modified: "+e.getMessage());
-        } 
+        }
 
     }
 
@@ -134,7 +135,7 @@ public abstract class ReflexiveTest {
                 fail("The property "+fieldname+" of class "+object.getClass().getName()+" was not modified: "+e.getMessage());
             } catch (IllegalAccessException e) {
                 fail("The property "+fieldname+" of class "+object.getClass().getName()+" was not modified: "+e.getMessage());
-            }            
+            }
             return originalValue;
     }
 
@@ -146,11 +147,11 @@ public abstract class ReflexiveTest {
     }
 
     private static String generateGetterName(String fieldname) {
-        return "get"+fieldname.substring(0, 1).toUpperCase()+fieldname.substring(1); 
+        return "get"+fieldname.substring(0, 1).toUpperCase()+fieldname.substring(1);
     }
 
     private static String generateSetterName(String fieldname) {
-        return "set"+fieldname.substring(0, 1).toUpperCase()+fieldname.substring(1); 
+        return "set"+fieldname.substring(0, 1).toUpperCase()+fieldname.substring(1);
     }
 
     public static Object invokeMethodReflexivelyWithParamTypes(Object targetObject, String methodName, Class<?>[] parameterTypes,
@@ -180,7 +181,7 @@ public abstract class ReflexiveTest {
         Object result=null;
         try {
             if(o!=null){
-                Method method = o.getClass().getMethod(methodName);            
+                Method method = o.getClass().getMethod(methodName);
                 result = method.invoke(o,params);
             }else
                 fail("The repository was not injected into the tests, its autowired value was null");
@@ -236,12 +237,12 @@ public abstract class ReflexiveTest {
 
     public Object getFieldValueReflexively(Object o, String fieldName){
         Object result=null;
-        try{            
+        try{
             Field myField=o.getClass().getField(fieldName);
             myField.setAccessible(true);
-            result=myField.get(o);            
+            result=myField.get(o);
         }catch(NoSuchFieldException ex){
-            result=invokeMethodReflexively(o, generateGetterName(fieldName));            
+            result=invokeMethodReflexively(o, generateGetterName(fieldName));
         } catch (IllegalArgumentException e) {
             fail("The property "+fieldName+" of class "+o.getClass().getName()+" was not modified: "+e.getMessage());
         } catch (IllegalAccessException e) {
@@ -295,7 +296,7 @@ public abstract class ReflexiveTest {
 
     public <T> boolean isEntity(Class<T> clazz) {
         return classIsAnnotatedWith(clazz, Entity.class);
-    }    
+    }
 }
 
 ```
@@ -312,46 +313,46 @@ Las clases para las que realizaremos el mapeo objeto-relacional como entidades J
 
 classDiagram
 direction LR
-class NamedEntity  {
+class NamedEntity {
 +String name
 }
-class Person  {
+class Person {
 +String firstName
 +String lastName
 }
 class Vet
-class Owner  {
+class Owner {
 +String address
 +String city
 }
 class Specialty
-class Pet  {
+class Pet {
 +Date birthDate
 +Double weight
 }
 class PetType
-class Visit  {
+class Visit {
 +Date date
 +String description
 }
-class Event  {
+class Event {
 +String type
 +Date date
 +String location
 +Integer maxParticipants
 +Double cost
 }
-class Participation  {
+class Participation {
 +LocalDate registeredOn
 +Integer score
 +Integer finalPosition
 }
-NamedEntity  <|--  Pet
-NamedEntity  <|--  Specialty
-NamedEntity  <|--  PetType
-NamedEntity  <|--  Event
-Person  <|--  Vet
-Person  <|--  Owner
+NamedEntity <|-- Pet
+NamedEntity <|-- Specialty
+NamedEntity <|-- PetType
+NamedEntity <|-- Event
+Person <|-- Vet
+Person <|-- Owner
 Owner "1" --> "0..n" Pet : owns
 Vet "0..n" --> "0..1" Specialty
 Visit "0..n" --> "1" Pet
@@ -462,7 +463,7 @@ class Test1 extends ReflexiveTest {
     @Test
     void test1CheckEventConstraints() {
         Event validEvent = createValidEvent(entityManager);
-        
+
         checkThatFieldsAreMandatory(validEvent, entityManager, "name", "type", "date", "location", "maxParticipants", "cost");
 
         Map<String, List<Object>> invalidValues = Map.of(
@@ -479,7 +480,7 @@ class Test1 extends ReflexiveTest {
     @Test
     void test1CheckParticipationConstraints() {
         Participation validParticipation = createValidParticipation(entityManager);
-        
+
         checkThatFieldsAreMandatory(validParticipation, entityManager, "registeredOn");
 
         Map<String, List<Object>> invalidValues = Map.of(
@@ -549,10 +550,10 @@ class Test1 extends ReflexiveTest {
     }
 
     private Participation createValidParticipation(EntityManager em) {
-       
+
         PetType type = new PetType();
         setValue(type, "name", String.class, "dog");
-        em.persist(type); 
+        em.persist(type);
 
         Owner owner = new Owner();
         setValue(owner, "firstName", String.class, "Test");
@@ -605,6 +606,7 @@ class Test1 extends ReflexiveTest {
 ```
 
 ### Test 2 – Relaciones entre las entidades
+
 Elimine las anotaciones @Transient de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior. Se pide crear las siguientes relaciones entre las entidades:
 
 Cree una relación unidireccional desde “Participation” hacia “Pet” que exprese la que aparece en el diagrama UML (mostrado en la primera página de este enunciado) respetando sus cardinalidades, usando el atributo “pet” en la clase “Participation”. Debe asegurarse de que la relación expresa adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, el atributo `pet` no puede ser nulo, puesto que la cardinalidad es 1 en el extremo de `Pet`.
@@ -612,6 +614,7 @@ Cree una relación unidireccional desde “Participation” hacia “Pet” que 
 Además, se pide crear una relación unidireccional desde “Participation” hacia “Event” que represente la que aparece en el diagrama UML, tenga en cuenta la cardinalidad que tiene, usando el atributo “event” en la clase “Participation”. Debe asegurarse de que la relación expresa adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, el atributo `event` no puede ser nulo, puesto que la cardinalidad es 1 en el extremo de `Event`.
 
 **Código del Test:**
+
 ```java
 package org.springframework.samples.petclinic;
 
@@ -692,52 +695,52 @@ Realizaremos una serie de ejercicios basados en funcionalidades que implementare
 
 classDiagram
 direction LR
-class BaseEntity  {
+class BaseEntity {
 +Int id
 }
-class Authorities  {
+class Authorities {
 +String authority "NotBlank"
 }
-class User  {
+class User {
 +String username "Lenght(4,50)"
 +String password "Lenght(8,50)"
 }
-class NamedEntity  {
+class NamedEntity {
 +String name "NotBlank"
 }
-class ChessMatch  {
+class ChessMatch {
 +LocalDateTime start
 +LocalDateTime finish
 +ChessMatchType type
 +Long turnDuration
 }
-class ChessBoard  {
+class ChessBoard {
 +Boolean creatorTurn
 +LocalDateTime currentTurnStart
 +Boolean jaque
 }
-class Piece  {
+class Piece {
 +PieceColor color
 +PieceType type
 +Integer xPosition
 +Integer yPosition
 }
-class Rating  {
+class Rating {
 +Integer score
 +LocalDate lastUpdate
 }
-class RatingChange  {
+class RatingChange {
 +Integer changeAmount
 +LocalDate changeDate
 }
-BaseEntity  <|--  Authorities
-BaseEntity  <|--  NamedEntity
-NamedEntity  <|--  ChessMatch
+BaseEntity <|-- Authorities
+BaseEntity <|-- NamedEntity
+NamedEntity <|-- ChessMatch
 Authorities "0..n" --> User
-ChessMatch "1" * --> "1" ChessBoard
+ChessMatch "1" _ --> "1" ChessBoard
 ChessMatch "0..n" --> "1" User : creator
 ChessMatch "0..n" --> "1" User : opponent
-ChessBoard "1" * --> "0..n" Piece
+ChessBoard "1" _ --> "0..n" Piece
 User "1" --> "1" Rating
 Rating "1" <-- "0..n" RatingChange
 RatingChange "0..n" --> "1" ChessMatch
@@ -897,7 +900,7 @@ public class Test1 extends ReflexiveTest {
         assertTrue(foundRating.isPresent(), "Persisted Rating should be retrievable");
     }
 
-   
+
 
     @Test
     void test1CheckRatingChangeConstraints() {
@@ -1013,11 +1016,12 @@ public class Test1 extends ReflexiveTest {
         setValue(ratingChange, "rating", Rating.class, createValidRating(em));
         setValue(ratingChange, "chessMatch", ChessMatch.class, createValidChessMatch(em));
         return ratingChange;
-    }  
+    }
 }
 ```
 
 ### Test 2 – Relaciones entre las entidades
+
 Elimine las anotaciones @Transient de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior. Se pide crear las siguientes relaciones entre las entidades:
 
 Cree una relación unidireccional desde “User” hacia “Rating” que exprese la que aparece en el diagrama UML (mostrado en la primera página de este enunciado) respetando sus cardinalidades, usando el atributo “rating” de la clase “User”.
@@ -1025,6 +1029,7 @@ Cree una relación unidireccional desde “User” hacia “Rating” que expres
 Además, se pide crear dos relaciones unidireccionales desde “RatingChange” hacia “Rating” y hacia “ChessMatch” que representen las que aparecen en el diagrama UML, tenga en cuenta la cardinalidad que tienen (recuerde que en este caso, se tratan de relaciones de 0..n a 1), usando como nombre de los atributos “rating” y “chessMatch” en la clase “RatingChange”, correspondientemente. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML, por ejemplo, algunos atributos pueden ser nulos puesto que la cardinalidad es 0..n pero otros no, porque su cardinalidad en el extremo navegable de la relación es 1..n.
 
 **Código del Test:**
+
 ```java
 package es.us.dp1.chess.tournament;
 
@@ -1083,7 +1088,7 @@ public class Test2 extends ReflexiveTest {
     @Test
     public void test2UserConstraints() {
         User user = createValidUser(em);
-        
+
         checkThatFieldsAreMandatory(user, em, "rating");
     }
 
@@ -1138,14 +1143,13 @@ public class Test2 extends ReflexiveTest {
 }
 ```
 
-
 # Control práctico de DP1 2024-2025 (Segunda Convocatoria Julio 2025)
 
 ## Enunciado
 
-En este ejercicio, añadiremos la funcionalidad de gestión de desafíos para una implementación del juego del ajedrez. Concretamente, se proporciona una clase `ChessMatch` que representa las partidas que se juegan, y que tiene asociada una instancia de la clase `ChessBoard` que representa el estado del tablero para dicha partida, por lo que tendrá asociada un conjunto de instancias de la clase `Piece`. 
+En este ejercicio, añadiremos la funcionalidad de gestión de desafíos para una implementación del juego del ajedrez. Concretamente, se proporciona una clase `ChessMatch` que representa las partidas que se juegan, y que tiene asociada una instancia de la clase `ChessBoard` que representa el estado del tablero para dicha partida, por lo que tendrá asociada un conjunto de instancias de la clase `Piece`.
 
-Además, tendremos la clase `Challenge`, que representa a un desafío acotado en el tiempo, por ejemplo "ganar 7 partidas en una semana entre el 10 y el 17 de julio de 2025", o "jugar 100 partidas en el año 2025 (entre el 1 de enero y el 31 de diciembre)". Para expresar el objetivo del desafío se usa el enumerado `ChallengeObjective`. 
+Además, tendremos la clase `Challenge`, que representa a un desafío acotado en el tiempo, por ejemplo "ganar 7 partidas en una semana entre el 10 y el 17 de julio de 2025", o "jugar 100 partidas en el año 2025 (entre el 1 de enero y el 31 de diciembre)". Para expresar el objetivo del desafío se usa el enumerado `ChallengeObjective`.
 
 Los usuarios del sistema se inscriben en los desafíos (esta situación está expresada a través de la relación `participants`), y cada vez que juegan una partida ésta se asocia con los desafíos en los que estén participando activamente según las fechas y la inscripción (esta situación está expresada a través de la relación entre `Challenge` y `ChessMatch`).
 
@@ -1155,24 +1159,27 @@ El diagrama UML que describe las clases y relaciones con las que vamos a trabaja
 
 Las clases para las que realizaremos el mapeo objeto-relacional como entidades JPA se han señalado en rojo. Las clases en azul son clases que se proporcionan ya mapeadas, pero con las que se trabajará durante el control de laboratorio.
 
-Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Cada ejercicio correctamente resuelto valdrá un punto, el número de casos de prueba de cada ejercicio puede variar entre uno y otro y la nota se calculará en base al porcentaje de casos de prueba que pasan. 
+Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Cada ejercicio correctamente resuelto valdrá un punto, el número de casos de prueba de cada ejercicio puede variar entre uno y otro y la nota se calculará en base al porcentaje de casos de prueba que pasan.
 
 ---
 
 ## Ejercicios a Resolver
 
 ### Test 1 – Restricciones de atributos
+
 Modificar la clase `Challenge` para que sea una entidad. Esta clase está alojada en el paquete `es.us.dp1.chess.tournament.challenge`, y debe tener los siguientes atributos y restricciones:
-* El atributo de tipo entero (`Integer`) llamado `id` actuará como clave primaria.
-* Un atributo de tipo cadena de caracteres (`String`) llamado `message` obligatorio (no puede ser nulo), que debe tener una longitud mínima de 5 caracteres y máxima de 60 y que no puede estar formada por caracteres vacíos.
-* El atributo de tipo entero (`Integer`) llamado `targetValue`, que representa el número de partidas ganadas o jugadas, o el número de piezas capturadas. Es obligatorio y su valor debe ser mayor o igual a 1.
-* El atributo de tipo fecha (`LocalDate`) llamado `startDate`, que representa la fecha de comienzo y es obligatorio.
-* El atributo de tipo fecha (`LocalDate`) llamado `endDate`, que representa la fecha de finalización y es obligatorio.
-* Un atributo del tipo enumerado `ChallengeObjective` llamado `goal` obligatorio. Debe almacenarse como una cadena en la BD.
+
+- El atributo de tipo entero (`Integer`) llamado `id` actuará como clave primaria.
+- Un atributo de tipo cadena de caracteres (`String`) llamado `message` obligatorio (no puede ser nulo), que debe tener una longitud mínima de 5 caracteres y máxima de 60 y que no puede estar formada por caracteres vacíos.
+- El atributo de tipo entero (`Integer`) llamado `targetValue`, que representa el número de partidas ganadas o jugadas, o el número de piezas capturadas. Es obligatorio y su valor debe ser mayor o igual a 1.
+- El atributo de tipo fecha (`LocalDate`) llamado `startDate`, que representa la fecha de comienzo y es obligatorio.
+- El atributo de tipo fecha (`LocalDate`) llamado `endDate`, que representa la fecha de finalización y es obligatorio.
+- Un atributo del tipo enumerado `ChallengeObjective` llamado `goal` obligatorio. Debe almacenarse como una cadena en la BD.
 
 No modifique por ahora las anotaciones `@Transient` de las clases. Modificar la interfaz `ChallengeRepository` alojada en el mismo paquete para que extienda a `CrudRepository`. No olvide especificar sus parámetros de tipo y descomentar la consulta del método `findActiveChallengesAtDate`.
 
 **Código del Test:**
+
 ```java
 package es.us.dp1.chess.tournament;
 
@@ -1214,10 +1221,10 @@ public class Test1 extends ReflexiveTest{
     TournamentRepository tournamentRepo;
     @Autowired(required = false)
     RoundRepository roundRepo;
-    
+
     @Autowired
     EntityManager em;
- 
+
     @Test
     public void test1RepositoriesExist(){
         assertNotNull(tournamentRepo,"The tournament repository was not injected into the tests, its autowired value was null");
@@ -1231,30 +1238,30 @@ public class Test1 extends ReflexiveTest{
             assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a tournament that does not exist");
         }else
             fail("The tournament repository was not injected into the tests, its autowired value was null");
-        
+
         if(roundRepo!=null){
             Object v=roundRepo.findById(12);
             assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a round that does not exist");
         }else
             fail("The round repository was not injected into the tests, its autowired value was null");
     }
-    
-    
 
-    
+
+
+
     @Test
     public void test1CheckRoundConstraints() {
-        Map<String,List<Object>> invalidValues=Map.of( 
+        Map<String,List<Object>> invalidValues=Map.of(
                                         "name",     List.of(
                                                         "      ","a",
                                                         "aaaa",
                                                         "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que " +
                                                         "vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor." +
-                                                        "Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos"+ 
-                                                        "los sábados," + 
+                                                        "Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos"+
+                                                        "los sábados," +
                                                         "lentejas los viernes, algún palomino de añadidura los domingos, consumían las tres"+
-                                                        " partes de su hacienda. "),                                           
-                                            "roundNumber",  List.of(-1, 0, 1001)                                           
+                                                        " partes de su hacienda. "),
+                                            "roundNumber",  List.of(-1, 0, 1001)
                                             );
 
 
@@ -1262,10 +1269,10 @@ public class Test1 extends ReflexiveTest{
         if(r.getTournament()!=null)
             em.persist(r.getTournament());
         em.persist(r);
-        
-        checkThatFieldsAreMandatory(r, em, "roundDate");        
-        
-        checkThatValuesAreNotValid(r, invalidValues,em);   
+
+        checkThatFieldsAreMandatory(r, em, "roundDate");
+
+        checkThatValuesAreNotValid(r, invalidValues,em);
     }
 
      @Test
@@ -1283,18 +1290,18 @@ public class Test1 extends ReflexiveTest{
                                             "prize", List.of(-1,0)
                                             );
 
-                                        
+
         Tournament t=createValidTournament(em);
         em.persist(t);
-        
-        checkThatFieldsAreMandatory(t, em, "name","startDate","endDate","prize");        
-        
-        checkThatValuesAreNotValid(t, invalidValues,em);   
+
+        checkThatFieldsAreMandatory(t, em, "name","startDate","endDate","prize");
+
+        checkThatValuesAreNotValid(t, invalidValues,em);
     }
 
-    
+
     @Test
-    public void test1CheckTournamentAnnotations() {        
+    public void test1CheckTournamentAnnotations() {
         assertTrue(classIsAnnotatedWith(Tournament.class,Entity.class));
     }
 
@@ -1303,27 +1310,27 @@ public class Test1 extends ReflexiveTest{
         assertTrue(classIsAnnotatedWith(Round.class,Entity.class));
     }
 
-    public static Tournament createValidTournament(EntityManager em){        
-        Tournament tournament=new Tournament();        
+    public static Tournament createValidTournament(EntityManager em){
+        Tournament tournament=new Tournament();
         setValue(tournament,"name",String.class,"Torneo de Ajedrez de Los Palacios");
         User u1=null;
         User u2=null;
         if(em!=null){
             u1=em.find(User.class, 4);
-            u2=em.find(User.class, 5);        
+            u2=em.find(User.class, 5);
         }else{
             u1=createUser("Pepe");
             u2=createUser("Juan");
         }
-        tournament.setStartDate(LocalDate.of(2024, 12, 1)); 
+        tournament.setStartDate(LocalDate.of(2024, 12, 1));
         tournament.setEndDate(LocalDate.of(2024, 12, 20));
         tournament.setPrize(1000);
-        tournament.setParticipants(List.of(u1,u2));        
+        tournament.setParticipants(List.of(u1,u2));
         return tournament;
     }
 
     public static Round createValidRound(EntityManager em){
-        
+
         User u1=null;
         User u2=null;
         if(em!=null){
@@ -1334,9 +1341,9 @@ public class Test1 extends ReflexiveTest{
             u2=createUser("Juan");
         }
         Round round = new Round();
-        setValue(round, "name", String.class, "Finals");        
+        setValue(round, "name", String.class, "Finals");
         round.setRoundNumber(1);  // Valor dentro del rango
-        round.setRoundDate(LocalDate.of(2024, 12, 1));        
+        round.setRoundDate(LocalDate.of(2024, 12, 1));
         round.setParticipants(List.of(u1,u2));
         round.setTournament(createValidTournament(em));
         return round;
@@ -1350,17 +1357,20 @@ public class Test1 extends ReflexiveTest{
         setValue(u1, "authority", Authorities.class, a1);
         return u1;
     }
-        
+
 }
 ```
 
 ### Test 2 – Relaciones entre las entidades
+
 Elimine las anotaciones `@Transient` de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior. Se pide crear las siguientes relaciones:
-* Relación unidireccional desde `Challenge` hacia `User` usando el atributo `participants`.
-* Relación unidireccional desde `Challenge` hacia `ChessMatch` mediante el atributo `matches`.
-*Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML.*
+
+- Relación unidireccional desde `Challenge` hacia `User` usando el atributo `participants`.
+- Relación unidireccional desde `Challenge` hacia `ChessMatch` mediante el atributo `matches`.
+  _Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML._
 
 **Código del Test:**
+
 ```java
 package es.us.dp1.chess.tournament;
 
@@ -1378,36 +1388,36 @@ import jakarta.persistence.ManyToOne;
 
 @DataJpaTest()
 public class Test2 extends ReflexiveTest{
-    
+
     @Autowired(required = false)
-    EntityManager em;         
+    EntityManager em;
 
     @Test
     public void test2TournamentAnnotations() {
-        checkThatFieldIsAnnotatedWith(Tournament.class, "participants", ManyToMany.class);                                  
+        checkThatFieldIsAnnotatedWith(Tournament.class, "participants", ManyToMany.class);
     }
 
     @Test
-    public void test2RoundAnnotations() {        
-        checkThatFieldIsAnnotatedWith(Round.class, "tournament", ManyToOne.class);        
-        checkThatFieldIsAnnotatedWith(Round.class, "participants", ManyToMany.class);                
+    public void test2RoundAnnotations() {
+        checkThatFieldIsAnnotatedWith(Round.class, "tournament", ManyToOne.class);
+        checkThatFieldIsAnnotatedWith(Round.class, "participants", ManyToMany.class);
     }
 
     @Test
-    public void test2ChessMatchAnnotations() {        
-        checkThatFieldIsAnnotatedWith(ChessMatch.class, "round", ManyToOne.class);                
+    public void test2ChessMatchAnnotations() {
+        checkThatFieldIsAnnotatedWith(ChessMatch.class, "round", ManyToOne.class);
     }
-    
+
     @Test
     private void test2TournamentConstraints() {
         Tournament t=Test1.createValidTournament(em);
-        checkThatFieldsAreMandatory(t, em,"participants");        
+        checkThatFieldsAreMandatory(t, em,"participants");
     }
 
     @Test
     private void test2RoundConstraints() {
         Round r=Test1.createValidRound(em);
-        checkThatFieldsAreMandatory(r, em,"participants","tournament");                
+        checkThatFieldsAreMandatory(r, em,"participants","tournament");
     }
 
 
@@ -1418,9 +1428,9 @@ public class Test2 extends ReflexiveTest{
 
 ## Enunciado
 
-En este ejercicio, añadiremos la funcionalidad de gestión de desafíos para una implementación del juego del ajedrez. Concretamente, se proporciona una clase `ChessMatch` que representa las partidas que se juegan, y que tiene asociada una instancia de la clase `ChessBoard` que representa el estado del tablero para dicha partida, por lo que tendrá asociada un conjunto de instancias de la clase `Piece`. 
+En este ejercicio, añadiremos la funcionalidad de gestión de desafíos para una implementación del juego del ajedrez. Concretamente, se proporciona una clase `ChessMatch` que representa las partidas que se juegan, y que tiene asociada una instancia de la clase `ChessBoard` que representa el estado del tablero para dicha partida, por lo que tendrá asociada un conjunto de instancias de la clase `Piece`.
 
-Además, tendremos la clase `Challenge`, que representa a un desafío acotado en el tiempo, por ejemplo *"ganar 7 partidas en una semana entre el 10 y el 17 de julio de 2025"*, o *"jugar 100 partidas en el año 2025 (entre el 1 de enero y el 31 de diciembre)"*. Para expresar el objetivo del desafío se usa el enumerado `ChallengeObjective`. 
+Además, tendremos la clase `Challenge`, que representa a un desafío acotado en el tiempo, por ejemplo _"ganar 7 partidas en una semana entre el 10 y el 17 de julio de 2025"_, o _"jugar 100 partidas en el año 2025 (entre el 1 de enero y el 31 de diciembre)"_. Para expresar el objetivo del desafío se usa el enumerado `ChallengeObjective`.
 
 Los usuarios del sistema se inscriben en los desafíos (esta situación está expresada a través de la relación **"participants"**), y cada vez que juegan una partida ésta se asocia con los desafíos en los que estén participando activamente según las fechas y la inscripción (esta situación está expresada a través de la relación entre `Challenge` y `ChessMatch`).
 
@@ -1429,6 +1439,7 @@ Los usuarios del sistema se inscriben en los desafíos (esta situación está ex
 Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Si desea ver el resultado que arrojarían las pruebas en backend, puede ejecutarlas (bien mediante su entorno de desarrollo favorito, bien mediante el comando `mvnw test` en la carpeta raíz del proyecto). Cada ejercicio correctamente resuelto valdrá un punto; el número de casos de prueba de cada ejercicio puede variar entre uno y otro y la nota se calculará en base al porcentaje de casos de prueba que pasan. Por ejemplo, si pasan la mitad (50%) de los casos de prueba de un ejercicio, en lugar de un punto usted obtendrá un 0.5.
 
 ### Instrucciones de Entrega
+
 Para comenzar el control debe aceptar la tarea a través del siguiente enlace: [https://classroom.github.com/a/lD4Iqc88](https://classroom.github.com/a/lD4Iqc88)
 
 Al aceptar dicha tarea, se creará un repositorio único individual para usted; debe usar dicho repositorio para realizar el control práctico. Debe entregar la actividad en EV asociada al control check proporcionando como texto la dirección URL de su repositorio personal. Recuerde que además debe entregar su solución del control.
@@ -1437,29 +1448,31 @@ La entrega de su solución al control se realizará mediante un único comando `
 
 ### Notas Importantes
 
-* **Nota importante 1:** No modifique los nombres de las clases ni la signatura (nombre, tipo de respuesta y parámetros) de los métodos proporcionados como material de base. Las pruebas que se usan para la evaluación dependen de esta estructura. Si los modifica probablemente no pueda hacer que pasen las pruebas, y obtendrá una mala calificación.
-* **Nota importante 2:** No modifique las pruebas unitarias proporcionadas bajo ningún concepto. Aunque las modifique en su copia local, éstas serán restituidas mediante un comando git antes de la ejecución de las pruebas para la nota final.
-* **Nota importante 3:** Mientras haya ejercicios no resueltos habrá tests que no funcionen y, por tanto, el comando `mvnw install` finalizará con error. Esto es normal. Si se quiere probar la aplicación se puede ejecutar de la forma habitual pese a este error.
-* **Nota importante 4:** La descarga del material usando git y la entrega de su solución con git forman parte de las competencias evaluadas. No se aceptarán entregas por otros medios ni se podrá solicitar ayuda a los profesores para estas tareas.
-* **Nota importante 5:** No se aceptarán como soluciones válidas proyectos cuyo código fuente no compile correctamente o que provoquen fallos al arrancar la aplicación en la inicialización del contexto de Spring. Serán evaluadas con una nota de 0.
+- **Nota importante 1:** No modifique los nombres de las clases ni la signatura (nombre, tipo de respuesta y parámetros) de los métodos proporcionados como material de base. Las pruebas que se usan para la evaluación dependen de esta estructura. Si los modifica probablemente no pueda hacer que pasen las pruebas, y obtendrá una mala calificación.
+- **Nota importante 2:** No modifique las pruebas unitarias proporcionadas bajo ningún concepto. Aunque las modifique en su copia local, éstas serán restituidas mediante un comando git antes de la ejecución de las pruebas para la nota final.
+- **Nota importante 3:** Mientras haya ejercicios no resueltos habrá tests que no funcionen y, por tanto, el comando `mvnw install` finalizará con error. Esto es normal. Si se quiere probar la aplicación se puede ejecutar de la forma habitual pese a este error.
+- **Nota importante 4:** La descarga del material usando git y la entrega de su solución con git forman parte de las competencias evaluadas. No se aceptarán entregas por otros medios ni se podrá solicitar ayuda a los profesores para estas tareas.
+- **Nota importante 5:** No se aceptarán como soluciones válidas proyectos cuyo código fuente no compile correctamente o que provoquen fallos al arrancar la aplicación en la inicialización del contexto de Spring. Serán evaluadas con una nota de 0.
 
 ---
 
 ## Ejercicios a Desarrollar
 
 ### Test 1 – Restricciones de atributos
+
 Modificar la clase `Challenge` para que sea una entidad. Esta clase está alojada en el paquete `es.us.dp1.chess.tournament.challenge`, y debe tener los siguientes atributos y restricciones:
 
-* El atributo de tipo entero (`Integer`) llamado `id` actuará como clave primaria.
-* Un atributo de tipo cadena de caracteres (`String`) llamado `message` obligatorio (no puede ser nulo), que debe tener una longitud mínima de 5 caracteres y máxima de 60 y que no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.). [^1]
-* El atributo de tipo entero (`Integer`) llamado `targetValue`, que representa el número de partidas ganadas/jugadas o piezas capturadas. Este atributo es obligatorio y su valor debe ser mayor o igual a 1.
-* El atributo de tipo fecha (`LocalDate`) llamado `startDate`, que representa la fecha de comienzo y es obligatorio.
-* El atributo de tipo fecha (`LocalDate`) llamado `endDate`, que representa la fecha de finalización y es obligatorio.
-* Un atributo del tipo enumerado `ChallengeObjective` llamado `goal`. Este atributo es obligatorio y debe almacenarse como una cadena en la BD.
+- El atributo de tipo entero (`Integer`) llamado `id` actuará como clave primaria.
+- Un atributo de tipo cadena de caracteres (`String`) llamado `message` obligatorio (no puede ser nulo), que debe tener una longitud mínima de 5 caracteres y máxima de 60 y que no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.). [^1]
+- El atributo de tipo entero (`Integer`) llamado `targetValue`, que representa el número de partidas ganadas/jugadas o piezas capturadas. Este atributo es obligatorio y su valor debe ser mayor o igual a 1.
+- El atributo de tipo fecha (`LocalDate`) llamado `startDate`, que representa la fecha de comienzo y es obligatorio.
+- El atributo de tipo fecha (`LocalDate`) llamado `endDate`, que representa la fecha de finalización y es obligatorio.
+- Un atributo del tipo enumerado `ChallengeObjective` llamado `goal`. Este atributo es obligatorio y debe almacenarse como una cadena en la BD.
 
-*No modifique por ahora las anotaciones `@Transient` de las clases.* Modificar la interfaz `ChallengeRepository` alojada en el mismo paquete para que extienda a `CrudRepository`. No olvide especificar sus parámetros de tipo y descomentar la consulta del método `findActiveChallengesAtDate`.
+_No modifique por ahora las anotaciones `@Transient` de las clases._ Modificar la interfaz `ChallengeRepository` alojada en el mismo paquete para que extienda a `CrudRepository`. No olvide especificar sus parámetros de tipo y descomentar la consulta del método `findActiveChallengesAtDate`.
 
 **Código del Test:**
+
 ```java
 package es.us.dp1.chess.tournament;
 
@@ -1597,12 +1610,14 @@ public class Test1 extends ReflexiveTest{
 ```
 
 ### Test 2 – Relaciones entre las entidades
+
 Elimine las anotaciones `@Transient` de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior. Se pide crear las siguientes relaciones:
 
-* Cree una relación unidireccional desde `Challenge` hacia `User` que exprese la que aparece en el diagrama UML respetando sus cardinalidades, usando el atributo `participants` de la clase `Challenge`.
-* Cree otra relación unidireccional desde `Challenge` hacia `ChessMatch` mediante el atributo `matches` que represente la que aparece en el diagrama UML. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama (ej. algunos atributos pueden ser nulos si la cardinalidad es 0..n, pero otros no si es 1..n).
+- Cree una relación unidireccional desde `Challenge` hacia `User` que exprese la que aparece en el diagrama UML respetando sus cardinalidades, usando el atributo `participants` de la clase `Challenge`.
+- Cree otra relación unidireccional desde `Challenge` hacia `ChessMatch` mediante el atributo `matches` que represente la que aparece en el diagrama UML. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama (ej. algunos atributos pueden ser nulos si la cardinalidad es 0..n, pero otros no si es 1..n).
 
 **Código del Test:**
+
 ```java
 package es.us.dp1.chess.tournament;
 
@@ -1647,6 +1662,7 @@ Además, tendremos las clases `Symptom` y `Treatment` que representan a los sín
 Realizaremos una serie de ejercicios basados en funcionalidades que implementaremos en el sistema, y validaremos mediante pruebas unitarias. Si desea ver el resultado que arrojarían las pruebas en backend, puede ejecutarlas (bien mediante su entorno de desarrollo favorito, bien mediante el comando `mvnw test` en la carpeta raíz del proyecto). Cada ejercicio correctamente resuelto valdrá un punto, el número de casos de prueba de cada ejercicio puede variar entre uno y otro y la nota se calculará en base al porcentaje de casos de prueba que pasan. Por ejemplo, si pasan la mitad (50%) de los casos de prueba de un ejercicio, en lugar de un punto usted obtendrá un 0.5.
 
 ### Instrucciones de Entrega
+
 Para comenzar el control debe aceptar la tarea de este control práctico a través del siguiente enlace: [https://classroom.github.com/a/7txXh2sC](https://classroom.github.com/a/7txXh2sC)
 
 Al aceptar dicha tarea, se creará un repositorio único individual para usted; debe usar dicho repositorio para realizar el control práctico. Debe entregar la actividad en EV asociada al control check proporcionando como texto la dirección url de su repositorio personal. Recuerde que además debe entregar su solución del control.
@@ -1655,34 +1671,39 @@ La entrega de su solución al control se realizará mediante un único comando `
 
 ### Notas Importantes
 
-* **Nota importante 1:** No modifique los nombres de las clases ni la signatura (nombre, tipo de respuesta y parámetros) de los métodos proporcionados como material de base para el control. Las pruebas que se usan para la evaluación dependen de que las clases y los métodos tengan la estructura y nombres proporcionados. Si los modifica probablemente no pueda hacer que pasen las pruebas, y obtendrá una mala calificación.
-* **Nota importante 2:** No modifique las pruebas unitarias proporcionadas como parte del proyecto bajo ningún concepto. Aunque modifique las pruebas en su copia local del proyecto, éstas serán restituidas mediante un comando git previamente a la ejecución de las pruebas para la emisión de la nota final, por lo que sus modificaciones en las pruebas no serán tenidas en cuenta en ningún momento.
-* **Nota importante 3:** Mientras haya ejercicios no resueltos habrá tests que no funcionen y, por tanto, el comando `mvnw install` finalizará con error. Esto es normal debido a la forma en la que está planteado el control y no hay que preocuparse por ello. Si se quiere probar la aplicación se puede ejecutar de la forma habitual pese a que `mvnw install` finalice con error.
-* **Nota importante 4:** La descarga del material de la prueba usando git, y la entrega de su solución con git a través del repositorio GitHub creado a tal efecto forman parte de las competencias evaluadas durante el examen, por lo que no se aceptarán entregas que no hagan uso de este medio, y no se podrá solicitar ayuda a los profesores para realizar estas tareas.
-* **Nota importante 5:** No se aceptarán como soluciones válidas proyectos cuyo código fuente no compile correctamente o que provoquen fallos al arrancar la aplicación en la inicialización del contexto de Spring. Las soluciones cuyo código fuente no compile o incapaces de arrancar el contexto de Spring serán evaluadas con una nota de 0.
+- **Nota importante 1:** No modifique los nombres de las clases ni la signatura (nombre, tipo de respuesta y parámetros) de los métodos proporcionados como material de base para el control. Las pruebas que se usan para la evaluación dependen de que las clases y los métodos tengan la estructura y nombres proporcionados. Si los modifica probablemente no pueda hacer que pasen las pruebas, y obtendrá una mala calificación.
+- **Nota importante 2:** No modifique las pruebas unitarias proporcionadas como parte del proyecto bajo ningún concepto. Aunque modifique las pruebas en su copia local del proyecto, éstas serán restituidas mediante un comando git previamente a la ejecución de las pruebas para la emisión de la nota final, por lo que sus modificaciones en las pruebas no serán tenidas en cuenta en ningún momento.
+- **Nota importante 3:** Mientras haya ejercicios no resueltos habrá tests que no funcionen y, por tanto, el comando `mvnw install` finalizará con error. Esto es normal debido a la forma en la que está planteado el control y no hay que preocuparse por ello. Si se quiere probar la aplicación se puede ejecutar de la forma habitual pese a que `mvnw install` finalice con error.
+- **Nota importante 4:** La descarga del material de la prueba usando git, y la entrega de su solución con git a través del repositorio GitHub creado a tal efecto forman parte de las competencias evaluadas durante el examen, por lo que no se aceptarán entregas que no hagan uso de este medio, y no se podrá solicitar ayuda a los profesores para realizar estas tareas.
+- **Nota importante 5:** No se aceptarán como soluciones válidas proyectos cuyo código fuente no compile correctamente o que provoquen fallos al arrancar la aplicación en la inicialización del contexto de Spring. Las soluciones cuyo código fuente no compile o incapaces de arrancar el contexto de Spring serán evaluadas con una nota de 0.
 
 ---
 
 ## Ejercicios a Desarrollar
 
 ### Test 1 – Restricciones de atributos
+
 Modificar las clases `Symptom` y `Treatment` para que sean entidades. Estas clases están alojadas en el paquete `org.springframework.samples.petclinic.disease`, y deben tener los siguientes atributos y restricciones:
 
 **Para ambas clases:**
-* El atributo de tipo entero (`Integer`) llamado `id` actuará como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
-* Un atributo de tipo cadena de caracteres (`String`) llamado `name` obligatorio (no puede ser nulo), que debe tener una longitud mínima de 3 caracteres y máxima de 50 y que no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.).
+
+- El atributo de tipo entero (`Integer`) llamado `id` actuará como clave primaria en la tabla de la base de datos relacional asociada a la entidad.
+- Un atributo de tipo cadena de caracteres (`String`) llamado `name` obligatorio (no puede ser nulo), que debe tener una longitud mínima de 3 caracteres y máxima de 50 y que no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.).
 
 **Para la clase Treatment:**
-* El atributo de tipo entero (`Integer`) llamado `baseDose`, que representa el número de miligramos de tratamiento por kilogramo de peso del animal. Este atributo será obligatorio y tendrá un valor mínimo de 1.
-* El atributo de tipo entero (`Integer`) llamado `shockDose`, que representa una cantidad fija de miligramos. En la lógica de negocio del sistema esta cantidad se añadirá al tratamiento en caso de que la enfermedad a tratar sea mortal (valor 5 para el atributo `severity` en la entidad `Disease`). El atributo es opcional, pero si toma valor, tendrá un valor mínimo de 1.
-* El atributo de tipo entero (`Integer`) llamado `maxDose` que representa la dosis máxima de tratamiento que puede llegar a administrarse (en miligramos de tratamiento por kilogramo de peso del animal). Este atributo es obligatorio y tendrá un valor mínimo de 1.
+
+- El atributo de tipo entero (`Integer`) llamado `baseDose`, que representa el número de miligramos de tratamiento por kilogramo de peso del animal. Este atributo será obligatorio y tendrá un valor mínimo de 1.
+- El atributo de tipo entero (`Integer`) llamado `shockDose`, que representa una cantidad fija de miligramos. En la lógica de negocio del sistema esta cantidad se añadirá al tratamiento en caso de que la enfermedad a tratar sea mortal (valor 5 para el atributo `severity` en la entidad `Disease`). El atributo es opcional, pero si toma valor, tendrá un valor mínimo de 1.
+- El atributo de tipo entero (`Integer`) llamado `maxDose` que representa la dosis máxima de tratamiento que puede llegar a administrarse (en miligramos de tratamiento por kilogramo de peso del animal). Este atributo es obligatorio y tendrá un valor mínimo de 1.
 
 **Para la clase Symptom:**
-* El atributo de tipo cadena caracteres (`String`) llamado `virulence` opcional que únicamente podrá tomar tres valores: "LOW", "MEDIUM", "HIGH". [^1]
 
-*No modifique por ahora las anotaciones `@Transient` de las clases.* Modificar las interfaces `SymptomRepository` y `TreatmentRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
+- El atributo de tipo cadena caracteres (`String`) llamado `virulence` opcional que únicamente podrá tomar tres valores: "LOW", "MEDIUM", "HIGH". [^1]
+
+_No modifique por ahora las anotaciones `@Transient` de las clases._ Modificar las interfaces `SymptomRepository` y `TreatmentRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
 
 **Código del Test:**
+
 ```java
 package org.springframework.samples.petclinic;
 
@@ -1717,7 +1738,7 @@ public class Test1 extends ReflexiveTest{
     SymptomRepository symptomsRepo;
     @Autowired(required = false)
     TreatmentRepository treatmentsRepo;
-    
+
     @Autowired
     EntityManager em;
 
@@ -1731,25 +1752,25 @@ public class Test1 extends ReflexiveTest{
     public void test1RepositoriesContainsMethod(){
         if(symptomsRepo!=null){
             Object v=symptomsRepo.findById(12);
-            assertFalse(null!=v && ((Optional)v).isPresent(), 
+            assertFalse(null!=v && ((Optional)v).isPresent(),
             "No result (null) should be returned for a symptom that does not exist");
         }else
             fail("The symptoms repository was not injected into the tests, its autowired value was null");
-        
+
         if(treatmentsRepo!=null){
             Object v=treatmentsRepo.findById(12);
-            assertFalse(null!=v && ((Optional)v).isPresent(), 
+            assertFalse(null!=v && ((Optional)v).isPresent(),
             "No result (null) should be returned for a treatment that does not exist");
         }else
             fail("The treatments repository was not injected into the tests, its autowired value was null");
     }
-    
-    
 
-    
+
+
+
     @Test
     public void test1CheckTreatmentsConstraints() {
-        Map<String,List<Object>> invalidValues=Map.of( 
+        Map<String,List<Object>> invalidValues=Map.of(
                                         "name",     List.of(
                                                         "      ","a",
                                                         "En un lugar de la Mancha, de cuyo nombre no quiero acordarme,"+
@@ -1757,19 +1778,19 @@ public class Test1 extends ReflexiveTest{
                                                         "adarga antigua, rocín flaco y galgo corredor. Una olla de algo"+
                                                         "más vaca que carnero, salpicón las más noches, duelos y"+
                                                         "quebrantos los sábados, lentejas los viernes, algún palomino"+
-                                                        "de añadidura los domingos, consumían las tres partes de su hacienda. "),                                           
+                                                        "de añadidura los domingos, consumían las tres partes de su hacienda. "),
                                             "baseDose",  List.of( -1, 0 ),
                                             "shockDose", List.of( -1, 0),
-                                            "maxDose", List.of( -1, 0)                                            
+                                            "maxDose", List.of( -1, 0)
                                             );
 
 
         Treatment t=createValidTreatment(em);
         em.persist(t);
-        
-        checkThatFieldsAreMandatory(t, em, "baseDose","maxDose");        
-        
-        checkThatValuesAreNotValid(t, invalidValues,em);   
+
+        checkThatFieldsAreMandatory(t, em, "baseDose","maxDose");
+
+        checkThatValuesAreNotValid(t, invalidValues,em);
     }
     @Test
     public void test1CheckSymptomsContraints() {
@@ -1782,21 +1803,21 @@ public class Test1 extends ReflexiveTest{
                                                     "que carnero, salpicón las más noches, duelos y quebrantos los sábados,"+
                                                     "lentejas los viernes, algún palomino de añadidura los domingos,"+
                                                     "consumían las tres partes de su hacienda. "),
-                                            "virulence", List.of ("too bad","oh no!")                                            
+                                            "virulence", List.of ("too bad","oh no!")
                                             );
 
 
         Symptom s=createValidSymptom(em);
         em.persist(s);
-        
-        checkThatFieldsAreMandatory(s, em, "name");        
-        
-        checkThatValuesAreNotValid(s, invalidValues,em);   
+
+        checkThatFieldsAreMandatory(s, em, "name");
+
+        checkThatValuesAreNotValid(s, invalidValues,em);
     }
 
-    
+
     @Test
-    public void test1CheckTreatmentAnnotations() {        
+    public void test1CheckTreatmentAnnotations() {
         assertTrue(classIsAnnotatedWith(Treatment.class,Entity.class));
     }
 
@@ -1805,8 +1826,8 @@ public class Test1 extends ReflexiveTest{
         assertTrue(classIsAnnotatedWith(Symptom.class,Entity.class));
     }
 
-    public static Symptom createValidSymptom(EntityManager em){        
-        Symptom o=new Symptom();        
+    public static Symptom createValidSymptom(EntityManager em){
+        Symptom o=new Symptom();
         setValue(o,"name",String.class,"Un síntoma válido");
         o.setVirulence("LOW");
         o.setIncludes(Set.of(em.find(Disease.class, 1)));
@@ -1826,13 +1847,15 @@ public class Test1 extends ReflexiveTest{
 ```
 
 ### Test 2 – Relaciones entre las entidades
+
 Elimine las anotaciones `@Transient` de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior, así como la del atributo `symptoms` de la clase `Visit`. Se pide crear las siguientes relaciones entre las entidades:
 
-* Cree una relación unidireccional desde `Visit` hacia `Symptom` que exprese la que aparece en el diagrama UML respetando sus cardinalidades, usando el atributo `symptoms` de la clase `Visit`.
-* Se pide crear dos relaciones unidireccionales desde `Symptom` hacia `Disease` que representen las que aparecen en el diagrama UML, tenga en cuenta la cardinalidad que tienen (recuerde que en este caso, al tratarse de una doble relación n a n entre las mismas entidades se trata de unas relaciones bastante exóticas), usando como nombre de los atributos `includes` y `excludes` en la clase `Symptom`. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML (ej. algunos atributos pueden ser nulos puesto que la cardinalidad es 0..n pero otros no, porque su cardinalidad en el extremo navegable es 1..n).
-* Finalmente, se pide crear una relación unidireccional desde `Treatment` hacia `Disease` que represente la que aparece en el diagrama, usando como nombre de atributo `recommendedFor`. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML (ej. el atributo no puede ser nulo y es obligatorio, puesto que la cardinalidad es 1..n en el extremo de Disease).
+- Cree una relación unidireccional desde `Visit` hacia `Symptom` que exprese la que aparece en el diagrama UML respetando sus cardinalidades, usando el atributo `symptoms` de la clase `Visit`.
+- Se pide crear dos relaciones unidireccionales desde `Symptom` hacia `Disease` que representen las que aparecen en el diagrama UML, tenga en cuenta la cardinalidad que tienen (recuerde que en este caso, al tratarse de una doble relación n a n entre las mismas entidades se trata de unas relaciones bastante exóticas), usando como nombre de los atributos `includes` y `excludes` en la clase `Symptom`. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML (ej. algunos atributos pueden ser nulos puesto que la cardinalidad es 0..n pero otros no, porque su cardinalidad en el extremo navegable es 1..n).
+- Finalmente, se pide crear una relación unidireccional desde `Treatment` hacia `Disease` que represente la que aparece en el diagrama, usando como nombre de atributo `recommendedFor`. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML (ej. el atributo no puede ser nulo y es obligatorio, puesto que la cardinalidad es 1..n en el extremo de Disease).
 
 **Código del Test:**
+
 ```java
 package org.springframework.samples.petclinic;
 
@@ -1849,19 +1872,19 @@ import jakarta.persistence.ManyToOne;
 
 @DataJpaTest()
 public class Test2 extends ReflexiveTest{
-    
+
     @Autowired(required = false)
-    EntityManager em;         
+    EntityManager em;
 
     @Test
     public void test2TreatmentAnnotations() {
-        checkThatFieldIsAnnotatedWith(Treatment.class, "recommendedFor", ManyToMany.class);                          
+        checkThatFieldIsAnnotatedWith(Treatment.class, "recommendedFor", ManyToMany.class);
     }
 
     @Test
-    public void test2SymptomAnnotations() {        
-        checkThatFieldIsAnnotatedWith(Symptom.class, "includes", ManyToMany.class);        
-        checkThatFieldIsAnnotatedWith(Symptom.class, "excludes", ManyToMany.class);                
+    public void test2SymptomAnnotations() {
+        checkThatFieldIsAnnotatedWith(Symptom.class, "includes", ManyToMany.class);
+        checkThatFieldIsAnnotatedWith(Symptom.class, "excludes", ManyToMany.class);
     }
 
     @Test
@@ -1872,13 +1895,13 @@ public class Test2 extends ReflexiveTest{
     @Test
     public void test2TreatmentConstraints() {
         Treatment t=Test1.createValidTreatment(em);
-        checkThatFieldsAreMandatory(t, em,"recommendedFor");        
+        checkThatFieldsAreMandatory(t, em,"recommendedFor");
     }
 
     @Test
     public void test2SymptomsConstraints() {
         Symptom s=Test1.createValidSymptom(em);
-        checkThatFieldsAreMandatory(s, em,"includes");                
+        checkThatFieldsAreMandatory(s, em,"includes");
     }
 
 }
@@ -1980,8 +2003,7 @@ Modificar las clases `Symptom` y `Medicine` para que sean entidades. Estas clase
 
 - Un atributo de tipo cadena de caracteres `String` llamado `name` obligatorio (no puede ser nulo), que debe tener una longitud mínima de 3 caracteres y máxima de 50 y que no puede estar formada por caracteres vacíos (espacios, tabuladores, etc.).
 
-- El atributo de tipo cadena caracteres `String` llamado `description` opcional. 
-
+- El atributo de tipo cadena caracteres `String` llamado `description` opcional.
 
 **Para la clase `Medicine`:**
 
@@ -1989,13 +2011,14 @@ Modificar las clases `Symptom` y `Medicine` para que sean entidades. Estas clase
 
 - El atributo de tipo fecha `LocalDate` llamado `startDate`, que representa la fecha en que comienza la medicación pautada. La fecha seguirá el formato `dd/MM/yyyy` (puede usar como ejemplo la clase Pet y su fecha de nacimiento para ver cómo se especificar dicho formato, pero nótese que el patrón del formato es distinto). Este atributo es obligatorio.
 
-- El atributo de tipo fecha `LocalDate` llamado `endDate`, que representa la fecha en que debe terminar la medicación pautada. Seguirá el formato `dd/MM/yyyy`. Este atributo debe ser obligatorio. 
+- El atributo de tipo fecha `LocalDate` llamado `endDate`, que representa la fecha en que debe terminar la medicación pautada. Seguirá el formato `dd/MM/yyyy`. Este atributo debe ser obligatorio.
 
 > Para el formato de fecha puede usar como ejemplo la clase `Pet` y su fecha de nacimiento, pero nótese que el patrón del formato es distinto.
 
-*No modifique por ahora las anotaciones `@Transient` de las clases.* Modificar las interfaces `SymptomRepository` y `MedicineRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
+_No modifique por ahora las anotaciones `@Transient` de las clases._ Modificar las interfaces `SymptomRepository` y `MedicineRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
 
 **Código del Test:**
+
 ```java
 package org.springframework.samples.petclinic;
 
@@ -2034,10 +2057,10 @@ public class Test1 extends ReflexiveTest{
     SymptomRepository symptomsRepo;
     @Autowired(required = false)
     MedicineRepository medicineRepo;
-    
+
     @Autowired
     EntityManager em;
- 
+
     @Test
     public void test1RepositoriesExist(){
         assertNotNull(symptomsRepo,"The symptoms repository was not injected into the tests, its autowired value was null");
@@ -2051,35 +2074,35 @@ public class Test1 extends ReflexiveTest{
             assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a symptom that does not exist");
         }else
             fail("The symptoms repository was not injected into the tests, its autowired value was null");
-        
+
         if(medicineRepo!=null){
             Object v=medicineRepo.findById(12);
             assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a medicine that does not exist");
         }else
             fail("The medicine repository was not injected into the tests, its autowired value was null");
     }
-    
-    
 
-    
+
+
+
     @Test
     public void test1CheckMedicineConstraints() {
-        Map<String,List<Object>> invalidValues=Map.of( 
+        Map<String,List<Object>> invalidValues=Map.of(
                                         "name",     List.of(
                                                         "      ","a",
-                                                        "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados, lentejas los viernes, algún palomino de añadidura los domingos, consumían las tres partes de su hacienda. "),                                           
+                                                        "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados, lentejas los viernes, algún palomino de añadidura los domingos, consumían las tres partes de su hacienda. "),
                                             "medication",  List.of(-1, 0, 1001)
                                            // "startDate", List.of(LocalDate.ofYearDay(2024, 30),LocalDate.of(2023, 12, 12)),
-                                          //  "endDate", List.of(LocalDate.ofYearDay(2024, 60),LocalDate.of(2024, 12, 13))                                           
+                                          //  "endDate", List.of(LocalDate.ofYearDay(2024, 60),LocalDate.of(2024, 12, 13))
                                             );
 
 
         Medicine t=createValidMedicine(em);
         em.persist(t);
-        
-        checkThatFieldsAreMandatory(t, em, "medication","startDate","endDate");        
-        
-        checkThatValuesAreNotValid(t, invalidValues,em);   
+
+        checkThatFieldsAreMandatory(t, em, "medication","startDate","endDate");
+
+        checkThatValuesAreNotValid(t, invalidValues,em);
     }
 
      @Test
@@ -2089,21 +2112,21 @@ public class Test1 extends ReflexiveTest{
                                                     "      ",
                                                     "a",
                                                     "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados, lentejas los viernes, algún palomino de añadidura los domingos, consumían las tres partes de su hacienda. ")
-                                                  
+
                                             );
 
-                                        
+
         Symptom s=createValidSymptom(em);
         em.persist(s);
-        
-        checkThatFieldsAreMandatory(s, em, "name");        
-        
-        checkThatValuesAreNotValid(s, invalidValues,em);   
+
+        checkThatFieldsAreMandatory(s, em, "name");
+
+        checkThatValuesAreNotValid(s, invalidValues,em);
     }
 
-    
+
     @Test
-    public void test1CheckMedicineAnnotations() {        
+    public void test1CheckMedicineAnnotations() {
         assertTrue(classIsAnnotatedWith(Medicine.class,Entity.class));
     }
 
@@ -2112,8 +2135,8 @@ public class Test1 extends ReflexiveTest{
         assertTrue(classIsAnnotatedWith(Symptom.class,Entity.class));
     }
 
-    public static Symptom createValidSymptom(EntityManager em){        
-        Symptom o=new Symptom();        
+    public static Symptom createValidSymptom(EntityManager em){
+        Symptom o=new Symptom();
         setValue(o,"name",String.class,"Un síntoma válido");
         o.setDescription("Una descripción");
         o.setIncludedDiseases(Set.of());
@@ -2121,7 +2144,7 @@ public class Test1 extends ReflexiveTest{
     }
 
     public static Medicine createValidMedicine(EntityManager em){
-        
+
         Medicine medicine = new Medicine();
         setValue(medicine, "name", String.class, "medicine");
         medicine.setDescription("description");
@@ -2134,7 +2157,6 @@ public class Test1 extends ReflexiveTest{
 }
 ```
 
-
 ## Test 2 – Relaciones entre las entidades
 
 Elimine las anotaciones `@Transient` de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior, así como la del atributo `symptoms` de la clase `Visit`. Se pide crear las siguientes relaciones entre las entidades:
@@ -2146,6 +2168,7 @@ Elimine las anotaciones `@Transient` de los métodos y atributos que las tengan 
 - Cree una relación unidireccional desde `Medicine` hacia `Disease` que represente la que aparece en el diagrama. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML.
 
 **Código del Test:**
+
 ```java
 package org.springframework.samples.petclinic;
 
@@ -2161,42 +2184,42 @@ import jakarta.persistence.ManyToMany;
 
 @DataJpaTest()
 public class Test2 extends ReflexiveTest{
-    
+
     @Autowired(required = false)
-    EntityManager em;         
+    EntityManager em;
 
     @Test
     public void test2TreatmentAnnotations() {
-        checkThatFieldIsAnnotatedWith(Medicine.class, "prescribedfor", ManyToMany.class);                          
+        checkThatFieldIsAnnotatedWith(Medicine.class, "prescribedfor", ManyToMany.class);
     }
 
     @Test
-    public void test2SymptomAnnotations() {        
-        checkThatFieldIsAnnotatedWith(Symptom.class, "includedDiseases", ManyToMany.class);        
-        checkThatFieldIsAnnotatedWith(Symptom.class, "excludedDiseases", ManyToMany.class);                
+    public void test2SymptomAnnotations() {
+        checkThatFieldIsAnnotatedWith(Symptom.class, "includedDiseases", ManyToMany.class);
+        checkThatFieldIsAnnotatedWith(Symptom.class, "excludedDiseases", ManyToMany.class);
     }
 
     @Test
     public void test2VisitAnnotationsAndConstraints(){
         checkThatFieldIsAnnotatedWith(Visit.class, "symptoms", ManyToMany.class);
     }
- 
+
     @Test
     private void test2TreatmentConstraints() {
         Medicine t=Test1.createValidMedicine(em);
-        checkThatFieldsAreMandatory(t, em,"prescribedfor");        
+        checkThatFieldsAreMandatory(t, em,"prescribedfor");
     }
 
     @Test
     private void test2SymptomsConstraints() {
         Symptom s=Test1.createValidSymptom(em);
         checkThatFieldsAreMandatory(s, em,"includedDiseases");
-                
+
     }
 }
 ```
 
-```markdown
+````markdown
 # Control práctico de DP1 2024-2025 (Control-check 2)
 
 ## Enunciado
@@ -2259,6 +2282,7 @@ classDiagram
     Prescription "0..*" --> "0..*" Medication : optionalMedications
     Medication "0..*" --> "0..*" ActivePrinciple : activePrinciples
 ```
+````
 
 Las clases para las que realizaremos el mapeo como entidades JPA se han señalado en rojo (`Prescription` y `Allergy`). Las clases azules son clases que se proporcionan ya mapeadas pero con las que se trabajará durante el control.
 
@@ -2308,6 +2332,7 @@ Modificar las clases `Prescription` y `Allergy` para que sean entidades. Estas c
 No modifique por ahora las anotaciones `@Transient` de las clases. Modificar las interfaces `PrescriptionRepository` y `AllergyRepository` alojadas en el mismo paquete para que extiendan a `CrudRepository`. No olvide especificar sus parámetros de tipo.
 
 **Código del Test:**
+
 ```java
 package org.springframework.samples.petclinic;
 
@@ -2345,10 +2370,10 @@ public class test1 extends ReflexiveTest{
     AllergyRepository allergiesRepo;
     @Autowired(required = false)
     PrescriptionRepository prescriptionRepo;
-    
+
     @Autowired
     EntityManager em;
- 
+
     @Test
     public void test1RepositoriesExist(){
         assertNotNull(allergiesRepo,"The allergies repository was not injected into the tests, its autowired value was null");
@@ -2362,17 +2387,17 @@ public class test1 extends ReflexiveTest{
             assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for an allergy that does not exist");
         }else
             fail("The allergies repository was not injected into the tests, its autowired value was null");
-        
+
         if(prescriptionRepo!=null){
             Object v=prescriptionRepo.findById(12);
             assertFalse(null!=v && ((Optional)v).isPresent(), "No result (null) should be returned for a prescription that does not exist");
         }else
             fail("The prescription repository was not injected into the tests, its autowired value was null");
     }
-    
-    
 
-    
+
+
+
     @Test
     public void test1CheckPrescriptionConstraints() {
         Map<String,List<Object>> invalidValues=Map.of(
@@ -2383,10 +2408,10 @@ public class test1 extends ReflexiveTest{
 
         Prescription t=createValidPrescription(em);
         em.persist(t);
-        
-        checkThatFieldsAreMandatory(t, em, "dosage","treatmentStart","treatmentEnd","hoursBetweenDosage");        
-        
-        checkThatValuesAreNotValid(t, invalidValues,em);   
+
+        checkThatFieldsAreMandatory(t, em, "dosage","treatmentStart","treatmentEnd","hoursBetweenDosage");
+
+        checkThatValuesAreNotValid(t, invalidValues,em);
     }
 
      @Test
@@ -2395,18 +2420,18 @@ public class test1 extends ReflexiveTest{
                                             "level", List.of(0, 11)
                                             );
 
-                                        
+
         Allergy s=createValidAllergy(em);
         em.persist(s);
-        
-        checkThatFieldsAreMandatory(s, em, "level", "diagnosisDate");        
-        
-        checkThatValuesAreNotValid(s, invalidValues,em);   
+
+        checkThatFieldsAreMandatory(s, em, "level", "diagnosisDate");
+
+        checkThatValuesAreNotValid(s, invalidValues,em);
     }
 
-    
+
     @Test
-    public void test1CheckPrescriptionAnnotations() {        
+    public void test1CheckPrescriptionAnnotations() {
         assertTrue(classIsAnnotatedWith(Prescription.class,Entity.class));
     }
 
@@ -2415,8 +2440,8 @@ public class test1 extends ReflexiveTest{
         assertTrue(classIsAnnotatedWith(Allergy.class,Entity.class));
     }
 
-    public static Allergy createValidAllergy(EntityManager em){        
-        Allergy o=new Allergy();        
+    public static Allergy createValidAllergy(EntityManager em){
+        Allergy o=new Allergy();
         o.setInformation("Una descripción alérgica");
         o.setLevel(5);;
         o.setDiagnosisDate(LocalDate.of(2024, 12, 1));
@@ -2425,7 +2450,7 @@ public class test1 extends ReflexiveTest{
     }
 
     public static Prescription createValidPrescription(EntityManager em){
-        
+
         Prescription prescription = new Prescription();
         prescription.setInformation("description of a prescription");
         prescription.setDosage  (100);  // Valor dentro del rango
@@ -2436,12 +2461,12 @@ public class test1 extends ReflexiveTest{
         prescription.setMandatoryMedications(Set.of(em.find(Medication.class,1)));
         return prescription;
     }
-    
-        
+
+
 }
 ```
 
-## Test 2 –  Relaciones entre las entidades
+## Test 2 – Relaciones entre las entidades
 
 Elimine las anotaciones `@Transient` de los métodos y atributos que las tengan en las entidades creadas en el ejercicio anterior, así como del atributo `allergies` de la clase `Pet`. Se pide crear las siguientes relaciones entre las entidades:
 
@@ -2450,6 +2475,7 @@ Elimine las anotaciones `@Transient` de los métodos y atributos que las tengan 
 - Finalmente, se piden crear dos relaciones para la clase `Allergy`. Una de ellas unidireccional desde `Pet` hacia `Allergy`; y otra desde `Allergy` hacia `ActivePrinciple` que representen las que aparecen en el diagrama. Debe asegurarse de que las relaciones expresan adecuadamente la cardinalidad que muestra el diagrama UML.
 
 **Código del Test:**
+
 ```java
 package org.springframework.samples.petclinic;
 
@@ -2467,38 +2493,38 @@ import jakarta.persistence.ManyToOne;
 
 @DataJpaTest()
 public class test2 extends ReflexiveTest{
-    
+
     @Autowired(required = false)
-    EntityManager em;         
+    EntityManager em;
 
     @Test
     public void test2PrescriptionAnnotations() {
-        checkThatFieldIsAnnotatedWith(Prescription.class, "visit", ManyToOne.class);                          
-        checkThatFieldIsAnnotatedWith(Prescription.class, "mandatoryMedications", ManyToMany.class);        
-        checkThatFieldIsAnnotatedWith(Prescription.class, "optionalMedications", ManyToMany.class);                
+        checkThatFieldIsAnnotatedWith(Prescription.class, "visit", ManyToOne.class);
+        checkThatFieldIsAnnotatedWith(Prescription.class, "mandatoryMedications", ManyToMany.class);
+        checkThatFieldIsAnnotatedWith(Prescription.class, "optionalMedications", ManyToMany.class);
     }
 
     @Test
-    public void test2AllergyAnnotations() {        
-        checkThatFieldIsAnnotatedWith(Allergy.class, "activePrinciples", ManyToMany.class);        
+    public void test2AllergyAnnotations() {
+        checkThatFieldIsAnnotatedWith(Allergy.class, "activePrinciples", ManyToMany.class);
     }
 
     @Test
     public void test2PetAnnotationsAndConstraints(){
         checkThatFieldIsAnnotatedWith(Pet.class, "allergies", ManyToMany.class);
     }
- 
+
     @Test
     private void test2PrescriptionConstraints() {
         Prescription t=test1.createValidPrescription(em);
-        checkThatFieldsAreMandatory(t, em,"mandatoryMedications", "visit");        
+        checkThatFieldsAreMandatory(t, em,"mandatoryMedications", "visit");
     }
 
     @Test
     private void test2AllergyConstraints() {
         Allergy s=test1.createValidAllergy(em);
         checkThatFieldsAreMandatory(s, em,"activePrinciples");
-                
+
     }
 
 

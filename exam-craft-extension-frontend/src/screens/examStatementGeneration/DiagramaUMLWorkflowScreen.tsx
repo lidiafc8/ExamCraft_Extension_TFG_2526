@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from "react"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md"
+import React, { useEffect, useState } from "react"
+
+import { Header } from "~src/components/Header"
+
+import { useGeminiGeneration } from "../../components/GeminiGeneration"
+import { cleanMermaidCode } from "../../components/mermaidCleaner"
+import { MermaidViewer } from "../../components/MermaidViewer"
+import {
+  PromptEditor,
+  StepperHeader
+} from "../../components/WorkflowComponents"
 import { generateWithAI } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
-import { MermaidViewer } from "../../components/MermaidViewer"
-import { Header } from "~src/components/Header"
-import { cleanMermaidCode } from "../../components/mermaidCleaner"
-import { useGeminiGeneration } from "../../components/GeminiGeneration"
-import { StepperHeader, PromptEditor } from "../../components/WorkflowComponents"
+
 import "../../css/WorkFlowParts.css"
 
 interface Props {
@@ -34,7 +40,7 @@ export default function DiagramUMLScreen({
   onFunctionalExtension,
   onStatementStep1,
   onFinishExtension,
-  onComponents,
+  onComponents
 }: Props) {
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
   const [promptText, setPromptText] = useState("")
@@ -43,21 +49,24 @@ export default function DiagramUMLScreen({
 
   useEffect(() => {
     if (!extensionPromptMarkdown || !domainName) return
-    const { visibleText, hiddenContext: parsed } = parseMasterPrompt(extensionPromptMarkdown)
+    const { visibleText, hiddenContext: parsed } = parseMasterPrompt(
+      extensionPromptMarkdown
+    )
     setPromptText(visibleText.replaceAll("{{DOMAIN}}", domainName))
     setHiddenContext(parsed)
   }, [context, domainName])
 
-  const { responseText, isLoading, generate, setResponseText } = useGeminiGeneration({
-    logExerciseName: "diagram_uml_functional_extension",
-    buildLogPayload: (result) => ({
-      domain: domainName,
-      hiddenContext,
-      statementContext: context,
-      visiblePrompt: promptText,
-      response: result,
-    }),
-  })
+  const { responseText, isLoading, generate, setResponseText } =
+    useGeminiGeneration({
+      logExerciseName: "diagram_uml_functional_extension",
+      buildLogPayload: (result) => ({
+        domain: domainName,
+        hiddenContext,
+        statementContext: context,
+        visiblePrompt: promptText,
+        response: result
+      })
+    })
 
   const handleGenerate = async () => {
     const payload = `
@@ -83,9 +92,9 @@ export default function DiagramUMLScreen({
     { label: "INICIO", action: onWelcome },
     { label: "CREAR EXAMEN", action: onCreateExam },
     { label: "POR PARTES", action: onCreateExamByParts },
-    { label: 'ENUNCIADO', action: onComponents },
+    { label: "ENUNCIADO", action: onComponents },
     { label: "EXTENSIÓN FUNCIONAL", action: onFunctionalExtension },
-    { label: domainName.toUpperCase(), action: onStatementStep1 },
+    { label: domainName.toUpperCase(), action: onStatementStep1 }
   ]
 
   return (
@@ -98,19 +107,18 @@ export default function DiagramUMLScreen({
 
       <main className="main-content">
         <div className="wf-layout-container">
-
           <StepperHeader steps={STEPS} currentStep={2} />
 
           <div className="wf-wide-wrapper">
-
             {internalStep === "input" && (
               <PromptEditor
                 title={`${domainName.toUpperCase()}: Diagrama UML`}
                 description={
                   <>
-                    Este es el prompt que se usará para generar el diagrama UML (en código mermaid
-                    y en visualización gráfica), puede revisar o modificar cualquier información
-                    que vea conveniente. Al terminar, pulse en{" "}
+                    Este es el prompt que se usará para generar el diagrama UML
+                    (en código mermaid y en visualización gráfica), puede
+                    revisar o modificar cualquier información que vea
+                    conveniente. Al terminar, pulse en{" "}
                     <strong>"Generar Diagrama UML"</strong>.
                   </>
                 }
@@ -126,9 +134,10 @@ export default function DiagramUMLScreen({
             {internalStep === "result" && (
               <>
                 <div className="wf-diagram-split-view">
-
                   <div className="wf-column-three">
-                    <span className="wf-column-title">Prompt de Generación del Diagrama UML</span>
+                    <span className="wf-column-title">
+                      Prompt de Generación del Diagrama UML
+                    </span>
                     <div className="wf-instruction-text">
                       <textarea
                         className="wf-textarea-input"
@@ -139,14 +148,17 @@ export default function DiagramUMLScreen({
                   </div>
 
                   <div className="wf-column-three">
-                    <span className="wf-column-title">Extensión Funcional con Diagrama UML</span>
+                    <span className="wf-column-title">
+                      Extensión Funcional con Diagrama UML
+                    </span>
                     <div className="wf-diagram-viewer-inner">
                       <div className="wf-diagram-enunciado">{context}</div>
                       <div className="wf-diagram-area">
-                        {cleanCode
-                          ? <MermaidViewer chartCode={cleanCode} />
-                          : <div>Renderizando...</div>
-                        }
+                        {cleanCode ? (
+                          <MermaidViewer chartCode={cleanCode} />
+                        ) : (
+                          <div>Renderizando...</div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -154,30 +166,33 @@ export default function DiagramUMLScreen({
                   <div className="wf-column-three">
                     <span className="wf-column-title">Código Mermaid</span>
                     <div className="wf-diagram-code-inner">
-                      <textarea 
+                      <textarea
                         className="wf-result-box"
                         value={isLoading ? "Generando..." : responseText}
                         onChange={(e) => setResponseText(e.target.value)}
                         disabled={isLoading}
-                        spellCheck={false} 
+                        spellCheck={false}
                       />
                     </div>
                   </div>
-
                 </div>
 
                 <div className="wf-actions-row">
                   <button
                     onClick={handleGenerate}
                     className="btn-step generate"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                    disabled={isLoading}>
+                    {isLoading ? (
+                      <div className="loading-spinner" />
+                    ) : (
+                      "Volver a generar"
+                    )}
                   </button>
                   <button
                     className="btn-step primary"
-                    onClick={() => onFinishExtension(context.trim(), responseText.trim())}
-                  >
+                    onClick={() =>
+                      onFinishExtension(context.trim(), responseText.trim())
+                    }>
                     Confirmar Diagrama UML
                   </button>
                 </div>

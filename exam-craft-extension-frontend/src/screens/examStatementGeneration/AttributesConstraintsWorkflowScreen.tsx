@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from "react"
 import attributesConstraintsPromptMarkdown from "bundle-text:../../prompts/generation-constraints-attributes/generation_attribute_constraints_from_statement.md"
-import { parseMasterPrompt } from "~src/utils/promptParser"
+import React, { useEffect, useState } from "react"
+
+import { useGeminiGeneration } from "~src/components/GeminiGeneration"
 import { Header } from "~src/components/Header"
 import { ConfirmModal } from "~src/components/modals/ConfirmModal"
 import { SuccessModal } from "~src/components/modals/SuccessModal"
-import { useGeminiGeneration } from "~src/components/GeminiGeneration"
-import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponents"
-import { downloadMarkdown } from "~src/utils/downloadUtils"
+import {
+  PromptEditor,
+  SplitResultView
+} from "~src/components/WorkflowComponents"
 import { saveToChrome } from "~src/utils/chromeStorageUtils"
+import { downloadMarkdown } from "~src/utils/downloadUtils"
+import { parseMasterPrompt } from "~src/utils/promptParser"
+
 import "../../css/Cards.css"
 import "../storage/css/FoldersGridScreen.css"
-import { WarningModal } from "~src/components/modals/WarningModal"
+
 import { FolderExamSelector } from "~src/components/FolderExamsSelector"
 import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
+import { WarningModal } from "~src/components/modals/WarningModal"
 
 declare var chrome: any
 
@@ -31,7 +37,12 @@ interface Props {
   readonly onBack: () => void
   readonly onWelcome: () => void
   readonly onCreateExam: () => void
-  readonly onCreateTest: (data: { project: Project; constraints: string; entityRelationships: string; baseClass: string }) => void
+  readonly onCreateTest: (data: {
+    project: Project
+    constraints: string
+    entityRelationships: string
+    baseClass: string
+  }) => void
   readonly onGoToBaseClass: (project?: Project) => void
   readonly onCreateExamByParts: () => void
 }
@@ -54,38 +65,45 @@ export default function AttributesConstraintsWorkflowScreen({
   onCreateExam,
   onCreateTest,
   onGoToBaseClass,
-  onCreateExamByParts,
+  onCreateExamByParts
 }: Props) {
   const [step, setStep] = useState<"selection" | "workflow">("selection")
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
   const [projects, setProjects] = useState<Project[]>([])
-  const [selectedDomainFolder, setSelectedDomainFolder] = useState<string | null>(null)
+  const [selectedDomainFolder, setSelectedDomainFolder] = useState<
+    string | null
+  >(null)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showDownloadModal, setShowDownloadModal] = useState(false)
-  const [savedData, setSavedData] = useState<{ project: Project; result: string } | null>(null)
+  const [savedData, setSavedData] = useState<{
+    project: Project
+    result: string
+  } | null>(null)
   const [promptText, setPromptText] = useState("")
   const [hiddenContext, setHiddenContext] = useState("")
-  const [pendingProjectForBaseClass, setPendingProjectForBaseClass] = useState<Project | null>(null)
+  const [pendingProjectForBaseClass, setPendingProjectForBaseClass] =
+    useState<Project | null>(null)
 
-  const { responseText, isLoading, setResponseText, generate } = useGeminiGeneration({
-    logExerciseName: "attributes_constraints",
-    buildLogPayload: (result) => ({
-      domain: selectedProject?.domainName,
-      hiddenContext,
-      selectedExam: selectedProject?.extensionFinish,
-      visiblePrompt: promptText,
-      response: result,
-    }),
-  })
+  const { responseText, isLoading, setResponseText, generate } =
+    useGeminiGeneration({
+      logExerciseName: "attributes_constraints",
+      buildLogPayload: (result) => ({
+        domain: selectedProject?.domainName,
+        hiddenContext,
+        selectedExam: selectedProject?.extensionFinish,
+        visiblePrompt: promptText,
+        response: result
+      })
+    })
 
   useEffect(() => {
     if (step === "selection" && globalThis.chrome?.storage?.local) {
       chrome.storage.local.get(null, (items: Record<string, any>) => {
         const list = Object.keys(items)
           .filter((k) => k.startsWith("project_"))
-          .map((k) => ({ id: k, ...items[k] } as Project))
+          .map((k) => ({ id: k, ...items[k] }) as Project)
         setProjects(list)
       })
     }
@@ -93,7 +111,9 @@ export default function AttributesConstraintsWorkflowScreen({
 
   useEffect(() => {
     if (selectedProject?.domainName) {
-      const { visibleText, hiddenContext: hc } = parseMasterPrompt(attributesConstraintsPromptMarkdown)
+      const { visibleText, hiddenContext: hc } = parseMasterPrompt(
+        attributesConstraintsPromptMarkdown
+      )
       setPromptText(visibleText)
       setHiddenContext(hc)
     }
@@ -129,7 +149,7 @@ export default function AttributesConstraintsWorkflowScreen({
     const updated: Project = {
       ...selectedProject,
       [STORAGE_KEY]: responseText,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
     try {
       await saveToChrome(selectedProject.id, updated)
@@ -137,7 +157,11 @@ export default function AttributesConstraintsWorkflowScreen({
       setSavedData({ project: updated, result: responseText })
       setShowSuccessModal(true)
     } catch (error) {
-      alert(error instanceof Error ? error.message : "No se pudo actualizar el examen.")
+      alert(
+        error instanceof Error
+          ? error.message
+          : "No se pudo actualizar el examen."
+      )
     }
   }
 
@@ -156,7 +180,7 @@ export default function AttributesConstraintsWorkflowScreen({
         project: savedData.project,
         constraints: savedData.result,
         entityRelationships: savedData.project.entityRelationships || "",
-        baseClass: savedData.project.baseClasses,
+        baseClass: savedData.project.baseClasses
       })
     } else {
       setPendingProjectForBaseClass(savedData.project)
@@ -167,7 +191,7 @@ export default function AttributesConstraintsWorkflowScreen({
     { label: "INICIO", action: onWelcome },
     { label: "CREAR EXAMEN", action: onCreateExam },
     { label: "POR PARTES", action: onCreateExamByParts },
-    { label: 'ENUNCIADO', action: onBack },
+    { label: "ENUNCIADO", action: onBack }
   ]
 
   return (
@@ -178,8 +202,15 @@ export default function AttributesConstraintsWorkflowScreen({
           message={`¿Deseas utilizar ${displayName(selectedProject)} como base para generar el ejercicio de restricciones?`}
           warning={warningMessage(selectedProject)}
           onConfirm={handleConfirmSelection}
-          onCancel={() => { setShowConfirmModal(false); setSelectedProject(null) }}
-          confirmLabel={selectedProject.attributeConstraints ? "Continuar y reemplazar" : "Confirmar"}
+          onCancel={() => {
+            setShowConfirmModal(false)
+            setSelectedProject(null)
+          }}
+          confirmLabel={
+            selectedProject.attributeConstraints
+              ? "Continuar y reemplazar"
+              : "Confirmar"
+          }
         />
       )}
 
@@ -190,14 +221,17 @@ export default function AttributesConstraintsWorkflowScreen({
           actions={[
             {
               label: "No",
-              onClick: () => { setShowSuccessModal(false); onWelcome() },
-              variant: "secondary",
+              onClick: () => {
+                setShowSuccessModal(false)
+                onWelcome()
+              },
+              variant: "secondary"
             },
             {
               label: "Sí",
               onClick: handleSuccessPrimary,
-              variant: "primary",
-            },
+              variant: "primary"
+            }
           ]}
         />
       )}
@@ -210,7 +244,6 @@ export default function AttributesConstraintsWorkflowScreen({
         />
 
         <main className="main-content">
-
           {step === "selection" && (
             <FolderExamSelector
               projects={projects}
@@ -231,9 +264,11 @@ export default function AttributesConstraintsWorkflowScreen({
                     title="Restricciones de Atributos"
                     description={
                       <>
-                        Este es el prompt que se usará para generar las restricciones de atributos del examen
-                        seleccionado, puede revisar o modificar cualquier información que vea conveniente.
-                        Al terminar, pulse en <strong>"Generar"</strong>.
+                        Este es el prompt que se usará para generar las
+                        restricciones de atributos del examen seleccionado,
+                        puede revisar o modificar cualquier información que vea
+                        conveniente. Al terminar, pulse en{" "}
+                        <strong>"Generar"</strong>.
                       </>
                     }
                     promptText={promptText}
@@ -259,17 +294,23 @@ export default function AttributesConstraintsWorkflowScreen({
                         <button
                           onClick={handleGenerate}
                           className="btn-step generate"
-                          disabled={isLoading}
-                        >
-                          {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                          disabled={isLoading}>
+                          {isLoading ? (
+                            <div className="loading-spinner" />
+                          ) : (
+                            "Volver a generar"
+                          )}
                         </button>
                         <button
                           onClick={() => setShowDownloadModal(true)}
-                          className="btn-step btn-download"
-                        >
+                          className="btn-step btn-download">
                           Descargar (.md)
                         </button>
-                        <button onClick={handleSaveToChrome} className="btn-step primary">Guardar</button>
+                        <button
+                          onClick={handleSaveToChrome}
+                          className="btn-step primary">
+                          Guardar
+                        </button>
                       </div>
                     }
                   />
@@ -277,13 +318,12 @@ export default function AttributesConstraintsWorkflowScreen({
               </div>
             </div>
           )}
-
         </main>
       </div>
 
       <DownloadConfirmModal
         isOpen={showDownloadModal}
-        defaultFileName={`${DOWNLOAD_PREFIX}_${displayName(selectedProject || {} as Project).replace(/\s+/g, "_")}`}
+        defaultFileName={`${DOWNLOAD_PREFIX}_${displayName(selectedProject || ({} as Project)).replace(/\s+/g, "_")}`}
         onConfirm={handleConfirmDownload}
         onCancel={() => setShowDownloadModal(false)}
       />
@@ -291,14 +331,22 @@ export default function AttributesConstraintsWorkflowScreen({
       {pendingProjectForBaseClass && (
         <WarningModal
           title="Faltan las Clases Base"
-          message={<>Para poder generar los tests de restricciones, primero es necesario generar las <strong>Clases Base</strong> del examen.</>}
+          message={
+            <>
+              Para poder generar los tests de restricciones, primero es
+              necesario generar las <strong>Clases Base</strong> del examen.
+            </>
+          }
           confirmLabel="Ir a crear Clases Base"
           onConfirm={() => {
             const p = pendingProjectForBaseClass
             setPendingProjectForBaseClass(null)
             onGoToBaseClass(p)
           }}
-          onCancel={() => { setPendingProjectForBaseClass(null); onWelcome() }}
+          onCancel={() => {
+            setPendingProjectForBaseClass(null)
+            onWelcome()
+          }}
         />
       )}
     </>

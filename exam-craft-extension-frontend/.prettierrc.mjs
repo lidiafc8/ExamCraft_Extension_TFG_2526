@@ -12,9 +12,9 @@ export default {
   bracketSameLine: true,
   plugins: ["@ianvs/prettier-plugin-sort-imports"],
   importOrder: [
-    "<BUILTIN_MODULES>", 
-    "<THIRD_PARTY_MODULES>", 
-    "", 
+    "<BUILTIN_MODULES>",
+    "<THIRD_PARTY_MODULES>",
+    "",
     "^@plasmo/(.*)$",
     "",
     "^@plasmohq/(.*)$",

@@ -3,6 +3,7 @@
 ## Clínica Veterinaria:
 
 ### ControlCheck 1 G1 ----------------------------------------------------------------------------------------------------------------------
+
 ```
 En este ejercicio, añadiremos la funcionalidad de gestión de
 enfermedades, síntomas y tratamientos médicos. Concretamente, se
@@ -64,7 +65,7 @@ class Symptom {
 +String virulence
 }
 
-class Treatment { 
+class Treatment {
 +Integer baseDose
 +Integer shockDose
 +Integer maxDose
@@ -80,7 +81,7 @@ Person <|-- Vet
 Person <|-- Owner
 
 %% --- Asociaciones y Relaciones ---
-Owner "1" --> "0..n" Pet : owns 
+Owner "1" --> "0..n" Pet : owns
 Vet "0..n" --> "0..1" Specialty
 Vet "1" <-- "0..n" Visit
 Pet "0..n" --> "1" PetType
@@ -112,6 +113,7 @@ control de laboratorio. Realizaremos una serie de ejercicios basados en
 funcionalidades que implementaremos en el sistema, y validaremos
 mediante pruebas unitarias.
 ```
+
 ### ControlCheck 1 G2 ----------------------------------------------------------------------------------------------------------------------
 
 ```
@@ -128,6 +130,7 @@ SurgeryType se relaciona con aquellos PetType a los que ese tipo de
 cirugía puede aplicar. El diagrama UML que describe las clases y
 relaciones con las que vamos a trabajar es el siguiente:
 ```
+
 ```
 classDiagram
 direction LR
@@ -188,7 +191,7 @@ Person <|-- Vet
 Person <|-- Owner
 
 %% --- Asociaciones y Relaciones ---
-Owner "1" --> "0..n" Pet : owns 
+Owner "1" --> "0..n" Pet : owns
 Vet "0..n" --> "0..1" Specialty
 Pet "0..n" --> "1" PetType
 Visit "0..n" --> "1" Pet
@@ -200,11 +203,12 @@ Surgery "1..n" --> "1" SurgeryType : <font color=red>type</font>
 Surgery "0..n" --> "1" OperatingRoom : <font color=red>room</font>
 OperatingRoom "0..n" --> "1..n" SurgeryType : <font color=red>valid for</font>
 
-%% Style 
-style SurgeryType stroke:blue,color:blue 
-style Surgery stroke:red,color:red 
+%% Style
+style SurgeryType stroke:blue,color:blue
+style Surgery stroke:red,color:red
 style OperatingRoom stroke:red,color:red
 ```
+
 ```
 Las clases para las que realizaremos el mapeo objeto-relacional como
 entidades JPA se han señalado en rojo. Las clases en azul son clases que
@@ -215,9 +219,7 @@ basados en funcionalidades que implementaremos en el sistema, y
 validaremos mediante pruebas unitarias.
 ```
 
-
 ### ControlCheck 1 G3 ----------------------------------------------------------------------------------------------------------------------
-
 
 ```
 En este ejercicio, añadiremos la funcionalidad de gestión de cursos de
@@ -231,6 +233,7 @@ alumnos y el pago de las tasas correspondientes, dado que el profesor no
 trabaja gratis. El diagrama UML que describe las clases y relaciones con
 las que vamos a trabajar es el siguiente:
 ```
+
 ```
 classDiagram
 direction LR
@@ -283,7 +286,7 @@ Person <|-- Owner
 
 %% --- Asociaciones y Relaciones ---
 
-Owner "1" --> "0..n" Pet : owns 
+Owner "1" --> "0..n" Pet : owns
 Vet "0..n" --> "0..1" Speciality
 Pet "0..n" --> "1" PetType
 PetType "0..n" <--> "0..n" Course : <font color=blue>< is about</font>
@@ -309,6 +312,7 @@ linkStyle 8 stroke:blue
 
 linkStyle 9 stroke:blue
 ```
+
 ```
 Las clases para las que realizaremos el mapeo objeto-relacional como
 entidades JPA se han señalado en rojo. Las clases en azul son clases que
@@ -317,7 +321,6 @@ control de laboratorio. Realizaremos una serie de ejercicios basados en
 funcionalidades que implementaremos en el sistema, y validaremos
 mediante pruebas unitarias.
 ```
-
 
 ### ControlCheck 2 G1 ----------------------------------------------------------------------------------------------------------------------
 
@@ -341,6 +344,7 @@ más precisos. Por otro lado, tenemos una relación denominada
 afección de la mascota.El diagrama UML que describe las clases y
 relaciones con las que vamos a trabajar es el siguiente:
 ```
+
 ```
 classDiagram
 direction LR
@@ -414,7 +418,7 @@ Person <|-- Owner
 
 %% --- Asociaciones y Relaciones ---
 
-Owner "1" --> "0..n" Pet : owns 
+Owner "1" --> "0..n" Pet : owns
 
 Vet "0..n" --> "0..1" Specialty
 
@@ -454,6 +458,7 @@ style Symptom stroke:red,color:red
 
 style Medicine stroke:red,color:red
 ```
+
 ```
 Las clases para las que realizaremos el mapeo como entidades JPA se han
 señalado en rojo. Las clases azules son clases que se proporcionan ya
@@ -461,7 +466,6 @@ mapeadas pero con las que se trabajará durante el control. Realizaremos
 una serie de ejercicios basados en funcionalidades que implementaremos
 en el sistema, y validaremos mediante pruebas unitarias.
 ```
-
 
 ### ControlCheck 2 G2 ----------------------------------------------------------------------------------------------------------------------
 
@@ -487,6 +491,7 @@ indicar el nombre del esteticista de mascotas que realizó el servicio, el
 número de minutos invertidos y, además, es posible agregar un
 comentario sobre el servicio.
 ```
+
 ```
 classDiagram
 direction LR
@@ -533,7 +538,7 @@ class GroomingPackage {
 +Double cost
 }
 
-class GroomingType { 
+class GroomingType {
 +String description
 }
 
@@ -573,7 +578,7 @@ Vet "0..n" --> "0..1" Specialty
 
 Vet "1" <-- "0..n" Visit
 
-Owner "1" --> "0..n" Pet : owns 
+Owner "1" --> "0..n" Pet : owns
 
 Pet "" --> "" PetType
 Pet "1" -- "0..n" Visit
@@ -600,6 +605,7 @@ style GroomingConsumed stroke:red,color:red
 
 style Coupon stroke:red,color:red
 ```
+
 ```
 Las clases para las que realizaremos el mapeo objeto-relacional como
 entidades JPA se han señalado en rojo. Las clases en azul son clases que
@@ -608,7 +614,6 @@ control de laboratorio. Realizaremos una serie de ejercicios basados en
 funcionalidades que implementaremos en el sistema, y validaremos
 mediante pruebas unitarias.
 ```
-
 
 ### ControlCheck 2 G3 ----------------------------------------------------------------------------------------------------------------------
 
@@ -676,7 +681,7 @@ class Medication {
 
 class Prescription {
 +Integer dosage
-+LocalDate treatmentStart 
++LocalDate treatmentStart
 +LocalDate treatmentEnd
 +Integer hoursBetweenDosage
 +String information
@@ -698,7 +703,7 @@ Vet "1" <-- "0..n" Visit
 
 Pet "1" <-- "0..n" Visit
 
-Owner "1" --> "0..n" Pet : owns 
+Owner "1" --> "0..n" Pet : owns
 
 Pet "0..n" --> "0..n" Allergy: <font color=red>has</font>
 
@@ -714,12 +719,13 @@ Prescription "0..n" --> "1" Visit: <font color=red>precribedIn</font>
 
 %% Style
 
-style Pet stroke:blue,color:blue 
+style Pet stroke:blue,color:blue
 style ActivePrinciple stroke:blue,color:blue
 style Medication stroke:blue,color:blue
-style Allergy stroke:red,color:red 
+style Allergy stroke:red,color:red
 style Prescription stroke:red,color:red
 ```
+
 ```
 Las clases para las que realizaremos el mapeo como entidades JPA se han
 señalado en rojo. Las clases azules son clases que se proporcionan ya
@@ -729,7 +735,6 @@ en el sistema, y validaremos mediante pruebas unitarias.
 ```
 
 ## Juego de Ajedrez:
-
 
 ### 1ª Convocatoria (enero) ----------------------------------------------------------------------------------------------------------------
 
@@ -747,6 +752,7 @@ participantes, que se han expresado en el diagrama con sendas relaciones.
 El diagrama UML que describe las clases y relaciones con las que vamos
 a trabajar es el siguiente:
 ```
+
 ```
 classDiagram
 direction LR
@@ -838,6 +844,7 @@ style Pice stroke:blue,color:blue
 style Round stroke:red,color:red
 style Tournament stroke:red,color:red
 ```
+
 ```
 Las clases para las que realizaremos el mapeo objeto-relacional como
 entidades JPA se han señalado en rojo. Las clases en azul son clases que
@@ -846,6 +853,7 @@ control de laboratorio. Realizaremos una serie de ejercicios basados en
 funcionalidades que implementaremos en el sistema, y validaremos
 mediante pruebas unitarias.
 ```
+
 ### 2ª Convocatoria (julio) ----------------------------------------------------------------------------------------------------------------
 
 ```
@@ -868,6 +876,7 @@ relación entre “Challenge” y “ChessMatch”).
 El diagrama UML que describe las clases y relaciones con las que vamos
 a trabajar es el siguiente:
 ```
+
 ```
 classDiagram
 direction LR
@@ -955,11 +964,11 @@ Authorities "0..n" -- "" User
 
 style ChessMatch stroke:blue,color:blue
 
-style ChessBoard stroke:blue,color:blue 
+style ChessBoard stroke:blue,color:blue
 
 style Pice stroke:blue,color:blue
 
-style Challenge stroke:red,color:red 
+style Challenge stroke:red,color:red
 
 style ChallengeObjective stroke:red,color:red
 ```
@@ -972,5 +981,3 @@ control de laboratorio. Realizaremos una serie de ejercicios basados en
 funcionalidades que implementaremos en el sistema, y validaremos
 mediante pruebas unitarias
 ```
-
-
