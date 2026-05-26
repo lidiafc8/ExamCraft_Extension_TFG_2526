@@ -88,13 +88,13 @@ export default function AttributesConstraintsWorkflowScreen({
 
   const { responseText, isLoading, setResponseText, generate } =
     useGeminiGeneration({
-      logExerciseName: "attributes_constraints",
+      logExerciseName: "attributes-constraints",
       buildLogPayload: (result) => ({
-        domain: selectedProject?.domainName,
-        hiddenContext,
-        selectedExam: selectedProject?.extensionFinish,
-        visiblePrompt: promptText,
-        response: result
+        dominio: selectedProject?.domainName,
+        contextoOculto: hiddenContext,
+        examenSeleccionado: selectedProject?.extensionFinish,
+        promptVisible: promptText,
+        respuesta: result
       })
     })
 

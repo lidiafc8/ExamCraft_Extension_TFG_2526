@@ -142,8 +142,8 @@ export default function GenerationTestScreen({
   const { responseText, isLoading, setResponseText, generate } =
     useGeminiGeneration({
       logExerciseName: isRelationships
-        ? "test_relationships_code_generation"
-        : "test_attributes_code_generation",
+        ? "test-relationships-code-generation"
+        : "test-attributes-code-generation",
       buildLogPayload: (result) => ({
         dominio: initialData?.project?.domainName || "",
         contextoOculto: hiddenContext,

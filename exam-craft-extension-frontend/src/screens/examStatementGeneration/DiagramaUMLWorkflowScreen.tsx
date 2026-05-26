@@ -57,13 +57,13 @@ export default function DiagramUMLWorkflowScreen({
 
   const { responseText, isLoading, generate, setResponseText } =
     useGeminiGeneration({
-      logExerciseName: "diagram_uml_functional_extension",
+      logExerciseName: "diagram-uml-functional-extension",
       buildLogPayload: (result) => ({
-        domain: domainName,
-        hiddenContext,
-        statementContext: context,
-        visiblePrompt: promptText,
-        response: result
+        dominio: domainName,
+        contextoOculto: hiddenContext,
+        enunciadoDeContexto: context,
+        promptVisible: promptText,
+        respuesta: result
       })
     })
 

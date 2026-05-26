@@ -120,7 +120,7 @@ export default function GenerationSolutionCodeScreen({
 
   const { responseText, isLoading, setResponseText, generate } =
     useGeminiGeneration({
-      logExerciseName: "full_solution_generation",
+      logExerciseName: "full-solution-generation",
       buildLogPayload: (result) => ({
         dominio: selectedProject?.domainName,
         contextoOculto: hiddenContext,

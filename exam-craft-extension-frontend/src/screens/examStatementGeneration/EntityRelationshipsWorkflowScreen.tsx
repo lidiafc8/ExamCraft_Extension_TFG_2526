@@ -84,13 +84,13 @@ export default function EntityRelationshipsWorkflowScreen({
 
   const { responseText, isLoading, setResponseText, generate } =
     useGeminiGeneration({
-      logExerciseName: "entity_relationships",
+      logExerciseName: "entity-relationships",
       buildLogPayload: (result) => ({
-        domain: selectedProject?.domainName,
-        hiddenContext,
-        selectedExam: selectedProject?.extensionFinish,
-        visiblePrompt: promptText,
-        response: result
+        dominio: selectedProject?.domainName,
+        contextoOculto: hiddenContext,
+        examenSeleccionado: selectedProject?.extensionFinish,
+        promptVisible: promptText,
+        respuesta: result
       })
     })
 
