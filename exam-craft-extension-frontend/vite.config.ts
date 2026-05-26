@@ -17,6 +17,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html"],
       include: ["src/**/*.tsx", "src/**/*.ts"],
+      exclude: ["src/models/**/*.ts", "src/**/*.d.ts", "src/types/**/*.ts"],
     },
   },
 });
