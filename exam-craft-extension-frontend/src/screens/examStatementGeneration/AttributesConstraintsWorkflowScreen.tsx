@@ -19,6 +19,7 @@ import "../storage/css/FoldersGridScreen.css"
 import { FolderExamSelector } from "~src/components/FolderExamsSelector"
 import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
 import { WarningModal } from "~src/components/modals/WarningModal"
+import { buildStandardLogPayload } from "~src/utils/logUtils"
 
 declare var chrome: any
 
@@ -88,14 +89,14 @@ export default function AttributesConstraintsWorkflowScreen({
 
   const { responseText, isLoading, setResponseText, generate } =
     useGeminiGeneration({
-      logExerciseName: "attributes-constraints",
-      buildLogPayload: (result) => ({
-        dominio: selectedProject?.domainName,
-        contextoOculto: hiddenContext,
-        examenSeleccionado: selectedProject?.extensionFinish,
-        promptVisible: promptText,
-        respuesta: result
-      })
+      logExerciseName: "attribute-constraints",
+      buildLogPayload: (result) =>
+        buildStandardLogPayload(
+          result,
+          selectedProject,
+          hiddenContext,
+          promptText
+        )
     })
 
   useEffect(() => {

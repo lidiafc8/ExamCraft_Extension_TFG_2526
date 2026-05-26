@@ -19,6 +19,8 @@ import { WarningModal } from "../../components/modals/WarningModal"
 
 import "../../css/Cards.css"
 
+import { buildStandardLogPayload } from "~src/utils/logUtils"
+
 declare var chrome: any
 
 interface Project {
@@ -85,13 +87,13 @@ export default function EntityRelationshipsWorkflowScreen({
   const { responseText, isLoading, setResponseText, generate } =
     useGeminiGeneration({
       logExerciseName: "entity-relationships",
-      buildLogPayload: (result) => ({
-        dominio: selectedProject?.domainName,
-        contextoOculto: hiddenContext,
-        examenSeleccionado: selectedProject?.extensionFinish,
-        promptVisible: promptText,
-        respuesta: result
-      })
+      buildLogPayload: (result) =>
+        buildStandardLogPayload(
+          result,
+          selectedProject,
+          hiddenContext,
+          promptText
+        )
     })
 
   useEffect(() => {
