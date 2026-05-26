@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { generateWithAI  } from "../services/geminiService"
+
+import { generateWithAI } from "../services/geminiService"
 
 interface UseGeminiGenerationOptions {
   logExerciseName: string
@@ -15,7 +16,7 @@ interface UseGeminiGenerationReturn {
 
 export function useGeminiGeneration({
   logExerciseName,
-  buildLogPayload,
+  buildLogPayload
 }: UseGeminiGenerationOptions): UseGeminiGenerationReturn {
   const [responseText, setResponseText] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -31,10 +32,15 @@ export function useGeminiGeneration({
         await fetch("http://localhost:3001/save-log", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ exercise: logExerciseName, ...buildLogPayload(result) }),
+          body: JSON.stringify({
+            exercise: logExerciseName,
+            ...buildLogPayload(result)
+          })
         })
       } catch {
-        console.warn("Servidor de logs apagado. El log no se guardó en el repo.")
+        console.warn(
+          "Servidor de logs apagado. El log no se guardó en el repo."
+        )
       }
       setIsLoading(false)
       return result

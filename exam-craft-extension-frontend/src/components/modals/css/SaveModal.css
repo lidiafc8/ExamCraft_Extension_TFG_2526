@@ -40,7 +40,7 @@
   padding: 13px 16px 13px 40px;
   font-size: 15px;
   font-weight: 500;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: Georgia, "Times New Roman", serif;
   color: #2c1a0e;
   background: #fdf8f4;
   border: 2px solid #d4b8a8;
@@ -54,7 +54,9 @@
 .save-modal-input--focused {
   background: #fff;
   border-color: #5c3d2e;
-  box-shadow: 0 0 0 4px rgba(92, 61, 46, 0.12), 0 2px 8px rgba(92, 61, 46, 0.08);
+  box-shadow:
+    0 0 0 4px rgba(92, 61, 46, 0.12),
+    0 2px 8px rgba(92, 61, 46, 0.08);
 }
 
 .save-modal-input-underline {

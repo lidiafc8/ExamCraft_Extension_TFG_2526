@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from "react"
-import { Header } from "~src/components/Header"
 import extensionPromptMarkdown from "bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md"
-import { parseMasterPrompt } from "../../utils/promptParser"
+import React, { useEffect, useState } from "react"
+
+import { Header } from "~src/components/Header"
+
 import { useGeminiGeneration } from "../../components/GeminiGeneration"
-import { StepperHeader, PromptEditor, SplitResultView } from "../../components/WorkflowComponents"
+import {
+  PromptEditor,
+  SplitResultView,
+  StepperHeader
+} from "../../components/WorkflowComponents"
+import { parseMasterPrompt } from "../../utils/promptParser"
+
 import "../../css/WorkFlowParts.css"
 import "../../css/CommonText.css"
 
@@ -30,7 +37,7 @@ export default function ContextWorkflowScreen({
   onCreateExamByParts,
   onFunctionalExtension,
   onCreateDiagram,
-  onComponents,
+  onComponents
 }: Props) {
   const [wizardStep, setWizardStep] = useState<1 | 2>(1)
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
@@ -46,7 +53,8 @@ export default function ContextWorkflowScreen({
         .map((key) => items[key])
         .filter(
           (p) =>
-            p.domainName?.toLowerCase() === domainName.toLowerCase() && p.extensionFinish
+            p.domainName?.toLowerCase() === domainName.toLowerCase() &&
+            p.extensionFinish
         )
         .map(
           (p, i) =>
@@ -59,21 +67,24 @@ export default function ContextWorkflowScreen({
 
   useEffect(() => {
     if (!extensionPromptMarkdown) return
-    const { visibleText, hiddenContext: parsed } = parseMasterPrompt(extensionPromptMarkdown)
+    const { visibleText, hiddenContext: parsed } = parseMasterPrompt(
+      extensionPromptMarkdown
+    )
     setPromptText(visibleText.replaceAll("{{DOMAIN}}", domainName))
     setHiddenContext(parsed)
   }, [domainName])
 
-  const { responseText, isLoading, generate, setResponseText } = useGeminiGeneration({
-    logExerciseName: "statement_functional_extension",
-    buildLogPayload: (result) => ({
-      domain: domainName,
-      hiddenContext,
-      previousExtensions,
-      visiblePrompt: promptText,
-      response: result,
-    }),
-  })
+  const { responseText, isLoading, generate, setResponseText } =
+    useGeminiGeneration({
+      logExerciseName: "statement_functional_extension",
+      buildLogPayload: (result) => ({
+        domain: domainName,
+        hiddenContext,
+        previousExtensions,
+        visiblePrompt: promptText,
+        response: result
+      })
+    })
 
   const handleGenerate = async () => {
     const payload = `
@@ -83,9 +94,11 @@ export default function ContextWorkflowScreen({
       [RECURSOS ESTÁTICOS Y EJEMPLOS]:
       ${hiddenContext}
 
-      ${previousExtensions
-        ? `[EXTENSIONES FUNCIONALES YA CREADAS PARA EL DOMINIO "${domainName}" - LA SOLUCIÓN DEVUELTA DEBERÁ EVITAR REPETIR ESTAS EXTENSIONES:\n${previousExtensions}`
-        : ""}
+      ${
+        previousExtensions
+          ? `[EXTENSIONES FUNCIONALES YA CREADAS PARA EL DOMINIO "${domainName}" - LA SOLUCIÓN DEVUELTA DEBERÁ EVITAR REPETIR ESTAS EXTENSIONES:\n${previousExtensions}`
+          : ""
+      }
 
       INSTRUCCIONES PRINCIPALES:
       ${promptText}
@@ -98,8 +111,8 @@ export default function ContextWorkflowScreen({
     { label: "INICIO", action: onWelcome },
     { label: "CREAR EXAMEN", action: onCreateExam },
     { label: "POR PARTES", action: onCreateExamByParts },
-    { label: 'ENUNCIADO', action: onComponents },
-    { label: "EXTENSIÓN FUNCIONAL", action: onFunctionalExtension },
+    { label: "ENUNCIADO", action: onComponents },
+    { label: "EXTENSIÓN FUNCIONAL", action: onFunctionalExtension }
   ]
 
   return (
@@ -115,15 +128,15 @@ export default function ContextWorkflowScreen({
           <StepperHeader steps={STEPS} currentStep={wizardStep} />
 
           <div className="wf-wide-wrapper">
-
             {wizardStep === 1 && internalStep === "input" && (
               <PromptEditor
                 title={`${domainName.toUpperCase()}: Texto de enunciado`}
                 description={
                   <>
-                    Este es el prompt que se usará para generar el texto del enunciado del examen,
-                    puede revisar o modificar cualquier información que vea conveniente. Al
-                    terminar, pulse en <strong>"Generar Enunciado"</strong>.
+                    Este es el prompt que se usará para generar el texto del
+                    enunciado del examen, puede revisar o modificar cualquier
+                    información que vea conveniente. Al terminar, pulse en{" "}
+                    <strong>"Generar Enunciado"</strong>.
                   </>
                 }
                 promptText={promptText}
@@ -150,12 +163,19 @@ export default function ContextWorkflowScreen({
                   <button
                     onClick={handleGenerate}
                     className="btn-step generate"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                    disabled={isLoading}>
+                    {isLoading ? (
+                      <div className="loading-spinner" />
+                    ) : (
+                      "Volver a generar"
+                    )}
                   </button>
-                  <button onClick={onBack} className="btn-back">Volver</button>
-                  <button onClick={() => setWizardStep(2)} className="btn-step success confirm">
+                  <button onClick={onBack} className="btn-back">
+                    Volver
+                  </button>
+                  <button
+                    onClick={() => setWizardStep(2)}
+                    className="btn-step success confirm">
                     Confirmar y Continuar
                   </button>
                 </div>
@@ -166,26 +186,25 @@ export default function ContextWorkflowScreen({
               <div className="content-card-wf">
                 <h2 className="main-title small">Confirmación</h2>
                 <p className="wf-instruction-text">
-                  ¿Está seguro que desea usar el texto de enunciado generado? Una vez confirmado,
-                  se generará el diagrama UML en base a él y no podrá modificarlo.
+                  ¿Está seguro que desea usar el texto de enunciado generado?
+                  Una vez confirmado, se generará el diagrama UML en base a él y
+                  no podrá modificarlo.
                 </p>
                 <div className="wf-actions-row">
                   <button
                     onClick={() => setWizardStep(1)}
-                    className="btn-step secondary cancel"
-                  >
+                    className="btn-step secondary cancel">
                     Cancelar y seguir editando enunciado
                   </button>
                   <button
                     onClick={() => onCreateDiagram(responseText)}
-                    className="btn-step success confirm"
-                  >
-                    Confirmar y pasar al paso 2<br />(Diagrama UML)
+                    className="btn-step success confirm">
+                    Confirmar y pasar al paso 2<br />
+                    (Diagrama UML)
                   </button>
                 </div>
               </div>
             )}
-
           </div>
         </div>
       </div>

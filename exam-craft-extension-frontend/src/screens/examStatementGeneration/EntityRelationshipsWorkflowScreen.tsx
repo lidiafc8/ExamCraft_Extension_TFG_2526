@@ -1,16 +1,22 @@
-import React, { useState, useEffect } from "react"
 import entityRelationshipsPromptMarkdown from "bundle-text:../../prompts/generation-entity-relationships/generation_relationships_between_entities_from_statement.md"
-import { parseMasterPrompt } from "~src/utils/promptParser"
+import React, { useEffect, useState } from "react"
+
+import { FolderExamSelector } from "~src/components/FolderExamsSelector"
 import { useGeminiGeneration } from "~src/components/GeminiGeneration"
 import { Header } from "~src/components/Header"
-import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponents"
-import { FolderExamSelector } from "~src/components/FolderExamsSelector"
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
+import {
+  PromptEditor,
+  SplitResultView
+} from "~src/components/WorkflowComponents"
+import { saveToChrome } from "~src/utils/chromeStorageUtils"
+import { downloadMarkdown } from "~src/utils/downloadUtils"
+import { parseMasterPrompt } from "~src/utils/promptParser"
+
 import { ConfirmModal } from "../../components/modals/ConfirmModal"
 import { SuccessModal } from "../../components/modals/SuccessModal"
 import { WarningModal } from "../../components/modals/WarningModal"
-import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
-import { downloadMarkdown } from "~src/utils/downloadUtils"
-import { saveToChrome } from "~src/utils/chromeStorageUtils"
+
 import "../../css/Cards.css"
 
 declare var chrome: any
@@ -30,9 +36,16 @@ interface Props {
   readonly onBack: () => void
   readonly onWelcome: () => void
   readonly onCreateExam: () => void
-  readonly onCreateTest: (data: { project: any; constraints: string; entityRelationships: string; baseClass: string; targetPart?: string }) => void
+  readonly onCreateTest: (data: {
+    project: any
+    constraints: string
+    entityRelationships: string
+    baseClass: string
+    targetPart?: string
+  }) => void
   readonly onGoToBaseClass: (project?: any) => void
-  readonly onCreateExamByParts: () => void}
+  readonly onCreateExamByParts: () => void
+}
 
 const ALLOWED_FOLDERS = ["clínica veterinaria", "ajedrez"]
 const STORAGE_KEY = "entityRelationships"
@@ -47,7 +60,7 @@ export default function EntityRelationshipsWorkflowScreen({
   onCreateExam,
   onCreateTest,
   onGoToBaseClass,
-  onCreateExamByParts,
+  onCreateExamByParts
 }: Props) {
   const [step, setStep] = useState<"selection" | "workflow">("selection")
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
@@ -59,29 +72,34 @@ export default function EntityRelationshipsWorkflowScreen({
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showDownloadModal, setShowDownloadModal] = useState(false)
-  const [savedData, setSavedData] = useState<{ project: any; result: string } | null>(null)
-  const [pendingProjectForBaseClass, setPendingProjectForBaseClass] = useState<any>(null)
+  const [savedData, setSavedData] = useState<{
+    project: any
+    result: string
+  } | null>(null)
+  const [pendingProjectForBaseClass, setPendingProjectForBaseClass] =
+    useState<any>(null)
 
   const [promptText, setPromptText] = useState("")
   const [hiddenContext, setHiddenContext] = useState("")
 
-  const { responseText, isLoading, setResponseText, generate } = useGeminiGeneration({
-    logExerciseName: "entity_relationships",
-    buildLogPayload: (result) => ({
-      domain: selectedProject?.domainName,
-      hiddenContext,
-      selectedExam: selectedProject?.extensionFinish,
-      visiblePrompt: promptText,
-      response: result,
-    }),
-  })
+  const { responseText, isLoading, setResponseText, generate } =
+    useGeminiGeneration({
+      logExerciseName: "entity_relationships",
+      buildLogPayload: (result) => ({
+        domain: selectedProject?.domainName,
+        hiddenContext,
+        selectedExam: selectedProject?.extensionFinish,
+        visiblePrompt: promptText,
+        response: result
+      })
+    })
 
   useEffect(() => {
     if (step === "selection" && globalThis.chrome?.storage?.local) {
       chrome.storage.local.get(null, (items: Record<string, any>) => {
         const list = Object.keys(items)
           .filter((k) => k.startsWith("project_"))
-          .map((k) => ({ id: k, ...items[k] } as Project))
+          .map((k) => ({ id: k, ...items[k] }) as Project)
         setProjects(list)
       })
     }
@@ -89,7 +107,9 @@ export default function EntityRelationshipsWorkflowScreen({
 
   useEffect(() => {
     if (selectedProject?.domainName) {
-      const { visibleText, hiddenContext: hc } = parseMasterPrompt(entityRelationshipsPromptMarkdown)
+      const { visibleText, hiddenContext: hc } = parseMasterPrompt(
+        entityRelationshipsPromptMarkdown
+      )
       setPromptText(visibleText)
       setHiddenContext(hc)
     }
@@ -131,7 +151,7 @@ export default function EntityRelationshipsWorkflowScreen({
     const updatedProject = {
       ...selectedProject,
       [STORAGE_KEY]: responseText,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
     try {
       await saveToChrome(selectedProject.id, updatedProject)
@@ -160,7 +180,7 @@ export default function EntityRelationshipsWorkflowScreen({
         constraints: savedData.project.attributeConstraints || "",
         entityRelationships: savedData.result,
         baseClass: savedData.project.baseClasses,
-        targetPart: "test2_relationships",
+        targetPart: "test2_relationships"
       })
     } else {
       setPendingProjectForBaseClass(savedData.project)
@@ -173,15 +193,21 @@ export default function EntityRelationshipsWorkflowScreen({
 
   return (
     <div className="exam-app">
-
       {showConfirmModal && selectedProject && (
         <ConfirmModal
           title="Confirmar Contexto"
           message={`¿Deseas utilizar ${projectDisplayName(selectedProject)} como base para generar el ejercicio de relaciones entre entidades?`}
           warning={confirmWarning ?? undefined}
           onConfirm={handleConfirmSelection}
-          onCancel={() => { setShowConfirmModal(false); setSelectedProject(null) }}
-          confirmLabel={selectedProject.entityRelationships ? "Continuar y reemplazar" : "Confirmar"}
+          onCancel={() => {
+            setShowConfirmModal(false)
+            setSelectedProject(null)
+          }}
+          confirmLabel={
+            selectedProject.entityRelationships
+              ? "Continuar y reemplazar"
+              : "Confirmar"
+          }
         />
       )}
 
@@ -190,8 +216,15 @@ export default function EntityRelationshipsWorkflowScreen({
           title="¡Guardado correctamente!"
           message={`Las relaciones entre entidades de ${projectDisplayName(savedData.project)} han sido actualizadas correctamente.\n\n¿Deseas continuar y generar los tests para estas relaciones ahora mismo?`}
           actions={[
-            { label: "No", onClick: () => { setShowSuccessModal(false); onWelcome() }, variant: "secondary" },
-            { label: "Sí", onClick: handlePrimarySuccess, variant: "primary" },
+            {
+              label: "No",
+              onClick: () => {
+                setShowSuccessModal(false)
+                onWelcome()
+              },
+              variant: "secondary"
+            },
+            { label: "Sí", onClick: handlePrimarySuccess, variant: "primary" }
           ]}
         />
       )}
@@ -199,7 +232,12 @@ export default function EntityRelationshipsWorkflowScreen({
       {pendingProjectForBaseClass && (
         <WarningModal
           title="Faltan las Clases Base"
-          message={<>Para poder generar los tests de relaciones, primero es necesario generar las <strong>Clases Base</strong> del examen.</>}
+          message={
+            <>
+              Para poder generar los tests de relaciones, primero es necesario
+              generar las <strong>Clases Base</strong> del examen.
+            </>
+          }
           confirmLabel="Ir a crear Clases Base"
           cancelLabel="Cancelar"
           onConfirm={() => {
@@ -224,13 +262,12 @@ export default function EntityRelationshipsWorkflowScreen({
           { label: "INICIO", action: onWelcome },
           { label: "CREAR EXAMEN", action: onCreateExam },
           { label: "POR PARTES", action: onCreateExamByParts },
-          { label: 'ENUNCIADO', action: onBack },
+          { label: "ENUNCIADO", action: onBack }
         ]}
         currentStep="RELACIONES ENTRE ENTIDADES"
       />
 
       <main className="main-content">
-
         {step === "selection" && (
           <FolderExamSelector
             projects={projects}
@@ -251,9 +288,10 @@ export default function EntityRelationshipsWorkflowScreen({
                   title="Relaciones entre Entidades"
                   description={
                     <>
-                      Este es el prompt que se usará para generar las relaciones entre entidades del examen
-                      seleccionado, puede revisar o modificar cualquier información que vea conveniente.
-                      Al terminar, pulse en <strong>"Generar"</strong>.
+                      Este es el prompt que se usará para generar las relaciones
+                      entre entidades del examen seleccionado, puede revisar o
+                      modificar cualquier información que vea conveniente. Al
+                      terminar, pulse en <strong>"Generar"</strong>.
                     </>
                   }
                   promptText={promptText}
@@ -278,17 +316,21 @@ export default function EntityRelationshipsWorkflowScreen({
                       <button
                         onClick={handleGenerate}
                         className="btn-step generate"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                        disabled={isLoading}>
+                        {isLoading ? (
+                          <div className="loading-spinner" />
+                        ) : (
+                          "Volver a generar"
+                        )}
                       </button>
                       <button
                         onClick={() => setShowDownloadModal(true)}
-                        className="btn-step btn-download"
-                      >
+                        className="btn-step btn-download">
                         Descargar (.md)
                       </button>
-                      <button onClick={handleSave} className="btn-step primary">Guardar</button>
+                      <button onClick={handleSave} className="btn-step primary">
+                        Guardar
+                      </button>
                     </div>
                   }
                 />

@@ -1,15 +1,22 @@
-import React, { useState, useEffect } from "react"
 import generationExamBaseClassesPrompt from "bundle-text:../../prompts/generation-exam-repository/exam/generation_exam_base_classes.md"
-import { parseMasterPrompt } from "~src/utils/promptParser"
-import { PromptEditor, SplitResultView } from "~src/components/WorkflowComponents"
+import React, { useEffect, useState } from "react"
+
 import { useGeminiGeneration } from "~src/components/GeminiGeneration"
 import { Header } from "~src/components/Header"
+import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
+import {
+  PromptEditor,
+  SplitResultView
+} from "~src/components/WorkflowComponents"
+import { downloadMarkdown } from "~src/utils/downloadUtils"
+import { parseMasterPrompt } from "~src/utils/promptParser"
+
 import { ConfirmModal } from "../../components/modals/ConfirmModal"
 import { SaveModal } from "../../components/modals/SaveModal"
-import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
-import { downloadMarkdown } from "~src/utils/downloadUtils"
+
 import "../../css/Cards.css"
 import "../storage/css/FoldersGridScreen.css"
+
 import { FolderExamSelector } from "~src/components/FolderExamsSelector"
 
 declare var chrome: any
@@ -40,8 +47,8 @@ const CLASES_POR_DEFECTO: Record<string, string> = {
   "clínica veterinaria": `
 - BaseEntity\n- NamedEntity\n- Person\n- Owner\n- Vet\n- Pet\n- PetType
 - Specialty\n- Visit\n- Clinic\n- PricingPlan\n- ClinicOwner\n- User\n- Authorities`,
-  "ajedrez": `
-- BaseEntity\n- NamedEntity\n- Authorities\n- User\n- ChessMatch\n- ChessBoard\n- Piece`,
+  ajedrez: `
+- BaseEntity\n- NamedEntity\n- Authorities\n- User\n- ChessMatch\n- ChessBoard\n- Piece`
 }
 
 const ALLOWED_FOLDERS = ["clínica veterinaria", "ajedrez"]
@@ -56,17 +63,27 @@ const warningMessage = (proj: Project): string | null =>
     ? "Este examen ya tiene clases base generadas. Si continúas, se sobreescribirán al guardar."
     : null
 
-function buildPrompt(project: Project): { visibleText: string; hiddenContext: string } {
+function buildPrompt(project: Project): {
+  visibleText: string
+  hiddenContext: string
+} {
   try {
-    const { visibleText, hiddenContext } = parseMasterPrompt(generationExamBaseClassesPrompt)
+    const { visibleText, hiddenContext } = parseMasterPrompt(
+      generationExamBaseClassesPrompt
+    )
     const dominio = (project.domainName || project.customName || "").trim()
-    const clases = CLASES_POR_DEFECTO[dominio.toLowerCase()] || "No hay clases base registradas para este dominio."
-    const base = visibleText?.trim().length > 0
-      ? visibleText
-      : "Genera las clases base en Java para el dominio {dominio}. Clases a incluir: {clases_existentes}"
+    const clases =
+      CLASES_POR_DEFECTO[dominio.toLowerCase()] ||
+      "No hay clases base registradas para este dominio."
+    const base =
+      visibleText?.trim().length > 0
+        ? visibleText
+        : "Genera las clases base en Java para el dominio {dominio}. Clases a incluir: {clases_existentes}"
     return {
-      visibleText: base.replaceAll("{dominio}", dominio || "el examen").replaceAll("{clases_existentes}", clases),
-      hiddenContext: hiddenContext || "",
+      visibleText: base
+        .replaceAll("{dominio}", dominio || "el examen")
+        .replaceAll("{clases_existentes}", clases),
+      hiddenContext: hiddenContext || ""
     }
   } catch (error) {
     console.error("Error en buildPrompt:", error)
@@ -82,44 +99,47 @@ export default function GenerationBaseClassesScreen({
   onWelcome,
   onCreateExam,
   onCreateExamByParts,
-  onCodeGeneration,
+  onCodeGeneration
 }: Props) {
-  const [selectionStep, setSelectionStep] = useState<"folders" | "exams" | "workflow">(
-    initialProject ? "workflow" : "folders"
-  )
+  const [selectionStep, setSelectionStep] = useState<
+    "folders" | "exams" | "workflow"
+  >(initialProject ? "workflow" : "folders")
   const [internalStep, setInternalStep] = useState<"input" | "result">("input")
   const [projects, setProjects] = useState<Project[]>([])
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
-  const [selectedProject, setSelectedProject] = useState<Project | null>(initialProject ?? null)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(
+    initialProject ?? null
+  )
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [showDownloadModal, setShowDownloadModal] = useState(false)
   const [promptText, setPromptText] = useState("")
   const [hiddenContext, setHiddenContext] = useState("")
 
-  const { responseText, isLoading, setResponseText, generate } = useGeminiGeneration({
-    logExerciseName: "base_classes_code_generation",
-    buildLogPayload: (result) => ({
-      domain: selectedProject?.domainName,
-      hiddenContext,
-      selectedExam: selectedProject?.extensionFinish,
-      visiblePrompt: promptText,
-      response: result,
-    }),
-  })
+  const { responseText, isLoading, setResponseText, generate } =
+    useGeminiGeneration({
+      logExerciseName: "base_classes_code_generation",
+      buildLogPayload: (result) => ({
+        domain: selectedProject?.domainName,
+        hiddenContext,
+        selectedExam: selectedProject?.extensionFinish,
+        visiblePrompt: promptText,
+        response: result
+      })
+    })
 
   const breadcrumbItems = fromAttributes
     ? [
         { label: "INICIO", action: onWelcome },
         { label: "CREAR EXAMEN", action: onCreateExam },
         { label: "POR PARTES", action: onCreateExamByParts },
-        { label: "ATRIBUTOS", action: onBack },
+        { label: "ATRIBUTOS", action: onBack }
       ]
     : [
         { label: "INICIO", action: onWelcome },
         { label: "CREAR EXAMEN", action: onCreateExam },
         { label: "POR PARTES", action: onCreateExamByParts },
-        { label: "CÓDIGO", action: onCodeGeneration },
+        { label: "CÓDIGO", action: onCodeGeneration }
       ]
 
   useEffect(() => {
@@ -127,7 +147,7 @@ export default function GenerationBaseClassesScreen({
       chrome.storage.local.get(null, (items: Record<string, any>) => {
         const list = Object.keys(items)
           .filter((k) => k.startsWith("project_"))
-          .map((k) => ({ id: k, ...items[k] } as Project))
+          .map((k) => ({ id: k, ...items[k] }) as Project)
         setProjects(list)
       })
     }
@@ -178,22 +198,30 @@ export default function GenerationBaseClassesScreen({
           message={`¿Deseas utilizar ${displayName(selectedProject)} como base para generar las clases base del examen?`}
           warning={warningMessage(selectedProject)}
           onConfirm={handleConfirmSelection}
-          onCancel={() => { setShowConfirmModal(false); setSelectedProject(null) }}
+          onCancel={() => {
+            setShowConfirmModal(false)
+            setSelectedProject(null)
+          }}
         />
       )}
 
       {showSaveModal && selectedProject && (
         <SaveModal
           domainName={displayName(selectedProject)}
-          onSuccess={fromAttributes
-            ? () => onGoToTests?.({ ...selectedProject, [STORAGE_KEY]: responseText })
-            : onWelcome
+          onSuccess={
+            fromAttributes
+              ? () =>
+                  onGoToTests?.({
+                    ...selectedProject,
+                    [STORAGE_KEY]: responseText
+                  })
+              : onWelcome
           }
           onClose={() => setShowSaveModal(false)}
           buildPayload={() => ({
             ...selectedProject,
             [STORAGE_KEY]: responseText,
-            updatedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           })}
           existingKey={selectedProject.id}
           skipPrompt
@@ -204,12 +232,16 @@ export default function GenerationBaseClassesScreen({
 
       <DownloadConfirmModal
         isOpen={showDownloadModal}
-        defaultFileName={`${DOWNLOAD_PREFIX}_${displayName(selectedProject || {} as Project).replace(/\s+/g, "_")}`}
+        defaultFileName={`${DOWNLOAD_PREFIX}_${displayName(selectedProject || ({} as Project)).replace(/\s+/g, "_")}`}
         onConfirm={handleConfirmDownload}
         onCancel={() => setShowDownloadModal(false)}
       />
 
-      <Header onWelcome={onWelcome} breadcrumbItems={breadcrumbItems} currentStep="CLASES BASE" />
+      <Header
+        onWelcome={onWelcome}
+        breadcrumbItems={breadcrumbItems}
+        currentStep="CLASES BASE"
+      />
 
       <main className="main-content">
         {(selectionStep === "folders" || selectionStep === "exams") && (
@@ -233,12 +265,20 @@ export default function GenerationBaseClassesScreen({
               {internalStep === "input" && (
                 <PromptEditor
                   title="Clases Base del Examen"
-                  description={<>Este es el prompt que se usará para generar las clases base. Puedes modificar lo que veas conveniente. Al terminar, pulsa <strong>"Generar"</strong>.</>}
+                  description={
+                    <>
+                      Este es el prompt que se usará para generar las clases
+                      base. Puedes modificar lo que veas conveniente. Al
+                      terminar, pulsa <strong>"Generar"</strong>.
+                    </>
+                  }
                   promptText={promptText}
                   isLoading={isLoading}
                   onPromptChange={setPromptText}
                   onGenerate={handleGenerate}
-                  onBack={() => fromAttributes ? onBack() : setSelectionStep("exams")}
+                  onBack={() =>
+                    fromAttributes ? onBack() : setSelectionStep("exams")
+                  }
                 />
               )}
               {internalStep === "result" && (
@@ -255,17 +295,23 @@ export default function GenerationBaseClassesScreen({
                       <button
                         onClick={handleGenerate}
                         className="btn-step generate"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? <div className="loading-spinner" /> : "Volver a generar"}
+                        disabled={isLoading}>
+                        {isLoading ? (
+                          <div className="loading-spinner" />
+                        ) : (
+                          "Volver a generar"
+                        )}
                       </button>
                       <button
                         onClick={() => setShowDownloadModal(true)}
-                        className="btn-step btn-download"
-                      >
+                        className="btn-step btn-download">
                         Descargar (.md)
                       </button>
-                      <button onClick={() => setShowSaveModal(true)} className="btn-step primary">Guardar</button>
+                      <button
+                        onClick={() => setShowSaveModal(true)}
+                        className="btn-step primary">
+                        Guardar
+                      </button>
                     </div>
                   }
                 />

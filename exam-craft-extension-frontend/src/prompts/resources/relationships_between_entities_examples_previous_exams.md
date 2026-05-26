@@ -3,6 +3,7 @@
 ## Clínica Veterinaria:
 
 ### ControlCheck 1 G1 ----------------------------------------------------------------------------------------------------------------------
+
 ```
 Elimine las anotaciones @Transient de los métodos y atributos que las
 tengan en las entidades creadas anteriormente, así como la del atributo
@@ -27,7 +28,9 @@ expresan adecuadamente la cardinalidad que muestra el diagrama UML, por
 ejemplo, el atributo no puede ser nulo y es obligatorio, puesto que la
 cardinalidad es 1..n en el extremo de Disease.
 ```
+
 ### ControlCheck 1 G2 ----------------------------------------------------------------------------------------------------------------------
+
 ```
 Se pide crear las siguientes relaciones entre las entidades:
 
@@ -50,6 +53,7 @@ UML respetando sus cardinalidades, usando el atributo
 UML respetando sus cardinalidades, usando el atributo “room”
 de la clase “Surgery”.
 ```
+
 ### ControlCheck 1 G3 ----------------------------------------------------------------------------------------------------------------------
 
 ```
@@ -73,6 +77,7 @@ otros no, porque su cardinalidad en el extremo navegable de la relación es 1.
 ```
 
 ### ControlCheck 2 G1 ----------------------------------------------------------------------------------------------------------------------
+
 ```
 Elimine las anotaciones @Transient de los métodos y atributos que las
 tengan en las entidades creadas en el ejercicio anterior, así como la del
@@ -234,4 +239,3 @@ algunos atributos pueden ser nulos puesto que la cardinalidad es 0..n pero
 otros no, porque su cardinalidad en el extremo navegable de la relación es
 1..n.
 ```
-

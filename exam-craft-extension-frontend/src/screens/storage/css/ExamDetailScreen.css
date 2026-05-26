@@ -74,7 +74,7 @@
 }
 
 .btn-code {
-  background-color: #946150; 
+  background-color: #946150;
   color: white;
   border: none;
   border-radius: var(--radius-sm);
@@ -135,7 +135,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 14px;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -154,20 +154,41 @@
   font-weight: 600;
   cursor: pointer;
   text-align: center;
-  transition: filter 0.15s, transform 0.15s;
+  transition:
+    filter 0.15s,
+    transform 0.15s;
   letter-spacing: 0.01em;
 }
 
-.action-btn:hover { filter: brightness(1.08); transform: scale(1.04); }
-.action-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.action-btn:hover {
+  filter: brightness(1.08);
+  transform: scale(1.04);
+}
+.action-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
 
-.action-btn--preview  { background-color: #1e5422; color: white; }
+.action-btn--preview {
+  background-color: #1e5422;
+  color: white;
+}
 
-.action-btn--download { background-color: #1a73e8; color: white; }
+.action-btn--download {
+  background-color: #1a73e8;
+  color: white;
+}
 
-.action-btn--github   { background-color: #24292e; color: white; }
+.action-btn--github {
+  background-color: #24292e;
+  color: white;
+}
 
-.action-btn--delete   { background-color: #cf1322; color: white; }
+.action-btn--delete {
+  background-color: #cf1322;
+  color: white;
+}
 
 .action-divider {
   border: none;
@@ -195,7 +216,7 @@
   border-radius: 14px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 }
 
@@ -226,7 +247,9 @@
   transition: background 0.15s;
 }
 
-.preview-close-btn:hover { background: var(--accent-light); }
+.preview-close-btn:hover {
+  background: var(--accent-light);
+}
 
 .preview-modal-body {
   padding: 32px;
