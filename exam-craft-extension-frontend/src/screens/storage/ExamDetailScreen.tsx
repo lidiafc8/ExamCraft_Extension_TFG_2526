@@ -5,7 +5,7 @@ import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModa
 import { GitHubDeployModal } from "~src/components/modals/GitHubDeployModal"
 
 import { Header } from "../../components/Header"
-import { cleanMermaidCode } from "../../components/mermaidCleaner"
+import { cleanMermaidCode } from "../../components/MermaidCodeCleaner"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import { generateWithAI } from "../../services/geminiService"
 

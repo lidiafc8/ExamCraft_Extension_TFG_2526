@@ -23,7 +23,7 @@ interface Props {
   readonly onCodeGeneration: () => void
 }
 
-export default function GeneralGenerationTestScreen({
+export default function SelectionGenerationTestScreen({
   onBack,
   onWelcome,
   onCreateExam,

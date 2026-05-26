@@ -14,7 +14,7 @@ interface Props {
   readonly onCreateExamByParts: () => void
 }
 
-export default function FunctionalExtensionScreen({
+export default function DomainSelectionScreen({
   onBack,
   onWelcome,
   onSelectDomain,
