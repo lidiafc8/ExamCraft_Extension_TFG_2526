@@ -19,7 +19,7 @@ import { WarningModal } from "../../components/modals/WarningModal"
 
 import "../../css/Cards.css"
 
-import { buildStandardLogPayload } from "~src/utils/logUtils"
+import { getLogConfig } from "~src/utils/logUtils"
 
 declare var chrome: any
 
@@ -84,17 +84,8 @@ export default function EntityRelationshipsWorkflowScreen({
   const [promptText, setPromptText] = useState("")
   const [hiddenContext, setHiddenContext] = useState("")
 
-  const { responseText, isLoading, setResponseText, generate } =
-    useGeminiGeneration({
-      logExerciseName: "entity-relationships",
-      buildLogPayload: (result) =>
-        buildStandardLogPayload(
-          result,
-          selectedProject,
-          hiddenContext,
-          promptText
-        )
-    })
+  const { responseText, isLoading, setResponseText, generate } = 
+    useGeminiGeneration(getLogConfig("entity-relationships", selectedProject, hiddenContext, promptText));
 
   useEffect(() => {
     if (step === "selection" && globalThis.chrome?.storage?.local) {

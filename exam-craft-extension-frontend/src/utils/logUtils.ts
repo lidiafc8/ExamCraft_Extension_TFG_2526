@@ -20,3 +20,14 @@ export const buildStandardLogPayload = (
     respuesta: result
   }
 }
+
+export const getLogConfig = (
+  exerciseName: string,
+  project: any,
+  context: string,
+  prompt: string
+) => ({
+  logExerciseName: exerciseName,
+  buildLogPayload: (result: string) => 
+    buildStandardLogPayload(result, project, context, prompt)
+});

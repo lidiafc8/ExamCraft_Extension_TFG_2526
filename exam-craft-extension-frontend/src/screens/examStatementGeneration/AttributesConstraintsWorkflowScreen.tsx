@@ -19,7 +19,7 @@ import "../storage/css/FoldersGridScreen.css"
 import { FolderExamSelector } from "~src/components/FolderExamsSelector"
 import { DownloadConfirmModal } from "~src/components/modals/DownloadConfirmModal"
 import { WarningModal } from "~src/components/modals/WarningModal"
-import { buildStandardLogPayload } from "~src/utils/logUtils"
+import { getLogConfig } from "~src/utils/logUtils"
 
 declare var chrome: any
 
@@ -87,17 +87,8 @@ export default function AttributesConstraintsWorkflowScreen({
   const [pendingProjectForBaseClass, setPendingProjectForBaseClass] =
     useState<Project | null>(null)
 
-  const { responseText, isLoading, setResponseText, generate } =
-    useGeminiGeneration({
-      logExerciseName: "attribute-constraints",
-      buildLogPayload: (result) =>
-        buildStandardLogPayload(
-          result,
-          selectedProject,
-          hiddenContext,
-          promptText
-        )
-    })
+  const { responseText, isLoading, setResponseText, generate } = 
+    useGeminiGeneration(getLogConfig("attributes-constraints", selectedProject, hiddenContext, promptText));
 
   useEffect(() => {
     if (step === "selection" && globalThis.chrome?.storage?.local) {
