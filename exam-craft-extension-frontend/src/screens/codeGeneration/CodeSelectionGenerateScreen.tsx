@@ -11,7 +11,7 @@ interface Props {
   readonly onGenerateSolutionCode: () => void
 }
 
-export default function CodeGenerationScreen({
+export default function CodeSelectionGenerateScreen({
   onBack,
   onWelcome,
   onCreateExamByParts,

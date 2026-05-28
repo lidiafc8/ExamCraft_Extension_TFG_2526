@@ -118,13 +118,13 @@ export default function GenerationBaseClassesScreen({
 
   const { responseText, isLoading, setResponseText, generate } =
     useGeminiGeneration({
-      logExerciseName: "base_classes_code_generation",
+      logExerciseName: "base-classes-code-generation",
       buildLogPayload: (result) => ({
-        domain: selectedProject?.domainName,
-        hiddenContext,
-        selectedExam: selectedProject?.extensionFinish,
-        visiblePrompt: promptText,
-        response: result
+        dominio: selectedProject?.domainName,
+        contextoOculto: hiddenContext,
+        examenSeleccionado: selectedProject?.extensionFinish,
+        promptVisible: promptText,
+        respuesta: result
       })
     })
 

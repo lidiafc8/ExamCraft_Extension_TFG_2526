@@ -4,13 +4,12 @@ import React, { useEffect, useState } from "react"
 import { Header } from "~src/components/Header"
 
 import { useGeminiGeneration } from "../../components/GeminiGeneration"
-import { cleanMermaidCode } from "../../components/mermaidCleaner"
+import { cleanMermaidCode } from "../../components/MermaidCodeCleaner"
 import { MermaidViewer } from "../../components/MermaidViewer"
 import {
   PromptEditor,
   StepperHeader
 } from "../../components/WorkflowComponents"
-import { generateWithAI } from "../../services/geminiService"
 import { parseMasterPrompt } from "../../utils/promptParser"
 
 import "../../css/WorkFlowParts.css"
@@ -30,7 +29,7 @@ interface Props {
 
 const STEPS = [{ label: "Texto de enunciado" }, { label: "Diagrama UML" }]
 
-export default function DiagramUMLScreen({
+export default function DiagramUMLWorkflowScreen({
   domainName,
   context,
   onBack,
@@ -58,13 +57,13 @@ export default function DiagramUMLScreen({
 
   const { responseText, isLoading, generate, setResponseText } =
     useGeminiGeneration({
-      logExerciseName: "diagram_uml_functional_extension",
+      logExerciseName: "diagram-uml-functional-extension",
       buildLogPayload: (result) => ({
-        domain: domainName,
-        hiddenContext,
-        statementContext: context,
-        visiblePrompt: promptText,
-        response: result
+        dominio: domainName,
+        contextoOculto: hiddenContext,
+        enunciadoDeContexto: context,
+        promptVisible: promptText,
+        respuesta: result
       })
     })
 
