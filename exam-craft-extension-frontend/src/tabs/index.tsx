@@ -10,7 +10,7 @@ import EntityRelationshipsWorkflowScreen from "~src/screens/examStatementGenerat
 import CreateExamByPartsScreen from "../screens/chooseCreate/CreateExamByPartsScreen"
 import CreateExamScreen from "../screens/chooseCreate/CreateExamSelectionScreen"
 import GenerationTestAtributesScreen from "../screens/codeGeneration/GenerationTestsScreen"
-import GeneralGenerationTestScreen from "../screens/codeGeneration/SelectionGenerationTest"
+import GeneralGenerationTestScreen from "../screens/codeGeneration/SelectionGenerationTestScreen"
 import ContextWorkflowScreen from "../screens/examStatementGeneration/ContextWorkflowScreen"
 import DiagramUMLScreen from "../screens/examStatementGeneration/DiagramaUMLWorkflowScreen"
 import DomainSelectionScreen from "../screens/examStatementGeneration/DomainSelectionScreen"

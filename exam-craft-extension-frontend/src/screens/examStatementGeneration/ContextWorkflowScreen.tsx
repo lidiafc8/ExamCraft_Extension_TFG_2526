@@ -76,13 +76,13 @@ export default function ContextWorkflowScreen({
 
   const { responseText, isLoading, generate, setResponseText } =
     useGeminiGeneration({
-      logExerciseName: "statement_functional_extension",
+      logExerciseName: "statement-functional-extension",
       buildLogPayload: (result) => ({
-        domain: domainName,
-        hiddenContext,
-        previousExtensions,
-        visiblePrompt: promptText,
-        response: result
+        dominio: domainName,
+        contextoOculto: hiddenContext,
+        extensionesPrevias: previousExtensions,
+        promptVisible: promptText,
+        respuesta: result
       })
     })
 

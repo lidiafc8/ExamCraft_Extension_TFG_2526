@@ -10,7 +10,7 @@ interface Props {
   readonly onCreateExamByParts: () => void
 }
 
-export default function CreateExamScreen({
+export default function CreateExamSelectionScreen({
   onBack,
   onCreateExamByParts
 }: Props) {
