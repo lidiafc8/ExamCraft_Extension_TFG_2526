@@ -39,7 +39,7 @@ Deberá cumplir estos requisitos:
 
 - Las explicaciones tendrán que ser parecidas a los ejemplos que te he pasado en el archivo md.
 
-- Se debe especificar la direccionalidad de las relaciones a implementar y las entidades implicadas en cada una de ellas.
+- Se debe especificar la direccionalidad de las relaciones a implementar y las entidades implicadas en cada una de ellas. Esta direccionalidad tiene que ser la indicada estrictamente en el código Mermaid de la extensión funcional pasada como contexto.
 
 - Se debe indicar que las relaciones deberán corresponderse con lo indicado en el diagrama UML proporcionado al alumno.
 
