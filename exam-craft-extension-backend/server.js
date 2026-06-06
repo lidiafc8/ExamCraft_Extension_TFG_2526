@@ -92,6 +92,7 @@ async function executeProvider(providerId, prompt) {
     try {
       return await provider.callApi(prompt, key, provider.model)
     } catch (err) {
+      console.error(`[${providerId.toUpperCase()}] Error caused by:`, err.message)
       console.warn(
         `[${providerId.toUpperCase()}] Key failed, attempting the next...`
       )
