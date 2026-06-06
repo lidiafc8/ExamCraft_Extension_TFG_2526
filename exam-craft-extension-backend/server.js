@@ -142,7 +142,7 @@ function formatTitle(key) {
 
 app.post("/save-log", (req, res) => {
   try {
-    const { ejercicio, dominio, ...dynamicFields } = req.body
+    const { ejercicio, dominio, proveedor,...dynamicFields } = req.body
 
     const domainTranslations = {
       "clínica veterinaria": "petClinic",
@@ -154,8 +154,11 @@ app.post("/save-log", (req, res) => {
     const safeExercise = ejercicio
       ? ejercicio.toLowerCase().replace(/\s+/g, "_")
       : "general_exercise"
+    const safeProvider = proveedor 
+      ? proveedor.toLowerCase().trim() 
+      : "unknown_provider"
 
-    const folderPath = path.join(__dirname, "logs", safeExercise, englishDomain)
+    const folderPath = path.join(__dirname, "logs", safeProvider, safeExercise, englishDomain)
 
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath, { recursive: true })
@@ -191,7 +194,7 @@ app.post("/save-log", (req, res) => {
       .join("\n\n---\n\n")
 
     const fileContent =
-      `# Evaluación de Prompt\n\n**Ejercicio:** ${(ejercicio || "sin_nombre").toUpperCase()}\n**Dominio:** ${englishDomain.toUpperCase()}\n**Fecha:** ${new Date().toLocaleString()}\n\n## Índice\n${indexLines}\n\n---\n\n${sections}`.trim()
+      `# Evaluación de Prompt\n\n**Proveedor IA:** ${safeProvider.toUpperCase()}\n**Ejercicio:** ${(ejercicio || "sin_nombre").toUpperCase()}\n**Dominio:** ${englishDomain.toUpperCase()}\n**Fecha:** ${new Date().toLocaleString()}\n\n## Índice\n${indexLines}\n\n---\n\n${sections}`.trim()
 
     fs.writeFileSync(filePath, fileContent)
     console.log(`[Log Service] Successfully saved log at: ${filePath}`)
