@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cleanMermaidCode } from "./mermaidCleaner";
+import { cleanMermaidCode } from "./MermaidCodeCleaner";
 
 describe("cleanMermaidCode – Casos Base y Limpieza Inicial", () => {
   it("retorna un string vacío si la entrada es nula, indefinida o vacía (Control de Guardas)", () => {

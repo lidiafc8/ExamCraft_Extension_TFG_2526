@@ -237,7 +237,7 @@ function printEndpoints(app) {
   console.log("============================\n")
 }
 
-const PORT = 3001
+const PORT = 3000
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 

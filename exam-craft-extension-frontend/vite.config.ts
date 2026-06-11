@@ -1,9 +1,26 @@
 import { defineConfig } from "vitest/config";
+import type { Plugin } from "vitest/config"; 
 import react from "@vitejs/plugin-react";
-import path from "path"; 
+import path from "path";
+
+function bundleTextPlugin(): Plugin {
+  return {
+    name: "bundle-text",
+    resolveId(id) {
+      if (id.startsWith("bundle-text:")) {
+        return "\0bundle-text-mock";
+      }
+    },
+    load(id) {
+      if (id === "\0bundle-text-mock") {
+        return `export default "";`;
+      }
+    },
+  };
+}
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), bundleTextPlugin()],
   resolve: {
     alias: {
       "~src": path.resolve(__dirname, "./src"),

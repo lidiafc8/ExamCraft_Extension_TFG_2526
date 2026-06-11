@@ -5,11 +5,9 @@ import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateExamByPartsScreen from "./CreateExamByPartsScreen";
 
-// Mocks para evitar errores al importar archivos de imágenes en Vitest
 vi.mock("../../../assets/images/code.png", () => ({ default: "mock-code-icon" }));
 vi.mock("../../../assets/images/statement.png", () => ({ default: "mock-statement-icon" }));
 
-// Mock del componente Header para aislar la prueba y centrarnos en la pantalla actual
 vi.mock("~src/components/Header", () => ({
   Header: ({ breadcrumbItems, currentStep, onWelcome }: any) => (
     <header data-testid="mock-header">
@@ -40,19 +38,15 @@ describe("CreateExamByPartsScreen – Pruebas Unitarias", () => {
   it("renderiza correctamente los títulos, textos e iconos de la pantalla", () => {
     render(<CreateExamByPartsScreen {...baseProps} />);
 
-    // Verificar textos principales en el DOM
     expect(screen.getByText("CREAR EXAMEN POR PARTES")).toBeInTheDocument();
     expect(screen.getByText("¿Qué parte te gustaría generar primero?")).toBeInTheDocument();
 
-    // Verificar que las etiquetas de las tarjetas están presentes
     expect(screen.getByText("Enunciado")).toBeInTheDocument();
     expect(screen.getByText("Código")).toBeInTheDocument();
 
-    // Verificar que las imágenes cargan con sus respectivos textos alternativos (alt)
     expect(screen.getByAltText("Icono examen")).toBeInTheDocument();
     expect(screen.getByAltText("Icono archivo")).toBeInTheDocument();
 
-    // Verificar el botón general de retroceso
     expect(screen.getByRole("button", { name: "Volver" })).toBeInTheDocument();
   });
 
@@ -86,11 +80,9 @@ describe("CreateExamByPartsScreen – Pruebas Unitarias", () => {
   it("pasa las acciones correctas al componente Header y reacciona a sus interacciones", async () => {
     render(<CreateExamByPartsScreen {...baseProps} />);
 
-    // Verificar que el Header se renderiza con el paso actual
     expect(screen.getByTestId("mock-header")).toBeInTheDocument();
     expect(screen.getByText("Step: POR PARTES")).toBeInTheDocument();
 
-    // Simular interacciones con los botones inyectados en las migas de pan (breadcrumbs) del Header
     const btnInicio = screen.getByRole("button", { name: "INICIO" });
     const btnCrearExamen = screen.getByRole("button", { name: "CREAR EXAMEN" });
     const btnWelcomeLink = screen.getByRole("button", { name: "Welcome Link" });
@@ -102,6 +94,6 @@ describe("CreateExamByPartsScreen – Pruebas Unitarias", () => {
     expect(baseProps.onBack).toHaveBeenCalledTimes(1);
 
     await userEvent.click(btnWelcomeLink);
-    expect(baseProps.onWelcome).toHaveBeenCalledTimes(2); // Se llama una segunda vez
+    expect(baseProps.onWelcome).toHaveBeenCalledTimes(2); 
   });
 });
