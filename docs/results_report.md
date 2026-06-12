@@ -14,6 +14,7 @@
 | 1.2 | 29/03/2026 | Lidia Ning Fernández Casillas | Mejora de estructura de logs y actualización correspondiente en el documento. |
 | 2.0 | 04/05/2026 | Lidia Ning Fernández Casillas | Actualización del documento con nuevos datos y creación de plantilla para ChatGPT. |
 | 2.1 | 04/06/2026 | Lidia Ning Fernández Casillas | Actualización del documento con nuevos datos para pruebas de validación. |
+| 2.2 | 12/06/2026 | María Auxiliadora Quintana Fernández | Actualización del documento con nuevos datos para pruebas de validación. |
 
 ---
 <br>
@@ -44,7 +45,7 @@
 # PARTE I: Evaluación Modelo Gemini
 
 - **Modelo Evaluado:** API de Gemini
-- **Total de Logs Analizados:** 83
+- **Total de Logs Analizados:** 88
 
 ## 1. Métricas Globales Gemini
 
@@ -52,10 +53,10 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 
 | Métrica | Cantidad | Porcentaje |
 | :--- | :---: | :---: |
-| **Total de Pruebas (Logs)** | 83 | 100% |
-| ✅ **Éxitos Totales** | 71 | **85.54%** |
-| ⚠️ **Éxito Parcial:** | 10 | **12.04%** |
-| ❌ **Fallos / Alucinaciones** | 2 | **2.40%** |
+| **Total de Pruebas (Logs)** | 88 | 100% |
+| ✅ **Éxitos Totales** | 74 | **84.09%** |
+| ⚠️ **Éxito Parcial:** | 12 | **13.63%** |
+| ❌ **Fallos / Alucinaciones** | 2 | **2.27%** |
 
 ## 2. Criterios de Evaluación Gemini
 
@@ -68,8 +69,8 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 ## 3. Análisis de Partes del Enunciado Gemini
 
 ### 3.1. Enunciado de la Extensión Funcional - Parte 1 (`functional_extension`)
-* **Total de pruebas:** 13 para Clínica Veterinaria, 9 para Ajedrez
-* **Ratio de Éxito:** 84,61% (11/13 Clínica Veterinaria), 100% (9/9 Ajedrez) 
+* **Total de pruebas:** 15 para Clínica Veterinaria, 11 para Ajedrez
+* **Ratio de Éxito:** 86,67% (13/15 Clínica Veterinaria), 91,66% (11/12 Ajedrez) 
 * **Observaciones Positivas:** 
     - El modelo respeta muy bien el tono académico y usa correctamente los recursos ocultos.
     - El modelo toma como contexto las extensiones funcionales anteriores almacenadas correctamente y genera otras diferentes.
@@ -83,11 +84,12 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
     - Susitución de negaciones explícitas por palabras similares para evitar la omisión de instrucciones importantes debido al filtrado que lleva a cabo el modelo.
     - Dotación de memoria para la generación de extensiones nuevas que no se hayan repetido anteriormente con la extensión.
     - Mejora y clarificación de las instrucciones del prompt para la optimización y mejora del entendimiento de la estructura objetivo de la solución a devolver.
+    - Especificar en cada atributo solo se le puede dar un nombre.
 * **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
 
 ### 3.2. Diagrama UML de la Extensión Funcional - Parte 2 (`UML_diagram`)
-* **Total de pruebas:** 12 para Clínica Veterinaria, 9 para Ajedrez
-* **Ratio de Éxito:** 50% (6/12 Clínica Veterinaria), 77,77% (7/9 Ajedrez) 
+* **Total de pruebas:** 14 para Clínica Veterinaria, 12 para Ajedrez
+* **Ratio de Éxito:** 50% (7/14 Clínica Veterinaria), 83,33% (10/12 Ajedrez) 
 * **Observaciones Positivas:** 
     - Devuelve el código Mermaid con las relaciones y los atributos de la forma en la que se le piden, en base a los ejemplos pasados de exámenes anteriores.
     - El diagrama se renderiza y visualiza de manera correcta en la UI.
@@ -95,6 +97,7 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 * **Errores Comunes (Fallos):** 
     - Para ambos dominios:
         - No se devuelve el código para establecer el color de cada entidad y relación. (Este fallo ha sido corregido y actualmente no sucede).
+        - Crea alguna cardinalidad que no coincide con el contexto generado ni con la lógica.
     - Para Ajedrez:
         - El modelo hay veces en las que no devuelve las clases `ChessBoard`, `ChessMatch`, `Piece`, clases necesarias para construir correctamente el examen. (Este fallo ha sido corregido y actualmente no sucede, devolviendo siempre estas clases necesarias).
 * **Mejoras para el Prompt realizadas:**
@@ -106,16 +109,16 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
     
 
 ### 3.3. Restricciones de atributos - (`attributes_constraints`)
-* **Total de pruebas:** 6 para Clínica Veterinaria, 4 para Ajedrez
+* **Total de pruebas:** 8 para Clínica Veterinaria, 7 para Ajedrez
 * **Ratio de Éxito:** 100% para ambos
 * **Observaciones Positivas:** El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
 * **Errores Comunes (Fallos):** No se han visualizado errores hasta el momento.
 * **Mejoras para el Prompt realizadas:**
     - Susitución de negaciones explícitas por palabras similares para evitar la omisión de instrucciones importantes debido al filtrado que lleva a cabo el modelo.
-* **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
-
+* **Propuesta de mejora para el Prompt:** 
+    - Diferenciación de las restricciones `@NotBlank` y `@NotNull` en los atributos tipo String.
 ### 3.4. Relaciones entre entidades - (`entity_relationships`)
-* **Total de pruebas:** 3 para Clínicia Veterinaria, 3 para Ajedrez
+* **Total de pruebas:** 4 para Clínicia Veterinaria, 3 para Ajedrez
 * **Ratio de Éxito:** 100% para Clínicia Veterinaria, 2/3 para Ajedrez
 * **Observaciones Positivas:** El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
 * **Errores Comunes (Fallos):** 
@@ -130,7 +133,7 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 ## 4. Análisis de Partes de Código Gemini
 
 ### 4.1. Código Clases Base (`base_classes_code`)
-* **Total de pruebas:** 3 para Clínica Veterinaria, 3 para Ajedrez
+* **Total de pruebas:** 6 para Clínica Veterinaria, 6 para Ajedrez
 * **Ratio de Éxito:** 100% para ambos
 * **Observaciones Positivas:** 
     - El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
@@ -145,7 +148,7 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 * **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
 
 ### 4.2. Código de Tests de "Restricciones de Atributos" (`tests_attribute_constraints_code`)
-* **Total de pruebas:** 3 para Clínica Veterinaria, 3 para Ajedrez
+* **Total de pruebas:** 5 para Clínica Veterinaria, 6 para Ajedrez
 * **Ratio de Éxito:** 100% para ambos
 * **Observaciones Positivas:** 
     - El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
@@ -157,7 +160,7 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 * **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
 
 ### 4.3. Código de Tests de "Relaciones entre Entidades" (`tests_entity_relationships_code`)
-* **Total de pruebas:** 3 para Clínica Veterinaria, 3 para Ajedrez
+* **Total de pruebas:** 5 para Clínica Veterinaria, 6 para Ajedrez
 * **Ratio de Éxito:** 100% para ambos
 * **Observaciones Positivas:** 
     - El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
@@ -169,7 +172,7 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 * **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
 
 ### 4.4. Código Solución (`solution_code`)
-* **Total de pruebas:** 3 para Clínica Veterinaria, 3 para Ajedrez
+* **Total de pruebas:** 5 para Clínica Veterinaria, 6 para Ajedrez
 * **Ratio de Éxito:** 100% para ambos
 * **Observaciones Positivas:** 
     - El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
@@ -189,8 +192,8 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 
 | Dominio | Partes Probadas | Éxitos | Fallos | Tasa de Acierto | Notas |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Clínica Veterinaria** | 8 (enunciado, diagrama UML, restricciones de atributos, relaciones entre entidades, clases base, tests (2) y código solución)| 8 | 0 | 100% | Intencionadamente en blanco. |
-| **Ajedrez** | 8 (enunciado, diagrama UML, restricciones de atributos, relaciones entre entidades, clases base, tests (2) y código solución) | 8 | 0 | 100% | Intencionadamente en blanco. |
+| **Clínica Veterinaria** | 10 (enunciado, diagrama UML, restricciones de atributos, relaciones entre entidades, clases base, tests (2) y código solución)| 10 | 0 | 100% | Intencionadamente en blanco. |
+| **Ajedrez** | 11 (enunciado, diagrama UML, restricciones de atributos, relaciones entre entidades, clases base, tests (2) y código solución) | 11 | 0 | 100% | Intencionadamente en blanco. |
 
 **Conclusión del Dominio:** En este momento ambos dominios son comprendidos de manera correcta independientemente del tema que se trate en el mismo, siendo el nivel de creatividad y adaptación bastante óptimo para cada uno de los dominios.
 
