@@ -211,11 +211,11 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 # PARTE II: Evaluación Modelo ChatGPT
 
 - **Modelo Evaluado:** API de ChatGPT (OpenAI)
-- **Total de Logs Analizados:** [Completar]
+- **Total de Logs Analizados:** 0 (Evaluación cualitativa basada en pruebas informales durante el desarrollo)
 
 ## 1. Métricas Globales ChatGPT
 
-En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y fallo de todas las pruebas realizadas.
+En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y fallo de todas las pruebas realizadas. Cabe destacar que, al intentar iniciar las pruebas formales con este modelo, la cuota de la API de OpenAI se vio completamente sobrepasada, impidiendo el registro automatizado de logs. Por tanto, los datos cuantitativos se mantienen a cero y las conclusiones se basan en la experiencia empírica del equipo de desarrollo.
 
 | Métrica | Cantidad | Porcentaje |
 | :--- | :---: | :---: |
@@ -311,4 +311,6 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 
 ## 6. Conclusiones y Próximos Pasos ChatGPT
 
-- Por el momento el modelo de Open AI se está utilizando como alternativa en el caso de que el modelo Gemini falle o exceda las cuotas disponibles. Sin embargo, en las pruebas realizadas con el mismo se comprueba que el nivel de entendimiento y acierto es mucho peor que Gemini, cometiendo errores al entender el prompt a pesar de que se le especifica explícitamente todas las instrucciones en los diferentes prompts. Por este motivo, se optará si las condiciones lo permiten el uso de Gemini, siendo este modelo con el que se hizo inicialmente el entrenamiento de prompts.
+- Por el momento el modelo de Open AI se está utilizando como alternativa en el caso de que el modelo Gemini falle o exceda las cuotas disponibles. Sin embargo, en las pruebas realizadas con el mismo se comprueba que el nivel de entendimiento y acierto es mucho peor que Gemini, cometiendo errores al entender el prompt a pesar de que se le especifica explícitamente todas las instrucciones en los diferentes prompts. 
+
+- Es crucial matizar que, debido a que la cuota de la API se vio sobrepasada al intentar iniciar la suite de testeo formal, las conclusiones a las que se ha llegado con respecto a este modelo son en base a las pruebas informales realizadas durante el desarrollo de la extensión y a lo que las desarrolladoras recuerdan de la interacción directa en consola, no existiendo un registro formal de logs en el sistema para OpenAI. Por este motivo, se establece la ejecución de estas pruebas formales como un punto de extensión y trabajo futuro del proyecto. Mientras tanto, se optará siempre que las condiciones lo permitan por el uso de Gemini, siendo este el modelo con el que se entrenaron inicialmente los prompts.
