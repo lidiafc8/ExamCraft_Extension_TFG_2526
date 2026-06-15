@@ -13,6 +13,8 @@
 | 1.1 | 10/03/2026 | Lidia Ning Fernández Casillas | Actualización del documento con nuevos datos. |
 | 1.2 | 29/03/2026 | Lidia Ning Fernández Casillas | Mejora de estructura de logs y actualización correspondiente en el documento. |
 | 2.0 | 04/05/2026 | Lidia Ning Fernández Casillas | Actualización del documento con nuevos datos y creación de plantilla para ChatGPT. |
+| 2.1 | 04/06/2026 | Lidia Ning Fernández Casillas | Actualización del documento con nuevos datos para pruebas de validación. |
+| 2.2 | 12/06/2026 | María Auxiliadora Quintana Fernández | Actualización del documento con nuevos datos para pruebas de validación. |
 
 ---
 <br>
@@ -43,7 +45,7 @@
 # PARTE I: Evaluación Modelo Gemini
 
 - **Modelo Evaluado:** API de Gemini
-- **Total de Logs Analizados:** 43
+- **Total de Logs Analizados:** 88
 
 ## 1. Métricas Globales Gemini
 
@@ -51,10 +53,10 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 
 | Métrica | Cantidad | Porcentaje |
 | :--- | :---: | :---: |
-| **Total de Pruebas (Logs)** | 43 | 100% |
-| ✅ **Éxitos Totales** | 33 | **76.74%** |
-| ⚠️ **Éxito Parcial:** | 8 | **18.60%** |
-| ❌ **Fallos / Alucinaciones** | 2 | **4.65%** |
+| **Total de Pruebas (Logs)** | 88 | 100% |
+| ✅ **Éxitos Totales** | 74 | **84.09%** |
+| ⚠️ **Éxito Parcial:** | 12 | **13.63%** |
+| ❌ **Fallos / Alucinaciones** | 2 | **2.27%** |
 
 ## 2. Criterios de Evaluación Gemini
 
@@ -67,44 +69,63 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 ## 3. Análisis de Partes del Enunciado Gemini
 
 ### 3.1. Enunciado de la Extensión Funcional - Parte 1 (`functional_extension`)
-* **Total de pruebas:** 10 para Clínica Veterinaria, 7 para Ajedrez
-* **Ratio de Éxito:** 80% (8/10 Clínica Veterinaria), 100% (7/7 Ajedrez) 
-* **Observaciones Positivas:** - El modelo respeta muy bien el tono académico y usa correctamente los recursos ocultos.
+* **Total de pruebas:** 15 para Clínica Veterinaria, 11 para Ajedrez
+* **Ratio de Éxito:** 86,67% (13/15 Clínica Veterinaria), 91,66% (11/12 Ajedrez) 
+* **Observaciones Positivas:** 
+    - El modelo respeta muy bien el tono académico y usa correctamente los recursos ocultos.
     - El modelo toma como contexto las extensiones funcionales anteriores almacenadas correctamente y genera otras diferentes.
+    - Las extensiones nuevas generadas son creativas y no sufren ninguna alucinación. El modelo entiende correctamente el dominio explicando detalladamente la nueva funcionalidad a implementar.
 * **Errores Comunes (Fallos):** 
     - En algunos casos aislados, genera el código Mermaid para el diagrama UML junto con la propuesta de enunciado, a pesar de que se le indica explícitamente que no lo haga.
     - En algunos casos aislados, la respuesta devuelta contiene las restricciones de los atributos y las relaciones entre entidades, aunque no se le pidan explícitamente.
 
     Estos errores ocurren con muy poca frecuencia y se deben a las variaciones que la IA puede ocasionar. Por este motivo, quedará en responsabilidad del profesor el editar dicha propuesta del modelo para poder adaptarlo a las necesidades personales.
-
+* **Mejoras para el Prompt realizadas:**
+    - Susitución de negaciones explícitas por palabras similares para evitar la omisión de instrucciones importantes debido al filtrado que lleva a cabo el modelo.
+    - Dotación de memoria para la generación de extensiones nuevas que no se hayan repetido anteriormente con la extensión.
+    - Mejora y clarificación de las instrucciones del prompt para la optimización y mejora del entendimiento de la estructura objetivo de la solución a devolver.
+    - Especificar en cada atributo solo se le puede dar un nombre.
 * **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
 
 ### 3.2. Diagrama UML de la Extensión Funcional - Parte 2 (`UML_diagram`)
-* **Total de pruebas:** 9 para Clínica Veterinaria, 6 para Ajedrez
-* **Ratio de Éxito:** 33.33% (3/9 Clínica Veterinaria), 71,42% (5/7 Ajedrez) 
+* **Total de pruebas:** 14 para Clínica Veterinaria, 12 para Ajedrez
+* **Ratio de Éxito:** 50% (7/14 Clínica Veterinaria), 83,33% (10/12 Ajedrez) 
 * **Observaciones Positivas:** 
     - Devuelve el código Mermaid con las relaciones y los atributos de la forma en la que se le piden, en base a los ejemplos pasados de exámenes anteriores.
     - El diagrama se renderiza y visualiza de manera correcta en la UI.
-* **Errores Comunes (Fallos):** - Para ambos dominios:
-        - No se devuelve el código para establecer el color de cada entidad y relación.
+    - Los colores de las clases rojas, que son las clases a implementar por el alumno, se colorean correctamente del color indicado junto con las relaciones que salen de estas.
+* **Errores Comunes (Fallos):** 
+    - Para ambos dominios:
+        - No se devuelve el código para establecer el color de cada entidad y relación. (Este fallo ha sido corregido y actualmente no sucede).
+        - Crea alguna cardinalidad que no coincide con el contexto generado ni con la lógica.
     - Para Ajedrez:
-        - El modelo hay veces en las que no devuelve las clases `ChessBoard`, `ChessMatch`, `Piece`, clases necesarias para construir correctamente el examen.
-* **Propuesta de mejora para el Prompt:** 
-    - Explicitar la generación de estilos en la repuesta.
-    - Explicitar generar para el dominio Ajedrez siempre las 3 clases necesarias mencionadas.
+        - El modelo hay veces en las que no devuelve las clases `ChessBoard`, `ChessMatch`, `Piece`, clases necesarias para construir correctamente el examen. (Este fallo ha sido corregido y actualmente no sucede, devolviendo siempre estas clases necesarias).
+* **Mejoras para el Prompt realizadas:**
+    - Susitución de negaciones explícitas por palabras similares para evitar la omisión de instrucciones importantes debido al filtrado que lleva a cabo el modelo.
+    - Explicitación de instrucciones para la correcta generación del código Mermaid en cuanto a estilos y colores de las clases a implementar.
+    - Explicitación de instrucciones con las clases base que siempre deberá devolver debido a los requisitos de cada dominio concreto.
+    - Mejora de las instrucciones definidas en el prompt para mejorar el entendimiento de la estructura del código de relaciones, atributos y tipado del diagrama para que se corresponda con la máxima exactitud a los exámenes de ejemplo.
+* **Propuesta de mejora para el Prompt:** Intencionadamente en blanco. 
+    
 
 ### 3.3. Restricciones de atributos - (`attributes_constraints`)
-* **Total de pruebas:** 3 para Clínica Veterinaria, 2 para Ajedrez
+* **Total de pruebas:** 8 para Clínica Veterinaria, 7 para Ajedrez
 * **Ratio de Éxito:** 100% para ambos
 * **Observaciones Positivas:** El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
 * **Errores Comunes (Fallos):** No se han visualizado errores hasta el momento.
-* **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
-
+* **Mejoras para el Prompt realizadas:**
+    - Susitución de negaciones explícitas por palabras similares para evitar la omisión de instrucciones importantes debido al filtrado que lleva a cabo el modelo.
+* **Propuesta de mejora para el Prompt:** 
+    - Diferenciación de las restricciones `@NotBlank` y `@NotNull` en los atributos tipo String.
 ### 3.4. Relaciones entre entidades - (`entity_relationships`)
-* **Total de pruebas:** 1 para Ajedrez
-* **Ratio de Éxito:** 100%
+* **Total de pruebas:** 4 para Clínicia Veterinaria, 3 para Ajedrez
+* **Ratio de Éxito:** 100% para Clínicia Veterinaria, 2/3 para Ajedrez
 * **Observaciones Positivas:** El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
-* **Errores Comunes (Fallos):** No se han visualizado errores hasta el momento.
+* **Errores Comunes (Fallos):** 
+    - En casos aislados, para el dominio de Ajedrez se ha detectado que la direccionalidad de las relaciones a implementar descritas en el enunciado del ejercicio no se corresponden con la del código Mermaid. (Esto se ha corregido y actualmente funciona correctamente).
+* **Mejoras para el Prompt realizadas:**
+    - Susitución de negaciones explícitas por palabras similares para evitar la omisión de instrucciones importantes debido al filtrado que lleva a cabo el modelo.
+    - Explicitación de instrucciones en el prompt para la correcta generación del enunciado del ejercicio para que tenga una correspondencia exacta con lo descrito en el diagrama UML de la extensión funcional.
 * **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
 
 ---
@@ -112,43 +133,55 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 ## 4. Análisis de Partes de Código Gemini
 
 ### 4.1. Código Clases Base (`base_classes_code`)
-* **Total de pruebas:** 1 para Ajedrez
-* **Ratio de Éxito:** 100%
+* **Total de pruebas:** 6 para Clínica Veterinaria, 6 para Ajedrez
+* **Ratio de Éxito:** 100% para ambos
 * **Observaciones Positivas:** 
     - El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
     - Entendimiento correcto de la estructura de nombres de paquetes y código.
     - Correspondiencia correcta con el examen base para el que se crea el código.
-* **Errores Comunes (Fallos):** No se han visualizado errores hasta el momento.
+* **Errores Comunes (Fallos):** 
+    - En el código devuelto, en casos aislados devuelve las entidades ya anotadas con `@Entity`cuando no debería puesto que es una anotación a poner por el alumno. (Esto ha sido corregido y el funcionamiento es el correcto).
+    - En el código devuelto, en casos aislados, los repositorios ya extienden a `CrudRepository`cuando no debería puesto que es una anotación a poner por el alumno. (Esto ha sido corregido y el funcionamiento es el correcto).
+* **Mejoras para el Prompt realizadas:**
+    - Susitución de negaciones explícitas por palabras similares para evitar la omisión de instrucciones importantes debido al filtrado que lleva a cabo el modelo.
+    - Explicitación de anotaciones que el modelo no debe devolver dentro del código base que devuelve, aunque estos se especifiquen en los ejemplos pasados como contexto. El objetivo de esto es evitar cualquier fallo menor.
 * **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
 
 ### 4.2. Código de Tests de "Restricciones de Atributos" (`tests_attribute_constraints_code`)
-* **Total de pruebas:** 1 para Ajedrez
-* **Ratio de Éxito:** 100%
+* **Total de pruebas:** 5 para Clínica Veterinaria, 6 para Ajedrez
+* **Ratio de Éxito:** 100% para ambos
 * **Observaciones Positivas:** 
     - El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
     - Entendimiento correcto de la estructura de nombres de paquetes y código.
     - Correspondiencia correcta con el examen base para el que se crea el código y las clases base que debe comprobar.
 * **Errores Comunes (Fallos):** No se han visualizado errores hasta el momento.
+* **Mejoras para el Prompt realizadas:**
+    - Susitución de negaciones explícitas por palabras similares para evitar la omisión de instrucciones importantes debido al filtrado que lleva a cabo el modelo.
 * **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
 
 ### 4.3. Código de Tests de "Relaciones entre Entidades" (`tests_entity_relationships_code`)
-* **Total de pruebas:** 1 para Ajedrez
-* **Ratio de Éxito:** 100%
+* **Total de pruebas:** 5 para Clínica Veterinaria, 6 para Ajedrez
+* **Ratio de Éxito:** 100% para ambos
 * **Observaciones Positivas:** 
     - El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
     - Entendimiento correcto de la estructura de nombres de paquetes y código.
     - Correspondiencia correcta con el examen base para el que se crea el código y las clases base que debe comprobar.
 * **Errores Comunes (Fallos):** No se han visualizado errores hasta el momento.
+* **Mejoras para el Prompt realizadas:**
+    - Susitución de negaciones explícitas por palabras similares para evitar la omisión de instrucciones importantes debido al filtrado que lleva a cabo el modelo.
 * **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
 
 ### 4.4. Código Solución (`solution_code`)
-* **Total de pruebas:** 1 para Ajedrez
-* **Ratio de Éxito:** 100%
+* **Total de pruebas:** 5 para Clínica Veterinaria, 6 para Ajedrez
+* **Ratio de Éxito:** 100% para ambos
 * **Observaciones Positivas:** 
     - El modelo entiende bien las directrices y utiliza los ejemplos proporcionados para devolver la estructura solicitada.
     - Entendimiento correcto de la estructura de nombres de paquetes y código.
     - Correspondiencia correcta con el examen base para el que se crea el código.
-* **Errores Comunes (Fallos):** No se han visualizado errores hasta el momento.
+* **Errores Comunes (Fallos):**
+    - Algunas veces se ha observado que el modelo genera comentarios que dan algunas explicaciones del código implementado. Esto se ha prohibido estrictamente en el prompt pero aun así, a veces genera este tipo de comentarios explicativos. Puesto que sucede en la parte del código solución, código que está pensando que sea únicamente accesible por el profesorado, no presenta ningún riesgo en la fiabilidad del sistema.
+* **Mejoras para el Prompt realizadas:**
+    - Susitución de negaciones explícitas por palabras similares para evitar la omisión de instrucciones importantes debido al filtrado que lleva a cabo el modelo.
 * **Propuesta de mejora para el Prompt:** Intencionadamente en blanco.
 
 ---
@@ -157,12 +190,12 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 
 ¿Afecta el tema del examen al rendimiento de la IA?
 
-| Dominio | Ejercicios Probados | Éxitos | Fallos | Tasa de Acierto | Notas |
+| Dominio | Partes Probadas | Éxitos | Fallos | Tasa de Acierto | Notas |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Clínica Veterinaria** | 3 | 3 | 0 | 100% | Intencionadamente en blanco. |
-| **Ajedrez** | 3 | 3 | 0 | 100% | Intencionadamente en blanco. |
+| **Clínica Veterinaria** | 10 (enunciado, diagrama UML, restricciones de atributos, relaciones entre entidades, clases base, tests (2) y código solución)| 10 | 0 | 100% | Intencionadamente en blanco. |
+| **Ajedrez** | 11 (enunciado, diagrama UML, restricciones de atributos, relaciones entre entidades, clases base, tests (2) y código solución) | 11 | 0 | 100% | Intencionadamente en blanco. |
 
-**Conclusión del Dominio:** En este momento ambos dominios son comprendidos de manera correcta. 
+**Conclusión del Dominio:** En este momento ambos dominios son comprendidos de manera correcta independientemente del tema que se trate en el mismo, siendo el nivel de creatividad y adaptación bastante óptimo para cada uno de los dominios.
 
 ---
 
@@ -178,11 +211,11 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 # PARTE II: Evaluación Modelo ChatGPT
 
 - **Modelo Evaluado:** API de ChatGPT (OpenAI)
-- **Total de Logs Analizados:** [Completar]
+- **Total de Logs Analizados:** 0 (Evaluación cualitativa basada en pruebas informales durante el desarrollo)
 
 ## 1. Métricas Globales ChatGPT
 
-En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y fallo de todas las pruebas realizadas.
+En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y fallo de todas las pruebas realizadas. Cabe destacar que, al intentar iniciar las pruebas formales con este modelo, la cuota de la API de OpenAI se vio completamente sobrepasada, impidiendo el registro automatizado de logs. Por tanto, los datos cuantitativos se mantienen a cero y las conclusiones se basan en la experiencia empírica del equipo de desarrollo.
 
 | Métrica | Cantidad | Porcentaje |
 | :--- | :---: | :---: |
@@ -278,4 +311,6 @@ En la siguiente tabla se presenta el ratio general de éxito, éxito parcial y f
 
 ## 6. Conclusiones y Próximos Pasos ChatGPT
 
-- Por el momento el modelo de Open AI se está utilizando como alternativa en el caso de que el modelo Gemini falle o exceda las cuotas disponibles. Sin embargo, en las pruebas realizadas con el mismo se comprueba que el nivel de entendimiento y acierto es mucho peor que Gemini, cometiendo errores al entender el prompt a pesar de que se le especifica explícitamente todas las instrucciones en los diferentes prompts. Por este motivo, se optará si las condiciones lo permiten el uso de Gemini, siendo este modelo con el que se hizo inicialmente el entrenamiento de prompts.
+- Por el momento el modelo de Open AI se está utilizando como alternativa en el caso de que el modelo Gemini falle o exceda las cuotas disponibles. Sin embargo, en las pruebas realizadas con el mismo se comprueba que el nivel de entendimiento y acierto es mucho peor que Gemini, cometiendo errores al entender el prompt a pesar de que se le especifica explícitamente todas las instrucciones en los diferentes prompts. 
+
+- Es crucial matizar que, debido a que la cuota de la API se vio sobrepasada al intentar iniciar la suite de testeo formal, las conclusiones a las que se ha llegado con respecto a este modelo son en base a las pruebas informales realizadas durante el desarrollo de la extensión y a lo que las desarrolladoras recuerdan de la interacción directa en consola, no existiendo un registro formal de logs en el sistema para OpenAI. Por este motivo, se establece la ejecución de estas pruebas formales como un punto de extensión y trabajo futuro del proyecto. Mientras tanto, se optará siempre que las condiciones lo permitan por el uso de Gemini, siendo este el modelo con el que se entrenaron inicialmente los prompts.

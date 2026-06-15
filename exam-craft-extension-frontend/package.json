@@ -1,8 +1,8 @@
 {
   "name": "exam-craft-extension",
-  "displayName": "Exam craft extension",
-  "version": "0.0.1",
-  "description": "ExamCraft Extension",
+  "displayName": "ExamCraft Extension",
+  "version": "0.9.0",
+  "description": "Herramienta dirigida al profesorado de la asignatura Diseño y Pruebas I de la Universidad de Sevilla, cuyo objetivo es facilitar la generación automatizada de exámenes, optimizando el proceso de elaboración y mejorando la eficiencia en la creación de pruebas de evaluación.",
   "author": "lidiaestudios14@gmail.com",
   "scripts": {
     "dev": "plasmo dev",

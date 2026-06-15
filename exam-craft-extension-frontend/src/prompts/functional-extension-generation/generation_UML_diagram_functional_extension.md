@@ -19,6 +19,9 @@ Quiero que en base a la lógica de la extensión funcional que me has pasado, me
   - IMPORTANTE: Ignora si los ejemplos están compactados; tú debes aplicar siempre las reglas de saltos de línea estrictas mencionadas abajo.
   - De ellos, mantendrás la estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), de las clases base, es decir, las de color negro.
 
+
+- Los atributos String que tenga restricciones de que valores pueden tener, ponerlo mejor como enumerado.
+
 - Para las nuevas clases a implementar por el alumno, es decir, clases rojas, añadirás toda su estructura (entidad, atributos, relaciones, direccionalidad, multiplicidad), acorde a la extensión funcional generada.
 
 - Para las relaciones, asigna siempre un nombre a estas, ya que deberá constar en el diagrama.

@@ -46,6 +46,8 @@ Teniendo estos ejemplos, tu tarea es proporcionarme una extensión de enunciado 
 
 - La extensión funcional devuelta deberá tener la misma estructura narrativa que la de los proporcionados como ejemplo, tanto el principio como el final del enunciado.
 
+- Omite otorgar dos nombres distintos (utilizar el nombre "o" nombre) a un mismo atributo.
+
 - La extensión funcional devuelta deberá tener el mismo nivel de detalle que los proporcionados como ejemplo, ni más ni menos, dando BREVES descripciones de los atributos de las nuevas entidades (rojas) y sus relaciones, evita alargar dichas explicaciones.
 
 - La extensión funcional deberá mantener la base del dominio.
