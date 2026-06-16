@@ -2,11 +2,7 @@ import React from "react"
 import { render, screen, fireEvent } from "@testing-library/react"
 import { describe, test, expect, beforeEach, vi } from "vitest"
 import "@testing-library/jest-dom"
-import FinishFunctionalExtensionScreen from "./FinishFunctionalExtensionScreen" // Ajusta la ruta según corresponda
-
-// ==========================================
-// 1. MOCKS DE COMPONENTES INTERNOS Y UTILS
-// ==========================================
+import FinishFunctionalExtensionScreen from "./FinishFunctionalExtensionScreen" 
 
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep }: any) => <div data-testid="header">{currentStep}</div>
@@ -36,7 +32,6 @@ vi.mock("~src/components/modals/SaveModal", () => ({
     <div data-testid="save-modal">
       <button
         onClick={() => {
-          // Ejecuta buildPayload para asegurar cobertura de la función constructora del objeto
           buildPayload("Mi Examen Custom")
           onSuccess()
         }}
@@ -48,13 +43,11 @@ vi.mock("~src/components/modals/SaveModal", () => ({
   )
 }))
 
-// Referencia de mock estática controlada para Vitest
 const mockDownloadMarkdown = vi.fn()
 vi.mock("~src/utils/downloadUtils", () => ({
   downloadMarkdown: (...args: any[]) => mockDownloadMarkdown(...args)
 }))
 
-// Props por defecto compartidas entre pruebas
 const defaultProps = {
   domainName: "Ajedrez",
   extensionStatement: "Enunciado extendido sobre el juego de ajedrez.",
@@ -68,35 +61,24 @@ const defaultProps = {
   onComponents: vi.fn()
 }
 
-// ==========================================
-// 2. SUITE DE PRUEBAS DE INTEGRACIÓN
-// ==========================================
 
 describe("FinishFunctionalExtensionScreen - Integration Tests Suite", () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  // ------------------------------------------
-  // A. RENDERIZADO Y ESTADO INICIAL
-  // ------------------------------------------
   describe("Renderizado Inicial", () => {
     test("Debería renderizar la información de la extensión de forma correcta (Enunciado y Diagrama)", () => {
       render(<FinishFunctionalExtensionScreen {...defaultProps} />)
 
-      // Verificar que el Header y el Stepper reflejan el estado final
       expect(screen.getByTestId("header")).toHaveTextContent("PROPUESTA FINAL")
       expect(screen.getByTestId("stepper-header")).toHaveTextContent("Paso: 3")
 
-      // Verificar título dinámico en mayúsculas
       expect(screen.getByText("AJEDREZ: Resultado Final")).toBeInTheDocument()
 
-      // Verificar el contenido del textarea del enunciado
       const textarea = screen.getByRole("textbox") as HTMLTextAreaElement
       expect(textarea.value).toBe("Enunciado extendido sobre el juego de ajedrez.")
       expect(textarea).toHaveAttribute("readOnly")
-
-      // Corregido: Se evalúa de manera más flexible omitiendo la discrepancia del salto de línea \n en el DOM plano
       expect(screen.getByTestId("mermaid-viewer")).toHaveTextContent(/classDiagram\s+Class01\s+<\|--\s+AveryLongClass/)
     })
 
@@ -108,9 +90,6 @@ describe("FinishFunctionalExtensionScreen - Integration Tests Suite", () => {
     })
   })
 
-  // ------------------------------------------
-  // B. INTERACCIONES, MODALES Y FLUJOS
-  // ------------------------------------------
   describe("Interacciones y Flujos de Modales", () => {
     test("Debería permitir regresar a la pantalla anterior mediante el botón 'Volver a UML'", () => {
       render(<FinishFunctionalExtensionScreen {...defaultProps} />)
@@ -124,18 +103,15 @@ describe("FinishFunctionalExtensionScreen - Integration Tests Suite", () => {
     test("Debería abrir el modal de descarga, generar el contenido Markdown estructurado y cerrarse al confirmar", () => {
       render(<FinishFunctionalExtensionScreen {...defaultProps} />)
 
-      // Abrir Modal
       const downloadBtn = screen.getByRole("button", { name: /Descargar \(.md\)/i })
       fireEvent.click(downloadBtn)
 
       expect(screen.getByTestId("download-modal")).toBeInTheDocument()
       expect(screen.getByText("Extension_Funcional_Ajedrez")).toBeInTheDocument()
 
-      // Confirmar Descarga
       const confirmDownloadBtn = screen.getByRole("button", { name: /Confirmar Descarga/i })
       fireEvent.click(confirmDownloadBtn)
 
-      // Corregido: Se utiliza el mock global mockDownloadMarkdown independiente del alias dinámico
       expect(mockDownloadMarkdown).toHaveBeenCalledWith(
         expect.stringContaining("# Extensión Funcional - Ajedrez\n\n## Enunciado\nEnunciado extendido sobre el juego de ajedrez."),
         "archivo_personalizado.md"
@@ -145,24 +121,20 @@ describe("FinishFunctionalExtensionScreen - Integration Tests Suite", () => {
         "archivo_personalizado.md"
       )
 
-      // El modal debería cerrarse
       expect(screen.queryByTestId("download-modal")).not.toBeInTheDocument()
     })
 
     test("Debería abrir el modal de guardado y redirigir al inicio mediante onWelcome tras una confirmación exitosa", async () => {
       render(<FinishFunctionalExtensionScreen {...defaultProps} />)
 
-      // Abrir Modal de Guardado
       const saveBtn = screen.getByRole("button", { name: /Guardar/i })
       fireEvent.click(saveBtn)
 
       expect(screen.getByTestId("save-modal")).toBeInTheDocument()
 
-      // Confirmar Guardado (el mock ejecuta buildPayload internamente)
       const confirmSaveBtn = screen.getByRole("button", { name: /Confirmar Guardado/i })
       fireEvent.click(confirmSaveBtn)
 
-      // Al guardarse correctamente redirige a la pantalla de bienvenida de la aplicación
       expect(defaultProps.onWelcome).toHaveBeenCalledTimes(1)
     })
   })
