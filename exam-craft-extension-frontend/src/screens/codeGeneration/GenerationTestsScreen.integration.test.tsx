@@ -9,9 +9,6 @@ import GenerationTestScreen from "./GenerationTestsScreen"
 
 expect.extend(jestDomMatchers)
 
-// =========================================================
-// MOCKS GLOBALES Y DE ENTORNO EXTENSIÓN CHROME
-// =========================================================
 const mockGetChrome = vi.fn()
 vi.stubGlobal("chrome", {
   storage: {
@@ -21,7 +18,6 @@ vi.stubGlobal("chrome", {
   }
 })
 
-// Mocks de los módulos de utilidades
 vi.mock("~src/utils/chromeStorageUtils", () => ({
   saveToChrome: vi.fn()
 }))
@@ -37,7 +33,6 @@ vi.mock("~src/utils/promptParser", () => ({
   }))
 }))
 
-// Mock de hook personalizado de IA
 const mockGenerate = vi.fn()
 const mockSetResponseText = vi.fn()
 let mockResponseText = ""
@@ -52,7 +47,6 @@ vi.mock("~src/components/GeminiGeneration", () => ({
   })
 }))
 
-// Mocks de Subcomponentes visuales
 vi.mock("~src/components/Header", () => ({
   Header: ({ onWelcome, breadcrumbItems, currentStep }: any) => (
     <header data-testid="header-mock">
@@ -124,9 +118,6 @@ vi.mock("~src/components/modals/ConfirmModal", () => ({
   )
 }))
 
-// =========================================================
-// CONFIGURACIÓN DE PROPS BASE
-// =========================================================
 const defaultProps = {
   initialData: {
     project: {
@@ -156,9 +147,6 @@ describe("Integración: GenerationTestScreen", () => {
     mockIsLoading = false
   })
 
-  // =========================================================
-  // CASOS POSITIVOS: RENDERIZADO VISUAL E INICIALIZACIÓN
-  // =========================================================
   describe("Casos Positivos: Renderizado e Inicialización", () => {
     it("inicializa en el paso 'input' y procesa el prompt inyectando el dominio", () => {
       render(<GenerationTestScreen {...defaultProps} />)
@@ -191,9 +179,6 @@ describe("Integración: GenerationTestScreen", () => {
     })
   })
 
-  // =========================================================
-  // CASOS POSITIVOS: FLUJOS DE ACCIONES Y CICLO DE VIDA
-  // =========================================================
   describe("Casos Positivos: Flujos de Generación, Guardado y Descarga", () => {
     it("realiza la llamada a la IA, limpia los bloques markdown de la respuesta y avanza al paso de resultados", async () => {
       mockResponseText = "```java\npublic class Test1 { /* test */ }\n```"
@@ -207,7 +192,6 @@ describe("Integración: GenerationTestScreen", () => {
       expect(mockGenerate).toHaveBeenCalled()
       expect(mockSetResponseText).toHaveBeenCalledWith("public class Test1 { /* test */ }")
       
-      // Forzamos actualización simulando el cambio de estado del hook para la vista de resultados
       mockResponseText = "public class Test1 { /* test */ }"
       render(<GenerationTestScreen {...defaultProps} />)
       
@@ -218,7 +202,6 @@ describe("Integración: GenerationTestScreen", () => {
     it("ejecuta el guardado en el almacenamiento local de Chrome unificándolo con los datos previos", async () => {
       const { saveToChrome } = await import("~src/utils/chromeStorageUtils")
       
-      // 1. Configuramos el mock de la respuesta de la IA y el almacenamiento de Chrome
       mockResponseText = "public class Test1 {}"
       mockGenerate.mockResolvedValue("public class Test1 {}")
       
@@ -228,15 +211,12 @@ describe("Integración: GenerationTestScreen", () => {
 
       render(<GenerationTestScreen {...defaultProps} />)
       
-      // 2. Ejecutamos la generación para forzar la transición al estado "result"
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      // 3. Buscamos de forma asíncrona el botón Guardar una vez cambie el paso
       const btnGuardar = await screen.findByRole("button", { name: "Guardar" })
       await userEvent.click(btnGuardar)
 
-      // 4. Verificaciones finales del guardado y éxito
       expect(mockGetChrome).toHaveBeenCalledWith(["proj_123"], expect.any(Function))
       expect(saveToChrome).toHaveBeenCalledWith("proj_123", expect.objectContaining({
         customName: "Preexistente",
@@ -251,39 +231,30 @@ describe("Integración: GenerationTestScreen", () => {
     it("abre el modal de descarga de archivos, permite confirmar y dispara la utilidad de descarga", async () => {
       const { downloadMarkdown } = await import("~src/utils/downloadUtils")
       
-      // 1. Preparamos el mock de la IA para que devuelva código válido
       mockResponseText = "public class Test1 {}"
       mockGenerate.mockResolvedValue("public class Test1 {}")
 
       render(<GenerationTestScreen {...defaultProps} />)
 
-      // 2. Disparamos la generación para pasar a la pantalla de resultados
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      // 3. Esperamos asíncronamente a que el botón "Descargar (.md)" aparezca en el DOM
       const btnDescargar = await screen.findByRole("button", { name: "Descargar (.md)" })
       await userEvent.click(btnDescargar)
 
-      // 4. El modal debe estar abierto en este punto
       expect(screen.getByTestId("download-modal-mock")).toBeInTheDocument()
 
-      // 5. Confirmamos la descarga en el modal mockeado
       const btnConfirmar = screen.getByRole("button", { name: "Confirmar Descarga" })
       await userEvent.click(btnConfirmar)
 
-      // 6. Verificamos que se ejecute la descarga física y se cierre el modal
       expect(downloadMarkdown).toHaveBeenCalledWith("public class Test1 {}", "CustomFile.java")
       expect(screen.queryByTestId("download-modal-mock")).not.toBeInTheDocument()
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS Y MANEJO DE ERRORES
-  // =========================================================
   describe("Casos Negativos: Errores e Interrupciones", () => {
     it("cancela el avance si la respuesta del motor de IA resulta vacía", async () => {
-      mockGenerate.mockResolvedValue("") // Falla la generación
+      mockGenerate.mockResolvedValue("") 
 
       render(<GenerationTestScreen {...defaultProps} />)
       
@@ -297,7 +268,6 @@ describe("Integración: GenerationTestScreen", () => {
     it("muestra el diálogo de error si el método de guardado en Chrome es rechazado", async () => {
       const { saveToChrome } = await import("~src/utils/chromeStorageUtils")
       
-      // 1. Preparamos los mocks para que la IA devuelva algo válido y falle el guardado
       mockResponseText = "public class Test1 {}"
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockGetChrome.mockImplementation((keys, callback) => callback({ proj_123: {} }))
@@ -305,15 +275,12 @@ describe("Integración: GenerationTestScreen", () => {
 
       render(<GenerationTestScreen {...defaultProps} />)
 
-      // 2. Transicionamos de la pantalla 'input' a la de 'result' ejecutando la generación
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      // 3. Esperamos a que el botón "Guardar" aparezca en el DOM gracias a la respuesta de la IA
       const btnGuardar = await screen.findByRole("button", { name: "Guardar" })
       await userEvent.click(btnGuardar)
 
-      // 4. Verificamos que aparezca el modal de error con el mensaje capturado
       await waitFor(() => {
         expect(screen.getByTestId("confirm-error-modal-mock")).toBeInTheDocument()
         expect(screen.getByText("Error de Cuota Excedida")).toBeInTheDocument()
@@ -321,9 +288,6 @@ describe("Integración: GenerationTestScreen", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE (EDGE CASES)
-  // =========================================================
   describe("Casos Límite", () => {
     it("evita el colapso del sistema si 'initialData' o el proyecto se encuentran ausentes", () => {
       const corruptProps = { ...defaultProps, initialData: null }
@@ -349,11 +313,9 @@ describe("Integración: GenerationTestScreen", () => {
 
       render(<GenerationTestScreen {...vetProps} />)
       
-      // 1. Agregamos el 'await' correspondiente al click del usuario
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      // 2. Envolvemos en un waitFor para esperar que se resuelva la lógica asíncrona del componente
       await waitFor(() => {
         expect(mockGenerate).toHaveBeenCalledWith(
           expect.stringContaining("org.springframework.samples.petclinic")

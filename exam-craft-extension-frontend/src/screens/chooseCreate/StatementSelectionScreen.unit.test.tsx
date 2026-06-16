@@ -37,8 +37,6 @@ beforeEach(() => {
 
 describe("StatementPartSelectionScreen – Pruebas Unitarias", () => {
 
-  // ── Rendering ───────────────────────────────────────────────────────────────
-
   it("renderiza correctamente los títulos y textos de la pantalla", () => {
     render(<StatementPartSelectionScreen {...baseProps} />);
 
@@ -74,8 +72,6 @@ describe("StatementPartSelectionScreen – Pruebas Unitarias", () => {
     expect(screen.getByRole("button", { name: "CREAR EXAMEN" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "POR PARTES" })).toBeInTheDocument();
   });
-
-  // ── Casos positivos ─────────────────────────────────────────────────────────
 
   it("ejecuta onFunctionalExtension al hacer click en 'Extensión funcional'", async () => {
     render(<StatementPartSelectionScreen {...baseProps} />);
@@ -141,8 +137,6 @@ describe("StatementPartSelectionScreen – Pruebas Unitarias", () => {
     expect(baseProps.onWelcome).toHaveBeenCalledTimes(1);
   });
 
-  // ── Casos negativos ─────────────────────────────────────────────────────────
-
   it("click en 'Extensión funcional' no dispara las demás callbacks", async () => {
     render(<StatementPartSelectionScreen {...baseProps} />);
 
@@ -195,8 +189,6 @@ describe("StatementPartSelectionScreen – Pruebas Unitarias", () => {
     expect(screen.getByRole("button", { name: "Restricciones de atributos" })).not.toBeDisabled();
     expect(screen.getByRole("button", { name: "Relaciones entre entidades" })).not.toBeDisabled();
   });
-
-  // ── Casos límite ────────────────────────────────────────────────────────────
 
   it("acumula correctamente múltiples clicks en 'Extensión funcional'", async () => {
     render(<StatementPartSelectionScreen {...baseProps} />);

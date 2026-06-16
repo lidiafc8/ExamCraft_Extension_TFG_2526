@@ -5,8 +5,6 @@ import { render, screen, cleanup, waitFor, within } from "@testing-library/react
 import userEvent from "@testing-library/user-event";
 import SelectionGenerationTestScreen from "./SelectionGenerationTestScreen";
 
-// ── MOCKS ──
-
 vi.mock("~src/components/Header", () => ({
   Header: ({ breadcrumbItems = [], currentStep, onWelcome }: any) => (
     <header data-testid="mock-header">
@@ -60,11 +58,6 @@ vi.mock("../../../assets/images/exam.png", () => ({
 
 vi.mock("../../../src/css/Cards.css", () => ({}));
 
-// ── DATOS DE PRUEBA ──
-// IMPORTANTE: el FolderExamSelector real compara
-// p.domainName?.toLowerCase() === folder.toLowerCase()
-// por lo que domainName debe ser string para que el flujo de selección funcione.
-
 const PROJECT_BOTH_PARTS = {
   _key: "project_1",
   id: "project_1",
@@ -85,8 +78,6 @@ const PROJECT_ONLY_ATTRIBUTES: any = {
   customName: "Examen Solo Atributos",
   baseClasses: "class Animal {}",
   attributeConstraints: "restricciones de prueba largas para pasar el filtro",
-  // entityRelationships se omite deliberadamente: getAvailableParts filtra por
-  // claves presentes en el objeto, no por si el valor está vacío.
   testPartsMap: {}
 };
 
@@ -159,9 +150,7 @@ beforeEach(() => {
   mockGetAllFromChrome.mockResolvedValue([PROJECT_BOTH_PARTS]);
 });
 
-// ══════════════════════════════════════════════════════════
 describe("SelectionGenerationTestScreen", () => {
-  // ── I. RENDERIZADO INICIAL ──
   describe("Renderizado inicial", () => {
     it("renderiza el Header con currentStep TESTS", async () => {
       render(<SelectionGenerationTestScreen {...baseProps} />);
@@ -247,8 +236,6 @@ describe("SelectionGenerationTestScreen", () => {
       expect(await screen.findByText(/2 EXÁMENES/i)).toBeInTheDocument();
     });
   });
-
-  // ── II. BREADCRUMBS ──
   describe("Breadcrumbs", () => {
     it("llama a onWelcome al pulsar INICIO", async () => {
       render(<SelectionGenerationTestScreen {...baseProps} />);
@@ -287,7 +274,6 @@ describe("SelectionGenerationTestScreen", () => {
     });
   });
 
-  // ── III. FLUJO DE SELECCIÓN ──
   describe("Flujo de selección de proyecto", () => {
     it("llama a onBack al pulsar Volver en la vista de carpetas", async () => {
       render(<SelectionGenerationTestScreen {...baseProps} />);
@@ -368,8 +354,6 @@ describe("SelectionGenerationTestScreen", () => {
       await userEvent.click(
         await screen.findByRole("button", { name: /^Volver$/ })
       );
-      // step vuelve a "selector"; al seguir con selectedFolder activo,
-      // FolderExamSelector muestra la lista de exámenes de esa carpeta
       expect(
         await screen.findByText(/Exámenes de CLÍNICA VETERINARIA/i)
       ).toBeInTheDocument();
@@ -414,7 +398,6 @@ describe("SelectionGenerationTestScreen", () => {
     });
   });
 
-  // ── IV. MODAL DE CONFIRMACIÓN DE PARTE ──
   describe("Modal de confirmación de parte", () => {
     async function navegarHastaPartes(proyectos: any[] = [PROJECT_BOTH_PARTS]) {
       mockGetAllFromChrome.mockResolvedValue(proyectos);
@@ -576,8 +559,7 @@ describe("SelectionGenerationTestScreen", () => {
       expect(screen.queryByTestId("confirm-warning")).not.toBeInTheDocument();
     });
   });
-
-  // ── V. CASOS LÍMITE ADICIONALES ──
+  
   describe("Casos límite adicionales", () => {
 
     it("genera displayName uniendo los dominios con ', ' cuando domainName es un array y no hay customName", async () => {

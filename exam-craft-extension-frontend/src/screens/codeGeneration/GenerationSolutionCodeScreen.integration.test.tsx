@@ -12,9 +12,6 @@ import { downloadMarkdown } from "~src/utils/downloadUtils"
 
 expect.extend(jestDomMatchers)
 
-// =========================================================
-// MOCKS DE DEPENDENCIAS Y UTILS
-// =========================================================
 vi.mock("bundle-text:../../prompts/generation-exam-repository/solution/generation_code_solution.md", () => ({
   default: "Visible text section\n---\nHidden context section"
 }))
@@ -35,18 +32,15 @@ vi.mock("~src/utils/promptParser", () => ({
   }))
 }))
 
-// INTERCEPCIÓN CLAVE: Guardamos una referencia dinámica a las opciones pasadas al hook
 let capturedHookOptions: any = null
 
 vi.mock("~src/components/GeminiGeneration", () => ({
   useGeminiGeneration: vi.fn((options) => {
-    // Almacenamos las opciones actuales (incluyendo buildLogPayload) para poder llamarlas en los tests
     capturedHookOptions = options
     return mockGeminiMock
   })
 }))
 
-// Mock de subcomponentes para aislar el flujo semántico
 vi.mock("~src/components/Header", () => ({
   Header: ({ onWelcome, breadcrumbItems, currentStep }: any) => (
     <header data-testid="header-mock">
@@ -116,9 +110,6 @@ vi.mock("~src/components/modals/SuccessModal", () => ({
   )
 }))
 
-// =========================================================
-// DATOS DE PRUEBA (MOCKS REUSABLES)
-// =========================================================
 const defaultProps = {
   onBack: vi.fn(),
   onWelcome: vi.fn(),
@@ -134,7 +125,7 @@ const mockValidProject = {
   customName: "Examen Ajedrez Pro",
   baseClasses: "class Tablero {}",
   attributeConstraints: "Restricciones de fichas",
-  extensionFinish: "Ajedrez_Finalizado", // Propiedad usada en la línea 127 de image_fa3945.png
+  extensionFinish: "Ajedrez_Finalizado", 
   testPartsMap: {
     test1_attributes: { code: "testAtributos()" }
   }
@@ -147,7 +138,6 @@ describe("Integración Completa: GenerationSolutionCodeScreen", () => {
     vi.clearAllMocks()
     capturedHookOptions = null
 
-    // El generador falso ahora ejecuta forzosamente la lógica interna del payload (Líneas 124-130)
     mockGeminiMock = {
       responseText: "",
       isLoading: false,
@@ -156,7 +146,6 @@ describe("Integración Completa: GenerationSolutionCodeScreen", () => {
         const resultText = "Código solución de la IA"
         mockGeminiMock.responseText = resultText
         
-        // Ejecutamos explícitamente el callback del componente real para dar el 100% de cobertura
         if (capturedHookOptions && typeof capturedHookOptions.buildLogPayload === "function") {
           capturedHookOptions.buildLogPayload(resultText)
         }
@@ -173,9 +162,6 @@ describe("Integración Completa: GenerationSolutionCodeScreen", () => {
     vi.restoreAllMocks()
   })
 
-  // =========================================================
-  // CASOS POSITIVOS Y FLUJOS DE NAVEGACIÓN
-  // =========================================================
   describe("Casos Positivos y Navegación", () => {
     it("carga los proyectos al montar y renderiza la pantalla de selección inicial", async () => {
       render(<GenerationSolutionCodeScreen {...defaultProps} />)
@@ -293,9 +279,6 @@ describe("Integración Completa: GenerationSolutionCodeScreen", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS Y COBERTURA DE EXCEPCIONES
-  // =========================================================
   describe("Casos Negativos y Ramas de Excepciones", () => {
     it("utiliza el fallback de texto de error por defecto si la excepción de saveToChrome no trae un message (Línea 146)", async () => {
       vi.mocked(saveToChrome).mockRejectedValue({}) 
@@ -390,10 +373,7 @@ describe("Integración Completa: GenerationSolutionCodeScreen", () => {
       })
     })
   })
-
-  // =========================================================
-  // CASOS LÍMITE Y COBERTURA DE LOGICA INTERNA
-  // =========================================================
+  
   describe("Casos Límite y Ramas de Lógica", () => {
     it("valida el filtro de proyectos combinando múltiples estados incompletos (Función filterProject)", async () => {
       const proyectosInvalidos = [

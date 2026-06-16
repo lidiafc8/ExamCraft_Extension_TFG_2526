@@ -9,7 +9,6 @@ import StatementPartSelectionScreen from "./StatementPartSelectionScreen"
 
 expect.extend(jestDomMatchers)
 
-// Mockeamos el subcomponente Header para simplificar la integración y validar las props que recibe
 vi.mock("~src/components/Header", () => ({
   Header: ({ onWelcome, breadcrumbItems, currentStep }: any) => (
     <header data-testid="header-mock">
@@ -40,9 +39,6 @@ describe("Integración: StatementPartSelectionScreen", () => {
     vi.clearAllMocks()
   })
 
-  // =========================================================
-  // CASOS POSITIVOS: RENDERIZADO VISUAL
-  // =========================================================
   describe("Casos Positivos: Renderizado", () => {
     it("renderiza correctamente los títulos de la sección y las instrucciones", () => {
       render(<StatementPartSelectionScreen {...defaultProps} />)
@@ -57,7 +53,6 @@ describe("Integración: StatementPartSelectionScreen", () => {
       expect(screen.getByTestId("header-mock")).toBeInTheDocument()
       expect(screen.getByTestId("current-step")).toHaveTextContent("ENUNCIADO")
       
-      // Comprobar que las migas de pan se enviaron con sus respectivas etiquetas
       expect(screen.getByRole("button", { name: "INICIO" })).toBeInTheDocument()
       expect(screen.getByRole("button", { name: "CREAR EXAMEN" })).toBeInTheDocument()
       expect(screen.getByRole("button", { name: "POR PARTES" })).toBeInTheDocument()
@@ -73,20 +68,15 @@ describe("Integración: StatementPartSelectionScreen", () => {
     })
   })
 
-  // =========================================================
-  // CASOS POSITIVOS: INTERACCIONES Y CALLBACKS
-  // =========================================================
   describe("Casos Positivos: Interacciones", () => {
     it("ejecuta los callbacks del Header al interactuar con el logo o las migas de pan", async () => {
       render(<StatementPartSelectionScreen {...defaultProps} />)
 
-      // Clic en el botón onWelcome del logo principal
       await userEvent.click(screen.getByRole("button", { name: "Logo Inicio" }))
       expect(defaultProps.onWelcome).toHaveBeenCalledTimes(1)
 
-      // Clic en las migas de pan
       await userEvent.click(screen.getByRole("button", { name: "INICIO" }))
-      expect(defaultProps.onWelcome).toHaveBeenCalledTimes(2) // Se llama de nuevo
+      expect(defaultProps.onWelcome).toHaveBeenCalledTimes(2) 
 
       await userEvent.click(screen.getByRole("button", { name: "CREAR EXAMEN" }))
       expect(defaultProps.onBack).toHaveBeenCalledTimes(1)
@@ -98,15 +88,12 @@ describe("Integración: StatementPartSelectionScreen", () => {
     it("ejecuta los respectivos callbacks al hacer clic en las opciones del menú vertical", async () => {
       render(<StatementPartSelectionScreen {...defaultProps} />)
 
-      // 1. Extensión funcional
       await userEvent.click(screen.getByRole("button", { name: "Extensión funcional" }))
       expect(defaultProps.onFunctionalExtension).toHaveBeenCalledTimes(1)
 
-      // 2. Restricciones de atributos
       await userEvent.click(screen.getByRole("button", { name: "Restricciones de atributos" }))
       expect(defaultProps.onAttributesConstraints).toHaveBeenCalledTimes(1)
 
-      // 3. Relaciones entre entidades
       await userEvent.click(screen.getByRole("button", { name: "Relaciones entre entidades" }))
       expect(defaultProps.onEntityRelationships).toHaveBeenCalledTimes(1)
     })

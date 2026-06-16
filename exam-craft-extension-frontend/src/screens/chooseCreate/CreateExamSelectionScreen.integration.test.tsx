@@ -9,7 +9,6 @@ import CreateExamSelectionScreen from "./CreateExamSelectionScreen"
 
 expect.extend(jestDomMatchers)
 
-// 1. Mockeamos el subcomponente Header para evaluar las propiedades que recibe de forma aislada
 vi.mock("~src/components/Header", () => ({
   Header: ({ onWelcome, breadcrumbItems, currentStep }: any) => (
     <header data-testid="header-mock">
@@ -26,7 +25,6 @@ vi.mock("~src/components/Header", () => ({
   )
 }))
 
-// 2. Mockeamos los recursos estáticos de imágenes para evitar fallos de lectura de archivos binarios
 vi.mock("../../../assets/images/parts_exam.png", () => ({ default: "mock-parts-icon.png" }))
 vi.mock("../../../assets/images/complete_exam.png", () => ({ default: "mock-complete-icon.png" }))
 
@@ -40,9 +38,6 @@ describe("Integración: CreateExamSelectionScreen", () => {
     vi.clearAllMocks()
   })
 
-  // =========================================================
-  // CASOS POSITIVOS: RENDERIZADO VISUAL
-  // =========================================================
   describe("Casos Positivos: Renderizado", () => {
     it("renderiza los títulos, el subtítulo y la estructura semántica de la pantalla", () => {
       render(<CreateExamSelectionScreen {...defaultProps} />)
@@ -62,11 +57,9 @@ describe("Integración: CreateExamSelectionScreen", () => {
     it("renderiza las tarjetas con sus respectivas etiquetas e imágenes/iconos asociados", () => {
       render(<CreateExamSelectionScreen {...defaultProps} />)
 
-      // Comprobar textos de los botones interactivos
       expect(screen.getByText("Crear examen por partes")).toBeInTheDocument()
       expect(screen.getByText("Crear examen completo")).toBeInTheDocument()
 
-      // Comprobar las imágenes estáticas mediante su atributo alt
       const iconoExamen = screen.getByAltText("Icono examen")
       const iconoArchivo = screen.getByAltText("Icono archivo")
 
@@ -78,18 +71,13 @@ describe("Integración: CreateExamSelectionScreen", () => {
     })
   })
 
-  // =========================================================
-  // CASOS POSITIVOS: INTERACCIONES Y CALLBACKS
-  // =========================================================
   describe("Casos Positivos: Interacciones", () => {
     it("ejecuta el callback onBack al interactuar con los elementos del Header", async () => {
       render(<CreateExamSelectionScreen {...defaultProps} />)
 
-      // Clic en el botón simulado del Logo
       await userEvent.click(screen.getByRole("button", { name: "Logo Inicio" }))
       expect(defaultProps.onBack).toHaveBeenCalledTimes(1)
 
-      // Clic en la miga de pan INICIO
       await userEvent.click(screen.getByRole("button", { name: "INICIO" }))
       expect(defaultProps.onBack).toHaveBeenCalledTimes(2)
     })
@@ -109,23 +97,17 @@ describe("Integración: CreateExamSelectionScreen", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE: COMPORTAMIENTO DE ELEMENTOS DESHABILITADOS
-  // =========================================================
   describe("Casos Límite", () => {
     it("mantiene deshabilitada la tarjeta de 'Crear examen completo' y bloquea cualquier evento de clic", async () => {
       render(<CreateExamSelectionScreen {...defaultProps} />)
 
       const botonDeshabilitado = screen.getByRole("button", { name: /Crear examen completo/i })
 
-      // Verificar propiedad disabled nativa del HTML
       expect(botonDeshabilitado).toBeDisabled()
       expect(botonDeshabilitado).toHaveClass("disabled-card")
 
-      // Intentar interactuar con el botón bloqueado
       await userEvent.click(botonDeshabilitado)
 
-      // Los callbacks no deberían haberse disparado bajo ningún concepto
       expect(defaultProps.onCreateExamByParts).not.toHaveBeenCalled()
       expect(defaultProps.onBack).not.toHaveBeenCalled()
     })

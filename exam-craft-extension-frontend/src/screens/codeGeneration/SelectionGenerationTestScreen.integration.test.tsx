@@ -10,16 +10,10 @@ import { getAllFromChrome } from "~src/utils/chromeStorageUtils"
 
 expect.extend(jestDomMatchers)
 
-// =========================================================
-// MOCKS DE DEPENDENCIAS Y COMPONENTES
-// =========================================================
-
-// Mock de la utilidad de Chrome Storage
 vi.mock("~src/utils/chromeStorageUtils", () => ({
   getAllFromChrome: vi.fn()
 }))
 
-// Mock de Header para evaluar props básicas
 vi.mock("~src/components/Header", () => ({
   Header: ({ onWelcome, breadcrumbItems, currentStep }: any) => (
     <header data-testid="header-mock">
@@ -36,7 +30,6 @@ vi.mock("~src/components/Header", () => ({
   )
 }))
 
-// Mock de FolderExamSelector para no heredar su lógica interna pesada
 vi.mock("../../components/FolderExamsSelector", () => ({
   FolderExamSelector: ({ projects, onSelectProject, onBack, displayName }: any) => (
     <div data-testid="selector-step-mock">
@@ -54,7 +47,6 @@ vi.mock("../../components/FolderExamsSelector", () => ({
   )
 }))
 
-// Datos simulados (Exámenes válidos e inválidos según los filtros del useEffect)
 const mockProjects = [
   {
     _key: "project_valido_1",
@@ -64,12 +56,12 @@ const mockProjects = [
     entityRelationships: "relationships { length > 10 caracteres }",
     customName: "Examen Final A",
     testPartsMap: {
-      test1_attributes: { code: "  " }, // Vacío
-      test2_relationships: { code: "const valid = true;" } // Con tests existentes
+      test1_attributes: { code: "  " }, 
+      test2_relationships: { code: "const valid = true;" } 
     }
   },
   {
-    _key: "project_invalido_corto", // Se filtrará por longitud de strings
+    _key: "project_invalido_corto", 
     domainName: "Historia",
     baseClasses: "corto",
     attributeConstraints: "corto"
@@ -88,13 +80,9 @@ const defaultProps = {
 describe("Integración: SelectionGenerationTestScreen", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Comportamiento por defecto: devuelve la lista de proyectos simulados
     vi.mocked(getAllFromChrome).mockResolvedValue(mockProjects)
   })
 
-  // =========================================================
-  // RENDERIZADO INICIAL Y FLUJO DE DATOS (PASO 1: SELECTOR)
-  // =========================================================
   describe("Paso 1: Selector de Proyectos", () => {
     it("pasa la configuración exacta al Header al inicializarse", async () => {
       render(<SelectionGenerationTestScreen {...defaultProps} />)
@@ -111,14 +99,11 @@ describe("Integración: SelectionGenerationTestScreen", () => {
     it("filtra y carga los proyectos válidos desde el almacenamiento de Chrome", async () => {
       render(<SelectionGenerationTestScreen {...defaultProps} />)
 
-      // Esperamos a que se resuelva la promesa del useEffect y se renderice el mock del selector
       await waitFor(() => {
         expect(screen.getByTestId("selector-step-mock")).toBeInTheDocument()
       })
 
-      // El proyecto válido usa su customName ("Examen Final A")
       expect(screen.getByRole("button", { name: "Examen Final A" })).toBeInTheDocument()
-      // El proyecto inválido no debe aparecer en la lista
       expect(screen.queryByRole("button", { name: /Historia/i })).not.toBeInTheDocument()
     })
 
@@ -137,9 +122,6 @@ describe("Integración: SelectionGenerationTestScreen", () => {
     })
   })
 
-  // =========================================================
-  // SELECCIÓN Y CONFIGURACIÓN DE PARTES (PASO 2: PARTS)
-  // =========================================================
   describe("Paso 2: Selección de Partes a Evaluar", () => {
     const avanzarAlPasoPartes = async () => {
       render(<SelectionGenerationTestScreen {...defaultProps} />)
@@ -152,7 +134,6 @@ describe("Integración: SelectionGenerationTestScreen", () => {
 
       expect(screen.getByRole("heading", { name: "¿Qué parte quieres evaluar?", level: 1 })).toBeInTheDocument()
       
-      // Deben renderizarse las dos opciones disponibles basadas en las keys del JSON del proyecto
       expect(screen.getByRole("button", { name: /Restricciones de Atributos/i })).toBeInTheDocument()
       expect(screen.getByRole("button", { name: /Relaciones entre Entidades/i })).toBeInTheDocument()
     })
@@ -163,18 +144,11 @@ describe("Integración: SelectionGenerationTestScreen", () => {
       const btnVolver = screen.getByRole("button", { name: "Volver" })
       await userEvent.click(btnVolver)
 
-      // Regresa al paso anterior
       expect(screen.getByTestId("selector-step-mock")).toBeInTheDocument()
       expect(screen.queryByRole("heading", { name: "¿Qué parte quieres evaluar?" })).not.toBeInTheDocument()
     })
   })
 
-  // =========================================================
-  // PORTAL: MODAL DE CONFIRMACIÓN Y SOBREESCRITURA
-  // =========================================================
-  // =========================================================
-  // PORTAL: MODAL DE CONFIRMACIÓN Y SOBREESCRITURA
-  // =========================================================
   describe("Flujo del Modal de Confirmación (Portales)", () => {
     const avanzarAlPasoPartes = async () => {
       render(<SelectionGenerationTestScreen {...defaultProps} />)
@@ -185,11 +159,9 @@ describe("Integración: SelectionGenerationTestScreen", () => {
     it("abre el modal sin advertencia si la parte seleccionada no tiene tests previos", async () => {
       await avanzarAlPasoPartes()
 
-      // Hacemos click en "Restricciones de Atributos" (test1_attributes está vacío)
       const btnAtributos = screen.getByRole("button", { name: /Restricciones de Atributos/i })
       await userEvent.click(btnAtributos)
 
-      // Validamos por su cabecera h3 en lugar de "dialog"
       const modalTitle = screen.getByRole("heading", { name: "Confirmar Parte", level: 3 })
       expect(modalTitle).toBeInTheDocument()
       
@@ -200,7 +172,6 @@ describe("Integración: SelectionGenerationTestScreen", () => {
     it("abre el modal con mensaje de advertencia si la parte seleccionada ya tiene tests guardados", async () => {
       await avanzarAlPasoPartes()
 
-      // Hacemos click en "Relaciones entre Entidades" (test2_relationships tiene código)
       const btnRelaciones = screen.getByRole("button", { name: /Relaciones entre Entidades/i })
       await userEvent.click(btnRelaciones)
 
@@ -213,14 +184,11 @@ describe("Integración: SelectionGenerationTestScreen", () => {
 
       await userEvent.click(screen.getByRole("button", { name: /Restricciones de Atributos/i }))
       
-      // Verificamos que el modal está presente asegurando que existe el botón Cancelar
       const btnCancelar = screen.getByRole("button", { name: "Cancelar" })
       expect(btnCancelar).toBeInTheDocument()
 
-      // Hacemos click en Cancelar
       await userEvent.click(btnCancelar)
       
-      // Al cerrarse, el botón Cancelar y el título ya no deben existir en el DOM
       expect(screen.queryByRole("button", { name: "Cancelar" })).not.toBeInTheDocument()
       expect(screen.queryByRole("heading", { name: "Confirmar Parte", level: 3 })).not.toBeInTheDocument()
       expect(defaultProps.onCreateTest1).not.toHaveBeenCalled()
@@ -243,7 +211,6 @@ describe("Integración: SelectionGenerationTestScreen", () => {
         targetType: "attributes"
       })
       
-      // El modal debe desaparecer tras confirmar
       expect(screen.queryByRole("button", { name: "Confirmar" })).not.toBeInTheDocument()
     })
   })

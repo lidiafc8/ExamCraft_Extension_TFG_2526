@@ -9,7 +9,6 @@ import CreateExamByPartsScreen from "./CreateExamByPartsScreen"
 
 expect.extend(jestDomMatchers)
 
-// 1. Mockeamos el subcomponente Header para validar las propiedades y aislar la integración
 vi.mock("~src/components/Header", () => ({
   Header: ({ onWelcome, breadcrumbItems, currentStep }: any) => (
     <header data-testid="header-mock">
@@ -26,7 +25,6 @@ vi.mock("~src/components/Header", () => ({
   )
 }))
 
-// 2. Mockeamos las importaciones de imágenes para evitar fallos con binarios en el entorno de test
 vi.mock("../../../assets/images/statement.png", () => ({ default: "mock-statement-icon.png" }))
 vi.mock("../../../assets/images/code.png", () => ({ default: "mock-code-icon.png" }))
 
@@ -42,9 +40,6 @@ describe("Integración: CreateExamByPartsScreen", () => {
     vi.clearAllMocks()
   })
 
-  // =========================================================
-  // CASOS POSITIVOS: RENDERIZADO VISUAL
-  // =========================================================
   describe("Casos Positivos: Renderizado", () => {
     it("renderiza correctamente los títulos, subtítulos y los contenedores de acción de la vista", () => {
       render(<CreateExamByPartsScreen {...defaultProps} />)
@@ -59,7 +54,6 @@ describe("Integración: CreateExamByPartsScreen", () => {
       expect(screen.getByTestId("header-mock")).toBeInTheDocument()
       expect(screen.getByTestId("current-step")).toHaveTextContent("POR PARTES")
       
-      // Comprobar las etiquetas de las migas de pan inyectadas
       expect(screen.getByRole("button", { name: "INICIO" })).toBeInTheDocument()
       expect(screen.getByRole("button", { name: "CREAR EXAMEN" })).toBeInTheDocument()
     })
@@ -81,22 +75,16 @@ describe("Integración: CreateExamByPartsScreen", () => {
     })
   })
 
-  // =========================================================
-  // CASOS POSITIVOS: INTERACCIONES Y CALLBACKS
-  // =========================================================
   describe("Casos Positivos: Interacciones", () => {
     it("ejecuta los respectivos callbacks de navegación en el Header al pulsar sus elementos", async () => {
       render(<CreateExamByPartsScreen {...defaultProps} />)
 
-      // Logo del Header llama a onWelcome
       await userEvent.click(screen.getByRole("button", { name: "Logo Inicio" }))
       expect(defaultProps.onWelcome).toHaveBeenCalledTimes(1)
 
-      // Miga de pan INICIO llama a onWelcome
       await userEvent.click(screen.getByRole("button", { name: "INICIO" }))
       expect(defaultProps.onWelcome).toHaveBeenCalledTimes(2)
 
-      // Miga de pan CREAR EXAMEN llama a onBack
       await userEvent.click(screen.getByRole("button", { name: "CREAR EXAMEN" }))
       expect(defaultProps.onBack).toHaveBeenCalledTimes(1)
     })

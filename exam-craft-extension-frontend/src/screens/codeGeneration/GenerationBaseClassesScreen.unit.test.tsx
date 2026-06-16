@@ -318,7 +318,6 @@ describe("GenerationBaseClassesScreen – Pruebas Unitarias", () => {
     const inputPrompt = screen.getByTestId("prompt-input");
     await userEvent.clear(inputPrompt);
     await userEvent.type(inputPrompt, "Nueva especificación de prompt personalizada");
-    // CORREGIDO: Sintaxis oficial de testing-library/jest-dom (.toHaveValue)
     expect(inputPrompt).toHaveValue("Nueva especificación de prompt personalizada");
   });
 
@@ -358,7 +357,6 @@ describe("GenerationBaseClassesScreen – Pruebas Unitarias", () => {
     await waitFor(() => screen.getByRole("button", { name: "Guardar" }));
     await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
     
-    // Verificamos que se renderiza el modal antes de desmontarlo simulando la confirmación
     expect(screen.getByTestId("save-modal")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Guardar y continuar" }));
   });

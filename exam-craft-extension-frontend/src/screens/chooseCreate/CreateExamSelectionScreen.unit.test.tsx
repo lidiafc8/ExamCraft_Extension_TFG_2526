@@ -36,20 +36,15 @@ describe("CreateExamSelectionScreen – Pruebas Unitarias", () => {
   it("renderiza correctamente los títulos, textos e iconos de la pantalla", () => {
     render(<CreateExamSelectionScreen {...baseProps} />);
 
-    // Verificar textos principales en el DOM
     expect(screen.getByText("CREAR NUEVO EXAMEN")).toBeInTheDocument();
-    // Regex para evitar problemas con espacios/saltos de línea en el JSX
     expect(screen.getByText(/selecciona la modalidad de creación/i)).toBeInTheDocument();
 
-    // Verificar que las etiquetas de las tarjetas están presentes
     expect(screen.getByText("Crear examen por partes")).toBeInTheDocument();
     expect(screen.getByText("Crear examen completo")).toBeInTheDocument();
 
-    // Verificar que las imágenes cargan con sus respectivos textos alternativos (alt)
     expect(screen.getByAltText("Icono examen")).toBeInTheDocument();
     expect(screen.getByAltText("Icono archivo")).toBeInTheDocument();
 
-    // Verificar el botón general de retroceso
     expect(screen.getByRole("button", { name: "Volver" })).toBeInTheDocument();
   });
 
@@ -86,16 +81,13 @@ describe("CreateExamSelectionScreen – Pruebas Unitarias", () => {
   it("pasa las acciones correctas al componente Header y reacciona a sus interacciones", async () => {
     render(<CreateExamSelectionScreen {...baseProps} />);
 
-    // Verificar que el Header se renderiza con el paso actual
     expect(screen.getByTestId("mock-header")).toBeInTheDocument();
     expect(screen.getByText("Step: CREAR EXAMEN")).toBeInTheDocument();
 
-    // El breadcrumb INICIO apunta a onBack
     const btnInicio = screen.getByRole("button", { name: "INICIO" });
     await userEvent.click(btnInicio);
     expect(baseProps.onBack).toHaveBeenCalledTimes(1);
 
-    // onWelcome del Header también apunta a onBack (ver componente)
     const btnWelcomeLink = screen.getByRole("button", { name: "Welcome Link" });
     await userEvent.click(btnWelcomeLink);
     expect(baseProps.onBack).toHaveBeenCalledTimes(2);

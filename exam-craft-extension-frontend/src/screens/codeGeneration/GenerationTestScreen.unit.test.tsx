@@ -4,12 +4,7 @@ import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import GenerationTestScreen from "./GenerationTestsScreen"
 
-// ─── I. MOCKS DE MÓDULOS EXTERNOS ───
-
-// ─── I. MOCKS DE MÓDULOS EXTERNOS ───
-
 const mockGenerate = vi.fn()
-// CAMBIO CLAVE: Hacemos que setResponseText actualice la variable dinámica en tiempo de ejecución
 let mockResponseTextValue = ""
 const mockSetResponseText = vi.fn((val) => {
   mockResponseTextValue = val
@@ -40,7 +35,6 @@ vi.mock("~src/utils/downloadUtils", () => ({
   downloadMarkdown: vi.fn((content, filename) => mockDownloadMarkdown(content, filename))
 }))
 
-// Mock de subcomponentes complejos para simplificar la aserción en la UI
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep }: any) => <header data-testid="mock-header">{currentStep}</header>
 }))
@@ -58,7 +52,6 @@ vi.mock("~src/components/WorkflowComponents", () => ({
       <button onClick={onBack}>Atrás</button>
     </div>
   ),
-  // SOLUCIÓN: Limpiamos el mock para que use fielmente el footer real de tu componente sin duplicar botones
   SplitResultView: ({ promptText, responseText, footer, onPromptChange, onResponseChange }: any) => (
     <div data-testid="split-result-view">
       <textarea data-testid="split-prompt" value={promptText} onChange={(e) => onPromptChange(e.target.value)} />
@@ -106,8 +99,6 @@ vi.mock("~src/components/modals/ConfirmModal", () => ({
   )
 }))
 
-// ─── II. DATOS DE PRUEBA (MOCKS) ───
-
 const PROJECT_BASE = {
   id: "proj_123",
   domainName: "Veterinaria",
@@ -133,7 +124,6 @@ const baseProps = {
   onComponents: vi.fn()
 }
 
-// Mock global de la API del almacenamiento de extensiones de Chrome
 const mockChromeGet = vi.fn()
 const mockChromeSet = vi.fn()
 global.chrome = {
@@ -156,12 +146,10 @@ describe("GenerationTestScreen", () => {
     })
   })
 
-  // ─── III. CASOS POSITIVOS ───
   describe("Casos Positivos", () => {
     it("renderiza correctamente en modo de restricciones inicializando el prompt", () => {
       render(<GenerationTestScreen {...baseProps} />)
 
-      // INMUNE A JEST-DOM: .textContent y .not.toBeNull()
       expect(screen.getByTestId("mock-header").textContent).toBe("TESTS DE RESTRICCIONES")
       expect(screen.getByTestId("prompt-editor")).not.toBeNull()
       expect((screen.getByTestId("prompt-textarea") as HTMLTextAreaElement).value).toBe("Plantilla Base para veterinaria")
@@ -176,7 +164,6 @@ describe("GenerationTestScreen", () => {
         />
       )
 
-      // INMUNE A JEST-DOM: .textContent
       expect(screen.getByTestId("mock-header").textContent).toBe("TESTS DE RELACIONES")
     })
 
@@ -192,7 +179,6 @@ describe("GenerationTestScreen", () => {
       expect(mockGenerate).toHaveBeenCalled()
       expect(mockSetResponseText).toHaveBeenCalledWith("package org.test;\npublic class Test1 {}")
       
-      // Forzar visualización en estado de resultado en el renderizado correspondiente
       mockResponseTextValue = "package org.test;\npublic class Test1 {}"
       render(<GenerationTestScreen {...baseProps} />)
       
@@ -201,21 +187,17 @@ describe("GenerationTestScreen", () => {
     })
 
     it("permite modificar el contenido del prompt y de la respuesta en la vista dividida", async () => {
-      // 1. Configuramos el mock de la IA
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
       
       render(<GenerationTestScreen {...baseProps} />)
       
-      // 2. Ejecutamos la generación pulsando el botón
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      // 3. Esperamos a que aparezca la vista dividida
       const splitPrompt = await screen.findByTestId("split-prompt") as HTMLTextAreaElement
       const splitResponse = await screen.findByTestId("split-response") as HTMLTextAreaElement
 
-      // Interceptamos el cambio para actualizar el valor simulado en el test
       splitPrompt.addEventListener('input', (e) => {
         splitPrompt.value = (e.target as HTMLTextAreaElement).value;
       });
@@ -223,11 +205,9 @@ describe("GenerationTestScreen", () => {
         splitResponse.value = (e.target as HTMLTextAreaElement).value;
       });
 
-      // 4. Simulamos la escritura con userEvent
       await userEvent.type(splitPrompt, " Añadiendo cambios")
       await userEvent.type(splitResponse, " // Comentario nuevo")
 
-      // 5. Verificamos que las llamadas e interacciones se procesan correctamente
       expect(splitPrompt.value).toContain("Añadiendo cambios")
       expect(splitResponse.value).toContain("// Comentario nuevo")
     })
@@ -274,7 +254,6 @@ describe("GenerationTestScreen", () => {
     })
   })
 
-  // ─── IV. CASOS NEGATIVOS ───
   describe("Casos Negativos", () => {
     it("frena la generación de código si el servicio Gemini retorna un valor nulo o vacío", async () => {
       mockGenerate.mockResolvedValue(null)
@@ -287,7 +266,6 @@ describe("GenerationTestScreen", () => {
     })
 
     it("Muestra un diálogo modal de error si falla la llamada de guardado en el almacenamiento de Chrome", async () => {
-      // 1. SOLUCIÓN: Configuramos el mock de generación para que no haga un 'return' temprano
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
       
@@ -296,15 +274,12 @@ describe("GenerationTestScreen", () => {
 
       render(<GenerationTestScreen {...baseProps} />)
       
-      // 2. Avanzamos de pantalla pulsando el botón inicial
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      // 3. SOLUCIÓN: Usamos un findByRole con 'await' para dar tiempo a que React pinte los botones nuevos
       const btnGuardar = await screen.findByRole("button", { name: "Guardar" })
       await userEvent.click(btnGuardar)
 
-      // 4. Verificamos que se renderiza el modal de error controlado
       await waitFor(() => {
         expect(screen.getByTestId("confirm-modal")).not.toBeNull()
         expect(screen.getByText("Storage Quota Limit Reached")).not.toBeNull()
@@ -316,24 +291,20 @@ describe("GenerationTestScreen", () => {
     })
 
     it("asigna un mensaje por defecto si la excepción al guardar carece de propiedad message", async () => {
-      // 1. SOLUCIÓN: Evitamos que la función handleGenerate haga un return temprano
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
       
       mockChromeGet.mockImplementation((keys, cb) => cb({ [PROJECT_BASE.id]: {} }))
-      mockSaveToChrome.mockRejectedValue({}) // Error plano sin .message
+      mockSaveToChrome.mockRejectedValue({}) 
 
       render(<GenerationTestScreen {...baseProps} />)
       
-      // 2. Transicionamos a la pantalla de resultados
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      // 3. SOLUCIÓN: Buscamos asíncronamente el botón una vez que React cambia el internalStep
       const btnGuardar = await screen.findByRole("button", { name: "Guardar" })
       await userEvent.click(btnGuardar)
 
-      // 4. Esperamos a que aparezca el cuadro de diálogo de error de guardado
       await waitFor(() => {
         expect(screen.getByText("No se pudo guardar.")).not.toBeNull()
       })
@@ -345,26 +316,21 @@ describe("GenerationTestScreen", () => {
         initialData: { ...baseProps.initialData, project: null }
       }
       
-      // 1. Forzamos que la generación resuelva un valor para pasar de pantalla
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
       
       render(<GenerationTestScreen {...propsSinProyecto} />)
 
-      // 2. Disparamos la generación de código
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      // 3. Esperamos de forma asíncrona a que aparezca el botón "Guardar" en la vista de resultados
       const btnGuardar = await screen.findByRole("button", { name: "Guardar" })
       await userEvent.click(btnGuardar)
 
-      // 4. Aseguramos que la función externa de almacenamiento de Chrome NUNCA fue llamada
       expect(mockSaveToChrome).not.toHaveBeenCalled()
     })
   })
 
-  // ─── V. CASOS LÍMITE (COBERTURA COMPLETA) ───
   describe("Casos Límite", () => {
     it("maneja dominios alternativos mapeando adecuadamente la configuración por defecto", () => {
       const propsDominioDesconocido = {
@@ -435,17 +401,14 @@ describe("GenerationTestScreen", () => {
     })
 
     it("cierra el modal de descarga sin invocar el callback utilitario si se cancela la acción", async () => {
-      // 1. SOLUCIÓN: Forzamos la respuesta del mock de generación
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
       
       render(<GenerationTestScreen {...baseProps} />)
 
-      // 2. Disparamos la generación de código
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      // 3. SOLUCIÓN: Buscamos asíncronamente el botón de descarga
       const btnDescargar = await screen.findByRole("button", { name: "Descargar (.md)" })
       await userEvent.click(btnDescargar)
 
@@ -466,7 +429,6 @@ describe("GenerationTestScreen", () => {
     })
 
     it("detiene limpiamente la ejecución si falla de forma asíncrona la re-generación (Línea 265 / Volver a generar)", async () => {
-      // 1. Primera llamada exitosa para renderizar la pantalla de resultados con el footer dinámico
       mockGenerate.mockResolvedValueOnce("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
       mockIsLoading = false
@@ -478,18 +440,15 @@ describe("GenerationTestScreen", () => {
 
       const unhandledSpy = vi.spyOn(process, "emit")
       
-      // 2. Controlamos la promesa rechazada adjuntando un .catch en la definición del mock
       mockGenerate.mockImplementationOnce(() => 
         Promise.reject(new Error("Gemini API Quota Exceeded")).catch(() => {})
       )
 
-      // 3. Buscamos el botón por su nombre real: "Volver a generar"
       const btnRegenerar = await screen.findByRole("button", { name: "Volver a generar" })
       
       try {
         await userEvent.click(btnRegenerar)
       } catch (err) {
-        // Silenciador en entorno de pruebas
       }
 
       await waitFor(() => {
@@ -499,41 +458,34 @@ describe("GenerationTestScreen", () => {
       unhandledSpy.mockRestore()
     })
 
- // ... Tus tests anteriores de la suite (Guarda, Descarga, etc.) ...
-
     describe("Casos de Cobertura Adicionales", () => {
       
       it("ejecuta las líneas 148-153 asegurando los fallbacks vacíos en el payload de logs", async () => {
-      // 1. Forzamos que el mock devuelva código válido
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
       
-      // 2. Estructura exacta para romper domainName y extensionFinish manteniendo el ID vivo
       const propsDatosNulos = {
         ...baseProps,
         initialData: {
           ...baseProps.initialData,
           project: {
             id: "proj_999",
-            domainName: undefined,      // Provoca la ejecución del fallback || "" (Línea 148)
-            extensionFinish: undefined, // Provoca la ejecución del fallback || "" (Línea 150)
-            baseClasses: undefined      // Por si acaso limpia también las clases base
+            domainName: undefined,      
+            extensionFinish: undefined, 
+            baseClasses: undefined      
           }
         }
       }
 
       render(<GenerationTestScreen {...propsDatosNulos} />)
       
-      // 3. Forzamos la escritura manual en el editor para saltar cualquier bloqueo de prompt vacío
       const textarea = screen.getByTestId("prompt-textarea")
       await userEvent.clear(textarea)
       await userEvent.type(textarea, "Generar código de pruebas estructurado")
 
-      // 4. Click en el botón para que se ejecute la función handleGenerate -> buildLogPayload
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      // 5. Esperamos de forma asíncrona a que el estado cambie a la vista dividida
       const splitView = await screen.findByTestId("split-result-view")
       expect(splitView).not.toBeNull()
     })
@@ -576,6 +528,6 @@ describe("GenerationTestScreen", () => {
         expect(screen.queryByText("Volver a generar")).toBeNull()
       })
 
-    }) // Fin de Casos de Cobertura Adicionales
-  }) // Fin de GenerationTestScreen (describe principal)
-}) // Fin del archivo (si tienes un bloque describe general externo)
+    })
+  }) 
+})

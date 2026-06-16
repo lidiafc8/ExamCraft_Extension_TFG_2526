@@ -3,10 +3,8 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import GenerationBaseClassesScreen from "./GenerationBaseClassesScreen"
 
-// Variable de control para decidir qué texto simula el parseador en cada test
 let promptVisibleSimulado = "Genera las clases base en Java para el dominio clínica veterinaria. Clases a incluir: "
 
-// Mock del parser real basándonos en la estructura de tu árbol de archivos
 vi.mock("~src/utils/promptParser", () => ({
   parseMasterPrompt: vi.fn(() => ({
     visibleText: promptVisibleSimulado,
@@ -14,7 +12,6 @@ vi.mock("~src/utils/promptParser", () => ({
   })),
 }))
 
-// Mock COMPLETO de la API de Chrome Storage y Runtime para evitar crasheos de lastError
 const mockGetStorage = vi.fn((keys, callback) => {
   if (callback) callback({})
   return Promise.resolve({})
@@ -39,14 +36,13 @@ globalThis.chrome = {
   },
 } as any
 
-// Mock dinámico del Hook de generación de Gemini para interceptar sus opciones de inicialización
 const mockGenerate = vi.fn()
 const mockSetResponseText = vi.fn()
 let capturedHookOptions: any = null
 
 vi.mock("~src/components/GeminiGeneration", () => ({
   useGeminiGeneration: (options: any) => {
-    capturedHookOptions = options // Guardamos las referencias (incluyendo buildLogPayload)
+    capturedHookOptions = options 
     return {
       responseText: "public class BaseEntity { ... }",
       isLoading: false,
@@ -56,13 +52,11 @@ vi.mock("~src/components/GeminiGeneration", () => ({
   },
 }))
 
-// SOLUCIÓN DEFINITIVA: Creamos una referencia explícita del espía compartida
 const spyDownloadMarkdown = vi.fn()
 vi.mock("~src/utils/downloadUtils", () => ({
   downloadMarkdown: (...args: any[]) => spyDownloadMarkdown(...args),
 }))
 
-// Mock de Header robusto: Captura cualquier variante de propiedad (items, breadcrumbs, breadcrumbItems)
 let capturedBreadcrumbs: any = null
 vi.mock("~src/components/Header", () => ({
   Header: (props: any) => {
@@ -75,7 +69,6 @@ vi.mock("~src/components/Header", () => ({
   },
 }))
 
-// Proyectos de prueba simulados
 const mockProjects = {
   project_1: {
     id: "project_1",
@@ -106,7 +99,7 @@ const defaultProps = {
 describe("GenerationBaseClassesScreen - Pruebas Integrales", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    spyDownloadMarkdown.mockClear() // Limpiamos explícitamente nuestro espía dedicado
+    spyDownloadMarkdown.mockClear()
     capturedHookOptions = null
     capturedBreadcrumbs = null
     
@@ -227,8 +220,6 @@ describe("GenerationBaseClassesScreen - Pruebas Integrales", () => {
       expect(successDescription).toBeDefined()
     })
   })
-
-  // TEST CORREGIDO Y BLINDADO: Sincronización exacta usando el contenido del modal impreso
 
   it("Debe procesar la lógica de retroceso hacia Atributos cuando fromAttributes es verdadero", async () => {
     render(<GenerationBaseClassesScreen {...defaultProps} fromAttributes={true} initialProject={mockProjects.project_1} />)

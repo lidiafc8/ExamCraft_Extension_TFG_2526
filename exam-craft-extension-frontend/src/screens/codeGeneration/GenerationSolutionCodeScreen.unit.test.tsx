@@ -5,7 +5,6 @@ import { render, screen, cleanup, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import GenerationSolutionCodeScreen from "./GenerationSolutionCodeScreen";
 
-// ── MOCKS ──
 vi.mock(
   "bundle-text:../../prompts/generation-exam-repository/solution/generation_code_solution.md",
   () => ({ default: "Prompt: {enunciado_restricciones} {enunciado_relaciones} {codigo_tests_restricciones} {codigo_tests_relaciones} {codigo_base_localstorage}" })
@@ -88,7 +87,6 @@ vi.mock("~src/utils/chromeStorageUtils", () => ({
   saveToChrome: (...args: any[]) => mockSaveToChrome(...args),
 }));
 
-// ── HELPERS ──
 const PROJECT_COMPLETE = {
   _key: "project_1",
   id: "project_1",
@@ -170,10 +168,8 @@ beforeEach(() => {
   });
 });
 
-// ══════════════════════════════════════════════════════════
 describe("GenerationSolutionCodeScreen", () => {
 
-  // ── I. RENDERIZADO INICIAL ──
   describe("Renderizado inicial", () => {
     it("renderiza el Header con currentStep SOLUCIÓN", async () => {
       render(<GenerationSolutionCodeScreen {...baseProps} />);
@@ -208,7 +204,6 @@ describe("GenerationSolutionCodeScreen", () => {
     });
   });
 
-  // ── II. BREADCRUMBS ──
   describe("Breadcrumbs", () => {
     it("llama a onWelcome al pulsar INICIO", async () => {
       render(<GenerationSolutionCodeScreen {...baseProps} />);
@@ -235,7 +230,6 @@ describe("GenerationSolutionCodeScreen", () => {
     });
   });
 
-  // ── III. FLUJO DE SELECCIÓN ──
   describe("Flujo de selección de proyecto", () => {
     it("navega a la carpeta al hacer clic en ella", async () => {
       render(<GenerationSolutionCodeScreen {...baseProps} />);
@@ -329,7 +323,6 @@ describe("GenerationSolutionCodeScreen", () => {
     });
   });
 
-  // ── IV. FLUJO DE GENERACIÓN ──
   describe("Flujo de generación", () => {
     it("llama a generate al pulsar Generar", async () => {
       mockGenerate.mockResolvedValue("resultado generado");
@@ -391,7 +384,6 @@ describe("GenerationSolutionCodeScreen", () => {
     });
   });
 
-  // ── V. FLUJO DE GUARDADO ──
   describe("Flujo de guardado", () => {
     async function navegarHastaResultado() {
       mockGenerate.mockResolvedValue("public class Solucion {}");
@@ -498,7 +490,6 @@ describe("GenerationSolutionCodeScreen", () => {
     });
   });
 
-  // ── VI. FLUJO DE DESCARGA ──
   describe("Flujo de descarga", () => {
     async function navegarHastaResultado() {
       mockGenerate.mockResolvedValue("public class Solucion {}");
@@ -554,7 +545,6 @@ describe("GenerationSolutionCodeScreen", () => {
     });
   });
 
-  // ── VII. CASOS LÍMITE ──
   describe("Casos límite", () => {
     it("maneja el fallo de getAllFromChrome sin romper la UI", async () => {
       mockGetAllFromChrome.mockRejectedValue(new Error("Storage no disponible"));
@@ -643,33 +633,26 @@ describe("GenerationSolutionCodeScreen", () => {
     });
 
     it("ejecuta la línea 265 al fallar una re-generación controlando la excepción global", async () => {
-      // 1. Interceptamos el manejador global para silenciar el desborde asíncrono en Vitest
       const unhandledRejectionSpy = vi.fn();
       process.on("unhandledRejection", unhandledRejectionSpy);
 
-      // 2. Simulamos primero un flujo de generación exitoso para situar la pantalla en la vista de resultado
       mockGenerate.mockResolvedValueOnce("public class Solucion {}");
       mockResponseTextValue = "public class Solucion {}";
       await navegarHastaEditor();
       await userEvent.click(await screen.findByRole("button", { name: /Generar/i }));
 
-      // 3. Configuramos el reintento para que esta vez Gemini falle de forma crítica
       mockGenerate.mockRejectedValueOnce(new Error("Gemini API Quota Exceeded"));
       
       const btnRegenerar = await screen.findByRole("button", { name: /Volver a generar/i });
       
-      // 4. Disparamos la acción de re-generación que provocará el catch
       await userEvent.click(btnRegenerar);
       
-      // 5. Esperamos que termine de actualizar los estados internos del componente
       await vi.waitFor(() => {
         expect(btnRegenerar).toBeEnabled();
       });
 
-      // Aseguramos que la microtarea asíncrona latente termine de procesarse limpiamente
       await new Promise((resolve) => setTimeout(resolve, 20));
 
-      // 6. Retiramos el interceptor para no alterar otros ficheros
       process.off("unhandledRejection", unhandledRejectionSpy);
     });
   });

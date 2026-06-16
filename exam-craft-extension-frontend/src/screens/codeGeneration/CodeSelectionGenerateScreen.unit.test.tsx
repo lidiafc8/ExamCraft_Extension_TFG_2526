@@ -35,7 +35,6 @@ beforeEach(() => {
 
 describe("CodeSelectionGenerateScreen – Pruebas Unitarias", () => {
 
-  // ── Rendering ───────────────────────────────────────────────────────────────
 
   it("renderiza correctamente el título principal de la pantalla", () => {
     render(<CodeSelectionGenerateScreen {...baseProps} />);
@@ -77,8 +76,6 @@ describe("CodeSelectionGenerateScreen – Pruebas Unitarias", () => {
     expect(screen.getByRole("button", { name: "CREAR EXAMEN" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "POR PARTES" })).toBeInTheDocument();
   });
-
-  // ── Casos positivos ─────────────────────────────────────────────────────────
 
   it("ejecuta onGenerateBaseClasses al hacer click en 'Clases base'", async () => {
     render(<CodeSelectionGenerateScreen {...baseProps} />);
@@ -144,7 +141,6 @@ describe("CodeSelectionGenerateScreen – Pruebas Unitarias", () => {
     expect(baseProps.onWelcome).toHaveBeenCalledTimes(1);
   });
 
-  // ── Casos negativos ─────────────────────────────────────────────────────────
 
   it("click en 'Clases base' no dispara las demás callbacks de menú", async () => {
     render(<CodeSelectionGenerateScreen {...baseProps} />);
@@ -198,8 +194,6 @@ describe("CodeSelectionGenerateScreen – Pruebas Unitarias", () => {
     expect(screen.getByRole("button", { name: "Tests" })).not.toBeDisabled();
     expect(screen.getByRole("button", { name: "Solución" })).not.toBeDisabled();
   });
-
-  // ── Casos límite ────────────────────────────────────────────────────────────
 
   it("acumula correctamente múltiples clicks en 'Clases base'", async () => {
     render(<CodeSelectionGenerateScreen {...baseProps} />);
