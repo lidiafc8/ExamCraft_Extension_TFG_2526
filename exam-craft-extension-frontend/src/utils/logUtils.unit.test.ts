@@ -1,22 +1,18 @@
 import { describe, it, expect, vi, afterEach } from "vitest"
-import { buildStandardLogPayload, getLogConfig } from "./logUtils" // Ajusta la ruta a tu archivo
+import { buildStandardLogPayload, getLogConfig } from "./logUtils" 
 
-// Declaramos la interfaz de forma local aquí para poder tipar los mocks de las pruebas
 interface LogProject {
   domainName?: string
   extensionFinish?: string
   [key: string]: any
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 describe("Logger Utilities", () => {
   afterEach(() => {
     vi.clearAllMocks()
   })
 
-  // ── buildStandardLogPayload ────────────────────────────────────────────────
   describe("buildStandardLogPayload", () => {
-    // ── Casos positivos ────────────────────────────────────────────────────
     describe("Casos positivos", () => {
       it("mapea correctamente las propiedades cuando el project tiene un domainName de tipo string", () => {
         const project: LogProject = {
@@ -57,7 +53,6 @@ describe("Logger Utilities", () => {
       })
     })
 
-    // ── Casos negativos ────────────────────────────────────────────────────
     describe("Casos negativos", () => {
       it("devuelve 'unknown' si el domainName no está presente en el objeto project", () => {
         const project: LogProject = { extensionFinish: "Test" }
@@ -66,14 +61,12 @@ describe("Logger Utilities", () => {
       })
 
       it("maneja de forma segura valores de project que no cumplen con la interfaz en runtime", () => {
-        // Forzando un tipo incorrecto (ej. un string) para verificar la robustez de la función
         const result = buildStandardLogPayload("OK", "no_soy_un_objeto" as any, "ctx", "prmt")
         expect(result.dominio).toBe("unknown")
         expect(result.examenSeleccionado).toBeUndefined()
       })
     })
 
-    // ── Casos límite ───────────────────────────────────────────────────────
     describe("Casos límite", () => {
       it("retorna 'unknown' si el domainName es un string vacío", () => {
         const project: LogProject = { domainName: "" }
@@ -108,9 +101,7 @@ describe("Logger Utilities", () => {
     })
   })
 
-  // ── getLogConfig ───────────────────────────────────────────────────────────
   describe("getLogConfig", () => {
-    // ── Casos positivos ────────────────────────────────────────────────────
     describe("Casos positivos", () => {
       it("inicializa el objeto de configuración con el nombre del ejercicio correcto", () => {
         const config = getLogConfig("Matematicas_101", null, "ctx", "prmt")
@@ -123,15 +114,12 @@ describe("Logger Utilities", () => {
       })
     })
 
-    // ── Flujo e Integración ─────────────────────────────────────────────────
     describe("Flujo e Integración (Closure Capture)", () => {
       it("captura por clausura los argumentos iniciales y los inyecta al ejecutar buildLogPayload", () => {
         const projectMock: LogProject = { domainName: "educacion.org", extensionFinish: "Quiz 2" }
         
-        // Se configura el entorno del logger una sola vez
         const config = getLogConfig("Historia_Universal", projectMock, "contexto_secreto", "pregunta_visible")
 
-        // El flujo avanza y más tarde se genera la respuesta
         const payloadFinal = config.buildLogPayload("Esta es la respuesta del usuario")
 
         expect(payloadFinal).toEqual({

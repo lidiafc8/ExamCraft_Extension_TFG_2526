@@ -1,22 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { saveToChrome, getAllFromChrome } from "./chromeStorageUtils" // Ajusta la ruta a tu archivo real
+import { saveToChrome, getAllFromChrome } from "./chromeStorageUtils" 
 
 describe("Chrome Storage Service Tests", () => {
-  // Guardamos el entorno original para restaurarlo después
   const originalChrome = globalThis.chrome
 
   beforeEach(() => {
     vi.clearAllMocks()
-    // Empezamos cada test con un entorno limpio (sin la extensión instalada)
     globalThis.chrome = undefined as any
   })
 
   afterEach(() => {
-    // Restauramos el objeto global al terminar la suite
     globalThis.chrome = originalChrome
   })
 
-  // Función auxiliar para mockear Chrome de forma sencilla sin "Object.defineProperty"
   const mockChromeStorage = (method: "set" | "get", implementation: (...args: any[]) => any) => {
     globalThis.chrome = {
       storage: {
@@ -25,24 +21,19 @@ describe("Chrome Storage Service Tests", () => {
         }
       },
       runtime: {
-        lastError: undefined // Por defecto no hay error en el navegador
+        lastError: undefined
       }
     } as any
   }
 
-  // =========================================================================
-  // 1. PRUEBAS PARA LA FUNCIÓN: saveToChrome
-  // =========================================================================
   describe("saveToChrome", () => {
     it("debería rechazar con un error si la API de Chrome Storage no está disponible", async () => {
-      // globalThis.chrome ya es undefined gracias al beforeEach
       await expect(saveToChrome("mi_examen", { id: 1 })).rejects.toThrow(
         "Esta funcionalidad solo está disponible dentro de la Extensión de Chrome."
       )
     })
 
     it("debería guardar los datos correctamente si la API responde con éxito", async () => {
-      // Simulamos que el método set ejecuta su callback con éxito
       mockChromeStorage("set", (data: any, callback: () => void) => callback())
 
       const dataToSave = { name: "Examen Patrones de Diseño", version: 1 }
@@ -57,7 +48,6 @@ describe("Chrome Storage Service Tests", () => {
     it("debería rechazar la promesa si chrome.runtime.lastError contiene un fallo", async () => {
       const mockError = new Error("Quota exceeded")
       
-      // Cuando se ejecute set, simulamos que el navegador asienta un error en runtime
       mockChromeStorage("set", (data: any, callback: () => void) => {
         globalThis.chrome.runtime.lastError = mockError
         callback()
@@ -67,12 +57,8 @@ describe("Chrome Storage Service Tests", () => {
     })
   })
 
-  // =========================================================================
-  // 2. PRUEBAS PARA LA FUNCIÓN: getAllFromChrome
-  // =========================================================================
   describe("getAllFromChrome", () => {
     it("debería retornar un array vacío [] si no está en el entorno de la extensión", async () => {
-      // Al ser undefined, debe retornar el fallback seguro de tu código
       const result = await getAllFromChrome()
       expect(result).toEqual([])
     })
@@ -83,7 +69,6 @@ describe("Chrome Storage Service Tests", () => {
         "key_2": { id: "2", titulo: "Examen de Java" }
       }
 
-      // Simulamos que el método get devuelve el objeto mockItems al callback
       mockChromeStorage("get", (target: any, callback: (items: any) => void) => callback(mockItems))
 
       const itemsResult = await getAllFromChrome()

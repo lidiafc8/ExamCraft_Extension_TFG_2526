@@ -11,12 +11,8 @@ describe("Mermaid Utilities", () => {
     vi.restoreAllMocks()
   })
 
-  // ==========================================================================
-  // ── 1. PRUEBAS PARA cleanMermaidCode
-  // ==========================================================================
   describe("cleanMermaidCode", () => {
     
-    // ── I. CASOS POSITIVOS ──────────────────────────────────────────────────
     describe("Casos positivos", () => {
       it("remueve etiquetas HTML básicas de un bloque de código", () => {
         const input = "classDiagram\n<div>class Avión</div>"
@@ -29,7 +25,6 @@ describe("Mermaid Utilities", () => {
       })
     })
 
-    // ── II. CASOS NEGATIVOS ─────────────────────────────────────────────────
     describe("Casos negativos", () => {
       it("retorna un string vacío de forma segura si la entrada es nula, undefined o vacía", () => {
         expect(cleanMermaidCode(null as any)).toBe("")
@@ -38,12 +33,10 @@ describe("Mermaid Utilities", () => {
       })
     })
 
-    // ── III. CASOS LÍMITE ───────────────────────────────────────────────────
     describe("Casos límite", () => {
       it("no corrompe el código si tiene etiquetas mal cerradas o símbolos '<' legítimos", () => {
         const input = "classDiagram\nList<String"
         
-        // CORREGIDO: Ajustado al comportamiento real de tu expresión regular (image_5a0fc8.png)
         expect(cleanMermaidCode(input)).toBe("classDiagram\nList")
       })
 
@@ -54,12 +47,8 @@ describe("Mermaid Utilities", () => {
     })
   })
 
-  // ==========================================================================
-  // ── 2. PRUEBAS PARA extractMermaidCode
-  // ==========================================================================
   describe("extractMermaidCode", () => {
 
-    // ── I. CASOS POSITIVOS ──────────────────────────────────────────────────
     describe("Casos positivos", () => {
       it("extrae el diagrama buscando la sección delimitada por líneas divisoras (--- o ===)", () => {
         const fullText = "Introducción teórica\n-----------\nclassDiagram\nA <|-- B\n===========\nConclusión final"
@@ -80,7 +69,6 @@ describe("Mermaid Utilities", () => {
       })
     })
 
-    // ── II. CASOS NEGATIVOS ─────────────────────────────────────────────────
     describe("Casos negativos", () => {
       it("devuelve un string vacío de forma segura si la entrada es nula, vacía o indefinida", () => {
         expect(extractMermaidCode(null as any)).toBe("")
@@ -93,7 +81,6 @@ describe("Mermaid Utilities", () => {
       })
     })
 
-    // ── III. CASOS LÍMITE ───────────────────────────────────────────────────
     describe("Casos límite", () => {
       it("extrae el fragmento completo aun si el separador es excesivamente largo", () => {
         const fullText = "Teoría\n=========================================\ngraph TD\nX --> Y"
@@ -107,18 +94,13 @@ describe("Mermaid Utilities", () => {
     })
   })
 
-  // ==========================================================================
-  // ── 3. PRUEBAS PARA sanitizeMermaidForModal
-  // ==========================================================================
   describe("sanitizeMermaidForModal", () => {
 
-    // ── I. CASOS POSITIVOS ──────────────────────────────────────────────────
     describe("Casos positivos", () => {
       it("mapea etiquetas de salto estructuradas (<br>, <p>, <div>) transformándolas en saltos de línea reales (\\n)", () => {
         const input = "graph TD\nA[Texto]<br/>B<p>C</p><div>D</div>"
         const result = sanitizeMermaidForModal(input)
         
-        // CORREGIDO: Sincronizado con la salida lineal exacta que muestra tu motor (image_5a08e0.png)
         expect(result).toBe("graph TD\nA[Texto]\nB\nC\n\nD")
       })
 
@@ -130,7 +112,6 @@ describe("Mermaid Utilities", () => {
       })
     })
 
-    // ── II. CASOS NEGATIVOS ─────────────────────────────────────────────────
     describe("Casos negativos", () => {
       it("retorna vacío de inmediato si el string original es nulo o no contiene sintaxis válida de Mermaid", () => {
         expect(sanitizeMermaidForModal(null as any)).toBe("")
@@ -138,7 +119,6 @@ describe("Mermaid Utilities", () => {
       })
     })
 
-    // ── III. CASOS LÍMITE ───────────────────────────────────────────────────
     describe("Casos límite", () => {
       it("mantiene intacta la capitalización original de las estructuras internas tras la limpieza", () => {
         const input = "classDiagram\nclass USUARIO_SISTEMA"
@@ -151,8 +131,4 @@ describe("Mermaid Utilities", () => {
       })
     })
   })
-
-  // ==========================================================================
-  // ── 4. FLUJO MÁXIMO COMBINADO (INTEGRACIÓN)
-
 })

@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { downloadMarkdown } from "./downloadUtils" // Ajusta la ruta a tu archivo
+import { downloadMarkdown } from "./downloadUtils" 
 import { downloadProjectAsMarkdown } from "./exportUtils"
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
 
 function buildDomMocks() {
   const linkEl = {
@@ -26,7 +25,6 @@ function buildDomMocks() {
   return { linkEl, appendChildSpy, createElementSpy, createObjectURLSpy, revokeObjectURLSpy }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 describe("downloadMarkdown", () => {
   let mocks: ReturnType<typeof buildDomMocks>
 
@@ -38,7 +36,6 @@ describe("downloadMarkdown", () => {
     vi.restoreAllMocks()
   })
 
-  // ── I. CASOS POSITIVOS ────────────────────────────────────────────────────
   describe("Casos positivos", () => {
     it("crea un elemento <a> usando document.createElement", () => {
       downloadMarkdown("# Hola", "examen")
@@ -143,7 +140,6 @@ describe("downloadMarkdown", () => {
     })
   })
 
-  // ── II. CASOS NEGATIVOS ───────────────────────────────────────────────────
   describe("Casos negativos", () => {
     it("trim del fileName elimina espacios al inicio y al final antes de añadir .md", () => {
       downloadMarkdown("# Test", "  examen  ")
@@ -189,7 +185,6 @@ describe("downloadMarkdown", () => {
     })
   })
 
-  // ── III. CASOS LÍMITE ─────────────────────────────────────────────────────
   describe("Casos límite", () => {
     it("extensión .md en mitad del nombre NO cuenta como sufijo (.md.bak añade .md)", () => {
       downloadMarkdown("# Test", "archivo.md.bak")
@@ -275,7 +270,6 @@ describe("downloadMarkdown", () => {
 
       downloadMarkdown("# Test", "orden-total")
 
-      // Ajustado para reflejar exactamente la secuencia de tu función real
       expect(callOrder).toEqual([
         "createObjectURL",
         "createElement",
@@ -287,7 +281,6 @@ describe("downloadMarkdown", () => {
     })
   })
 
-  // ── IV. FLUJO MÁXIMO ──────────────────────────────────────────────────────
   describe("Flujo máximo", () => {
     it("descarga un documento markdown complejo con todas las llamadas correctas y en orden", async () => {
       const content = [
@@ -337,11 +330,9 @@ describe("downloadMarkdown", () => {
       const projectA = { domainName: "Java", baseClasses: "class A {}" }
       const projectB = { domainName: "Python", baseClasses: "class B {}" }
 
-      // Ejecutamos la función correcta de tu archivo de utilidades
       downloadProjectAsMarkdown(projectA, "examen-a.md")
       downloadProjectAsMarkdown(projectB, "examen-b.md")
 
-      // Los espías globales ahora sí registrarán los eventos del ciclo de vida
       expect(mocks.createObjectURLSpy).toHaveBeenCalledTimes(2)
       expect(mocks.revokeObjectURLSpy).toHaveBeenCalledTimes(2)
     })

@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { downloadMarkdown } from "./downloadUtils" // Ajusta la ruta a tu archivo
+import { downloadMarkdown } from "./downloadUtils" 
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
 
 function buildDomMocks() {
-  // Guardamos un historial de los enlaces creados dinámicamente para inspeccionarlos en pruebas consecutivas
   const createdLinks: any[] = []
 
   const appendChildSpy = vi.spyOn(document.body, "appendChild").mockImplementation((node) => node as any)
@@ -33,7 +31,6 @@ function buildDomMocks() {
   return { createdLinks, appendChildSpy, createElementSpy, createObjectURLSpy, revokeObjectURLSpy }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 describe("exportUtils", () => {
   let mocks: ReturnType<typeof buildDomMocks>
 
@@ -45,7 +42,6 @@ describe("exportUtils", () => {
     vi.restoreAllMocks()
   })
 
-  // ── I. CASOS POSITIVOS ────────────────────────────────────────────────────
   describe("Casos positivos", () => {
     it("crea un elemento <a> usando document.createElement", () => {
       downloadMarkdown("# Hola", "examen")
@@ -85,7 +81,6 @@ describe("exportUtils", () => {
     it("añade el enlace al body antes de hacer click", () => {
       const callOrder: string[] = []
       
-      // Interceptamos la ejecución dinámica del ciclo de vida del elemento creado
       mocks.createElementSpy.mockImplementation(() => {
         const linkEl = {
           href: "",
@@ -180,7 +175,6 @@ describe("exportUtils", () => {
     })
   })
 
-  // ── II. CASOS NEGATIVOS ───────────────────────────────────────────────────
   describe("Casos negativos", () => {
     it("trim del fileName elimina espacios al inicio y al final antes de añadir .md", () => {
       downloadMarkdown("# Test", "  examen  ")
@@ -226,7 +220,6 @@ describe("exportUtils", () => {
     })
   })
 
-  // ── III. CASOS LÍMITE ─────────────────────────────────────────────────────
   describe("Casos límite", () => {
     it("extensión .md en mitad del nombre NO cuenta como sufijo (.md.bak añade .md)", () => {
       downloadMarkdown("# Test", "archivo.md.bak")
@@ -328,7 +321,6 @@ describe("exportUtils", () => {
     })
   })
 
-  // ── IV. FLUJO MÁXIMO ──────────────────────────────────────────────────────
   describe("Flujo máximo", () => {
     it("descarga un documento markdown complejo con todas las llamadas correctas y en orden", async () => {
       const content = [
@@ -382,13 +374,11 @@ describe("exportUtils", () => {
       downloadMarkdown("# Examen A", "examen-a")
       downloadMarkdown("# Examen B", "examen-b.md")
 
-      // Comprobaciones globales sobre la API URL
       expect(mocks.createObjectURLSpy).toHaveBeenCalledTimes(2)
       expect(mocks.revokeObjectURLSpy).toHaveBeenCalledTimes(2)
       expect(mocks.revokeObjectURLSpy).toHaveBeenNthCalledWith(1, "blob:url-examen-A")
       expect(mocks.revokeObjectURLSpy).toHaveBeenNthCalledWith(2, "blob:url-examen-B")
 
-      // Verificamos de forma independiente los dos elementos creados en el historial
       expect(mocks.createdLinks).toHaveLength(2)
       expect(mocks.createdLinks[0].download).toBe("examen-a.md")
       expect(mocks.createdLinks[1].download).toBe("examen-b.md")

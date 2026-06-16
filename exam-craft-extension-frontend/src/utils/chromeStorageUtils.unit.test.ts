@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { saveToChrome, getAllFromChrome } from "./chromeStorageUtils"
 
-// ── HELPERS ──────────────────────────────────────────────────────────────────
-
 function buildChromeMock({
   setError = null as any,
   getError = null as any,
@@ -37,16 +35,13 @@ function setGlobalChrome(mock: ReturnType<typeof buildChromeMock> | null) {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 describe("chromeStorageUtils", () => {
   afterEach(() => {
     delete (globalThis as any).chrome
     vi.clearAllMocks()
   })
 
-  // ── saveToChrome ──────────────────────────────────────────────────────────
   describe("saveToChrome", () => {
-    // ── Casos positivos ────────────────────────────────────────────────────
     describe("Casos positivos", () => {
       it("resuelve sin valor cuando chrome.storage.local está disponible y no hay error", async () => {
         setGlobalChrome(buildChromeMock())
@@ -102,7 +97,6 @@ describe("chromeStorageUtils", () => {
       })
     })
 
-    // ── Casos negativos ────────────────────────────────────────────────────
     describe("Casos negativos", () => {
       it("rechaza con el mensaje de extensión si chrome no está definido en globalThis", async () => {
         setGlobalChrome(null)
@@ -140,12 +134,10 @@ describe("chromeStorageUtils", () => {
       it("no llama a set si chrome.storage.local no está disponible", async () => {
         setGlobalChrome(null)
         try { await saveToChrome("k", {}) } catch {}
-        // set nunca existió — basta con que el reject ocurrió antes
         expect((globalThis as any).chrome).toBeUndefined()
       })
     })
 
-    // ── Casos límite ───────────────────────────────────────────────────────
     describe("Casos límite", () => {
       it("acepta una clave vacía como string válido", async () => {
         const mock = buildChromeMock()
@@ -192,9 +184,7 @@ describe("chromeStorageUtils", () => {
     })
   })
 
-  // ── getAllFromChrome ───────────────────────────────────────────────────────
   describe("getAllFromChrome", () => {
-    // ── Casos positivos ────────────────────────────────────────────────────
     describe("Casos positivos", () => {
       it("resuelve con array vacío si chrome.storage.local no está disponible", async () => {
         setGlobalChrome(null)
@@ -281,7 +271,6 @@ describe("chromeStorageUtils", () => {
       })
     })
 
-    // ── Casos negativos ────────────────────────────────────────────────────
     describe("Casos negativos", () => {
       it("rechaza si chrome.runtime.lastError está definido tras get", async () => {
         const lastError = new Error("Storage unavailable")
@@ -317,13 +306,11 @@ describe("chromeStorageUtils", () => {
       })
     })
 
-    // ── Casos límite ───────────────────────────────────────────────────────
     describe("Casos límite", () => {
       it("si el valor de un item es null, lo extiende como {} y añade _key", async () => {
         setGlobalChrome(
           buildChromeMock({ getItems: { project_null: null as any } })
         )
-        // { ...null } === {} en JS, así que el resultado es { _key: 'project_null' }
         const result = await getAllFromChrome()
         expect(result).toEqual([{ _key: "project_null" }])
       })
@@ -335,7 +322,6 @@ describe("chromeStorageUtils", () => {
           })
         )
         const result = await getAllFromChrome()
-        // El spread { ...value, _key: key } sobreescribe _key con el valor real
         expect(result[0]._key).toBe("real_key")
       })
 
@@ -379,13 +365,11 @@ describe("chromeStorageUtils", () => {
           buildChromeMock({ getItems: { array_key: ["a", "b"] as any } })
         )
         const result = await getAllFromChrome()
-        // { ...["a","b"] } = { 0: "a", 1: "b" }
         expect(result[0]).toMatchObject({ 0: "a", 1: "b", _key: "array_key" })
       })
     })
   })
 
-  // ── Comportamiento diferencial entre funciones ────────────────────────────
   describe("Diferencia de comportamiento entre saveToChrome y getAllFromChrome sin chrome", () => {
     it("saveToChrome rechaza cuando no hay chrome; getAllFromChrome resuelve [] — comportamientos distintos", async () => {
       setGlobalChrome(null)
@@ -398,7 +382,6 @@ describe("chromeStorageUtils", () => {
       setGlobalChrome(buildChromeMock({ getError: lastError }))
       await expect(getAllFromChrome()).rejects.toEqual(lastError)
 
-      // saveToChrome con el mismo mock pero sin error de set debe seguir funcionando
       const mockOk = buildChromeMock()
       setGlobalChrome(mockOk)
       await expect(saveToChrome("k", {})).resolves.toBeUndefined()

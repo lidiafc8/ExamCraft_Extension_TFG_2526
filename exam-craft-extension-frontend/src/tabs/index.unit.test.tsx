@@ -6,8 +6,6 @@ import "@testing-library/jest-dom"
 
 import IndexTab from "./index"
 
-// ── MOCKS DE TODAS LAS PANTALLAS ──
-
 vi.mock("../screens/principal/WelcomeScreen", () => ({
   default: ({ onStart, onCreateExam, onStorage }: any) => (
     <div data-testid="screen-welcome">
@@ -360,13 +358,11 @@ vi.mock("../screens/codeGeneration/SelectionGenerationTestScreen", () => ({
   )
 }))
 
-// ══════════════════════════════════════════════════════════════════════
 describe("IndexTab", () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  // ── I. RENDERIZADO INICIAL ──────────────────────────────────────────
   describe("Renderizado inicial", () => {
     it("muestra la pantalla de bienvenida al montar", () => {
       render(<IndexTab />)
@@ -381,7 +377,6 @@ describe("IndexTab", () => {
     })
   })
 
-  // ── II. NAVEGACIÓN DESDE WELCOME ────────────────────────────────────
   describe("Navegación desde WelcomeScreen", () => {
     it("navega a GitHub al pulsar 'Ir a GitHub'", async () => {
       render(<IndexTab />)
@@ -403,7 +398,6 @@ describe("IndexTab", () => {
     })
   })
 
-  // ── III. FLUJOS SIMPLES DE VUELTA ───────────────────────────────────
   describe("Navegación hacia atrás (botones Volver)", () => {
     it("vuelve a Welcome desde GitHub", async () => {
       render(<IndexTab />)
@@ -454,7 +448,6 @@ describe("IndexTab", () => {
     })
   })
 
-  // ── IV. FLUJO COMPLETO: WELCOME → CREATEEXAM → BYPARTS → CODEGENERATION ──
   describe("Flujo completo: creación por partes y generación de código", () => {
     it("navega Welcome → CreateExam → ByParts → CodeGeneration", async () => {
       render(<IndexTab />)
@@ -486,7 +479,6 @@ describe("IndexTab", () => {
     })
   })
 
-  // ── V. FLUJO: ATTRIBUTES → BASE CLASSES → TESTS ────────────────────
   describe("Flujo: Atributos → Clases Base → Tests", () => {
     async function llegarAAttributeConstraints() {
       render(<IndexTab />)
@@ -550,7 +542,6 @@ describe("IndexTab", () => {
     })
   })
 
-  // ── VI. FLUJO: ENTITY RELATIONSHIPS → BASE CLASSES → TESTS ─────────
   describe("Flujo: Relaciones entre Entidades → Clases Base → Tests", () => {
     async function llegarAEntityRelationships() {
       render(<IndexTab />)
@@ -612,7 +603,6 @@ describe("IndexTab", () => {
     })
   })
 
-  // ── VII. FLUJO TESTGENERAL → TESTATTRIBUTES ─────────────────────────
   describe("Flujo: TestGeneral → TestAttributes", () => {
     async function llegarATestGeneral() {
       render(<IndexTab />)
@@ -658,7 +648,6 @@ describe("IndexTab", () => {
     })
   })
 
-  // ── VIII. FLUJO EXTENSIÓN FUNCIONAL (DOMINIO → CONTEXTO → UML → FINISH) ─
   describe("Flujo: Extensión Funcional completo", () => {
     async function llegarADomainSelection() {
       render(<IndexTab />)
@@ -726,7 +715,6 @@ describe("IndexTab", () => {
     })
   })
 
-  // ── IX. NAVEGACIÓN GLOBAL (onWelcome / onCreateExam / onCreateExamByParts) ─
   describe("Atajos de navegación global", () => {
     it("Welcome desde cualquier pantalla profunda lleva a welcome", async () => {
       render(<IndexTab />)
@@ -794,11 +782,9 @@ describe("IndexTab", () => {
     })
   })
 
-  // ── X. CASOS LÍMITE ─────────────────────────────────────────────────
   describe("Casos límite y estados compartidos", () => {
     it("sharedTestData es null al montar (no se pasa initialData undefined a testAttributes antes de navegar)", async () => {
       render(<IndexTab />)
-      // Navegar directo a testGeneral sin pasar por attributes
       await userEvent.click(screen.getByRole("button", { name: "Crear Examen" }))
       await userEvent.click(screen.getByRole("button", { name: "Por Partes" }))
       await userEvent.click(screen.getByRole("button", { name: "Código desde ByParts" }))
@@ -807,13 +793,11 @@ describe("IndexTab", () => {
         screen.getByRole("button", { name: "Crear Test1 desde TestGeneral" })
       )
       const data = screen.getByTestId("test-initial-data").textContent
-      // Los datos vienen del mock de TestGeneral, no son null
       expect(JSON.parse(data!)).toMatchObject({ constraints: "c" })
     })
 
     it("CodeGeneration desde ByParts resetea selectedProject a null", async () => {
       render(<IndexTab />)
-      // Primero ir a AttributeConstraints y seleccionar proyecto
       await userEvent.click(screen.getByRole("button", { name: "Crear Examen" }))
       await userEvent.click(screen.getByRole("button", { name: "Por Partes" }))
       await userEvent.click(screen.getByRole("button", { name: "Componentes" }))
@@ -821,13 +805,11 @@ describe("IndexTab", () => {
       await userEvent.click(
         screen.getByRole("button", { name: "Ir a Clases Base desde Attributes" })
       )
-      // Volver atrás y luego ir a CodeGen desde ByParts (resetea proyecto)
       await userEvent.click(screen.getByRole("button", { name: "Volver desde BaseClasses" }))
       await userEvent.click(screen.getByRole("button", { name: "Volver desde Attributes" }))
       await userEvent.click(screen.getByRole("button", { name: "ByParts desde StatementPart" }))
       await userEvent.click(screen.getByRole("button", { name: "Código desde ByParts" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar Clases Base" }))
-      // initialProject debe ser null porque se reseteó
       expect(screen.getByTestId("initial-project")).toHaveTextContent("null")
     })
 
@@ -840,7 +822,6 @@ describe("IndexTab", () => {
       await userEvent.click(screen.getByRole("button", { name: "Seleccionar Dominio" }))
       await userEvent.click(screen.getByRole("button", { name: "Crear Diagrama" }))
       await userEvent.click(screen.getByRole("button", { name: "Volver desde DiagramUML" }))
-      // Volvemos a ContextWorkflow, el domainName sigue siendo "veterinaria"
       expect(screen.getByTestId("domain-name")).toHaveTextContent("veterinaria")
     })
 
@@ -853,7 +834,6 @@ describe("IndexTab", () => {
       await userEvent.click(screen.getByRole("button", { name: "Seleccionar Dominio" }))
       await userEvent.click(screen.getByRole("button", { name: "Crear Diagrama" }))
       await userEvent.click(screen.getByRole("button", { name: "Finalizar Extensión" }))
-      // Los datos están en FinishExtension
       expect(screen.getByTestId("finish-statement")).toHaveTextContent("enunciado final")
       expect(screen.getByTestId("finish-mermaid")).toHaveTextContent("diagrama mermaid")
     })

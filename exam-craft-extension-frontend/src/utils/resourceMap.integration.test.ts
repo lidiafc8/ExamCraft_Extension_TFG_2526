@@ -1,8 +1,5 @@
 import { describe, it, expect, vi } from "vitest"
 
-// =========================================================================
-// MOCK DE LOS TEXTOS EMBEBIDOS POR PARCEL (bundle-text)
-// =========================================================================
 vi.mock("bundle-text:../prompts/resources/functional_extension_examples_previous_exams.md", () => ({
   default: "Contenido de extensiones funcionales"
 }))
@@ -19,8 +16,7 @@ vi.mock("bundle-text:../prompts/resources/base_classes_structure_examples_previo
   default: "Contenido de estructura de clases base"
 }))
 
-// Importamos el mapa después de declarar los mocks para que tome los valores simulados
-import { RESOURCE_MAP } from "./resourceMap" // Ajusta la ruta a tu archivo real
+import { RESOURCE_MAP } from "./resourceMap" 
 
 describe("RESOURCE_MAP Static Configuration Tests", () => {
   

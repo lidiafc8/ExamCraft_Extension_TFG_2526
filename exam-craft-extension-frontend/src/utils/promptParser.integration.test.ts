@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { parseMasterPrompt } from "./promptParser" // Ajusta la ruta a tu archivo real
+import { parseMasterPrompt } from "./promptParser" 
 
-// =========================================================================
-// MOCK DEL MAPA DE RECURSOS (RESOURCE_MAP)
-// =========================================================================
 vi.mock("./resourceMap", () => ({
   RESOURCE_MAP: {
     "PlantillaExamen.java": "public class PlantillaExamen {}",
@@ -39,10 +36,8 @@ describe("parseMasterPrompt Utility Tests", () => {
 
     const result = parseMasterPrompt(rawText)
 
-    // 1. El cuerpo del prompt debe aislarse y limpiarse de espacios
     expect(result.visibleText).toBe("Genera una clase que herede de la plantilla provista.")
     
-    // 2. El contexto oculto debe contener la estructura formateada y el contenido del recurso del mock
     expect(result.hiddenContext).toContain("--- ARCHIVO / RECURSO: PlantillaExamen.java ---")
     expect(result.hiddenContext).toContain("public class PlantillaExamen {}")
   })
@@ -60,13 +55,11 @@ describe("parseMasterPrompt Utility Tests", () => {
     const result = parseMasterPrompt(rawText)
 
     expect(result.visibleText).toBe("Prompt de prueba.")
-    // Debe limpiar las comillas/backticks y encontrar ambos en el mapa
     expect(result.hiddenContext).toContain("--- ARCHIVO / RECURSO: PlantillaExamen.java ---")
     expect(result.hiddenContext).toContain("--- ARCHIVO / RECURSO: Configuracion.json ---")
   })
 
   it("debería omitir el recurso en el hiddenContext e imprimir un log en consola si el archivo no existe en el mapa", () => {
-    // Espiamos el console.log para validar que avise de la omisión
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {})
 
     const rawText = `
@@ -79,11 +72,9 @@ describe("parseMasterPrompt Utility Tests", () => {
 
     const result = parseMasterPrompt(rawText)
 
-    // 1. Al no existir en RESOURCE_MAP, el contexto oculto se queda vacío
     expect(result.hiddenContext).toBe("")
     expect(result.visibleText).toBe("Crea un algoritmo genérico.")
     
-    // 2. Se debe haber llamado a console.log informando del descarte
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining("Recurso dinámico o no encontrado en map: 'ArchivoInexistente.java'")
     )

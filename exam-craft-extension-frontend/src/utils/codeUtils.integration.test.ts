@@ -40,7 +40,6 @@ describe("parseJavaFiles Utility Tests", () => {
     const result = parseJavaFiles(rawText)
 
     expect(result).toHaveLength(1)
-    // Aquí se valida la línea 38: el path complejo se divide y extrae correctamente "Main.java"
     expect(result[0].filename).toBe("Main.java") 
     expect(result[0].path).toBe("src/main/java/com/example/Main.java")
   })
@@ -60,7 +59,6 @@ describe("parseJavaFiles Utility Tests", () => {
     expect(result).toHaveLength(1)
     expect(result[0].filename).toBe("MathUtils.java")
     expect(result[0].path).toBe("src/utils/MathUtils.java")
-    // Verifica que el comentario que contenía la ruta haya sido eliminado del código final
     expect(result[0].code).not.toContain("// Path: src/utils/MathUtils.java")
     expect(result[0].code.startsWith("public class MathUtils")).toBe(true)
   })

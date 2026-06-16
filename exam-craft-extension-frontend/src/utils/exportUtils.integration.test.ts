@@ -1,11 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-// Corrección de la importación: Usamos llaves explicítas para el export nombrado
 import { downloadProjectAsMarkdown } from "./exportUtils" 
 import { sanitizeMermaidForModal } from "./mermaidUtils"
 
-// Mockeamos la dependencia de utilidades de Mermaid
 vi.mock("./mermaidUtils", () => ({
-  sanitizeMermaidForModal: vi.fn((text) => text) // Retorna el texto tal cual para simplificar
+  sanitizeMermaidForModal: vi.fn((text) => text) 
 }))
 
 describe("downloadProjectAsMarkdown Utility Tests", () => {
@@ -14,11 +12,9 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    // Configuración de mocks globales de URL para el entorno de pruebas
     globalThis.URL.createObjectURL = vi.fn().mockReturnValue("blob:http://localhost/mock-uuid")
     globalThis.URL.revokeObjectURL = vi.fn()
 
-    // Mock del elemento de enlace simulado
     linkMock = {
       href: "",
       download: "",
@@ -45,7 +41,6 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
       extensionFinish: "Enunciado de la extensión"
     }
 
-    // Usamos un mock para inspeccionar qué se está guardando dentro del Blob
     const blobSpy = vi.spyOn(globalThis, "Blob").mockImplementation((chunks) => {
       const text = chunks[0] as string
       expect(text).toContain("# Examen: Patrones Estructurales")
@@ -103,11 +98,11 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
 
     const blobSpy = vi.spyOn(globalThis, "Blob").mockImplementation((chunks) => {
       const text = chunks[0] as string
-      // Comprobamos que el código se limpia de backticks adicionales
+      
       expect(text).toContain("### 📄 A_Test.java\n```java\npublic class A {}\n```")
       expect(text).toContain("### 📄 B_Test.java\n```java\npublic class B {}\n```")
       
-      // Comprobamos el orden alfabético: A_Test debe aparecer antes que B_Test en el cuerpo del Markdown
+      
       expect(text.indexOf("A_Test.java")).toBeLessThan(text.indexOf("B_Test.java"))
       return {} as Blob
     })
@@ -119,12 +114,11 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
   it("debería envolver en formato ```java secciones como clases base mediante formatCodeSection si no tienen backticks", () => {
     const fakeProject = {
       customName: "Examen Clases Base",
-      baseClasses: "public class Base {}" // Texto plano sin bloques markdown
+      baseClasses: "public class Base {}"
     }
 
     const blobSpy = vi.spyOn(globalThis, "Blob").mockImplementation((chunks) => {
       const text = chunks[0] as string
-      // Valida que formatCodeSection lo envolvió con triple acento automáticamente
       expect(text).toContain("## 4. Clases Base\n```java\npublic class Base {}\n```")
       return {} as Blob
     })
@@ -136,12 +130,11 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
   it("debería cerrar los backticks impares en formatCodeSection para evitar romper la estética del Markdown", () => {
     const fakeProject = {
       customName: "Examen Backticks Impares",
-      baseClasses: "```java\npublic class Incompleta {" // Solo 1 set de triple acento
+      baseClasses: "```java\npublic class Incompleta {" 
     }
 
     const blobSpy = vi.spyOn(globalThis, "Blob").mockImplementation((chunks) => {
       const text = chunks[0] as string
-      // Valida que el código añade el cierre de backticks al final
       expect(text).toContain("```java\npublic class Incompleta {\n```")
       return {} as Blob
     })
@@ -155,13 +148,11 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
 
     downloadProjectAsMarkdown(fakeProject, "  mi_archivo_de_examen  ")
 
-    // Verificación del limpiado del nombre del archivo y guardado
     expect(linkMock.download).toBe("mi_archivo_de_examen.md")
     expect(linkMock.href).toBe("blob:http://localhost/mock-uuid")
     expect(document.body.appendChild).toHaveBeenCalledWith(linkMock)
     expect(linkMock.click).toHaveBeenCalledTimes(1)
     
-    // Verificación de la recolección de basura de memoria y DOM
     expect(linkMock.remove).toHaveBeenCalledTimes(1)
     expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith("blob:http://localhost/mock-uuid")
   })

@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { parseMasterPrompt } from "./promptParser" // Ajusta la ruta a tu archivo original
+import { parseMasterPrompt } from "./promptParser" 
 import { RESOURCE_MAP } from "./resourceMap"
 
-// ── MOCKS EXTERNOS ───────────────────────────────────────────────────────────
-// Simulamos el mapa de recursos estáticos para controlar el escenario de pruebas
 vi.mock("./resourceMap", () => ({
   RESOURCE_MAP: {
     "ClaseBase.java": "public class ClaseBase {}",
@@ -15,17 +13,14 @@ vi.mock("./resourceMap", () => ({
 describe("parseMasterPrompt", () => {
   
   beforeEach(() => {
-    // Limpiamos los espías antes de cada test por si acaso
     vi.restoreAllMocks()
   })
 
-  // ── I. CASOS POSITIVOS ────────────────────────────────────────────────────
   describe("Casos positivos", () => {
     it("separa correctamente el texto visible a partir de la clave '## Prompt a utilizar:'", () => {
       const fullText = "Sección de configuración\n## Prompt a utilizar:\nEste es el mensaje final para la IA"
       const result = parseMasterPrompt(fullText)
 
-      // CORREGIDO: "el" en lugar de "the"
       expect(result.visibleText).toBe("Este es el mensaje final para la IA")
     })
 
@@ -63,7 +58,6 @@ describe("parseMasterPrompt", () => {
     })
   })
 
-  // ── II. CASOS NEGATIVOS ───────────────────────────────────────────────────
   describe("Casos negativos", () => {
     it("si la clave '## Prompt a utilizar:' NO existe, devuelve todo el texto como visible y el contexto vacío", () => {
       const fullText = "* ClaseBase.java\nTexto plano sin la clave de división por ningún lado."
@@ -89,13 +83,11 @@ describe("parseMasterPrompt", () => {
       const fullText = "## Prompt a utilizar:\n* ClaseBase.java\nEste es el cuerpo real del prompt"
       const result = parseMasterPrompt(fullText)
 
-      // Se queda como texto visible y no se parsea como recurso oculto
       expect(result.visibleText).toBe("* ClaseBase.java\nEste es el cuerpo real del prompt")
       expect(result.hiddenContext).toBe("")
     })
   })
 
-  // ── III. CASOS LÍMITE ─────────────────────────────────────────────────────
   describe("Casos límite", () => {
     it("funciona correctamente si el prompt a utilizar está totalmente en blanco", () => {
       const fullText = "* ClaseBase.java\n## Prompt a utilizar:\n"
@@ -106,7 +98,6 @@ describe("parseMasterPrompt", () => {
     })
 
     it("maneja nombres de archivos con espacios internos o caracteres especiales", () => {
-      // Modificamos el mapa dinámicamente para este test específico
       RESOURCE_MAP["Mi Clase Especial v2.java"] = "public class Especial {}"
 
       const fullText = "* `Mi Clase Especial v2.java`\n## Prompt a utilizar:\nTest"
@@ -120,12 +111,10 @@ describe("parseMasterPrompt", () => {
       const fullText = "Config\n## Prompt a utilizar:\nPrimer bloque\n## Prompt a utilizar:\nSegundo bloque"
       const result = parseMasterPrompt(fullText)
 
-      // CORREGIDO: Ajustado al comportamiento real de tu .split(), que aísla solo parts[1]
       expect(result.visibleText).toBe("Primer bloque")
     })
   })
 
-  // ── IV. FLUJO MÁXIMO ──────────────────────────────────────────────────────
   describe("Flujo máximo", () => {
     it("procesa un Master Prompt complejo con múltiples tipos de viñetas, archivos existentes y no existentes", () => {
       const fullText = `
@@ -143,12 +132,10 @@ Asegúrate de implementar los patrones vistos arriba.
 
       const result = parseMasterPrompt(fullText)
 
-      // 1. Validar cuerpo del prompt de salida
       expect(result.visibleText).toContain("Genera un examen basado en el dominio de Veterinaria.")
       expect(result.visibleText).toContain("Asegúrate de implementar los patrones vistos arriba.")
       expect(result.visibleText).not.toContain("# CONFIGURACIÓN DEL SISTEMA DE IA")
 
-      // 2. Validar inclusión de recursos válidos concatenados
       expect(result.hiddenContext).toContain("--- ARCHIVO / RECURSO: ClaseBase.java ---")
       expect(result.hiddenContext).toContain("public class ClaseBase {}")
       
@@ -158,7 +145,6 @@ Asegúrate de implementar los patrones vistos arriba.
       expect(result.hiddenContext).toContain("--- ARCHIVO / RECURSO: Diagrama.mermaid ---")
       expect(result.hiddenContext).toContain("classDiagram\nAnimal <|-- Perro")
 
-      // 3. Validar exclusión del archivo inexistente
       expect(result.hiddenContext).not.toContain("ArchivoInexistente.txt")
     })
   })

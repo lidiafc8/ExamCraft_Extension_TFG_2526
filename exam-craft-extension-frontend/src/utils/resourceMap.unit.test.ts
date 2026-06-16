@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { parseMasterPrompt } from "./promptParser"
-import { RESOURCE_MAP } from "./resourceMap" // Importamos el mapa ya mockeado
+import { RESOURCE_MAP } from "./resourceMap" 
 
-// ── 1. MOCK SEGURO CON DECLARACIÓN INTERNA Y EXPORTACIÓN ─────────────────────
 vi.mock("./resourceMap", () => {
   const innerMock = {
     "func_ext.md": "Contenido de extensión funcional.",
@@ -21,7 +20,6 @@ describe("resourceMap / promptParser", () => {
     vi.restoreAllMocks()
   })
 
-  // ── I. CASOS POSITIVOS ────────────────────────────────────────────────────
   describe("Casos positivos", () => {
     it("separa correctamente el texto visible a partir de la clave '## Prompt a utilizar:'", () => {
       const fullText = "Configuración previa\n## Prompt a utilizar:\nEste es el mensaje final para la IA"
@@ -64,7 +62,6 @@ describe("resourceMap / promptParser", () => {
     })
   })
 
-  // ── II. CASOS NEGATIVOS ───────────────────────────────────────────────────
   describe("Casos negativos", () => {
     it("si la clave '## Prompt a utilizar:' NO existe, devuelve todo el texto como visible y el contexto vacío", () => {
       const fullText = "* func_ext.md\nTexto plano sin la clave de división por ningún lado."
@@ -95,7 +92,6 @@ describe("resourceMap / promptParser", () => {
     })
   })
 
-  // ── III. CASOS LÍMITE ─────────────────────────────────────────────────────
   describe("Casos límite", () => {
     it("funciona correctamente si el prompt a utilizar está totalmente en blanco", () => {
       const fullText = "* func_ext.md\n## Prompt a utilizar:\n"
@@ -113,7 +109,6 @@ describe("resourceMap / promptParser", () => {
     })
   })
 
-  // ── IV. FLUJO MÁXIMO ──────────────────────────────────────────────────────
   describe("Flujo máximo", () => {
     it("procesa un Master Prompt complejo inyectando todos los recursos estáticos del mapa real y descartando los inexistentes", () => {
       const fullText = `
@@ -130,15 +125,12 @@ Genera un examen basado en el dominio solicitado siguiendo las estructuras adjun
 
       const result = parseMasterPrompt(fullText)
 
-      // 1. Validar cuerpo del prompt visible
       expect(result.visibleText).toBe("Genera un examen basado en el dominio solicitado siguiendo las estructuras adjuntas.")
 
-      // 2. Validar dinámicamente que se inyectaron todas las llaves usando el objeto RESOURCE_MAP importado
       Object.keys(RESOURCE_MAP).forEach((fileName) => {
         expect(result.hiddenContext).toContain(`--- ARCHIVO / RECURSO: ${fileName} ---`)
       })
 
-      // 3. Validar que se omitió el archivo desconocido
       expect(result.hiddenContext).not.toContain("archivo_desconocido.md")
     })
   })

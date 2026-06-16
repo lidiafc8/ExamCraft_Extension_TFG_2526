@@ -1,11 +1,7 @@
 import { describe, it, expect } from "vitest"
-import { buildStandardLogPayload, getLogConfig } from "./logUtils" // Ajusta la ruta a tu archivo real
-
+import { buildStandardLogPayload, getLogConfig } from "./logUtils" 
 describe("Log Utilities Tests", () => {
 
-  // =========================================================================
-  // 1. PRUEBAS PARA: buildStandardLogPayload
-  // =========================================================================
   describe("buildStandardLogPayload", () => {
     it("debería construir el payload correctamente con datos planos estándar", () => {
       const mockProject = {
@@ -37,7 +33,6 @@ describe("Log Utilities Tests", () => {
 
       const result = buildStandardLogPayload("Resultado", mockProject, "Ctx", "Prompt")
 
-      // Verifica que el array se haya convertido a un string separado por guiones
       expect(result.dominio).toBe("Diseño-Patrones-Fábrica")
     })
 
@@ -63,9 +58,6 @@ describe("Log Utilities Tests", () => {
     })
   })
 
-  // =========================================================================
-  // 2. PRUEBAS PARA: getLogConfig
-  // =========================================================================
   describe("getLogConfig", () => {
     it("debería retornar el nombre del ejercicio y una función buildLogPayload operativa", () => {
       const mockProject = {
@@ -80,11 +72,9 @@ describe("Log Utilities Tests", () => {
         "User Prompt"
       )
 
-      // 1. Verificamos que se mapee la propiedad estática
       expect(config.logExerciseName).toBe("Ejercicio_01_Prueba")
       expect(typeof config.buildLogPayload).toBe("function")
 
-      // 2. Ejecutamos el método dinámico retornado para validar la inyección de clausuras (closures)
       const payloadResult = config.buildLogPayload("Código Java Generado")
 
       expect(payloadResult).toEqual({

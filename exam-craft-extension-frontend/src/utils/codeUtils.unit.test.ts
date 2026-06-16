@@ -1,10 +1,8 @@
 import { describe, it, expect } from "vitest"
 import { parseJavaFiles } from "./codeUtils"
 
-// ══════════════════════════════════════════════════════════════════════════════
 describe("parseJavaFiles", () => {
 
-  // ── I. CASOS POSITIVOS ────────────────────────────────────────────────────
   describe("Casos positivos", () => {
     it("devuelve array vacío si rawText es string vacío", () => {
       expect(parseJavaFiles("")).toEqual([])
@@ -42,7 +40,7 @@ describe("parseJavaFiles", () => {
       const input = "// src/Animal.java\n```java\nclass Animal {}\n```"
       const result = parseJavaFiles(input)
       expect(result[0].filename).toBe("Animal.java")
-      expect(result[0].path).toBe("/Animal.java") // ← lo que la función realmente devuelve
+      expect(result[0].path).toBe("/Animal.java") 
     })
 
     it("extrae la ruta con prefijo '// Archivo:' antes del bloque", () => {
@@ -129,7 +127,6 @@ describe("parseJavaFiles", () => {
     })
   })
 
-  // ── II. CASOS NEGATIVOS ───────────────────────────────────────────────────
   describe("Casos negativos", () => {
     it("devuelve fallback 'Código Generado (Formato Irregular)' si no hay bloques pero sí texto", () => {
       const input = "public class SinBloque { }"
@@ -156,7 +153,6 @@ describe("parseJavaFiles", () => {
     })
 
     it("NO activa el fallback si rawText.trim() es vacío aunque tenga whitespace", () => {
-      // La condición es: results.length === 0 && rawText.trim() !== ""
       const result = parseJavaFiles("   \n   ")
       expect(result).toEqual([])
     })
@@ -177,7 +173,6 @@ describe("parseJavaFiles", () => {
     it("no extrae paths con extensión que no sea .java (ej: .py, .ts)", () => {
       const input = "src/Script.py\n```java\nclass A {}\n```"
       const result = parseJavaFiles(input)
-      // .py no es .java → no se captura como path
       expect(result[0].path).toBe("")
       expect(result[0].filename).toBe("Archivo.java")
     })
@@ -185,12 +180,10 @@ describe("parseJavaFiles", () => {
     it("no confunde una URL con una ruta java", () => {
       const input = "https://github.com/repo\n```java\nclass A {}\n```"
       const result = parseJavaFiles(input)
-      // "github.com/repo" no termina en .java → no hay path
       expect(result[0].filename).toBe("Archivo.java")
     })
   })
 
-  // ── III. CASOS LÍMITE ─────────────────────────────────────────────────────
   describe("Casos límite", () => {
     it("un bloque inmediatamente seguido de otro sin texto entre ellos", () => {
       const input = "```java\nclass A {}\n```\n```java\nclass B {}\n```"
@@ -203,7 +196,6 @@ describe("parseJavaFiles", () => {
     it("path dentro del bloque: elimina la primera línea del código resultante", () => {
       const input = "```java\nArchivo: src/Test.java\nclass Test {}\n```"
       const result = parseJavaFiles(input)
-      // La línea 'Archivo: src/Test.java' NO debe estar en el code
       expect(result[0].code).not.toContain("Archivo:")
       expect(result[0].code).toBe("class Test {}")
     })
@@ -211,7 +203,6 @@ describe("parseJavaFiles", () => {
     it("path en texto previo tiene prioridad sobre path dentro del bloque", () => {
       const input = "src/Externo.java\n```java\nArchivo: src/Interno.java\nclass X {}\n```"
       const result = parseJavaFiles(input)
-      // pathsBefore tiene contenido → usa el externo, NO el interno
       expect(result[0].filename).toBe("Externo.java")
     })
 
@@ -266,7 +257,6 @@ describe("parseJavaFiles", () => {
         "```"
       ].join("\n")
       const result = parseJavaFiles(input)
-      // El path real viene del texto antes del bloque
       expect(result[0].filename).toBe("Main.java")
       expect(result[0].path).toBe("src/Main.java")
     })
@@ -294,7 +284,6 @@ describe("parseJavaFiles", () => {
     })
   })
 
-  // ── IV. FLUJO MÁXIMO ──────────────────────────────────────────────────────
   describe("Flujo máximo: respuesta completa de IA con múltiples bloques y formatos mixtos", () => {
     it("procesa una respuesta realista con 5 archivos en formatos distintos", () => {
       const input = [
@@ -346,26 +335,20 @@ describe("parseJavaFiles", () => {
 
       expect(result).toHaveLength(5)
 
-      // Bloque 1: path en texto antes
       expect(result[0].filename).toBe("Main.java")
       expect(result[0].path).toBe("src/main/java/com/examen/Main.java")
       expect(result[0].code).toContain("public class Main")
 
-      // Bloque 2: path dentro del bloque con prefijo '// Archivo:'
       expect(result[1].filename).toBe("Animal.java")
       expect(result[1].code).toContain("public abstract class Animal")
       expect(result[1].code).not.toContain("Archivo:")
 
-      // Bloque 3: path dentro con 'Path:'
       expect(result[2].filename).toBe("Identificable.java")
       expect(result[2].code).toContain("public interface Identificable")
-      expect(result[2].code).not.toContain("Path:")
-
-      // Bloque 4: path en comentario antes del bloque
+      expect(result[2].code).not.toContain("Path:")      
       expect(result[3].filename).toBe("MainTest.java")
       expect(result[3].code).toContain("@Test")
 
-      // Bloque 5: sin path → fallback a Archivo.java
       expect(result[4].filename).toBe("Archivo.java")
       expect(result[4].path).toBe("")
       expect(result[4].code).toContain("public class Auxiliar")
