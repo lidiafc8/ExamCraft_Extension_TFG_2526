@@ -44,7 +44,7 @@ describe("useGeminiGeneration – Configuración Básica", () => {
 describe("useGeminiGeneration – Flujos de Ejecución (Cobertura 100%)", () => {
   
   it("gestiona los estados de carga, retorna el resultado y guarda el log con éxito", async () => {
-    mockGenerateWithAI.mockResolvedValue("Respuesta de la IA");
+    mockGenerateWithAI.mockResolvedValue({ result: "Respuesta de la IA", provider: "gemini" });
     const { result } = renderHook(() => useGeminiGeneration(baseOptions));
 
     let promesa;
@@ -62,7 +62,7 @@ describe("useGeminiGeneration – Flujos de Ejecución (Cobertura 100%)", () => 
   });
 
   it("continúa la ejecución con éxito si el servidor de logs está apagado", async () => {
-    mockGenerateWithAI.mockResolvedValue("Respuesta de la IA");
+    mockGenerateWithAI.mockResolvedValue({ result: "Respuesta de la IA", provider: "gemini" });
     global.fetch = vi.fn().mockRejectedValue(new Error("Logs caídos"));
 
     const { result } = renderHook(() => useGeminiGeneration(baseOptions));
