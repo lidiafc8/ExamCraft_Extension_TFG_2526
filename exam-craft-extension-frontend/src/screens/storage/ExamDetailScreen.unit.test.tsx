@@ -4,15 +4,9 @@ import userEvent from "@testing-library/user-event"
 import { vi, describe, it, expect, beforeEach } from "vitest"
 import "@testing-library/jest-dom"
 
-// --- IMPORTACIÓN DEL COMPONENTE BAJO PRUEBA ---
 import { ExamDetailScreen } from "./ExamDetailScreen"
 
-// Extracción dinámica del tipo de las props para evitar errores de compilación
 type ExamDetailScreenProps = React.ComponentProps<typeof ExamDetailScreen>
-
-// ============================================================================
-// --- MOCKS DE DEPENDENCIAS Y COMPONENTES HIJOS ---
-// ============================================================================
 
 vi.mock("../../services/geminiService", () => ({
   generateWithAI: vi.fn(),
@@ -77,10 +71,6 @@ vi.mock("~src/components/modals/GitHubDeployModal", () => ({
   ),
 }))
 
-// ============================================================================
-// --- SUITE PRINCIPAL DE PRUEBAS ---
-// ============================================================================
-
 describe("ExamDetailScreen", () => {
   let baseProps: ExamDetailScreenProps
   let mockProject: any
@@ -88,7 +78,6 @@ describe("ExamDetailScreen", () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    // Configuración de un proyecto con datos completos iniciales
     mockProject = {
       id: "project-123",
       customName: "Examen Parcial de Ajedrez",
@@ -121,9 +110,6 @@ describe("ExamDetailScreen", () => {
     Storage.prototype.getItem = vi.fn().mockReturnValue("gh_token_existente")
   })
 
-  // ==========================================
-  // 1. CASOS POSITIVOS (RENDERIZADO Y NAVEGACIÓN)
-  // ==========================================
   describe("Casos Positivos - Renderizado Inicial y Navegación", () => {
     it("renderiza correctamente el título personalizado y las secciones de contenido", () => {
       render(<ExamDetailScreen {...baseProps} />)
@@ -144,11 +130,8 @@ describe("ExamDetailScreen", () => {
       expect(textareas[1]).toHaveValue(mockProject.attributeConstraints)
       expect(textareas[2]).toHaveValue(mockProject.entityRelationships)
 
-      // Usamos findByTestId para asincronía segura
       const viewer = await screen.findByTestId("mermaid-viewer")
       
-      // --- CORRECCIÓN AQUÍ ---
-      // Usamos una expresión regular que acepta cualquier tipo de espacio o salto de línea (\s+) entre ambas palabras
       expect(viewer).toHaveTextContent(/cleaned-classDiagram\s+class Tablero/)
     })
 
@@ -176,9 +159,6 @@ describe("ExamDetailScreen", () => {
     })
   })
 
-  // ==========================================
-  // 2. ACCIONES DEL MENÚ DESPLEGABLE Y MODALES
-  // ==========================================
   describe("Interacciones - Menú Dropdown de Acciones y Modales", () => {
     beforeEach(async () => {
       render(<ExamDetailScreen {...baseProps} />)
@@ -192,7 +172,6 @@ describe("ExamDetailScreen", () => {
       const previewTitle = await screen.findByRole("heading", { name: "Previsualización del Examen" })
       expect(previewTitle).toBeInTheDocument()
       
-      // --- CORRECCIÓN AQUÍ: Filtramos la lista de botones por su clase exclusiva ---
       const closeBtn = screen.getAllByRole("button").find(btn => 
         btn.className.includes("preview-close-btn")
       ) as HTMLElement;

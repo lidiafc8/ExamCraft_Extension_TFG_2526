@@ -4,15 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import "@testing-library/jest-dom";
 
-// --- IMPORTACIÓN DEL COMPONENTE ---
 import { DomainFolderScreen } from "./ExamSelectionScreen";
 
-// EXTRACCIÓN DINÁMICA DE PROPS
 type DomainFolderScreenProps = React.ComponentProps<typeof DomainFolderScreen>;
-
-// ============================================================================
-// --- MOCKS DE COMPONENTES DE INTERFAZ Y HOOKS ---
-// ============================================================================
 
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome, breadcrumbItems }: any) => (
@@ -46,10 +40,6 @@ vi.mock("../../../assets/images/exam.png", () => ({
   default: "mock-exam-image.png"
 }));
 
-// ============================================================================
-// --- SUITE PRINCIPAL DE PRUEBAS ---
-// ============================================================================
-
 describe("DomainFolderScreen", () => {
   let baseProps: DomainFolderScreenProps;
 
@@ -74,9 +64,6 @@ describe("DomainFolderScreen", () => {
     };
   });
 
-  // ==========================================
-  // 1. PRUEBAS POSITIVAS (HAPPY PATH)
-  // ==========================================
   describe("Casos Positivos y Renderizado Core", () => {
     it("renderiza correctamente los títulos transformados a mayúsculas y los contenedores principales", () => {
       render(<DomainFolderScreen {...baseProps} />);
@@ -119,14 +106,10 @@ describe("DomainFolderScreen", () => {
     });
   });
 
-  // ==========================================
-  // 2. LOGICA DE BORRADO Y MANEJO DE MODAL (CORREGIDO)
-  // ==========================================
   describe("Flujo e Interacciones de Borrado", () => {
     it("abre el modal con los datos del ítem seleccionado deteniendo la propagación", async () => {
       render(<DomainFolderScreen {...baseProps} />);
       
-      // SOLUCIÓN: Usamos getAllByTitle para capturar el botón mediante su atributo title="Borrar examen"
       const deleteButtons = screen.getAllByTitle("Borrar examen");
       
       fireEvent(
@@ -165,9 +148,6 @@ describe("DomainFolderScreen", () => {
     });
   });
 
-  // ==========================================
-  // 3. EDICIÓN EN LÍNEA E INPUT CONTROLADO
-  // ==========================================
   describe("Flujo de Renombrado Inline e Inputs de Teclado", () => {
     it("conmuta de botón de texto a input de edición cuando editingId coincide con el proyecto", () => {
       baseProps.editingId = "p1";
@@ -229,9 +209,6 @@ describe("DomainFolderScreen", () => {
     });
   });
 
-  // ==========================================
-  // 4. NEGATIVOS Y COBERTURA DE RAMAS
-  // ==========================================
   describe("Casos de Error y Límites de Datos", () => {
     it("renderiza de forma segura el contenedor sin arrojar errores si projectsInFolder está vacío", () => {
       baseProps.projectsInFolder = [];

@@ -9,7 +9,6 @@ import { parseJavaFiles } from "~src/utils/codeUtils"
 
 type ComponentProps = React.ComponentProps<typeof GeneratedCodeScreen>
 
-// --- MOCKS DE COMPONENTES E INYECTORES ---
 vi.mock("~src/utils/codeUtils", () => ({
   parseJavaFiles: vi.fn()
 }))
@@ -76,10 +75,6 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
       onUpdateProject: vi.fn().mockResolvedValue(undefined)
     }
   })
-
-  // ==========================================
-  // 1. CASOS POSITIVOS (FLUJOS FELICES)
-  // ==========================================
   describe("Casos Positivos (Flujos Felices)", () => {
     it("renderiza correctamente las rutas de migas de pan y bloques de código Java", () => {
       render(<GeneratedCodeScreen {...baseProps} />)
@@ -140,9 +135,6 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
     })
   })
 
-  // ==========================================
-  // 2. CASOS NEGATIVOS Y GESTIÓN DE ERRORES
-  // ==========================================
   describe("Casos Negativos y Manejo de Errores", () => {
     it("lanza un alert en pantalla si la API falla y desbloquea el botón de guardar", async () => {
       const alertMock = vi.spyOn(window, "alert").mockImplementation(() => {})
@@ -176,9 +168,7 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
     })
   })
 
-  // ==========================================
-  // 3. CASOS LÍMITE (EDGE CASES)
-  // ==========================================
+  
   describe("Casos Limite y Sincronización de Estados", () => {
     it("renderiza correctamente los textos de control vacíos si el payload no trae información", () => {
       vi.mocked(parseJavaFiles).mockReturnValue([])
@@ -257,36 +247,27 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
       expect(filenamesRenderizados).not.toContain("NoCodeTest.java")
     })
 
-    // =========================================================
-    // NUEVOS TESTS ADICIONALES PARA LÍNEAS 105 Y 108 DEL MODAL
-    // =========================================================
     it("llama a onDeleteSection cuando se borra un item de tipo section (Linea 105)", async () => {
       render(<GeneratedCodeScreen {...baseProps} />)
 
-      // El primer botón de cruz "✕" corresponde al bloque de "Clases Base" (tipo section)
       const botonBorrarSeccion = screen.getAllByRole("button", { name: "✕" })[0]
       await userEvent.click(botonBorrarSeccion)
 
-      // Confirmamos el borrado en el modal
       const botonConfirmar = screen.getByRole("button", { name: "Confirmar Borrado" })
       await userEvent.click(botonConfirmar)
 
-      // Verifica que ejecutó la línea 105 enviando la llave adecuada ('baseClasses' o similar según tu lógica)
       expect(baseProps.onDeleteSection).toHaveBeenCalled()
     })
 
     it("llama a onDeleteTest cuando se borra un item de tipo test especializado (Linea 108)", async () => {
       render(<GeneratedCodeScreen {...baseProps} />)
 
-      // El segundo botón de cruz "✕" corresponde al bloque de tests ("test-key-1")
       const botonBorrarTest = screen.getAllByRole("button", { name: "✕" })[1]
       await userEvent.click(botonBorrarTest)
 
-      // Confirmamos el borrado en el modal
       const botonConfirmar = screen.getByRole("button", { name: "Confirmar Borrado" })
       await userEvent.click(botonConfirmar)
 
-      // Verifica que ejecutó de manera exitosa la línea 108 pasándole el identificador real del mapa
       expect(baseProps.onDeleteTest).toHaveBeenCalledWith("test-key-1")
     })
   })

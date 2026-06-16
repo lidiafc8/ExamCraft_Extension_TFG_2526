@@ -2,20 +2,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { render, screen, fireEvent } from "@testing-library/react"
 import React from "react"
 import type { ComponentProps } from "react"
-// IMPORTANTE: Importamos los matchers extendidos para solucionar el error de Chai
 import "@testing-library/jest-dom/vitest" 
 
 import { DomainFolderScreen } from "./ExamSelectionScreen"
 
-// Extraemos el tipo de las props dinámicamente ya que no está exportado
 type DomainFolderScreenProps = ComponentProps<typeof DomainFolderScreen>
 
-// 1. Mock de recursos estáticos (imágenes)
 vi.mock("../../../assets/images/exam.png", () => ({
   default: "exam-mock-image.png"
 }))
 
-// 2. Mocks de componentes secundarios para la integración
+
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome }: any) => (
     <header data-testid="mock-header">
@@ -43,7 +40,7 @@ describe("DomainFolderScreen Integration Tests", () => {
 
   const mockProjects = [
     { id: "1", customName: "Examen Matemáticas", domainName: "Ciencias" },
-    { id: "2", customName: "", domainName: "Historia" } // Prueba el fallback del nombre
+    { id: "2", customName: "", domainName: "Historia" } 
   ]
 
   beforeEach(() => {
@@ -62,22 +59,17 @@ describe("DomainFolderScreen Integration Tests", () => {
     }
   })
 
-  // --- RENDERING & INITIAL STATE ---
   it("debería renderizar todos los elementos iniciales correctamente", () => {
     render(<DomainFolderScreen {...defaultProps} />)
 
-    // Verificar títulos en mayúsculas
     expect(screen.getByText("CARPETA: MATEMÁTICAS")).toBeInTheDocument()
     
-    // Verificar que los proyectos se listan correctamente (uno con customName y otro con fallback)
     expect(screen.getByText("Examen Matemáticas")).toBeInTheDocument()
     expect(screen.getByText("Examen de Historia")).toBeInTheDocument()
     
-    // Botón de volver
     expect(screen.getByRole("button", { name: "Volver" })).toBeInTheDocument()
   })
 
-  // --- NAVIGATION ACTION FLUSHES ---
   it("debería ejecutar onWelcome al hacer click en el acceso del Header", () => {
     render(<DomainFolderScreen {...defaultProps} />)
     fireEvent.click(screen.getByText("Inicio Breadcrumb"))
@@ -98,7 +90,6 @@ describe("DomainFolderScreen Integration Tests", () => {
     expect(defaultProps.onSelectProject).toHaveBeenCalledWith(mockProjects[0])
   })
 
-  // --- RENAMING FLOW (EDITION) ---
   it("debería activar el modo edición al hacer click en la etiqueta del proyecto", () => {
     render(<DomainFolderScreen {...defaultProps} />)
     
@@ -120,7 +111,6 @@ describe("DomainFolderScreen Integration Tests", () => {
     const input = screen.getByDisplayValue("Nuevo Nombre")
     expect(input).toBeInTheDocument()
 
-    // Cambiar texto del input
     fireEvent.change(input, { target: { value: "Nombre Cambiado" } })
     expect(defaultProps.setTempName).toHaveBeenCalledWith("Nombre Cambiado")
   })
@@ -166,14 +156,13 @@ describe("DomainFolderScreen Integration Tests", () => {
     expect(defaultProps.setEditingId).not.toHaveBeenCalled()
   })
 
-  // --- DELETION FLOW (MODAL INTEGRATION) ---
   it("debería abrir el modal de confirmación al hacer click en el botón de borrar", () => {
     render(<DomainFolderScreen {...defaultProps} />)
     
     expect(screen.queryByTestId("delete-modal")).not.toBeInTheDocument()
 
     const deleteButtons = screen.getAllByTitle("Borrar examen")
-    fireEvent.click(deleteButtons[0]) // Click en la 'X'
+    fireEvent.click(deleteButtons[0]) 
 
     expect(screen.getByTestId("delete-modal")).toBeInTheDocument()
     expect(screen.getByText("¿Borrar Examen Matemáticas?")).toBeInTheDocument()

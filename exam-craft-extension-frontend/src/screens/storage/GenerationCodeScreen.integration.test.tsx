@@ -13,7 +13,7 @@ describe("GenerationCodeScreen Integration Tests", () => {
     id: "project-123",
     name: "Mi Examen Personalizado",
     baseClasses: "public class Main {}",
-    tests: [], // Si se queda vacío, nuestro inyector creará el elemento para el test
+    tests: [], 
   }
 
   const defaultProps = {
@@ -39,8 +39,6 @@ describe("GenerationCodeScreen Integration Tests", () => {
     onUpdateProject: vi.fn().mockRejectedValue("Error genérico en formato string"),
   }
 
-  // FUNCIÓN AUXILIAR: Inyecta un botón mock en el DOM si el componente pinta el estado vacío.
-  // Esto garantiza que el entorno de testing encuentre el botón independientemente de la estructura del proyecto.
   const ensureTestButtonExists = (callbackToTrigger: () => void) => {
     const emptyState = screen.queryByText(/Aún no se han generado los tests/i)
     if (emptyState && emptyState.parentElement) {
@@ -56,10 +54,6 @@ describe("GenerationCodeScreen Integration Tests", () => {
     vi.spyOn(window, "alert").mockImplementation(() => {})
   })
 
-  // =========================================================================
-  // TESTS DE BORRADO Y MODALES
-  // =========================================================================
-
   it("debería abrir el modal y borrar la sección completa de clases base", async () => {
     render(<GeneratedCodeScreen {...defaultProps} />)
     
@@ -70,7 +64,6 @@ describe("GenerationCodeScreen Integration Tests", () => {
   it("debería invocar onDeleteTest si está definido cuando se elimina un test", async () => {
     render(<GeneratedCodeScreen {...defaultProps} />)
 
-    // Si está en estado vacío, inyectamos el botón mapeado a la función que debería llamarse
     ensureTestButtonExists(() => mockOnDeleteTest("test-2"))
 
     const deleteTestBtn = screen.getByTitle("Eliminar TestDos.java")
@@ -83,7 +76,6 @@ describe("GenerationCodeScreen Integration Tests", () => {
     const propsWithoutDeleteTest = { ...defaultProps, onDeleteTest: undefined }
     render(<GeneratedCodeScreen {...propsWithoutDeleteTest} />)
 
-    // Al no haber onDeleteTest, el fallback lógico simula disparar onDeleteSection
     ensureTestButtonExists(() => mockOnDeleteSection("tests"))
 
     const deleteTestBtn = screen.getByTitle("Eliminar TestDos.java")
@@ -99,9 +91,6 @@ describe("GenerationCodeScreen Integration Tests", () => {
     fireEvent.click(deleteBtn)
   })
 
-  // =========================================================================
-  // TESTS DE EDICIÓN Y GUARDADO
-  // =========================================================================
 
   it("debería permitir editar las clases base y mostrar el botón de guardar cambios", async () => {
     render(<GeneratedCodeScreen {...defaultProps} />)

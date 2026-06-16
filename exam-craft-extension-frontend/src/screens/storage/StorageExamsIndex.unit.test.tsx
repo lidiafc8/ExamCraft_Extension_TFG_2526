@@ -8,7 +8,6 @@ import StorageExamsIndex from "./StorageExamsIndex"
 import { downloadProjectAsMarkdown } from "~src/utils/exportUtils"
 import { GithubService } from "~src/services/githubService"
 
-// --- MOCKS DE LOS COMPONENTES HIJOS ---
 vi.mock("./FoldersGridScreen", () => ({
   FoldersGridScreen: ({ onSelectFolder, onWelcome }: any) => (
     <div data-testid="screen-folders-grid">
@@ -84,7 +83,6 @@ vi.mock("~src/components/modals/DeleteConfirmationModal", () => ({
   }
 }))
 
-// --- MOCKS DE UTILS Y SERVICIOS ---
 vi.mock("~src/utils/exportUtils", () => ({
   downloadProjectAsMarkdown: vi.fn()
 }))
@@ -107,7 +105,6 @@ describe("StorageExamsIndex - Suite Orquestadora Completa", () => {
       "otra_key_no_project": { data: "invalida" }
     }
 
-    // Inyección global de la API mockeada de Chrome Extension
     globalThis.chrome = {
       storage: {
         local: {
@@ -132,9 +129,6 @@ describe("StorageExamsIndex - Suite Orquestadora Completa", () => {
     delete (globalThis as any).chrome
   })
 
-  // ==========================================
-  // 1. CASOS POSITIVOS (FLUJOS FELICES Y NAVEGACIÓN)
-  // ==========================================
   describe("Casos Positivos (Flujos Felices)", () => {
     it("carga inicialmente los proyectos desde el almacenamiento local filtrando por el prefijo project_", async () => {
       render(<StorageExamsIndex {...baseProps} />)
@@ -145,24 +139,19 @@ describe("StorageExamsIndex - Suite Orquestadora Completa", () => {
     it("navega fluidamente por el árbol completo: Carpetas -> Listado de Exámenes -> Detalle -> Pantallas de Código", async () => {
       render(<StorageExamsIndex {...baseProps} />)
 
-      // 1. Ir a carpeta "ajedrez"
       await userEvent.click(screen.getByRole("button", { name: "Ir a carpeta Ajedrez" }))
       expect(screen.getByTestId("screen-domain-folder")).toBeInTheDocument()
       expect(screen.getByText("Examen Mayo")).toBeInTheDocument()
 
-      // 2. Seleccionar el examen para abrir el detalle
       await userEvent.click(screen.getByRole("button", { name: "Ver Detalle" }))
       expect(screen.getByTestId("screen-exam-detail")).toBeInTheDocument()
 
-      // 3. Abrir la pantalla de código generado
       await userEvent.click(screen.getByRole("button", { name: "Ver Código Generado" }))
       expect(screen.getByTestId("screen-generated-code")).toBeInTheDocument()
 
-      // 4. Volver de la pantalla de código
       await userEvent.click(screen.getByRole("button", { name: "Volver de Código" }))
       expect(screen.getByTestId("screen-exam-detail")).toBeInTheDocument()
 
-      // 5. Abrir la pantalla de solución visual
       await userEvent.click(screen.getByRole("button", { name: "Ver Código Solución" }))
       expect(screen.getByTestId("screen-visual-solution")).toBeInTheDocument()
     })
@@ -212,9 +201,6 @@ describe("StorageExamsIndex - Suite Orquestadora Completa", () => {
     })
   })
 
-  // ==========================================
-  // 2. CASOS NEGATIVOS Y MANEJO DE EXCEPCIONES
-  // ==========================================
   describe("Casos Negativos y Manejo de Errores", () => {
     it("no inicializa estados ni explota si el entorno de ejecución carece del objeto chrome de extensión", () => {
       delete (globalThis as any).chrome
@@ -241,33 +227,23 @@ describe("StorageExamsIndex - Suite Orquestadora Completa", () => {
       await userEvent.click(screen.getByRole("button", { name: "Ver Detalle" }))
       await userEvent.click(screen.getByRole("button", { name: "Ver Código Generado" }))
 
-      // 1. Forzamos el error simulado de cuota de Chrome
       globalThis.chrome.runtime.lastError = { message: "Quota bytes exceeded in storage local" }
 
       const botonActualizar = screen.getByRole("button", { name: "Actualizar Proyecto Async" })
 
-      // 2. Interceptamos temporalmente el manejador de rechazos globales del proceso durante el clic 
-      // para evitar que Vitest lo cuente como un error crítico no controlado de la suite
       const unhandledRejectionSpy = vi.fn()
       process.on("unhandledRejection", unhandledRejectionSpy)
 
-      // 3. Ejecutamos el clic de forma directa (React asimilará el fallo internamente en su estado)
       await userEvent.click(botonActualizar)
 
-      // Damos un pequeño respiro para que el bucle de eventos procese las microtareas de la promesa rota
       await new Promise((resolve) => setTimeout(resolve, 10))
 
-      // 4. Verificaciones de seguridad
       expect(globalThis.chrome.storage.local.set).toHaveBeenCalled()
 
-      // Restauramos el escuchador del proceso para no ensuciar otros archivos de pruebas
       process.off("unhandledRejection", unhandledRejectionSpy)
     })
   })
-
-  // ==========================================
-  // 3. CASOS LÍMITE (EDGE CASES) Y MUTACIONES DE ESTADO
-  // ==========================================
+  
   describe("Casos Límite y Mutaciones de Estado", () => {
     it("despliega de manera controlada el modal de eliminación y aborta la acción si el usuario decide cancelar", async () => {
       render(<StorageExamsIndex {...baseProps} />)
@@ -341,19 +317,17 @@ describe("StorageExamsIndex - Suite Orquestadora Completa", () => {
     })
 
     it("aplica correctamente la regla alternativa RegExp para identificar el repositorio de la clínica veterinaria", async () => {
-      // Saneamos y preparamos el storage local solo con el de Veterinaria para este test aislado
       mockChromeStorage = {
         "project_2": { id: "project_2", domainName: "clínica veterinaria", customName: "Examen Veterinaria" }
       }
 
       render(<StorageExamsIndex {...baseProps} />)
 
-      // Navegamos usando los botones específicos del mock
+      
       await userEvent.click(screen.getByRole("button", { name: "Ir a carpeta Veterinaria" }))
       await userEvent.click(screen.getByRole("button", { name: "Ver Detalle" }))
       await userEvent.click(screen.getByRole("button", { name: "Desplegar GitHub" }))
 
-      // Comprobamos que el regex del componente principal resolvió la plantilla correcta de petclinic
       expect(GithubService.deployExam).toHaveBeenCalledWith(
         "mock-token",
         expect.objectContaining({ id: "project_2", domainName: "clínica veterinaria" }),

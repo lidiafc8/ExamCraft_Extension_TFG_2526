@@ -11,7 +11,6 @@ import CreateExamByPartsScreen from "../chooseCreate/CreateExamByPartsScreen"
 
 expect.extend(jestDomMatchers)
 
-// Mocks de assets
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome, breadcrumbItems }: any) => (
     <header data-testid="mock-header">
@@ -31,7 +30,6 @@ vi.mock("../../../assets/images/parts_exam.png", () => ({ default: "parts_exam.p
 vi.mock("../../../assets/images/code.png", () => ({ default: "code.png" }))
 vi.mock("../../../assets/images/statement.png", () => ({ default: "statement.png" }))
 
-// App mínima que orquesta la navegación real entre pantallas
 function MiniApp() {
   const [screen_name, setScreen] = useState<"welcome" | "createExam" | "createByParts">("welcome")
 

@@ -4,9 +4,6 @@ import "@testing-library/jest-dom"
 import { VisualSolutionCodeScreen } from "./VisualSolutionCodeScreen"
 import { parseJavaFiles } from "~src/utils/codeUtils"
 
-// =========================================================================
-// MOCKS DE UTILS Y COMPONENTES SUBORDINADOS
-// =========================================================================
 vi.mock("~src/utils/codeUtils", () => ({
   parseJavaFiles: vi.fn((rawCode) => {
     if (!rawCode) return []
@@ -40,9 +37,7 @@ vi.mock("~src/components/modals/DeleteConfirmationModal", () => ({
   }
 }))
 
-// =========================================================================
-// SUITE DE PRUEBAS DE INTEGRACIÓN
-// =========================================================================
+
 describe("VisualSolutionCodeScreen Integration Tests", () => {
   const mockOnBack = vi.fn()
   const mockOnWelcome = vi.fn()
@@ -58,7 +53,6 @@ describe("VisualSolutionCodeScreen Integration Tests", () => {
     fullSolution: "public class Solucion {}"
   }
 
-  // CORRECCIÓN: Eliminado el tipo estricto ": VisualSolutionCodeScreenProps" para evitar fallos de visibilidad
   const defaultProps = {
     selectedProject: mockProjectWithSolution,
     selectedDomainFolder: "Ajedrez",
@@ -75,9 +69,7 @@ describe("VisualSolutionCodeScreen Integration Tests", () => {
     vi.spyOn(window, "alert").mockImplementation(() => {})
   })
 
-  // -------------------------------------------------------------------------
-  // 1. RENDERIZADO Y ESTADOS INICIALES
-  // -------------------------------------------------------------------------
+  
   it("debería mostrar el estado vacío si el proyecto no contiene solución", () => {
     vi.mocked(parseJavaFiles).mockReturnValueOnce([])
 
@@ -99,9 +91,6 @@ describe("VisualSolutionCodeScreen Integration Tests", () => {
     expect(screen.getByText("🔒 No editable")).toBeInTheDocument()
   })
 
-  // -------------------------------------------------------------------------
-  // 2. FLUJO DE EDICIÓN Y GUARDADO (CON ÉXITO Y ERROR)
-  // -------------------------------------------------------------------------
   it("debería conmutar a modo edición mostrando el textarea con el código crudo", () => {
     render(<VisualSolutionCodeScreen {...defaultProps} />)
 
@@ -153,10 +142,7 @@ describe("VisualSolutionCodeScreen Integration Tests", () => {
       expect(window.alert).toHaveBeenCalledWith("Error de red en el Storage")
     })
   })
-
-  // -------------------------------------------------------------------------
-  // 3. FLUJO DE ELIMINACIÓN Y MODALES
-  // -------------------------------------------------------------------------
+  
   it("debería abrir el modal de confirmación, confirmar y llamar a onDeleteSection", () => {
     render(<VisualSolutionCodeScreen {...defaultProps} />)
 
@@ -184,9 +170,6 @@ describe("VisualSolutionCodeScreen Integration Tests", () => {
     expect(screen.queryByTestId("delete-modal")).not.toBeInTheDocument()
   })
 
-  // -------------------------------------------------------------------------
-  // 4. BOTONES DE NAVEGACIÓN SIMPLE
-  // -------------------------------------------------------------------------
   it("debería invocar la función onBack al pulsar el botón Volver", () => {
     render(<VisualSolutionCodeScreen {...defaultProps} />)
 

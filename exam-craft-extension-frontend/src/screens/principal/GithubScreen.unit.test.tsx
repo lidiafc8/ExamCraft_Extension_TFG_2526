@@ -6,11 +6,9 @@ import "@testing-library/jest-dom";
 import GithubScreen from "./GithubScreen";
 import { GithubService } from "../../services/githubService";
 
-// === EXTENDER MATCHERS PARA JEST-DOM ===
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers";
 expect.extend(jestDomMatchers);
 
-// --- MOCK DE COMPONENTES DE INTERFAZ ---
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome }: any) => (
     <header data-testid="mock-header">
@@ -20,7 +18,6 @@ vi.mock("~src/components/Header", () => ({
   ),
 }));
 
-// --- MOCK DEL SERVICIO DE GITHUB ---
 vi.mock("../../services/githubService", () => ({
   GithubService: {
     getUser: vi.fn(),
@@ -60,17 +57,13 @@ describe("GithubScreen", () => {
 
   describe("Fase de Carga e Interfaz Límite (Loading)", () => {
     it("muestra el mensaje de carga inicial y oculta la estructura de perfiles antes de resolver las promesas", async () => {
-      // Creamos promesas estancadas para congelar el renderizado en estado 'loading === true'
       vi.mocked(GithubService.getUser).mockReturnValue(new Promise(() => {}));
       vi.mocked(GithubService.getMyRepo).mockReturnValue(new Promise(() => {}));
 
       render(<GithubScreen {...baseProps} />);
 
-      // 1. Verificamos que el badge de carga de GitHub es visible en el DOM
       expect(screen.getByText("Obteniendo datos de GitHub...")).toBeInTheDocument();
       
-      // 2. Corrección del error del Heading: Como !loading es falso, la grid de perfiles no se monta.
-      // Comprobamos con queryBy de forma segura que no existan nombres o bloques finales.
       expect(screen.queryByText("lidiafc8")).not.toBeInTheDocument();
       expect(screen.queryByText("Proyecto Actual")).not.toBeInTheDocument();
     });
@@ -87,30 +80,25 @@ describe("GithubScreen", () => {
     it("renderiza toda la información de perfiles y repositorio tras resolver las promesas", async () => {
       render(<GithubScreen {...baseProps} />);
 
-      // Esperamos a que la UI asíncrona termine la carga y actualice el estado
       await waitFor(() => {
         expect(screen.queryByText("Obteniendo datos de GitHub...")).not.toBeInTheDocument();
       });
 
-      // Validar datos de Lidia
       expect(screen.getByText("lidiafc8")).toBeInTheDocument();
       expect(screen.getByText("Repos: 15")).toBeInTheDocument();
       const imgLidia = screen.getByAltText("Lidia") as HTMLImageElement;
       expect(imgLidia.src).toBe(mockLidiaData.avatar_url);
 
-      // Validar datos de Maria
       expect(screen.getByText("mery16q")).toBeInTheDocument();
       expect(screen.getByText("Repos: 22")).toBeInTheDocument();
       const imgMaria = screen.getByAltText("Maria") as HTMLImageElement;
       expect(imgMaria.src).toBe(mockMariaData.avatar_url);
 
-      // Validar datos del repositorio
       expect(screen.getByText("Proyecto Actual")).toBeInTheDocument();
       expect(screen.getByText(mockRepoData.name)).toBeInTheDocument();
       expect(screen.getByText(`"${mockRepoData.description}"`)).toBeInTheDocument();
       expect(screen.getByText("⭐ Estrellas: 5")).toBeInTheDocument();
 
-      // Validar hipervínculo y seguridad
       const link = screen.getByRole("link", { name: /Ver en GitHub/i }) as HTMLAnchorElement;
       expect(link.href).toBe(mockRepoData.html_url);
       expect(link.target).toBe("_blank");
@@ -141,17 +129,12 @@ describe("GithubScreen", () => {
       await waitFor(() => {
         expect(screen.queryByText("Obteniendo datos de GitHub...")).not.toBeInTheDocument();
       });
-
-      // Aseguramos la ejecución de la línea catch
       expect(spyConsoleError).toHaveBeenCalledWith("Error cargando datos", expect.any(Error));
 
-      // Debido a que las promesas fallaron y los objetos de usuario quedaron en null,
-      // la condición !loading evalúa a verdadero y los fallbacks de usuario "Cargando..." se muestran.
       const fallbacks = screen.getAllByRole("heading", { level: 3 });
       expect(fallbacks).toHaveLength(2);
       expect(fallbacks[0].textContent).toBe("Cargando...");
       
-      // El repositorio no debe renderizarse al ser null
       expect(screen.queryByText("Proyecto Actual")).not.toBeInTheDocument();
 
       spyConsoleError.mockRestore();
@@ -174,7 +157,6 @@ describe("GithubScreen", () => {
         expect(screen.queryByText("Obteniendo datos de GitHub...")).not.toBeInTheDocument();
       });
 
-      // Valida la evaluación de cortocircuito (`repo.description || "TFG Universidad de Sevilla"`)
       expect(screen.getByText(`"TFG Universidad de Sevilla"`)).toBeInTheDocument();
     });
   });

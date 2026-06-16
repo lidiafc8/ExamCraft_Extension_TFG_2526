@@ -4,15 +4,9 @@ import userEvent from "@testing-library/user-event"
 import { vi, describe, it, expect, beforeEach } from "vitest"
 import "@testing-library/jest-dom"
 
-// --- IMPORTACIÓN DEL COMPONENTE BAJO PRUEBA ---
 import { FoldersGridScreen } from "./FoldersGridScreen"
 
-// Extracción dinámica del tipo de las props
 type FoldersGridScreenProps = React.ComponentProps<typeof FoldersGridScreen>
-
-// ============================================================================
-// --- MOCKS DE DEPENDENCIAS Y COMPONENTES HIJOS ---
-// ============================================================================
 
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome, breadcrumbItems }: any) => (
@@ -30,14 +24,9 @@ vi.mock("~src/components/Header", () => ({
   ),
 }))
 
-// Mock de la imagen local para evitar fallos de resolución en Node
 vi.mock("../../../assets/images/archive.png", () => ({
   default: "mock-archive-image.png",
 }))
-
-// ============================================================================
-// --- SUITE PRINCIPAL DE PRUEBAS ---
-// ============================================================================
 
 describe("FoldersGridScreen", () => {
   let baseProps: FoldersGridScreenProps
@@ -51,16 +40,12 @@ describe("FoldersGridScreen", () => {
         { id: "1", domainName: "Matemáticas" },
         { id: "2", domainName: "MATEMÁTICAS" },
         { id: "3", domainName: "Historia" },
-        // "PROGRAMACIÓN" se queda sin proyectos adrede para validar el filtro visible
       ],
       onWelcome: vi.fn(),
       onSelectFolder: vi.fn(),
     }
   })
 
-  // ==========================================
-  // 1. CASOS POSITIVOS (HAPPY PATH)
-  // ==========================================
   describe("Casos Positivos - Renderizado Core y Conteo", () => {
     it("renderiza correctamente los elementos estructurales fijos de la pantalla", () => {
       render(<FoldersGridScreen {...baseProps} />)
@@ -73,21 +58,17 @@ describe("FoldersGridScreen", () => {
     it("muestra únicamente las carpetas permitidas que contienen al menos un proyecto", () => {
       render(<FoldersGridScreen {...baseProps} />)
 
-      // Deben existir las carpetas con proyectos asignados
       expect(screen.getByRole("button", { name: /MATEMÁTICAS/ })).toBeInTheDocument()
       expect(screen.getByRole("button", { name: /HISTORIA/ })).toBeInTheDocument()
 
-      // La carpeta "PROGRAMACIÓN" no tiene proyectos, por lo que NO debe renderizarse
       expect(screen.queryByRole("button", { name: /PROGRAMACIÓN/ })).not.toBeInTheDocument()
     })
 
     it("calcula y muestra de manera exacta el conteo pluralizado y singularizado de los exámenes", () => {
       render(<FoldersGridScreen {...baseProps} />)
 
-      // Matemáticas tiene 2 proyectos -> Plural "EXÁMENES"
       expect(screen.getByText("2 EXÁMENES")).toBeInTheDocument()
 
-      // Historia tiene 1 proyecto -> Singular "EXAMEN"
       expect(screen.getByText("1 EXAMEN")).toBeInTheDocument()
     })
 
@@ -95,14 +76,10 @@ describe("FoldersGridScreen", () => {
       render(<FoldersGridScreen {...baseProps} />)
 
       const folderImages = screen.getAllByRole("img", { name: "Carpeta" })
-      // Se renderizan 2 carpetas válidas, por ende, 2 imágenes
       expect(folderImages).toHaveLength(2)
     })
   })
 
-  // ==========================================
-  // 2. LOGICA DE FUNCIONES E INTERACCIONES
-  // ==========================================
   describe("Lógica de Funciones - Clicks y Navegación", () => {
     it("ejecuta onSelectFolder con el nombre original de la carpeta al hacer clic en una tarjeta", async () => {
       render(<FoldersGridScreen {...baseProps} />)
@@ -133,9 +110,6 @@ describe("FoldersGridScreen", () => {
     })
   })
 
-  // ==========================================
-  // 3. LIMITES Y NORMALIZACIÓN DE TEXTO (EDGE CASES)
-  // ==========================================
   describe("Casos Límite - Comparación Casing e Insensibilidad a Mayúsculas", () => {
     it("iguala correctamente las carpetas aunque combinan mayúsculas, minúsculas o espacios extraños en casing", () => {
       baseProps.allowedFolders = ["CiEnCiAs"]
@@ -146,7 +120,6 @@ describe("FoldersGridScreen", () => {
 
       render(<FoldersGridScreen {...baseProps} />)
 
-      // Debe pasar el filtro .filter() y renderizar el texto normalizado en mayúsculas (.toUpperCase())
       expect(screen.getByRole("button", { name: /CIENCIAS/ })).toBeInTheDocument()
       expect(screen.getByText("2 EXÁMENES")).toBeInTheDocument()
     })
@@ -161,18 +134,13 @@ describe("FoldersGridScreen", () => {
 
       render(<FoldersGridScreen {...baseProps} />)
 
-      // Ignora los nulos/undefined de manera segura y cuenta el único válido
       expect(screen.getByRole("button", { name: /QUÍMICA/ })).toBeInTheDocument()
       expect(screen.getByText("1 EXAMEN")).toBeInTheDocument()
     })
   })
 
-  // ==========================================
-  // 4. CASOS NEGATIVOS (ESTADOS VACÍOS)
-  // ==========================================
   describe("Casos Negativos - Estados Vacíos de Datos", () => {
     it("muestra la interfaz de estado vacío si la lista filtrada de visibleFolders resulta en longitud cero", () => {
-      // Ningún proyecto coincide con las carpetas permitidas
       baseProps.projects = [
         { id: "1", domainName: "Geografía" },
         { id: "2", domainName: "Arte" },
@@ -180,10 +148,8 @@ describe("FoldersGridScreen", () => {
 
       render(<FoldersGridScreen {...baseProps} />)
 
-      // No debe haber tarjetas mapeadas
       expect(screen.queryByRole("button", { name: /MATEMÁTICAS/ })).not.toBeInTheDocument()
 
-      // Debe aparecer el bloque de "empty-container" con sus textos descriptivos
       expect(screen.getByText("Todavía no tienes ningún examen guardado.")).toBeInTheDocument()
       expect(screen.getByText("Crea tu primer examen para verlo aquí.")).toBeInTheDocument()
     })

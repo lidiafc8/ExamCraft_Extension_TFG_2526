@@ -5,11 +5,9 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 import "@testing-library/jest-dom";
 import WelcomeScreen from "./WelcomeScreen";
 
-// === EXTENDER MATCHERS PARA JEST-DOM ===
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers";
 expect.extend(jestDomMatchers);
 
-// --- MOCK DE COMPONENTES AUXILIARES ---
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome }: any) => (
     <header data-testid="mock-header">
@@ -19,8 +17,6 @@ vi.mock("~src/components/Header", () => ({
   ),
 }));
 
-// --- MOCK DE ASSETS DE IMÁGENES ---
-// Esto previene fallos de resolución de empaquetadores en entornos de test puros
 vi.mock("../../../assets/images/exam.png", () => ({ default: "mock-exam-icon.png" }));
 vi.mock("../../../assets/images/archive.png", () => ({ default: "mock-archive-icon.png" }));
 
@@ -40,11 +36,9 @@ describe("WelcomeScreen", () => {
     it("renderiza correctamente el título principal, las insignias de texto y el subcomponente Header", () => {
       render(<WelcomeScreen {...baseProps} />);
 
-      // Verificar que el Header simulado se monta con los atributos correctos
       expect(screen.getByTestId("mock-header")).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "INICIO" })).toBeInTheDocument();
 
-      // Verificar títulos de bienvenida de la pantalla central
       expect(screen.getByRole("heading", { level: 1, name: "¡BIENVENIDO A EXAMCRAFT!" })).toBeInTheDocument();
       expect(screen.getByText("¿Qué desea hacer?")).toBeInTheDocument();
     });
@@ -52,17 +46,14 @@ describe("WelcomeScreen", () => {
     it("renderiza las tarjetas de acción con sus respectivas etiquetas de texto e imágenes alternativas (alt)", () => {
       render(<WelcomeScreen {...baseProps} />);
 
-      // Verificar botón "Crear examen" e icono asociado
       const imgExamen = screen.getByAltText("Icono examen") as HTMLImageElement;
       expect(imgExamen).toBeInTheDocument();
       expect(screen.getByText("Crear examen")).toBeInTheDocument();
 
-      // Verificar botón "Consultar exámenes anteriores" e icono asociado
       const imgArchivo = screen.getByAltText("Icono archivo") as HTMLImageElement;
       expect(imgArchivo).toBeInTheDocument();
       expect(screen.getByText("Consultar exámenes anteriores")).toBeInTheDocument();
 
-      // Verificar botón flotante de GitHub Info
       expect(screen.getByRole("button", { name: "GitHub Info" })).toBeInTheDocument();
     });
   });
@@ -98,7 +89,6 @@ describe("WelcomeScreen", () => {
     it("dispara el callback onBack a través de la propiedad onWelcome delegada al Header", async () => {
       render(<WelcomeScreen {...baseProps} />);
 
-      // El Header recibe `onBack` bajo la prop `onWelcome`
       const btnHeaderWelcome = screen.getByRole("button", { name: "Botón Welcome Header" });
       await userEvent.click(btnHeaderWelcome);
 
@@ -110,12 +100,10 @@ describe("WelcomeScreen", () => {
     it("garantiza que las tarjetas e imágenes conserven inalteradas sus clases CSS de maquetación estructural", () => {
       const { container } = render(<WelcomeScreen {...baseProps} />);
 
-      // Verificar contenedores de CSS flexbox/grid requeridos por las hojas de estilos importadas
       expect(container.querySelector(".cards-container")).toBeInTheDocument();
       expect(container.querySelector(".action-card")).toBeInTheDocument();
       expect(container.querySelector(".btn-floating-github")).toBeInTheDocument();
 
-      // Asegurar que las imágenes conserven la clase de dimensiones estandarizadas
       const imagenes = container.querySelectorAll(".card-icon");
       expect(imagenes).toHaveLength(2);
     });

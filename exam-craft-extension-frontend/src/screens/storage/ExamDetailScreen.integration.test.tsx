@@ -6,12 +6,10 @@ import "@testing-library/jest-dom"
 import { ExamDetailScreen } from "./ExamDetailScreen"
 import { generateWithAI } from "../../services/geminiService"
 
-// 1. Mocks de Servicios de IA externos
 vi.mock("../../services/geminiService", () => ({
   generateWithAI: vi.fn()
 }))
 
-// 2. Mocks de Componentes Internos Reutilizables de forma estricta e inequívoca
 vi.mock("../../components/Header", () => ({
   Header: ({ currentStep, breadcrumbItems }: any) => (
     <header data-testid="mock-header">
@@ -35,7 +33,6 @@ vi.mock("../../components/MermaidViewer", () => ({
   )
 }))
 
-// 3. Mocks de los Modales del sistema
 vi.mock("~src/components/modals/DeleteConfirmationModal", () => ({
   DeleteConfirmationModal: ({ isOpen, itemName, onConfirm, onCancel }: any) =>
     isOpen ? (
@@ -116,20 +113,15 @@ describe("Integration Test - ExamDetailScreen", () => {
 
     expect(screen.getByTestId("mermaid-viewer").textContent).toMatch(/clean-classDiagram\s*Animal\s*<\|--\s*Perro/)
 
-    // SOLUCIÓN AL FALLO 1: Usamos identificadores unívocos por índice de breadcrumb mapeado
-    // idx 0 -> INICIO (onWelcome)
     fireEvent.click(screen.getByTestId("breadcrumb-btn-0"))
     expect(defaultProps.onWelcome).toHaveBeenCalledTimes(1)
 
-    // idx 1 -> EXÁMENES ANTERIORES (onGoToFolders)
     fireEvent.click(screen.getByTestId("breadcrumb-btn-1"))
     expect(defaultProps.onGoToFolders).toHaveBeenCalledTimes(1)
 
-    // idx 2 -> FOLDER (onBack)
     fireEvent.click(screen.getByTestId("breadcrumb-btn-2"))
     expect(defaultProps.onBack).toHaveBeenCalledTimes(1)
 
-    // Botón volver del pie de página
     fireEvent.click(screen.getByRole("button", { name: "Volver" }))
     expect(defaultProps.onBack).toHaveBeenCalledTimes(2)
   })
@@ -146,12 +138,10 @@ describe("Integration Test - ExamDetailScreen", () => {
     const textareaCombined = screen.getAllByRole("textbox")[0]
     fireEvent.change(textareaCombined, { target: { value: "Nuevo enunciado modificado." } })
 
-    // SOLUCIÓN AL FALLO 2: Forzamos el salto temporal en hilos síncronos aislados usando act() nativo
     act(() => {
       vi.advanceTimersByTime(1500)
     })
 
-    // Restauramos temporizadores para que las microtareas de las promesas de red (generateWithAI) respiren libremente
     vi.useRealTimers()
 
     await waitFor(() => {

@@ -7,12 +7,8 @@ declare global {
   var chrome: any
 }
 
-// Variable global al archivo de pruebas para poder capturar errores asíncronos cuando queramos
 let errorCapturadoEnMock: Error | null = null
 
-// =========================================================================
-// MOCKS DE COMPONENTES DEPENDIENTES (Únicos y estables)
-// =========================================================================
 vi.mock("./FoldersGridScreen", () => ({
   FoldersGridScreen: ({ onSelectFolder }: any) => (
     <div data-testid="folders-grid">
@@ -74,16 +70,13 @@ vi.mock("./VisualSolutionCodeScreen", () => ({
 vi.mock("~src/services/githubService")
 vi.mock("~src/utils/exportUtils")
 
-// =========================================================================
-// SUITE DE PRUEBAS DE INTEGRACIÓN
-// =========================================================================
 describe("StorageExamsIndex Integration Tests", () => {
   const mockOnWelcome = vi.fn()
   let fakeStorage: Record<string, any> = {}
 
   beforeEach(() => {
     vi.clearAllMocks()
-    errorCapturadoEnMock = null // Limpiamos el capturador en cada test
+    errorCapturadoEnMock = null 
     fakeStorage = {
       "project_1": { domainName: "ajedrez", customName: "Mi Examen", baseClasses: "public class Main {}", testPartsMap: {} }
     }
@@ -203,7 +196,6 @@ describe("StorageExamsIndex Integration Tests", () => {
   })
 
   it("debería rechazar la promesa con un error si chrome.runtime.lastError está presente", async () => {
-    // Forzamos el error manteniendo intactas las demás funciones del Storage para evitar TypeErrors
     vi.stubGlobal("chrome", {
       storage: {
         local: {
@@ -226,7 +218,6 @@ describe("StorageExamsIndex Integration Tests", () => {
     
     fireEvent.click(screen.getByText("Guardar"))
 
-    // Esperamos que la promesa se rechace de manera segura controlada en nuestro capturador global de pruebas
     await waitFor(() => {
       expect(errorCapturadoEnMock).not.toBeNull()
     })
