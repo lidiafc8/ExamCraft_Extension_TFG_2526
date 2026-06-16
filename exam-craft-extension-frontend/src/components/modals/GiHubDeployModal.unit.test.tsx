@@ -1,11 +1,9 @@
-/// <reference types="vitest/globals" />
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { GitHubDeployModal } from "./GitHubDeployModal";
 
-// Parche global para mitigar la ausencia de la API clipboard en entornos happy-dom
 if (typeof navigator !== "undefined" && !navigator.clipboard) {
     Object.defineProperty(navigator, "clipboard", {
         value: {
@@ -16,7 +14,6 @@ if (typeof navigator !== "undefined" && !navigator.clipboard) {
     });
 }
 
-// Inyección limpia del mock de window.open sin alterar el resto de las propiedades globales de window
 const mockOpen = vi.fn();
 Object.defineProperty(window, "open", {
     value: mockOpen,
@@ -57,7 +54,6 @@ describe("GitHubDeployModal – renderizado inicial (Estado: confirm)", () => {
         const customUploadString = "  - src/App.tsx  \n\n- package.json  ";
         render(<GitHubDeployModal {...baseProps} uploadListString={customUploadString} />);
         
-        // Verifica que se limpien los guiones iniciales y espacios
         expect(screen.getByText("src/App.tsx")).toBeInTheDocument();
         expect(screen.getByText("package.json")).toBeInTheDocument();
         expect(screen.getAllByRole("listitem")).toHaveLength(2);
@@ -78,7 +74,6 @@ describe("GitHubDeployModal – control del Token de GitHub", () => {
 
     it("el input del token hereda y renderiza el valor inicial de savedToken si existe", () => {
         render(<GitHubDeployModal {...baseProps} savedToken="ghp_tokenGuardado" />);
-        // Al proveer un token guardado, el warning/input no se renderiza según la lógica del código actual
         expect(screen.queryByPlaceholderText("ghp_xxxxxxxxxxxx")).not.toBeInTheDocument();
     });
 
@@ -108,12 +103,10 @@ describe("GitHubDeployModal – comportamiento del flujo de despliegue (Acciones
         const btnDesplegar = screen.getByRole("button", { name: /desplegar/i });
         await userEvent.click(btnDesplegar);
 
-        // Verifica la llamada y el guardado en storage
         expect(onConfirmMock).toHaveBeenCalledWith("ghp_miToken");
         expect(localStorage.getItem("github_token")).toBe("ghp_miToken");
         expect(mockOpen).toHaveBeenCalledWith("https://github.com/repo/url", "_blank");
 
-        // Verifica el cambio de pantalla al SuccessModal
         expect(screen.getByText("¡Despliegue completado!")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /vale/i })).toBeInTheDocument();
     });
@@ -128,7 +121,6 @@ describe("GitHubDeployModal – comportamiento del flujo de despliegue (Acciones
         expect(onConfirmMock).toHaveBeenCalledWith("ghp_token");
         expect(mockOpen).not.toHaveBeenCalled();
 
-        // El flujo finaliza en SuccessModal igualmente
         expect(screen.getByText("¡Despliegue completado!")).toBeInTheDocument();
     });
 
@@ -147,7 +139,6 @@ describe("GitHubDeployModal – comportamiento del flujo de despliegue (Acciones
         const onCloseMock = vi.fn();
         render(<GitHubDeployModal {...baseProps} onClose={onCloseMock} />);
         
-        // Buscamos el botón secundario del ConfirmModal (normalmente 'Cancelar' o similar en tu subcomponente)
         const btnCancelar = screen.getByRole("button", { name: /cancelar|cerrar/i });
         await userEvent.click(btnCancelar);
 
@@ -162,7 +153,6 @@ describe("GitHubDeployModal – manejo de errores", () => {
         
         await userEvent.click(screen.getByRole("button", { name: /desplegar/i }));
 
-        // Evalúa renderizado de ErrorModal (que reusa ConfirmModal)
         expect(screen.getByText("ERROR EN EL DESPLIEGUE")).toBeInTheDocument();
         expect(screen.getByText(/no se pudo crear el repositorio: Token inválido/i)).toBeInTheDocument();
     });
@@ -176,7 +166,6 @@ describe("GitHubDeployModal – manejo de errores", () => {
         const btnReintentar = screen.getByRole("button", { name: /reintentar/i });
         await userEvent.click(btnReintentar);
 
-        // Debería estar de vuelta en la pantalla de confirmación inicial
         expect(screen.getByText("CONFIRMAR SUBIDA A GITHUB")).toBeInTheDocument();
     });
 
