@@ -19,12 +19,11 @@ describe("Integración: background script - chrome.action.onClicked", () => {
 
   beforeAll(async () => {
     await import("./background")
-    // Guardamos el listener ANTES de que clearAllMocks lo borre
     registeredListener = mockAddListener.mock.calls[0][0]
   })
 
   beforeEach(() => {
-    mockCreate.mockClear() // solo limpiamos el create, no el addListener
+    mockCreate.mockClear() 
   })
 
   it("registra un listener en chrome.action.onClicked al cargar el script", () => {
