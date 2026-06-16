@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { GithubService, extractFilesForGitHub } from "./githubService" // Ajusta la ruta a tu archivo real si es necesario
+import { GithubService, extractFilesForGitHub } from "./githubService"
 
 describe("GithubService & Utils - Suite de Pruebas Unitarias Completa", () => {
   beforeEach(() => {
@@ -7,7 +7,6 @@ describe("GithubService & Utils - Suite de Pruebas Unitarias Completa", () => {
     globalThis.fetch = vi.fn()
     vi.spyOn(console, "error").mockImplementation(() => {})
     vi.spyOn(console, "log").mockImplementation(() => {})
-    // Congelamos el tiempo para evitar fallas volátiles con Date.now() en fallbacks
     vi.useFakeTimers().setSystemTime(new Date("2026-06-16T00:00:00.000Z"))
   })
 
@@ -16,9 +15,6 @@ describe("GithubService & Utils - Suite de Pruebas Unitarias Completa", () => {
     vi.useRealTimers()
   })
 
-  // =========================================================================
-  // 1. TESTS DE LA FUNCIÓN PURA: extractFilesForGitHub
-  // =========================================================================
   describe("Función extractFilesForGitHub", () => {
     it("debe retornar un array vacío si el texto raw de entrada es nulo o vacío", () => {
       expect(extractFilesForGitHub("")).toEqual([])
@@ -66,9 +62,6 @@ describe("GithubService & Utils - Suite de Pruebas Unitarias Completa", () => {
     })
   })
 
-  // =========================================================================
-  // 2. CASOS POSITIVOS (FLUJOS FELICES DE GITHUB)
-  // =========================================================================
   describe("GithubService - Casos Positivos", () => {
     it("getUser: obtiene el perfil formateado de un usuario correctamente", async () => {
       vi.mocked(globalThis.fetch).mockResolvedValueOnce({
@@ -147,17 +140,17 @@ describe("GithubService & Utils - Suite de Pruebas Unitarias Completa", () => {
       const readmeMockBase64 = btoa(unescape(encodeURIComponent("## Descripción control check a realizar\n*(Aquí puedes añadir los detalles o la lista de comprobaciones que se deben realizar en el control)*")))
 
       vi.mocked(globalThis.fetch)
-        .mockResolvedValueOnce({ ok: false, status: 404 } as any) // Intento 1 (Bucle)
-        .mockResolvedValueOnce({ ok: false, status: 404 } as any) // Intento 2 (Bucle)
+        .mockResolvedValueOnce({ ok: false, status: 404 } as any) 
+        .mockResolvedValueOnce({ ok: false, status: 404 } as any) 
         .mockResolvedValueOnce({
           ok: true,
           status: 200,
           json: vi.fn().mockResolvedValueOnce({
             content: readmeMockBase64
           })
-        } as any) // Intento 3 (Éxito del Bucle y rompe el ciclo)
-        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) // Llamada interna a createOrUpdateFile (GET verificador)
-        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) // Llamada interna a createOrUpdateFile (PUT final)
+        } as any)
+        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) 
+        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any)
 
       const promesaReadme = GithubService.updateReadmeWithDescription("tok", "ow", "rep", "Nueva info insertada")
       
@@ -168,9 +161,6 @@ describe("GithubService & Utils - Suite de Pruebas Unitarias Completa", () => {
     })
   })
 
-  // =========================================================================
-  // 3. CASOS NEGATIVOS Y MANEJO DE EXCEPCIONES
-  // =========================================================================
   describe("GithubService - Casos Negativos y Errores", () => {
     it("getUser & getMyRepo: deben retornar null atrapando el error limpiamente si la API falla", async () => {
       vi.mocked(globalThis.fetch).mockResolvedValue({ ok: false } as any)
@@ -196,11 +186,11 @@ describe("GithubService & Utils - Suite de Pruebas Unitarias Completa", () => {
 
     it("createOrUpdateFile: lanza excepción si la petición PUT es rechazada", async () => {
       vi.mocked(globalThis.fetch)
-        .mockResolvedValueOnce({ ok: false } as any) // GET previo falla
+        .mockResolvedValueOnce({ ok: false } as any) 
         .mockResolvedValueOnce({
           ok: false,
           json: vi.fn().mockResolvedValueOnce({ message: "Invalid base64 content" })
-        } as any) // PUT falla
+        } as any) 
 
       await expect(
         GithubService.createOrUpdateFile("tok", "ow", "rep", "test.java", "code", "msg")
@@ -210,7 +200,6 @@ describe("GithubService & Utils - Suite de Pruebas Unitarias Completa", () => {
     it("updateReadmeWithDescription: lanza excepción fatal si se agotan todos los reintentos permitidos", async () => {
       vi.mocked(globalThis.fetch).mockResolvedValue({ ok: false, status: 404 } as any)
 
-      // CORRECCIÓN: Declaramos la aserción al mismo tiempo que disparamos el flujo asíncrono de los relojes virtuales
       const promesaReadme = GithubService.updateReadmeWithDescription("tok", "ow", "rep", "info")
       
       const expectPromise = expect(promesaReadme).rejects.toThrow(
@@ -222,9 +211,6 @@ describe("GithubService & Utils - Suite de Pruebas Unitarias Completa", () => {
     })
   })
 
-  // =========================================================================
-  // 4. FLUJO COMPLETO DE ORQUESTACIÓN (deployExam)
-  // =========================================================================
   describe("GithubService - Flujo de Despliegue de Examen (deployExam)", () => {
     it("orquesta con éxito todo el ciclo de publicación de ramas y subida de archivos", async () => {
       const projectMock = {
@@ -241,23 +227,22 @@ describe("GithubService & Utils - Suite de Pruebas Unitarias Completa", () => {
         fullSolution: "src/ClaseBase.java\n```java\npublic class ClaseBaseResuelta {}\n```"
       }
 
-      // Solución al URIError: Codificamos de forma binaria segura antes de generar el mock binario
       const readmeMockBase64 = btoa(unescape(encodeURIComponent("## Descripción control check a realizar")))
 
       vi.mocked(globalThis.fetch)
-        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ login: "lidiafc8" }) } as any) // /user
-        .mockResolvedValueOnce({ ok: true, headers: { get: () => "application/json" }, json: vi.fn().mockResolvedValueOnce({ html_url: "https://github.com/lidiafc8/nuevo-examen" }) } as any) // /generate
-        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ content: readmeMockBase64 }) } as any) // GET README (Corregido)
-        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) // GET interno README
-        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) // PUT README
-        .mockResolvedValueOnce({ ok: false } as any) // GET Test
-        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) // PUT Test
-        .mockResolvedValueOnce({ ok: false } as any) // GET Base class
-        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) // PUT Base class
-        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ object: { sha: "main-sha" } }) } as any) // GET SHA
-        .mockResolvedValueOnce({ ok: true } as any) // POST Create Branch
-        .mockResolvedValueOnce({ ok: false } as any) // GET Branch content
-        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) // PUT Branch content
+        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ login: "lidiafc8" }) } as any) 
+        .mockResolvedValueOnce({ ok: true, headers: { get: () => "application/json" }, json: vi.fn().mockResolvedValueOnce({ html_url: "https://github.com/lidiafc8/nuevo-examen" }) } as any) 
+        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ content: readmeMockBase64 }) } as any) 
+        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) 
+        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any)
+        .mockResolvedValueOnce({ ok: false } as any) 
+        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) 
+        .mockResolvedValueOnce({ ok: false } as any) 
+        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) 
+        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ object: { sha: "main-sha" } }) } as any) 
+        .mockResolvedValueOnce({ ok: true } as any) 
+        .mockResolvedValueOnce({ ok: false } as any) 
+        .mockResolvedValueOnce({ ok: true, json: vi.fn().mockResolvedValueOnce({ success: true }) } as any) 
 
       const promesaDeploy = GithubService.deployExam(
         "valid-token",

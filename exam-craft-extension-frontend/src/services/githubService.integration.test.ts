@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { GithubService } from "./githubService" // Ajustado según tu export const GithubService
-
-// =========================================================================
-// SETUP GLOBAL DE MOCKS
-// =========================================================================
+import { GithubService } from "./githubService" 
 global.fetch = vi.fn()
 
 describe("GitHub Utility & Service Tests", () => {
@@ -18,9 +14,6 @@ describe("GitHub Utility & Service Tests", () => {
     vi.useRealTimers()
   })
 
-  // =========================================================================
-  // 1. VALIDACIÓN DE LLAMADAS BÁSICAS (getUser / getMyRepo)
-  // =========================================================================
   describe("getUser & getMyRepo", () => {
     it("getUser: debería mapear y retornar los datos del usuario si el API responde 200 OK", async () => {
       const mockUserData = { login: "maria_tfg", avatar_url: "url", public_repos: 5, bio: "Estudiante" }
@@ -53,9 +46,6 @@ describe("GitHub Utility & Service Tests", () => {
     })
   })
 
-  // =========================================================================
-  // 2. CREACIÓN DE REPOSITORIOS (createRepoFromTemplate)
-  // =========================================================================
   describe("createRepoFromTemplate", () => {
     it("debería solicitar a GitHub la creación de un repo basado en una plantilla y retornar el JSON", async () => {
       const mockRepoResponse = { name: "nuevo-repo", html_url: "https://github.com/user/nuevo-repo" }
@@ -68,7 +58,6 @@ describe("GitHub Utility & Service Tests", () => {
 
       const response = await GithubService.createRepoFromTemplate("token", "template-owner", "template-repo", "nuevo-repo")
       
-      // Corregido para que compare el objeto retornado completo, tal y como hace tu servicio
       expect(response).toEqual(mockRepoResponse)
       expect(response.html_url).toBe("https://github.com/user/nuevo-repo")
       expect(fetch).toHaveBeenCalledWith(
@@ -78,9 +67,6 @@ describe("GitHub Utility & Service Tests", () => {
     })
   })
 
-  // =========================================================================
-  // 3. SUBIDA INDIVIDUAL DE ARCHIVOS (createOrUpdateFile)
-  // =========================================================================
   describe("createOrUpdateFile", () => {
     it("debería hacer un PUT directo si el archivo no existe previamente (404)", async () => {
       vi.mocked(fetch).mockResolvedValueOnce({ ok: false, status: 404 } as unknown as Response)
@@ -111,9 +97,6 @@ describe("GitHub Utility & Service Tests", () => {
     })
   })
 
-  // =========================================================================
-  // 4. TEST DE POLLING ASÍNCRONO (updateReadmeWithDescription)
-  // =========================================================================
   describe("updateReadmeWithDescription Polling", () => {
     it("debería reintentar la descarga si el README devuelve 404 temporalmente y luego actualizarlo", async () => {
       const mockReadmeContent = "## Descripción control check a realizar\n*(Aquí puedes añadir los detalles o la lista de comprobaciones)*"
@@ -142,9 +125,6 @@ describe("GitHub Utility & Service Tests", () => {
     })
   })
 
-  // =========================================================================
-  // 5. TEST COMPLETO DE ORQUESTACIÓN (deployExam)
-  // =========================================================================
   describe("deployExam Orchestration", () => {
     it("debería fallar de inmediato si la validación inicial del token es rechazada por GitHub", async () => {
       vi.mocked(fetch).mockResolvedValueOnce({ ok: false, status: 401 } as unknown as Response)
@@ -157,42 +137,34 @@ describe("GitHub Utility & Service Tests", () => {
     it("debería ejecutar toda la secuencia de subidas (Readme, Tests, Clases base) con éxito", async () => {
       const safeReadmeBase64 = btoa(unescape(encodeURIComponent("## Descripción")))
 
-      // 1. GET /user -> Perfil
       vi.mocked(fetch).mockResolvedValueOnce({ 
         ok: true, 
         json: vi.fn().mockResolvedValueOnce({ login: "profesor_user" }) 
       } as unknown as Response)
 
-      // 2. POST /generate -> Clonar desde plantilla
       vi.mocked(fetch).mockResolvedValueOnce({ 
         ok: true, 
         headers: { get: () => "application/json" }, 
         json: vi.fn().mockResolvedValueOnce({ html_url: "https://github.com/profesor_user/nuevo-examen" }) 
       } as unknown as Response)
 
-      // 3. GET /contents/README.md -> Lectura del README inicial por updateReadmeWithDescription
       vi.mocked(fetch).mockResolvedValueOnce({ 
         ok: true, 
         json: vi.fn().mockResolvedValueOnce({ content: safeReadmeBase64 }) 
       } as unknown as Response)
 
-      // 4. GET /contents/README.md -> Comprobación de SHA en createOrUpdateFile
       vi.mocked(fetch).mockResolvedValueOnce({ 
         ok: true, 
         json: vi.fn().mockResolvedValueOnce({ sha: "readme-initial-sha" }) 
       } as unknown as Response)
 
-      // 5. PUT /contents/README.md -> Subida final del README modificado
       vi.mocked(fetch).mockResolvedValueOnce({ 
         ok: true, 
         json: vi.fn().mockResolvedValueOnce({}) 
       } as unknown as Response)
 
-      // --- _uploadTests ---
-      // 6. GET /contents/src/test/java/Test.java -> Comprobar existencia (404)
       vi.mocked(fetch).mockResolvedValueOnce({ ok: false, status: 404 } as unknown as Response) 
 
-      // 7. PUT /contents/src/test/java/Test.java -> Crear archivo de pruebas
       vi.mocked(fetch).mockResolvedValueOnce({ 
         ok: true, 
         json: vi.fn().mockResolvedValueOnce({}) 

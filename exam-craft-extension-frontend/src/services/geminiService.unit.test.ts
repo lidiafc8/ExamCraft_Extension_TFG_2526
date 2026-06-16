@@ -5,9 +5,7 @@ describe("generateWithAI - AI Service Suite", () => {
   
   beforeEach(() => {
     vi.clearAllMocks()
-    // Inyectamos un mock limpio en el fetch global antes de cada test
     globalThis.fetch = vi.fn()
-    // Espiamos console.error para evitar logs sucios en la terminal al probar errores
     vi.spyOn(console, "error").mockImplementation(() => {})
   })
 
@@ -15,9 +13,6 @@ describe("generateWithAI - AI Service Suite", () => {
     vi.restoreAllMocks()
   })
 
-  // ==========================================
-  // 1. CASOS POSITIVOS (FLUJOS FELICES)
-  // ==========================================
   describe("Casos Positivos (Flujos Felices)", () => {
     it("debe retornar el resultado y el proveedor correctamente cuando el backend responde de forma exitosa", async () => {
       const mockResponseData = {
@@ -25,7 +20,6 @@ describe("generateWithAI - AI Service Suite", () => {
         provider: "openai"
       }
 
-      // Mock de fetch exitoso
       vi.mocked(globalThis.fetch).mockResolvedValueOnce({
         ok: true,
         json: vi.fn().mockResolvedValueOnce(mockResponseData)
@@ -49,7 +43,6 @@ describe("generateWithAI - AI Service Suite", () => {
     it("debe asignar 'unknown' como proveedor por defecto si el payload del backend no lo incluye", async () => {
       const mockResponseData = {
         text: "Solo texto de respuesta"
-        // provider omitido deliberadamente
       }
 
       vi.mocked(globalThis.fetch).mockResolvedValueOnce({
@@ -62,9 +55,6 @@ describe("generateWithAI - AI Service Suite", () => {
     })
   })
 
-  // ==========================================
-  // 2. CASOS NEGATIVOS Y MANEJO DE EXCEPCIONES (COBERTURA TOTAL)
-  // ==========================================
   describe("Casos Negativos y Manejo de Errores", () => {
     it("debe extraer el mensaje desde 'details' si la respuesta http no es ok (response.ok === false)", async () => {
       const mockErrorData = { details: "Límite de tokens excedido en el backend" }
@@ -95,7 +85,6 @@ describe("generateWithAI - AI Service Suite", () => {
     it("debe usar el mensaje genérico de servidor si el json de error falla o viene vacío", async () => {
       vi.mocked(globalThis.fetch).mockResolvedValueOnce({
         ok: false,
-        // Simulamos que .json() falla (por ejemplo, si el server devuelve HTML en vez de JSON)
         json: vi.fn().mockRejectedValueOnce(new Error("JSON inválido"))
       } as any)
 
@@ -118,7 +107,6 @@ describe("generateWithAI - AI Service Suite", () => {
     })
 
     it("debe capturar fallos de red físicos o caídas del servidor local e informar que se verifique la conexión", async () => {
-      // Simulamos un rechazo de la promesa del fetch (Error de red real)
       vi.mocked(globalThis.fetch).mockRejectedValueOnce(new Error("Failed to fetch"))
 
       await expect(generateWithAI("Prompt")).rejects.toThrow(
@@ -129,7 +117,6 @@ describe("generateWithAI - AI Service Suite", () => {
     })
 
     it("debe usar un texto alternativo en el bloque catch si el error lanzado no contiene un mensaje definido", async () => {
-      // Forzamos un rechazo con un objeto plano sin propiedad .message
       vi.mocked(globalThis.fetch).mockRejectedValueOnce({})
 
       await expect(generateWithAI("Prompt")).rejects.toThrow(
