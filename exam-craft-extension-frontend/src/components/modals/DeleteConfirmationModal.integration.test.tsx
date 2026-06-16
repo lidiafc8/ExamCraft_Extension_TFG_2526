@@ -5,7 +5,6 @@ import { vi, describe, it, expect, beforeEach } from "vitest"
 import "@testing-library/jest-dom"
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
-// Ajusta la importación según la ruta de tu componente
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal"
 
 expect.extend(jestDomMatchers)
@@ -21,9 +20,6 @@ const defaultProps = {
 describe("Integración: DeleteConfirmationModal", () => {
   beforeEach(() => vi.clearAllMocks())
 
-  // =========================================================
-  // CASOS POSITIVOS
-  // =========================================================
   describe("Casos Positivos", () => {
     it("renderiza el título, icono de advertencia y mensaje de peligro cuando está abierto", () => {
       render(<DeleteConfirmationModal {...defaultProps} />)
@@ -36,7 +32,6 @@ describe("Integración: DeleteConfirmationModal", () => {
     it("renderiza el texto adaptado para un examen cuando isExam es true", () => {
       render(<DeleteConfirmationModal {...defaultProps} isExam={true} itemName="Parcial 1" />)
 
-      // Evaluamos fragmentos de texto ya que la etiqueta <strong> fragmenta el nodo de texto
       expect(screen.getByText(/¿Deseas eliminar el examen/i)).toBeInTheDocument()
       expect(screen.getByText(/"Parcial 1"/i)).toBeInTheDocument()
     })
@@ -60,9 +55,6 @@ describe("Integración: DeleteConfirmationModal", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS
-  // =========================================================
   describe("Casos Negativos", () => {
     it("no renderiza absolutamente nada si isOpen es false", () => {
       const { container } = render(<DeleteConfirmationModal {...defaultProps} isOpen={false} />)
@@ -79,9 +71,6 @@ describe("Integración: DeleteConfirmationModal", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE
-  // =========================================================
   describe("Casos Límite", () => {
     it("renderiza el texto adaptado para una sección cuando isExam es false", () => {
       render(<DeleteConfirmationModal {...defaultProps} isExam={false} itemName="Bloque de Introducción" />)
@@ -101,16 +90,12 @@ describe("Integración: DeleteConfirmationModal", () => {
       render(<DeleteConfirmationModal {...defaultProps} itemName="" />)
 
       expect(screen.getByText(/¿Deseas eliminar el examen/i)).toBeInTheDocument()
-      expect(screen.getByText(/""/i)).toBeInTheDocument() // Comprueba las comillas vacías
+      expect(screen.getByText(/""/i)).toBeInTheDocument() 
     })
   })
 
-  // =========================================================
-  // FLUJO COMPLETO
-  // =========================================================
   describe("Flujo Completo", () => {
     it("flujo completo: renderiza el modal con alcance de sección, el usuario cancela y luego confirma en un segundo renderizado", async () => {
-      // 1. Primer render: El usuario va a borrar una sección pero se arrepiente y cancela
       const { rerender } = render(
         <DeleteConfirmationModal 
           {...defaultProps} 
@@ -125,7 +110,6 @@ describe("Integración: DeleteConfirmationModal", () => {
       expect(defaultProps.onCancel).toHaveBeenCalledTimes(1)
       expect(defaultProps.onConfirm).not.toHaveBeenCalled()
 
-      // 2. Simulamos que la app actualiza el estado y cierra el modal (isOpen = false)
       rerender(
         <DeleteConfirmationModal 
           {...defaultProps} 
@@ -136,7 +120,6 @@ describe("Integración: DeleteConfirmationModal", () => {
       )
       expect(screen.queryByRole("heading", { name: "Confirmar Acción" })).not.toBeInTheDocument()
 
-      // 3. Simulamos que vuelve a abrir el modal y esta vez sí decide confirmar la eliminación
       rerender(
         <DeleteConfirmationModal 
           {...defaultProps} 

@@ -42,7 +42,7 @@ describe("GitHub Utility & Service Tests", () => {
     })
 
     it("getMyRepo: debería retornar la información básica filtrada del repositorio", async () => {
-      const mockRepoData = { name: "ExamCraft", description: "TFG", html_url: "http://...", stargazers_count: 2 }
+      const mockRepoData = { name: "ExamCraft", description: "TFG", html_url: "https://...", stargazers_count: 2 }
       vi.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: vi.fn().mockResolvedValueOnce(mockRepoData)

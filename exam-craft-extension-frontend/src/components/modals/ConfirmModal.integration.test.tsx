@@ -5,7 +5,6 @@ import { vi, describe, it, expect, beforeEach } from "vitest"
 import "@testing-library/jest-dom"
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
-// Ajusta la importación según la ruta de tu componente
 import { ConfirmModal } from "./ConfirmModal"
 
 expect.extend(jestDomMatchers)
@@ -19,10 +18,6 @@ const defaultProps = {
 
 describe("Integración: ConfirmModal", () => {
   beforeEach(() => vi.clearAllMocks())
-
-  // =========================================================
-  // CASOS POSITIVOS
-  // =========================================================
   describe("Casos Positivos", () => {
     it("renderiza el título, mensaje e icono por defecto correctamente", () => {
       render(<ConfirmModal {...defaultProps} />)
@@ -56,9 +51,6 @@ describe("Integración: ConfirmModal", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS
-  // =========================================================
   describe("Casos Negativos", () => {
     it("no renderiza la sección de advertencia (warning) si no se pasa la prop", () => {
       const { container } = render(<ConfirmModal {...defaultProps} warning={undefined} />)
@@ -69,7 +61,6 @@ describe("Integración: ConfirmModal", () => {
     it("no aplica la clase 'warning' al contenedor de descripción si la prop warning no existe", () => {
       const { container } = render(<ConfirmModal {...defaultProps} warning={undefined} />)
       
-      // Nota: Tu componente tiene una errata de origen en la clase ("sucess-modal-description")
       const descriptionContainer = container.querySelector(".sucess-modal-description")
       expect(descriptionContainer).not.toHaveClass("warning")
     })
@@ -82,9 +73,6 @@ describe("Integración: ConfirmModal", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE
-  // =========================================================
   describe("Casos Límite", () => {
     it("renderiza correctamente etiquetas personalizadas en los botones", () => {
       render(
@@ -140,9 +128,6 @@ describe("Integración: ConfirmModal", () => {
     })
   })
 
-  // =========================================================
-  // FLUJO COMPLETO
-  // =========================================================
   describe("Flujo Completo", () => {
     it("flujo completo: renderiza advertencia especial, evalúa estilos dinámicos y dispara confirmación", async () => {
       const { container } = render(
@@ -152,14 +137,11 @@ describe("Integración: ConfirmModal", () => {
         />
       )
 
-      // 1. Verificar que al haber warning se inyecte la clase correspondiente en la descripción
       const descriptionContainer = container.querySelector(".sucess-modal-description")
       expect(descriptionContainer).toHaveClass("warning")
 
-      // 2. Verificar que el texto de advertencia sea visible para el usuario
       expect(screen.getByText("Se borrarán 50 archivos vinculados")).toBeInTheDocument()
 
-      // 3. El usuario decide proceder a pesar de la advertencia
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       
       expect(defaultProps.onConfirm).toHaveBeenCalledTimes(1)
