@@ -58,9 +58,10 @@ async function requestAIDiagram(enunciado: string) {
         ${enunciado}`
 
   const result = await generateWithAI(prompt)
+  const text = typeof result === "string" ? result : ""
   return (
-    result
-      ?.trim()
+    text
+      .trim()
       .replace(/```mermaid\s*/g, "")
       .replace(/```\s*/g, "")
       .trim() || ""
