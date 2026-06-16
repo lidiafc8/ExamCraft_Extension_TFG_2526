@@ -9,7 +9,6 @@ import { GitHubDeployModal } from "./GitHubDeployModal"
 
 expect.extend(jestDomMatchers)
 
-// Mockeamos los subcomponentes dependientes para aislar las pruebas de este Modal
 vi.mock("./ConfirmModal", () => ({
   ConfirmModal: ({ title, message, warning, onConfirm, onCancel, confirmLabel }: any) => (
     <div data-testid="confirm-modal-mock">
@@ -52,13 +51,11 @@ describe("Integración: GitHubDeployModal", () => {
     vi.clearAllMocks()
     localStorage.clear()
     vi.spyOn(window, "open").mockImplementation(() => null)
-    // CORRECCIÓN AQUÍ: Espiamos directamente el objeto global
+    
     vi.spyOn(localStorage, "setItem")
   })
 
-  // =========================================================
-  // CASOS POSITIVOS
-  // =========================================================
+  
   describe("Casos Positivos", () => {
     it("renderiza la vista inicial de confirmación con el nombre del repositorio y los elementos formateados", () => {
       render(<GitHubDeployModal {...defaultProps} />)
@@ -66,7 +63,7 @@ describe("Integración: GitHubDeployModal", () => {
       expect(screen.getByRole("heading", { name: "CONFIRMAR SUBIDA A GITHUB" })).toBeInTheDocument()
       expect(screen.getByText("mi-nuevo-repo-2026")).toBeInTheDocument()
       
-      // Comprobamos que limpia el prefijo "- " de las líneas
+      
       expect(screen.getByText("Index.md")).toBeInTheDocument()
       expect(screen.getByText("Seccion1.md")).toBeInTheDocument()
     })
@@ -81,11 +78,9 @@ describe("Integración: GitHubDeployModal", () => {
     it("completa el despliegue exitosamente guardando el token y abriendo el repositorio en otra pestaña", async () => {
       render(<GitHubDeployModal {...defaultProps} />)
 
-      // 1. Escribimos un token válido
       const input = screen.getByPlaceholderText("ghp_xxxxxxxxxxxx")
       await userEvent.type(input, "ghp_mockToken123")
 
-      // 2. Ejecutamos el despliegue
       await userEvent.click(screen.getByRole("button", { name: "Desplegar" }))
 
       await waitFor(() => {
@@ -93,22 +88,18 @@ describe("Integración: GitHubDeployModal", () => {
         expect(localStorage.setItem).toHaveBeenCalledWith("github_token", "ghp_mockToken123")
         expect(window.open).toHaveBeenCalledWith("https://github.com/user/repo", "_blank")
         
-        // Transiciona a la vista de éxito
         expect(screen.getByTestId("success-modal-mock")).toBeInTheDocument()
         expect(screen.getByRole("heading", { name: "¡Despliegue completado!" })).toBeInTheDocument()
       })
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS
-  // =========================================================
   describe("Casos Negativos", () => {
     it("no inicia el despliegue si el token ingresado está vacío o son solo espacios", async () => {
       render(<GitHubDeployModal {...defaultProps} />)
 
       const input = screen.getByPlaceholderText("ghp_xxxxxxxxxxxx")
-      await userEvent.type(input, "   ") // Espacios en blanco
+      await userEvent.type(input, "   ")
 
       await userEvent.click(screen.getByRole("button", { name: "Desplegar" }))
 
@@ -126,7 +117,6 @@ describe("Integración: GitHubDeployModal", () => {
       await userEvent.type(screen.getByPlaceholderText("ghp_xxxxxxxxxxxx"), "token_malo")
       await userEvent.click(screen.getByRole("button", { name: "Desplegar" }))
 
-      // Debe renderizar la pantalla de error mapeando el mensaje capturado
       await waitFor(() => {
         expect(screen.getByRole("heading", { name: "ERROR EN EL DESPLIEGUE" })).toBeInTheDocument()
         expect(screen.getByText(/No se pudo crear el repositorio: Token inválido o expirado/i)).toBeInTheDocument()
@@ -135,9 +125,6 @@ describe("Integración: GitHubDeployModal", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE
-  // =========================================================
   describe("Casos Límite", () => {
     it("oculta el input de contraseña por completo si savedToken ya viene proveído", () => {
       render(<GitHubDeployModal {...defaultProps} savedToken="ghp_token_guardado" />)
@@ -149,7 +136,7 @@ describe("Integración: GitHubDeployModal", () => {
     it("no intenta abrir una nueva pestaña si onConfirm devuelve una URL vacía", async () => {
       const customProps = {
         ...defaultProps,
-        onConfirm: vi.fn().mockResolvedValue("") // URL vacía
+        onConfirm: vi.fn().mockResolvedValue("")
       }
 
       render(<GitHubDeployModal {...customProps} savedToken="token" />)
@@ -165,7 +152,6 @@ describe("Integración: GitHubDeployModal", () => {
       render(
         <GitHubDeployModal 
           {...defaultProps} 
-          // CORRECCIÓN AQUÍ: Usamos saltos de línea reales usando backticks (Template Literals)
           uploadListString={`
             - ArchivoUno.md
             
@@ -181,17 +167,14 @@ describe("Integración: GitHubDeployModal", () => {
     it("utiliza el mensaje por defecto 'Error' si el objeto de error capturado no contiene la propiedad message (Línea 45)", async () => {
       const customProps = {
         ...defaultProps,
-        // Rechazamos con un objeto vacío para forzar que e.message sea undefined
         onConfirm: vi.fn().mockRejectedValue({}) 
       }
 
       render(<GitHubDeployModal templateRepo={""} newRepoName={""} uploadListString={""} savedToken={""} {...customProps} />)
 
-      // Rellenamos el token para poder avanzar
       await userEvent.type(screen.getByPlaceholderText("ghp_xxxxxxxxxxxx"), "token_prueba")
       await userEvent.click(screen.getByRole("button", { name: "Desplegar" }))
 
-      // Validamos que se use el fallback "Error" en la interfaz
       await waitFor(() => {
         expect(screen.getByRole("heading", { name: "ERROR EN EL DESPLIEGUE" })).toBeInTheDocument()
         expect(screen.getByText(/No se pudo crear el repositorio: Error/i)).toBeInTheDocument()
@@ -199,9 +182,6 @@ describe("Integración: GitHubDeployModal", () => {
     })
   })
 
-  // =========================================================
-  // FLUJO COMPLETO
-  // =========================================================
   describe("Flujo Completo", () => {
     it("flujo completo: inicia error, reintenta cambiando token, avanza a éxito y finaliza el flujo", async () => {
       let debeFallar = true
@@ -212,7 +192,6 @@ describe("Integración: GitHubDeployModal", () => {
 
       render(<GitHubDeployModal {...defaultProps} onConfirm={dynamicConfirm} />)
 
-      // 1. Primer intento fallido
       await userEvent.type(screen.getByPlaceholderText("ghp_xxxxxxxxxxxx"), "token_incorrecto")
       await userEvent.click(screen.getByRole("button", { name: "Desplegar" }))
 
@@ -220,16 +199,13 @@ describe("Integración: GitHubDeployModal", () => {
         expect(screen.getByRole("heading", { name: "ERROR EN EL DESPLIEGUE" })).toBeInTheDocument()
       })
 
-      // 2. Pulsar Reintentar (vuelve a cambiar el estado interno a "confirm")
       debeFallar = false
       await userEvent.click(screen.getByRole("button", { name: "Reintentar" }))
       
       expect(screen.getByRole("heading", { name: "CONFIRMAR SUBIDA A GITHUB" })).toBeInTheDocument()
 
-      // 3. Modificamos y enviamos de nuevo con el mock solucionado
       await userEvent.click(screen.getByRole("button", { name: "Desplegar" }))
 
-      // 4. Valida pantalla de éxito y presiona botón de finalización
       await waitFor(() => {
         expect(screen.getByTestId("success-modal-mock")).toBeInTheDocument()
       })

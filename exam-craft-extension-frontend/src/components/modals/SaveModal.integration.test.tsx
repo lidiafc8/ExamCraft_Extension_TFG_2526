@@ -10,13 +10,11 @@ import { getAllFromChrome, saveToChrome } from "~src/utils/chromeStorageUtils"
 
 expect.extend(jestDomMatchers)
 
-// 1. Mockeamos las utilidades de almacenamiento de Chrome
 vi.mock("~src/utils/chromeStorageUtils", () => ({
   getAllFromChrome: vi.fn(),
   saveToChrome: vi.fn()
 }))
 
-// 2. Mockeamos los subcomponentes implicados para aislar la suite de integración
 vi.mock("./ConfirmModal", () => ({
   ConfirmModal: ({ title, message, warning, onConfirm, onCancel, confirmLabel }: any) => (
     <div data-testid="confirm-modal-mock">
@@ -59,9 +57,6 @@ describe("Integración: SaveModal", () => {
     vi.mocked(saveToChrome).mockResolvedValue(undefined)
   })
 
-  // =========================================================
-  // CASOS POSITIVOS
-  // =========================================================
   describe("Casos Positivos", () => {
     it("renderiza el estado 'prompt' inicial con el nombre autogenerado por defecto", () => {
       render(<SaveModal {...defaultProps} />)
@@ -71,7 +66,6 @@ describe("Integración: SaveModal", () => {
       const input = screen.getByLabelText("Nombre del examen")
       expect(input).toHaveValue("Examen de Matemáticas")
       
-      // CORRECCIÓN: Como el input ya viene con el nombre preestablecido, la advertencia de vacío no debe mostrarse
       expect(screen.queryByText("⚠️ Se usará el nombre por defecto si se deja vacío")).not.toBeInTheDocument()
     })
 
@@ -99,12 +93,10 @@ describe("Integración: SaveModal", () => {
       const { container } = render(<SaveModal {...defaultProps} />)
       const input = screen.getByLabelText("Nombre del examen")
 
-      // Simulamos foco
       await userEvent.click(input)
       expect(container.querySelector(".save-modal-input-icon")).toHaveClass("save-modal-input-icon--focused")
       expect(container.querySelector(".save-modal-input")).toHaveClass("save-modal-input--focused")
 
-      // CORRECCIÓN: Quitamos el foco haciendo clic fuera en el contenedor raíz del árbol
       await userEvent.click(container.firstChild as HTMLElement)
       
       expect(container.querySelector(".save-modal-input-icon")).not.toHaveClass("save-modal-input-icon--focused")
@@ -112,9 +104,6 @@ describe("Integración: SaveModal", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS
-  // =========================================================
   describe("Casos Negativos", () => {
     it("bloquea el guardado si detecta un duplicado en la base de datos de Chrome para el mismo dominio", async () => {
       vi.mocked(getAllFromChrome).mockResolvedValue([
@@ -152,9 +141,6 @@ describe("Integración: SaveModal", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE
-  // =========================================================
   describe("Casos Límite", () => {
     it("si skipPrompt es true, guarda inmediatamente de forma automática usando el domainName como override", async () => {
       const { container } = render(<SaveModal {...defaultProps} skipPrompt={true} />)
@@ -173,7 +159,6 @@ describe("Integración: SaveModal", () => {
 
       await userEvent.clear(input)
       
-      // Aquí el input ya está vacío, por lo tanto la advertencia sí debe mostrarse
       expect(screen.getByText("⚠️ Se usará el nombre por defecto si se deja vacío")).toBeInTheDocument()
 
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
@@ -203,9 +188,6 @@ describe("Integración: SaveModal", () => {
     })
   })
 
-  // =========================================================
-  // FLUJO COMPLETO
-  // =========================================================
   describe("Flujo Completo", () => {
     it("flujo completo: intenta guardar un duplicado, limpia el error al escribir, cambia el texto y procesa con éxito", async () => {
       vi.mocked(getAllFromChrome).mockResolvedValue([
@@ -238,17 +220,13 @@ describe("Integración: SaveModal", () => {
     })
 
     it("retorna false en checkDuplicate si la llamada a getAllFromChrome falla lanzando una excepción (Líneas 54-55)", async () => {
-      // Forzamos a que getAllFromChrome falle lanzando un error
       vi.mocked(getAllFromChrome).mockRejectedValue(new Error("Error de lectura en Chrome Storage"))
 
       render(<SaveModal {...defaultProps} />)
       
-      // Intentamos guardar para gatillar el flujo de checkDuplicate
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
       await waitFor(() => {
-        // Al retornar false el catch, el modal asume que NO hay duplicados 
-        // e intenta avanzar al guardado llamando a saveToChrome
         expect(getAllFromChrome).toHaveBeenCalledTimes(1)
         expect(saveToChrome).toHaveBeenCalled()
         expect(screen.getByTestId("success-modal-mock")).toBeInTheDocument()
@@ -256,16 +234,13 @@ describe("Integración: SaveModal", () => {
     })
 
     it("utiliza el mensaje alternativo 'No se pudo guardar.' si el objeto capturado en el catch no es una instancia de Error (Línea 73)", async () => {
-      // Forzamos a saveToChrome a rechazar la promesa con un string en vez de un new Error()
       vi.mocked(saveToChrome).mockRejectedValue("Error misterioso de la extensión")
 
       render(<SaveModal {...defaultProps} />)
       
-      // Presionamos guardar para detonar handleConfirm
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
       await waitFor(() => {
-        // Al no ser instancia de Error, la línea 73 debe asignar "No se pudo guardar."
         expect(screen.getByRole("heading", { name: "Error al guardar" })).toBeInTheDocument()
         expect(screen.getByText("No se pudo guardar.")).toBeInTheDocument()
       })

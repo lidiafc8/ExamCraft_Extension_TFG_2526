@@ -41,9 +41,6 @@ function SelectorWrapper(props: Partial<React.ComponentProps<typeof FolderExamSe
 describe("Integración: FolderExamSelector", () => {
   beforeEach(() => vi.clearAllMocks())
 
-  // =========================================================
-  // CASOS POSITIVOS — todo funciona con datos válidos
-  // =========================================================
   describe("Casos Positivos", () => {
     it("muestra todas las carpetas que tienen proyectos asignados", () => {
       render(<SelectorWrapper />)
@@ -98,9 +95,6 @@ describe("Integración: FolderExamSelector", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS — datos ausentes o inválidos
-  // =========================================================
   describe("Casos Negativos", () => {
     it("muestra mensaje vacío por defecto si no hay proyectos", () => {
       render(<SelectorWrapper projects={[]} />)
@@ -144,7 +138,6 @@ describe("Integración: FolderExamSelector", () => {
     })
 
     it("muestra emptyProjectsMessage si la carpeta no tiene exámenes tras filtrar", async () => {
-      // Filtramos para que veterinaria no pase, pero entramos en ella igualmente
       render(
         <SelectorWrapper
           filterProject={(p) => p.domainName === "ajedrez"}
@@ -159,9 +152,6 @@ describe("Integración: FolderExamSelector", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE — valores extremos o situaciones frontera
-  // =========================================================
   describe("Casos Límite", () => {
     it("maneja correctamente un proyecto sin customName usando el domainName", async () => {
       const sinCustomName = [
@@ -196,23 +186,17 @@ describe("Integración: FolderExamSelector", () => {
     })
   })
 
-  // =========================================================
-  // FLUJO COMPLETO — navegación de principio a fin
-  // =========================================================
   describe("Flujo Completo", () => {
     it("flujo completo: carpetas → seleccionar carpeta → seleccionar examen", async () => {
       const onSelectProject = vi.fn()
       render(<SelectorWrapper onSelectProject={onSelectProject} />)
 
-      // 1. Vista inicial: carpetas visibles
       expect(screen.getByText("CLÍNICA VETERINARIA")).toBeInTheDocument()
 
-      // 2. Entrar en una carpeta
       await userEvent.click(screen.getByText("CLÍNICA VETERINARIA"))
       expect(screen.getByText("Examen Veterinaria 1")).toBeInTheDocument()
       expect(screen.queryByText("AJEDREZ")).not.toBeInTheDocument()
 
-      // 3. Seleccionar un examen
       await userEvent.click(screen.getAllByTitle("Abrir examen")[0])
       expect(onSelectProject).toHaveBeenCalledWith(mockProjects[0])
     })
@@ -220,16 +204,13 @@ describe("Integración: FolderExamSelector", () => {
     it("flujo completo: entrar en carpeta → volver → entrar en otra carpeta", async () => {
       render(<SelectorWrapper />)
 
-      // 1. Entrar en veterinaria
       await userEvent.click(screen.getByText("CLÍNICA VETERINARIA"))
       expect(screen.getByText("Examen Veterinaria 1")).toBeInTheDocument()
 
-      // 2. Volver a carpetas
       await userEvent.click(screen.getByText("Volver"))
       expect(screen.getByText("CLÍNICA VETERINARIA")).toBeInTheDocument()
       expect(screen.getByText("AJEDREZ")).toBeInTheDocument()
 
-      // 3. Entrar en ajedrez
       await userEvent.click(screen.getByText("AJEDREZ"))
       expect(screen.getByText("Examen Ajedrez 1")).toBeInTheDocument()
       expect(screen.queryByText("Examen Veterinaria 1")).not.toBeInTheDocument()
@@ -242,11 +223,9 @@ describe("Integración: FolderExamSelector", () => {
         />
       )
 
-      // Solo ajedrez visible tras filtrar
       expect(screen.queryByText("CLÍNICA VETERINARIA")).not.toBeInTheDocument()
       expect(screen.getByText("AJEDREZ")).toBeInTheDocument()
 
-      // Entrar y ver solo el examen que pasa el filtro
       await userEvent.click(screen.getByText("AJEDREZ"))
       expect(screen.getByText("Examen Ajedrez 1")).toBeInTheDocument()
       expect(screen.queryByText("Examen Veterinaria 1")).not.toBeInTheDocument()

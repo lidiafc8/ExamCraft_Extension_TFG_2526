@@ -7,7 +7,6 @@ import { useGeminiGeneration } from "./GeminiGeneration"
 
 expect.extend(jestDomMatchers)
 
-// --- MOCKS ---
 vi.mock("../services/geminiService", () => ({
   generateWithAI: vi.fn()
 }))
@@ -15,11 +14,9 @@ vi.mock("../services/geminiService", () => ({
 import { generateWithAI } from "../services/geminiService"
 const mockGenerateWithAI = generateWithAI as ReturnType<typeof vi.fn>
 
-// Mock de fetch global para el servidor de logs
 const mockFetch = vi.fn()
 vi.stubGlobal("fetch", mockFetch)
 
-// Mock de alert global
 const mockAlert = vi.fn()
 vi.stubGlobal("alert", mockAlert)
 
@@ -34,9 +31,6 @@ describe("Integración: useGeminiGeneration", () => {
     mockFetch.mockResolvedValue({ ok: true })
   })
 
-  // =========================================================
-  // CASOS POSITIVOS
-  // =========================================================
   describe("Casos Positivos", () => {
     it("devuelve los valores iniciales correctos antes de generar", () => {
       const { result } = renderHook(() => useGeminiGeneration(defaultOptions))
@@ -116,9 +110,6 @@ describe("Integración: useGeminiGeneration", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS
-  // =========================================================
   describe("Casos Negativos", () => {
     it("retorna null y muestra alert si generateWithAI lanza un error", async () => {
       mockGenerateWithAI.mockRejectedValue(new Error("fallo de red"))
@@ -157,7 +148,6 @@ describe("Integración: useGeminiGeneration", () => {
         returnValue = await result.current.generate("payload")
       })
 
-      // La generación sigue funcionando aunque el log falle
       expect(returnValue).toBe("ok")
       expect(result.current.responseText).toBe("ok")
     })
@@ -178,9 +168,6 @@ describe("Integración: useGeminiGeneration", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE
-  // =========================================================
   describe("Casos Límite", () => {
     it("maneja correctamente un resultado vacío de generateWithAI", async () => {
       mockGenerateWithAI.mockResolvedValue({ result: "", provider: "gemini" })
@@ -245,9 +232,6 @@ describe("Integración: useGeminiGeneration", () => {
     })
   })
 
-  // =========================================================
-  // FLUJO COMPLETO
-  // =========================================================
   describe("Flujo Completo", () => {
     it("flujo completo: generar, loguear y actualizar estado correctamente", async () => {
       const buildLogPayload = vi.fn().mockReturnValue({ dominio: "veterinaria" })
@@ -257,7 +241,6 @@ describe("Integración: useGeminiGeneration", () => {
         useGeminiGeneration({ logExerciseName: "base-classes", buildLogPayload })
       )
 
-      // Estado inicial
       expect(result.current.responseText).toBe("")
       expect(result.current.isLoading).toBe(false)
 
@@ -266,12 +249,10 @@ describe("Integración: useGeminiGeneration", () => {
         returnValue = await result.current.generate("payload completo")
       })
 
-      // Estado final
       expect(returnValue).toBe("clases generadas")
       expect(result.current.responseText).toBe("clases generadas")
       expect(result.current.isLoading).toBe(false)
 
-      // Log enviado correctamente
       expect(buildLogPayload).toHaveBeenCalledWith("clases generadas")
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/save-log",
@@ -294,11 +275,9 @@ describe("Integración: useGeminiGeneration", () => {
         await result.current.generate("payload")
       })
 
-      // El hook sigue usable después del error
       expect(result.current.isLoading).toBe(false)
       expect(result.current.responseText).toBe("")
 
-      // Segunda llamada funciona correctamente
       mockGenerateWithAI.mockResolvedValue({ result: "recuperado", provider: "gemini" })
 
       await act(async () => {
