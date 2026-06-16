@@ -42,7 +42,6 @@ jobs:
         uses: sonarsource/sonarqube-scan-action@v5
         with:
           projectBaseDir: exam-craft-extension-frontend
-          # 👇 AQUÍ ESTÁ LA SOLUCIÓN 👇
           args: >
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.test.ts,**/*.spec.ts,**/*.test.tsx,**/*.spec.tsx
