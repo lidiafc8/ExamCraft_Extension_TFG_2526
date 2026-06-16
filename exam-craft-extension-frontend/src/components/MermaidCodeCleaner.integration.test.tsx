@@ -3,9 +3,6 @@ import { cleanMermaidCode } from "./MermaidCodeCleaner"
 
 describe("Integración: cleanMermaidCode", () => {
 
-  // =========================================================
-  // CASOS POSITIVOS
-  // =========================================================
   describe("Casos Positivos", () => {
     it("elimina los bloques de código markdown ```mermaid y ```", () => {
       const input = "```mermaid\nclassDiagram\n  A --> B\n```"
@@ -110,9 +107,6 @@ describe("Integración: cleanMermaidCode", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS
-  // =========================================================
   describe("Casos Negativos", () => {
     it("devuelve string vacío si la entrada es vacía", () => {
       expect(cleanMermaidCode("")).toBe("")
@@ -141,14 +135,10 @@ describe("Integración: cleanMermaidCode", () => {
       const input = `classDiagram\n  A --> "1" B : uses`
       const result = cleanMermaidCode(input)
 
-      // No debe duplicar la flecha
       expect(result).not.toContain("-->  -->")
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE
-  // =========================================================
   describe("Casos Límite", () => {
     it("maneja entrada con solo espacios en blanco", () => {
       const result = cleanMermaidCode("   ")
@@ -189,7 +179,6 @@ describe("Integración: cleanMermaidCode", () => {
     it("normaliza *--> y o--> eliminando espacios intermedios", () => {
         const input = "classDiagram\n  A * --> B\n  C o --> D"
         const result = cleanMermaidCode(input)
-        // La función une * con --> pero luego --> se normaliza con espacios
         expect(result).toContain("*")
         expect(result).toContain("o")
         expect(result).toContain(" --> ")
@@ -203,9 +192,6 @@ describe("Integración: cleanMermaidCode", () => {
     })
   })
 
-  // =========================================================
-  // FLUJO COMPLETO
-  // =========================================================
   describe("Flujo Completo", () => {
     it("flujo completo: limpia un diagrama real con múltiples problemas", () => {
       const input = `

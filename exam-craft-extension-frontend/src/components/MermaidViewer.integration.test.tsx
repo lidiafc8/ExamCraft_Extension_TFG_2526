@@ -22,7 +22,6 @@ const mockMermaid = mermaid as unknown as {
   render: ReturnType<typeof vi.fn>
 }
 
-// Guardamos una variable de control para forzar fallos controlados en el DOMParser simulado
 let forceEmptySvgMock = false
 
 describe("Integración: MermaidViewer", () => {
@@ -30,11 +29,10 @@ describe("Integración: MermaidViewer", () => {
     vi.clearAllMocks()
     forceEmptySvgMock = false
 
-    // Mock de DOMParser dinámico para cubrir la línea 43
     vi.stubGlobal("DOMParser", class {
       parseFromString() {
         if (forceEmptySvgMock) {
-          return { querySelector: () => null } // Forzamos que !svg sea true
+          return { querySelector: () => null } 
         }
         const svgEl = {
           getAttribute: (attr: string) => attr === "width" ? "100" : attr === "height" ? "100" : null,
@@ -69,9 +67,6 @@ describe("Integración: MermaidViewer", () => {
     vi.unstubAllGlobals()
   })
 
-  // =========================================================
-  // CASOS POSITIVOS — sanitizeForRender (función pura)
-  // =========================================================
   describe("sanitizeForRender — Casos Positivos", () => {
     it("devuelve string vacío si la entrada es vacía", () => {
       expect(sanitizeForRender("")).toBe("")
@@ -126,9 +121,6 @@ describe("Integración: MermaidViewer", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS — sanitizeForRender
-  // =========================================================
   describe("sanitizeForRender — Casos Negativos", () => {
     it("devuelve vacío si la entrada es null casteado", () => {
       expect(sanitizeForRender(null as unknown as string)).toBe("")
@@ -144,9 +136,6 @@ describe("Integración: MermaidViewer", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE — sanitizeForRender
-  // =========================================================
   describe("sanitizeForRender — Casos Límite", () => {
     it("maneja texto muy largo sin romperse", () => {
       const longInput = Array(1000).fill("A-->B").join("\n")
@@ -166,9 +155,6 @@ describe("Integración: MermaidViewer", () => {
     })
   })
 
-  // =========================================================
-  // CASOS POSITIVOS — MermaidViewer (componente)
-  // =========================================================
   describe("MermaidViewer — Casos Positivos", () => {
     it("muestra 'Renderizando...' mientras espera el SVG", () => {
       mockMermaid.render.mockImplementation(() => new Promise(() => {}))
@@ -209,15 +195,13 @@ describe("Integración: MermaidViewer", () => {
       expect(svgEl?.getAttribute("style")).toContain("display: block")
     })
 
-    // COBERTURA LÍNEA 43: Entrar en el bloque return original si no encuentra la etiqueta svg
     it("retorna el string crudo en fixSvgDimensions si el parser no localiza el nodo svg", async () => {
-      forceEmptySvgMock = true // Activamos la trampa del mock
+      forceEmptySvgMock = true 
 
       render(<MermaidViewer chartCode="classDiagram\nA-->B" />)
       await act(async () => {})
 
       const innerContent = document.querySelector(".mermaid-inner-content")
-      // Debido al mock de la línea 48, el XMLSerializer no recibió un nodo modificado
       expect(innerContent).toBeInTheDocument()
     })
 
@@ -324,9 +308,6 @@ describe("Integración: MermaidViewer", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS — MermaidViewer
-  // =========================================================
   describe("MermaidViewer — Casos Negativos", () => {
     it("muestra error si mermaid.render lanza una excepción", async () => {
       mockMermaid.render.mockRejectedValue(new Error("sintaxis inválida"))
@@ -338,7 +319,6 @@ describe("Integración: MermaidViewer", () => {
       expect(screen.getByText(/Error renderizando/)).toBeInTheDocument()
     })
 
-    // COBERTURA LÍNEA 112: Capturar errores que no heredan de Error (objetos crudos o strings sin propiedad .message)
     it("maneja correctamente excepciones extrañas sin propiedad message en el bloque catch", async () => {
       mockMermaid.render.mockRejectedValue("Error crítico fatal crudo")
 
@@ -375,9 +355,6 @@ describe("Integración: MermaidViewer", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE — MermaidViewer
-  // =========================================================
   describe("MermaidViewer — Casos Límite", () => {
     it("el zoom no baja de 15% aunque se pulse muchas veces − Zoom", async () => {
       render(<MermaidViewer chartCode="classDiagram\nA-->B" />)
@@ -412,9 +389,6 @@ describe("Integración: MermaidViewer", () => {
     })
   })
 
-  // =========================================================
-  // FLUJO COMPLETO
-  // =========================================================
   describe("Flujo Completo", () => {
     it("flujo completo: carga → renderiza SVG → zoom in → zoom out → reset", async () => {
       render(<MermaidViewer chartCode="classDiagram\nA-->B" />)

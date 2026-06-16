@@ -27,9 +27,6 @@ public class Owner {
 describe("Integración: JavaCodeBlock", () => {
   beforeEach(() => vi.clearAllMocks())
 
-  // =========================================================
-  // CASOS POSITIVOS
-  // =========================================================
   describe("Casos Positivos", () => {
     it("renderiza el nombre del archivo correctamente", () => {
       render(<JavaCodeBlock filename="Pet.java" code={simpleCode} />)
@@ -87,9 +84,6 @@ describe("Integración: JavaCodeBlock", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS
-  // =========================================================
   describe("Casos Negativos", () => {
     it("renderiza sin errores cuando el código está vacío", () => {
       render(<JavaCodeBlock filename="Empty.java" code="" />)
@@ -107,14 +101,10 @@ describe("Integración: JavaCodeBlock", () => {
     it("no muestra el código como texto plano visible sin escapar", () => {
       render(<JavaCodeBlock filename="Pet.java" code={simpleCode} />)
 
-      // El código pasa por hljs y se renderiza como HTML, no como texto plano
       expect(screen.queryByText(simpleCode)).not.toBeInTheDocument()
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE
-  // =========================================================
   describe("Casos Límite", () => {
     it("maneja código con caracteres especiales sin romperse", () => {
       const specialCode = `public class Test { String s = "<div>&amp;</div>"; }`
@@ -162,28 +152,21 @@ describe("Integración: JavaCodeBlock", () => {
     })
   })
 
-  // =========================================================
-  // FLUJO COMPLETO
-  // =========================================================
   describe("Flujo Completo", () => {
     it("flujo completo: renderiza filename, pre, code con highlighting aplicado", () => {
       const { container } = render(
         <JavaCodeBlock filename="Owner.java" code={multiClassCode} />
       )
 
-      // 1. Filename visible
       expect(screen.getByText("Owner.java")).toBeInTheDocument()
 
-      // 2. Estructura pre > code presente
       const pre = container.querySelector("pre")
       const code = container.querySelector("code.hljs.language-java")
       expect(pre).toBeInTheDocument()
       expect(code).toBeInTheDocument()
 
-      // 3. Highlighting aplicado — hljs añade spans con clases
       expect(code?.innerHTML).toContain("<span")
 
-      // 4. El contenido no está vacío
       expect(code?.innerHTML.length).toBeGreaterThan(multiClassCode.length)
     })
 
@@ -204,7 +187,6 @@ describe("Integración: JavaCodeBlock", () => {
       const codeBlocks = container.querySelectorAll("code.hljs.language-java")
       expect(codeBlocks).toHaveLength(3)
 
-      // Cada bloque tiene su propio contenido
       const htmls = Array.from(codeBlocks).map((el) => el.innerHTML)
       expect(new Set(htmls).size).toBe(3)
     })

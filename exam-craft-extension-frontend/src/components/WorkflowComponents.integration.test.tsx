@@ -5,7 +5,6 @@ import { vi, describe, it, expect, beforeEach } from "vitest"
 import "@testing-library/jest-dom"
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
-// Ajusta las importaciones según la ruta de tus componentes
 import { StepperHeader, PromptEditor, SplitResultView } from "./WorkflowComponents"
 
 expect.extend(jestDomMatchers)
@@ -13,9 +12,6 @@ expect.extend(jestDomMatchers)
 describe("Integración: Componentes de WorkFlow", () => {
   beforeEach(() => vi.clearAllMocks())
 
-  // =========================================================
-  // STEPPER HEADER
-  // =========================================================
   describe("Componente: StepperHeader", () => {
     const defaultStepperProps = {
       steps: [{ label: "Paso 1" }, { label: "Paso 2" }, { label: "Paso 3" }],
@@ -33,11 +29,8 @@ describe("Integración: Componentes de WorkFlow", () => {
       it("aplica las clases correctas según el estado del paso", () => {
         const { container } = render(<StepperHeader {...defaultStepperProps} />)
         
-        // Paso 1: Completado (< currentStep)
         expect(container.querySelectorAll('.step-wrapper')[0]).toHaveClass('step-completed')
-        // Paso 2: Activo (=== currentStep)
         expect(container.querySelectorAll('.step-wrapper')[1]).toHaveClass('step-active')
-        // Paso 3: Inactivo (> currentStep)
         expect(container.querySelectorAll('.step-wrapper')[2]).toHaveClass('step-inactive')
       })
     })
@@ -58,9 +51,6 @@ describe("Integración: Componentes de WorkFlow", () => {
     })
   })
 
-  // =========================================================
-  // PROMPT EDITOR
-  // =========================================================
   describe("Componente: PromptEditor", () => {
     const defaultPromptProps = {
       title: "Título del Editor",
@@ -100,16 +90,12 @@ describe("Integración: Componentes de WorkFlow", () => {
       it("deshabilita el botón de generar y muestra spinner al estar cargando", () => {
         const { container } = render(<PromptEditor {...defaultPromptProps} isLoading={true} />)
         
-        // Buscamos el botón por su clase, ya que al cargar pierde el texto "Generar"
         const generateButton = container.querySelector('.btn-step.primary')
         
-        // 1. Validamos que el botón exista en el DOM
         expect(generateButton).toBeInTheDocument()
         
-        // 2. Validamos que esté deshabilitado
         expect(generateButton).toBeDisabled()
         
-        // 3. Validamos que el spinner esté renderizado dentro
         expect(container.querySelector('.loading-spinner')).toBeInTheDocument()
       })
 
@@ -126,15 +112,11 @@ describe("Integración: Componentes de WorkFlow", () => {
         const textarea = screen.getByRole("textbox")
         await userEvent.type(textarea, "Hola")
         
-        // Se llama 4 veces porque hemos escrito 4 letras ("H", "o", "l", "a")
         expect(defaultPromptProps.onPromptChange).toHaveBeenCalledTimes(4)
       })
     })
   })
 
-  // =========================================================
-  // SPLIT RESULT VIEW
-  // =========================================================
   describe("Componente: SplitResultView", () => {
     const defaultSplitProps = {
       promptText: "Mi prompt",
@@ -165,7 +147,6 @@ describe("Integración: Componentes de WorkFlow", () => {
         render(<SplitResultView {...defaultSplitProps} isLoading={true} />)
         
         expect(screen.getByText("Generando...")).toBeInTheDocument()
-        // Solo debería haber 1 textbox (el de la izquierda)
         const textareas = screen.getAllByRole("textbox")
         expect(textareas).toHaveLength(1)
         expect(textareas[0]).toHaveValue("Mi prompt")

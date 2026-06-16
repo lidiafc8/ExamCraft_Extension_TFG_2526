@@ -23,9 +23,6 @@ const defaultProps = {
 describe("Integración: Header", () => {
   beforeEach(() => vi.clearAllMocks())
 
-  // =========================================================
-  // CASOS POSITIVOS
-  // =========================================================
   describe("Casos Positivos", () => {
     it("renderiza el logo con su alt y aria-label correctos", () => {
       render(<Header {...defaultProps} />)
@@ -45,7 +42,6 @@ describe("Integración: Header", () => {
       render(<Header {...defaultProps} />)
 
       expect(screen.getByText("POR PARTES")).toBeInTheDocument()
-      // El currentStep es un span, no un botón
       expect(screen.queryByRole("button", { name: "POR PARTES" })).not.toBeInTheDocument()
     })
 
@@ -88,9 +84,6 @@ describe("Integración: Header", () => {
     })
   })
 
-  // =========================================================
-  // CASOS NEGATIVOS
-  // =========================================================
   describe("Casos Negativos", () => {
     it("no renderiza ningún breadcrumb si el array está vacío", () => {
       render(
@@ -102,7 +95,7 @@ describe("Integración: Header", () => {
       )
 
       expect(screen.queryByRole("button", { name: "INICIO" })).not.toBeInTheDocument()
-      expect(screen.getByText("INICIO")).toBeInTheDocument() // solo el currentStep
+      expect(screen.getByText("INICIO")).toBeInTheDocument()
     })
 
     it("no llama a onWelcome si no se pulsa el logo", () => {
@@ -129,9 +122,6 @@ describe("Integración: Header", () => {
     })
   })
 
-  // =========================================================
-  // CASOS LÍMITE
-  // =========================================================
   describe("Casos Límite", () => {
     it("renderiza correctamente con breadcrumbs vacío y currentStep vacío", () => {
       render(
@@ -187,9 +177,6 @@ describe("Integración: Header", () => {
     })
   })
 
-  // =========================================================
-  // FLUJO COMPLETO
-  // =========================================================
   describe("Flujo Completo", () => {
     it("flujo completo: navegar por varios breadcrumbs y luego al inicio con el logo", async () => {
       const onWelcome = vi.fn()
@@ -207,16 +194,13 @@ describe("Integración: Header", () => {
         />
       )
 
-      // 1. Pulsar breadcrumb CREAR EXAMEN
       await userEvent.click(screen.getByText("CREAR EXAMEN"))
       expect(accionCrear).toHaveBeenCalledTimes(1)
       expect(accionInicio).not.toHaveBeenCalled()
 
-      // 2. Pulsar breadcrumb INICIO
       await userEvent.click(screen.getByText("INICIO"))
       expect(accionInicio).toHaveBeenCalledTimes(1)
 
-      // 3. Pulsar logo para ir a welcome
       await userEvent.click(screen.getByRole("button", { name: "Ir a inicio" }))
       expect(onWelcome).toHaveBeenCalledTimes(1)
     })
@@ -232,9 +216,8 @@ describe("Integración: Header", () => {
             />
         )
 
-        // No hay botones de breadcrumb, solo el currentStep como texto
-        expect(screen.queryByText("INICIO")).toBeInTheDocument() // existe como span
-        expect(screen.queryAllByRole("button", { name: "INICIO" })).toHaveLength(0) // pero no como botón
+        expect(screen.queryByText("INICIO")).toBeInTheDocument()
+        expect(screen.queryAllByRole("button", { name: "INICIO" })).toHaveLength(0) 
 
         await userEvent.click(screen.getByRole("button", { name: "Ir a inicio" }))
         expect(onWelcome).toHaveBeenCalledTimes(1)
