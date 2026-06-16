@@ -29,11 +29,25 @@ export default defineConfig({
   test: {
     environment: "happy-dom",
     globals: true,
-    include: ["src/**/*.test.tsx", "src/**/*.test.ts"],
+    include: [
+      "src/**/*.test.tsx",
+      "src/**/*.test.ts",
+      "src/**/*.integration.test.tsx",
+      "src/**/*.integration.test.ts",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
       include: ["src/**/*.tsx", "src/**/*.ts"],
+      exclude: [
+        "src/models/**",
+        "src/**/*.d.ts",
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+        "src/**/*.integration.test.ts",
+        "src/**/*.integration.test.tsx",
+        "src/**/__mocks__/**",
+      ],
     },
   },
 });
