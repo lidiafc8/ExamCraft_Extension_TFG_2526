@@ -5,16 +5,13 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 import "@testing-library/jest-dom";
 import DiagramUMLWorkflowScreen from "./DiagramaUMLWorkflowScreen";
 
-// === EXTENDER MATCHERS PARA JEST-DOM ===
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers";
 expect.extend(jestDomMatchers);
 
-// --- CONTROLADOR DINÁMICO PARA EL LIMPIADOR MERMAID ---
 const mockCleanerControl = {
   forcedValue: undefined as string | undefined,
 };
 
-// --- MOCK DE DEPENDENCIAS ESTÁTICAS ---
 vi.mock("bundle-text:../../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md", () => ({
   default: "Texto base del Prompt UML para {{DOMAIN}}\n---\nContexto Secreto UML",
 }));
@@ -26,7 +23,6 @@ vi.mock("../../utils/promptParser", () => ({
   }),
 }));
 
-// Mock seguro de MermaidCodeCleaner sin requerir 'require'
 vi.mock("../../components/MermaidCodeCleaner", () => ({
   cleanMermaidCode: (code: string) => {
     if (mockCleanerControl.forcedValue !== undefined) {
@@ -36,7 +32,6 @@ vi.mock("../../components/MermaidCodeCleaner", () => ({
   }
 }));
 
-// --- MOCKS DE COMPONENTES AUXILIARES ---
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome, breadcrumbItems }: any) => (
     <header data-testid="mock-header">
@@ -78,7 +73,6 @@ vi.mock("../../components/WorkflowComponents", () => ({
   ),
 }));
 
-// --- SCENARIO MANAGEMENT PARA LA IA ---
 const geminiMockControl = {
   responseText: "classDiagram\n  class Init",
   isLoading: false,
@@ -100,8 +94,6 @@ vi.mock("../../components/GeminiGeneration", () => ({
     };
   },
 }));
-
-// --- CONFIGURACIÓN DE PROPS BASE ---
 describe("DiagramUMLWorkflowScreen", () => {
   const baseProps = {
     domainName: "Veterinaria",
@@ -120,7 +112,7 @@ describe("DiagramUMLWorkflowScreen", () => {
     vi.clearAllMocks();
     geminiMockControl.isLoading = false;
     geminiMockControl.responseText = "classDiagram\n  class Init";
-    mockCleanerControl.forcedValue = undefined; // Reseteamos el limpiador
+    mockCleanerControl.forcedValue = undefined; 
   });
 
   describe("Renderizado e Inicialización Básica", () => {
@@ -248,20 +240,15 @@ describe("DiagramUMLWorkflowScreen", () => {
       expect(document.querySelector(".btn-step.generate .loading-spinner")).toBeInTheDocument();
     });
 
-    // === SOLUCIÓN AL ERROR DE MODULE_NOT_FOUND (LÍNEA 246) ===
     it("Muestra el texto 'Renderizando...' en el área del diagrama si cleanCode se encuentra vacío", async () => {
-      // 1. Hacemos que la IA responda algo válido para cambiar de pantalla exitosamente
       mockGenerate.mockResolvedValue("CodigoCrudoDeLaIA"); 
       
-      // 2. Forzamos que el limpiador intercepte ese código y devuelva vacío ""
       mockCleanerControl.forcedValue = "";
 
       render(<DiagramUMLWorkflowScreen {...baseProps} />);
       
-      // 3. Gatillamos la generación para movernos a la vista de resultados
       await userEvent.click(screen.getByRole("button", { name: "Generar Diagrama UML" }));
 
-      // 4. Ahora sí, el componente estará en modo "result" y el else pintará el texto esperado
       expect(screen.getByText("Renderizando...")).toBeInTheDocument();
     });
   });

@@ -1,13 +1,11 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import React from "react"
-// IMPORTANTE: Importamos jest-dom para que existan 'toBeInTheDocument' y 'toHaveTextContent'
 import "@testing-library/jest-dom" 
 
 import DiagramUMLWorkflowScreen from "./DiagramaUMLWorkflowScreen"
 import { useGeminiGeneration } from "../../components/GeminiGeneration"
 
-// 1. Mock de las dependencias de texto/archivos
 vi.mock("bundle-text:../../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md", () => ({
   default: "Texto visible con {{DOMAIN}} y datos ocultos\n---\nContexto oculto parseado"
 }))
@@ -19,16 +17,14 @@ vi.mock("../../utils/promptParser", () => ({
   }))
 }))
 
-// 2. Mock del hook de Gemini utilizando variables controlables externamente
 const mockGenerate = vi.fn()
 const mockSetResponseText = vi.fn()
-// Esta variable nos permitirá cambiar dinámicamente el estado de carga en los tests
 let mockIsLoading = false 
 
 vi.mock("../../components/GeminiGeneration", () => ({
   useGeminiGeneration: vi.fn(() => ({
     responseText: "classDiagram\nClass01 <|-- AveryLongClass : Cool",
-    isLoading: mockIsLoading, // Apunta a nuestra variable mutable
+    isLoading: mockIsLoading,
     generate: mockGenerate,
     setResponseText: mockSetResponseText
   }))
@@ -86,13 +82,13 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockIsLoading = false // Resetear el estado de carga antes de cada test
+    mockIsLoading = false
+    
   })
 
   it("debería realizar el flujo completo: renderizado inicial, edición, generación, visualización de resultados y confirmación", async () => {
     mockGenerate.mockResolvedValue("código-crudo-de-ia")
 
-    // --- FASE 1: Renderizado Inicial ("input") ---
     render(<DiagramUMLWorkflowScreen {...defaultProps} />)
 
     expect(screen.getByTestId("mock-header")).toBeInTheDocument()
@@ -106,7 +102,6 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
     fireEvent.click(screen.getByText("Ir a Inicio"))
     expect(defaultProps.onWelcome).toHaveBeenCalledTimes(1)
 
-    // --- FASE 2: Modificación del Prompt y Envío ---
     fireEvent.change(textarea, { target: { value: "Prompt modificado por el usuario" } })
     fireEvent.click(screen.getByText("Generar Diagrama UML"))
 
@@ -114,7 +109,6 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
       expect.stringContaining("Prompt modificado por el usuario")
     )
 
-    // --- FASE 3: Transición a pantalla de Resultados ("result") ---
     await waitFor(() => {
       expect(screen.getByText("Extensión Funcional con Diagrama UML")).toBeInTheDocument()
     })
@@ -125,7 +119,6 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
     const mermaidViewer = screen.getByTestId("mermaid-viewer")
     expect(mermaidViewer).toHaveTextContent("clean-código-crudo-de-ia")
 
-    // --- FASE 4: Modificaciones manuales y Confirmación ---
     const textareasResult = screen.getAllByRole("textbox")
     fireEvent.change(textareasResult[1], { target: { value: "classDiagram modificado" } })
     expect(mockSetResponseText).toHaveBeenCalledWith("classDiagram modificado")
@@ -138,10 +131,8 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
   })
 
   it("debería mostrar indicador de carga en los botones y textareas cuando isLoading es true", () => {
-    // Cambiamos el valor de la variable de control antes de renderizar
     mockIsLoading = true
 
-    // Forzamos también que el hook devuelva el texto alternativo de carga
     vi.mocked(useGeminiGeneration).mockReturnValueOnce({
       responseText: "Generando...",
       isLoading: true,
@@ -151,7 +142,6 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
 
     render(<DiagramUMLWorkflowScreen {...defaultProps} />)
     
-    // Verificamos que el editor de prompts se monte con la prop isLoading activa
     expect(screen.getByTestId("prompt-editor")).toBeInTheDocument()
   })
 })

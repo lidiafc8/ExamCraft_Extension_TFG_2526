@@ -5,11 +5,9 @@ import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import "@testing-library/jest-dom";
 import EntityRelationshipsWorkflowScreen from "./EntityRelationshipsWorkflowScreen";
 
-// === EXTENDER MATCHERS PARA JEST-DOM ===
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers";
 expect.extend(jestDomMatchers);
 
-// --- MOCK DE PROMPTS Y PARSER ---
 vi.mock("bundle-text:../../prompts/generation-entity-relationships/generation_relationships_between_entities_from_statement.md", () => ({
   default: "Texto Base Prompt Relaciones\n---\nContexto Oculto Relaciones",
 }));
@@ -21,7 +19,6 @@ vi.mock("~src/utils/promptParser", () => ({
   }),
 }));
 
-// --- MOCK DE UTILIDADES COMPARTIDAS ---
 const mockSaveToChrome = vi.fn();
 vi.mock("~src/utils/chromeStorageUtils", () => ({
   saveToChrome: (...args: any[]) => mockSaveToChrome(...args),
@@ -40,7 +37,6 @@ vi.mock("../../components/MermaidCodeCleaner", () => ({
   cleanMermaidCode: (code: string) => code || "Código Limpio Mock",
 }));
 
-// --- MOCK DE COMPONENTES AUXILIARES DE INTERFAZ ---
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome }: any) => (
     <header data-testid="mock-header">
@@ -83,7 +79,6 @@ vi.mock("~src/components/WorkflowComponents", () => ({
   ),
 }));
 
-// --- MOCK DE MODALES ---
 vi.mock("../../components/modals/ConfirmModal", () => ({
   ConfirmModal: ({ title, message, onConfirm, onCancel, confirmLabel, warning }: any) => (
     <div data-testid="confirm-modal-mock">
@@ -126,7 +121,6 @@ vi.mock("~src/components/modals/DownloadConfirmModal", () => ({
   ) : null,
 }));
 
-// --- CONTROL DINÁMICO DE HOOK DE IA ---
 let currentMockResponseText = "Relaciones generadas por la IA";
 let currentMockIsLoading = false;
 
@@ -141,7 +135,6 @@ vi.mock("~src/components/GeminiGeneration", () => ({
 
 const mockGenerate = vi.fn();
 
-// --- SUITE PRINCIPAL ---
 describe("EntityRelationshipsWorkflowScreen", () => {
   const baseProps = {
     onBack: vi.fn(),
@@ -166,7 +159,6 @@ describe("EntityRelationshipsWorkflowScreen", () => {
       project_ajedrez: { id: "project_ajedrez", domainName: "ajedrez", entityRelationships: "Relaciones existentes v1" }
     };
 
-    // Usamos una función normal para evitar aserciones rígidas de Vitest sobre los argumentos pasados
     globalThis.chrome = {
       storage: {
         local: {
@@ -205,7 +197,6 @@ describe("EntityRelationshipsWorkflowScreen", () => {
       await userEvent.click(screen.getByText("Examen de ajedrez"));
       expect(screen.getByTestId("confirm-modal-mock")).toBeInTheDocument();
       
-      // Corregido: Validación flexible usando textContent limpio para evitar fallos por saltos de línea
       expect(screen.getByTestId("confirm-modal-mock").textContent).toContain("las relaciones anteriores serán reemplazadas");
     });
 
@@ -247,7 +238,6 @@ describe("EntityRelationshipsWorkflowScreen", () => {
       expect(screen.getByTestId("split-result-view-mock")).toBeInTheDocument();
     });
 
-    // === ADAPTACIÓN DE TU TEST EXITOSO DE DIAGRAMAS PARA EL SPINNER ===
     it("Muestra el spinner interno dentro del botón de re-generación cuando isLoading es verdadero", async () => {
       mockGenerate.mockResolvedValue("OK");
       const { rerender } = render(<EntityRelationshipsWorkflowScreen {...baseProps} />);
@@ -330,12 +320,10 @@ describe("EntityRelationshipsWorkflowScreen", () => {
   });
 
   describe("Cláusulas de Guardia y Fallbacks", () => {
-    // === RESOLUCIÓN PERMANENTE DEL ASSERTION ERROR ===
     it("línea 105: detiene la función save si el proyecto no posee un ID válido", async () => {
       mockSaveToChrome.mockResolvedValue(true);
       const spyAlert = vi.spyOn(window, "alert").mockImplementation(() => {});
 
-      // Inyectamos un objeto ficticio con un array de llaves idénticas al spy para silenciar la aserción estricta
       globalThis.chrome.storage.local.get = vi.fn((keys: any, callback: any) => {
         const payload = { project_vete: { id: "", domainName: "vete", customName: "Veterinaria Central" } };
         if (typeof callback === 'function') callback(payload);

@@ -5,17 +5,13 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 import "@testing-library/jest-dom";
 import DomainSelectionScreen from "./DomainSelectionScreen";
 
-// === EXTENDER MATCHERS PARA JEST-DOM ===
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers";
 expect.extend(jestDomMatchers);
 
-// --- MOCK DE ASSETS DE IMÁGENES ---
-// Esto evita que Vitest falle intentando procesar las importaciones de imágenes PNG reales
 vi.mock("../../../assets/images/chess.png", () => ({ default: "mock-chess-path" }));
 vi.mock("../../../assets/images/comingSoon.png", () => ({ default: "mock-coming-soon-path" }));
 vi.mock("../../../assets/images/petclinic.png", () => ({ default: "mock-petclinic-path" }));
 
-// --- MOCK DEL COMPONENTE HEADER ---
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome, breadcrumbItems }: any) => (
     <header data-testid="mock-header">
@@ -49,7 +45,6 @@ describe("DomainSelectionScreen", () => {
     it("renderiza correctamente los títulos, textos informativos y el Header", () => {
       render(<DomainSelectionScreen {...baseProps} />);
 
-      // Comprobamos textos de la pantalla
       expect(screen.getByTestId("mock-header")).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "CREAR EXTENSIÓN FUNCIONAL" })).toBeInTheDocument();
       expect(
@@ -60,12 +55,10 @@ describe("DomainSelectionScreen", () => {
     it("renderiza las tarjetas con sus respectivas imágenes y etiquetas correctas", () => {
       render(<DomainSelectionScreen {...baseProps} />);
 
-      // Validamos las tarjetas de dominio disponibles
       expect(screen.getByText("Clínica Veterinaria")).toBeInTheDocument();
       expect(screen.getByText("Ajedrez")).toBeInTheDocument();
       expect(screen.getByText("Crear nuevo dominio")).toBeInTheDocument();
 
-      // Validamos las imágenes mediante sus atributos alt
       expect(screen.getByAltText("Icono clínica veterinaria")).toBeInTheDocument();
       expect(screen.getByAltText("Icono ajedrez")).toBeInTheDocument();
       expect(screen.getByAltText("Icono comingSoon")).toBeInTheDocument();
@@ -110,7 +103,6 @@ describe("DomainSelectionScreen", () => {
     it("ejecuta correctamente todas las acciones configuradas en el Breadcrumb del Header", async () => {
       render(<DomainSelectionScreen {...baseProps} />);
 
-      // Comprobamos la navegación interactuando con los botones mockeados del breadcrumb
       await userEvent.click(screen.getByRole("button", { name: "INICIO" }));
       expect(baseProps.onWelcome).toHaveBeenCalled();
 

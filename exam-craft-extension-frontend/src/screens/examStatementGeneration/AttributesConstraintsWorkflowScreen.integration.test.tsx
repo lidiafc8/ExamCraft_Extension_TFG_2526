@@ -5,7 +5,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import "@testing-library/jest-dom"
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
-// IMPORTACIONES DIRECTAS DESDE ALIAS
 import AttributesConstraintsWorkflowScreen from "./AttributesConstraintsWorkflowScreen"
 import { useGeminiGeneration } from "~src/components/GeminiGeneration"
 import { saveToChrome } from "~src/utils/chromeStorageUtils"
@@ -13,10 +12,6 @@ import { downloadMarkdown } from "~src/utils/downloadUtils"
 import { FolderExamSelector } from "~src/components/FolderExamsSelector"
 
 expect.extend(jestDomMatchers)
-
-// =========================================================
-// INTERFACES Y CONFIGURACIÓN DE MOCKS
-// =========================================================
 
 interface Project {
   id: string
@@ -62,7 +57,6 @@ vi.mock("~src/utils/promptParser", () => ({
   }))
 }))
 
-// Mock de FolderExamSelector flexible y controlado por espías
 vi.mock("~src/components/FolderExamsSelector", () => ({
   FolderExamSelector: vi.fn()
 }))
@@ -82,7 +76,6 @@ vi.mock("~src/components/WorkflowComponents", () => ({
   )
 }))
 
-// Mock del almacenamiento local de Chrome
 const mockChromeStorage = {
   local: {
     get: vi.fn()
@@ -90,9 +83,6 @@ const mockChromeStorage = {
 }
 globalThis.chrome = mockChromeStorage as any
 
-// =========================================================
-// SUITE DE PRUEBAS DE INTEGRACIÓN CORREGIDA
-// =========================================================
 
 describe("Integración: AttributesConstraintsWorkflowScreen", () => {
   const defaultProps: AttributesConstraintsWorkflowScreenProps = {
@@ -111,7 +101,6 @@ describe("Integración: AttributesConstraintsWorkflowScreen", () => {
     vi.clearAllMocks()
     window.alert = vi.fn()
 
-    // Configuración exitosa base para el Hook de Gemini
     vi.mocked(useGeminiGeneration).mockReturnValue({
       responseText: "Resultado exitoso: Atributo 'precio' debe ser positivo.",
       isLoading: false,
@@ -119,10 +108,8 @@ describe("Integración: AttributesConstraintsWorkflowScreen", () => {
       generate: mockGenerate
     })
 
-    // saveToChrome por defecto resuelve exitosamente siempre
     vi.mocked(saveToChrome).mockResolvedValue(undefined as any)
 
-    // Implementación por defecto del selector de proyectos para el flujo positivo standard
     vi.mocked(FolderExamSelector).mockImplementation(({ onSelectProject }) => (
       <button 
         onClick={() => onSelectProject({ 
@@ -137,9 +124,6 @@ describe("Integración: AttributesConstraintsWorkflowScreen", () => {
     ))
   })
 
-  // ---------------------------------------------------------
-  // FLUJO POSITIVO (HAPPY PATH)
-  // ---------------------------------------------------------
   describe("Flujo Positivo Completo", () => {
     it("debería transicionar entre pantallas correctamente, llamar a la IA, guardar en Chrome y avanzar a la creación de tests", async () => {
       mockChromeStorage.local.get.mockImplementation((key, callback) => {
@@ -186,7 +170,6 @@ describe("Integración: AttributesConstraintsWorkflowScreen", () => {
       const primaryActionModal = screen.getByRole("button", { name: "Sí" })
       await userEvent.click(primaryActionModal)
 
-      // CORRECCIÓN AQUÍ: Flexibilizamos la aserción para que machee con los datos reales inyectados
       expect(defaultProps.onCreateTest).toHaveBeenCalledWith(
         expect.objectContaining({
           constraints: "Resultado exitoso: Atributo 'precio' debe ser positivo.",
@@ -199,10 +182,6 @@ describe("Integración: AttributesConstraintsWorkflowScreen", () => {
       )
     })
   })
-
-  // ---------------------------------------------------------
-  // FLUJOS NEGATIVOS (GESTIÓN DE ERRORES)
-  // ---------------------------------------------------------
   describe("Flujos Negativos y Control de Fallos", () => {
     it("debería interceptar y capturar el error de persistencia si falla saveToChrome", async () => {
       mockChromeStorage.local.get.mockImplementation((key, callback) => {
@@ -242,9 +221,6 @@ describe("Integración: AttributesConstraintsWorkflowScreen", () => {
     })
   })
 
-  // ---------------------------------------------------------
-  // CASOS LÍMITE Y FLUJOS ALTERNATIVOS
-  // ---------------------------------------------------------
   describe("Casos Límite y Flujos Alternativos", () => {
     it("caso límite: si el proyecto ya contenía restricciones previas cambia las leyendas y botones del Modal", async () => {
       vi.mocked(FolderExamSelector).mockImplementationOnce(({ onSelectProject }) => (

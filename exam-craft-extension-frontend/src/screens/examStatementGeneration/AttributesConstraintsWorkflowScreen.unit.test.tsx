@@ -5,7 +5,6 @@ import { render, screen, cleanup, waitFor, within } from "@testing-library/react
 import userEvent from "@testing-library/user-event"
 import AttributesConstraintsWorkflowScreen from "./AttributesConstraintsWorkflowScreen"
 
-// Creamos un objeto de control que podemos modificar dinámicamente en los tests
 const geminiMockControl = {
   responseText: "Propuesta de restricciones simuladas por Gemini IA",
   isLoading: false
@@ -149,8 +148,6 @@ vi.mock("~src/components/modals/WarningModal", () => ({
   )
 }))
 
-// ── II. MOCKS DE UTILS Y EXTENSIONES DEL SISTEMA ──
-
 const mockSaveToChrome = vi.fn()
 vi.mock("~src/utils/chromeStorageUtils", () => ({
   saveToChrome: (...args: any[]) => mockSaveToChrome(...args)
@@ -177,7 +174,6 @@ vi.mock("~src/components/GeminiGeneration", () => ({
   })
 }))
 
-// Mocks de Assets y CSS
 vi.mock("bundle-text:../../prompts/generation-constraints-attributes/generation_attribute_constraints_from_statement.md", () => ({
   default: "markdown-raw-content"
 }))
@@ -185,14 +181,12 @@ vi.mock("~src/utils/logUtils", () => ({ getLogConfig: () => ({}) }))
 vi.mock("../../css/Cards.css", () => ({}))
 vi.mock("../storage/css/FoldersGridScreen.css", () => ({}))
 
-// ── III. SET DE DATOS DE EXÁMENES DE PRUEBA ──
-
 const PRUEBA_PROYECTO_NUEVO = {
   id: "project_veterinaria",
   domainName: "clínica veterinaria",
   customName: "Examen Perros y Gatos",
   extensionFinish: "Enunciado del flujo de la clínica veterinaria",
-  attributeConstraints: "" // Vacío para forzar flujo nuevo sin advertencias
+  attributeConstraints: "" 
 }
 
 const PRUEBA_PROYECTO_EXISTENTE = {
@@ -201,7 +195,7 @@ const PRUEBA_PROYECTO_EXISTENTE = {
   customName: "Final Ajedrez Magnvs",
   extensionFinish: "Enunciado completo de ajedrez",
   attributeConstraints: "Restricciones de fichas existentes en el sistema",
-  baseClasses: "class Tablero {}" // Con clases base para saltar validaciones posteriores
+  baseClasses: "class Tablero {}"
 }
 
 const baseProps = {
@@ -213,7 +207,6 @@ const baseProps = {
   onCreateExamByParts: vi.fn()
 }
 
-// Inicialización de la API de Storage simulada de Chrome Extensions
 const mockGetChromeStorage = vi.fn()
 globalThis.chrome = {
   storage: {
@@ -223,15 +216,11 @@ globalThis.chrome = {
   }
 } as any
 
-// ══════════════════════════════════════════════════════════
-//   CUERPO DE LA SUITE DE PRUEBAS
-// ══════════════════════════════════════════════════════════
 describe("AttributesConstraintsWorkflowScreen", () => {
   beforeEach(() => {
     cleanup()
     vi.clearAllMocks()
     
-    // Inyección de proyectos en el mock del Storage de Chrome
     mockGetChromeStorage.mockImplementation((_keys, callback) => {
       callback({
         project_vet: PRUEBA_PROYECTO_NUEVO,
@@ -241,9 +230,6 @@ describe("AttributesConstraintsWorkflowScreen", () => {
     })
   })
 
-  // ==========================================
-  //  1. CASOS POSITIVOS (Flujos de éxito)
-  // ==========================================
   describe("Casos Positivos", () => {
     it("carga y filtra los proyectos del Chrome Storage mostrando la vista de carpetas", async () => {
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
@@ -323,31 +309,23 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
 
-      // 1. Hacemos click específicamente en el botón de la barra inferior (el que tiene la clase del contenedor)
       const footerContainer = screen.getByTestId("split-footer")
       const openModalBtn = within(footerContainer).getByRole("button", { name: "Descargar (.md)" })
       await userEvent.click(openModalBtn)
 
-      // Verificamos que el modal de descarga se ha abierto en el DOM
       const downloadModal = screen.getByTestId("real-download-modal")
       expect(downloadModal).toBeInTheDocument()
 
-      // 2. Hacemos click específicamente en el botón "Descargar (.md)" que está DENTRO del Modal
       const confirmDownloadBtn = within(downloadModal).getByRole("button", { name: "Descargar (.md)" })
       await userEvent.click(confirmDownloadBtn)
 
-      // Validamos que se ejecute la utilidad nativa de descarga con los strings esperados
       expect(mockDownloadMarkdown).toHaveBeenCalledWith(
         expect.stringContaining("# Restricciones de Atributos - Examen Perros y Gatos"),
         "archivo_test.md"
       )
     })
   })
-
-  // ==========================================
-  //  2. CASOS NEGATIVOS (Errores y cancelaciones)
-  // ==========================================
-  describe("Casos Negativos", () => {
+    describe("Casos Negativos", () => {
     it("cancela el flujo de trabajo y limpia la selección si se declina el ConfirmModal", async () => {
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
       await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
@@ -369,7 +347,6 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
 
-      // Permanece en la pantalla del editor de prompts
       expect(screen.queryByTestId("real-split-view")).not.toBeInTheDocument()
       expect(screen.getByTestId("real-prompt-editor")).toBeInTheDocument()
     })
@@ -391,16 +368,12 @@ describe("AttributesConstraintsWorkflowScreen", () => {
     })
   })
 
-  // ==========================================
-  //  3. CASOS DE LÍMITE (Edge Cases)
-  // ==========================================
   describe("Casos de Límite y Reglas de Negocio", () => {
     it("inyecta la advertencia de reemplazo si el examen ya cuenta con restricciones de atributos registradas", async () => {
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
       await userEvent.click(await screen.findByRole("button", { name: "AJEDREZ" }))
       await userEvent.click(screen.getByRole("button", { name: "Final Ajedrez Magnvs" }))
 
-      // Usamos una RegExp flexible en lugar de comparar un string rígido con \n
       const msgRegex = /Este examen ya tiene restricciones de atributos generadas\..*Si continúas, las restricciones anteriores serán reemplazadas por las nuevas\./i
       
       expect(screen.getByTestId("modal-warning")).toHaveTextContent(msgRegex)
@@ -418,16 +391,13 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
-      // Confirmar en el SuccessModal
       await userEvent.click(screen.getByRole("button", { name: "Sí" }))
 
-      // Se despliega el WarningModal porque PRUEBA_PROYECTO_NUEVO no tiene baseClasses
       expect(screen.getByTestId("real-warning-modal")).toBeInTheDocument()
       expect(screen.getByText("Faltan las Clases Base")).toBeInTheDocument()
     })
 
     it("llama de manera directa a onCreateTest si el examen posee sus Clases Base tras la confirmación", async () => {
-      // Nota: Dejamos el mock de la IA o el flujo correr normalmente hasta llegar al click de "Sí"
       mockGenerate.mockResolvedValue("Propuesta de restricciones simuladas por Gemini IA")
       mockSaveToChrome.mockResolvedValue(true)
 
@@ -438,10 +408,8 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
-      // Al hacer clic en "Sí", confirmamos la navegación directa al test
       await userEvent.click(screen.getByRole("button", { name: "Sí" }))
 
-      // COMPROBACIÓN CORREGIDA:
       expect(baseProps.onCreateTest).toHaveBeenCalledWith(
         expect.objectContaining({
           baseClass: "class Tablero {}",
@@ -476,40 +444,30 @@ describe("AttributesConstraintsWorkflowScreen", () => {
 
   describe("Cobertura de Ramas y Líneas Específicas", () => {
     
-    // Resetear el control del mock de Gemini antes de cada test de este bloque
     beforeEach(() => {
       geminiMockControl.responseText = "Propuesta de restricciones simuladas por Gemini IA"
       geminiMockControl.isLoading = false
     })
 
-    // ── COBERTURA LÍNEAS 138-140: Validación de selectedProject vacío en guardado ──
     it("líneas 138-140: detiene el guardado si selectedProject se vuelve inválido inesperadamente", async () => {
       const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {})
       mockGenerate.mockResolvedValue("Resultado")
 
-      // Renderizamos e iniciamos el flujo con un proyecto normal para llegar a la pantalla de Split
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
       await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
       await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
 
-      // SIMULACIÓN DE CONTINGENCIA: Antes de hacer click en Guardar, simulamos que el usuario deslogueó
-      // o alteramos el comportamiento haciendo click en volver root si el botón sigue montado por CSS,
-      // o simplemente forzamos el click de Guardar asegurándonos que el handler evalúe la condición.
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
-      
-      // Si la id existía guarda bien, si no, salta el alert. Para asegurar la línea 138-140 sin romper el estado reactivo,
-      // el alert se ejecuta si selectedProject?.id es falsa.
+
       alertSpy.mockRestore()
     })
 
-    // ── COBERTURA LÍNEA 155: Captura del bloque catch (error string o fallback) ──
     it("línea 155: muestra el mensaje por defecto en el alert si el error capturado no es una instancia de Error", async () => {
       const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {})
       mockGenerate.mockResolvedValue("Resultado válido")
       
-      // Forzamos a saveToChrome a rechazar la promesa con un string plano en lugar de un objeto Error
       mockSaveToChrome.mockRejectedValue("Error de Texto Plano Crítico")
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
@@ -519,12 +477,10 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
-      // El bloque catch evalúa: error instanceof Error ? error.message : "No se pudo actualizar el examen."
       expect(alertSpy).toHaveBeenCalledWith("No se pudo actualizar el examen.")
       alertSpy.mockRestore()
     })
 
-    // ── COBERTURA LÍNEAS 217-219: Acción "No" en el SuccessModal ──
     it("líneas 217-219: cierra el SuccessModal y redirige a onWelcome al pulsar 'No'", async () => {
       mockGenerate.mockResolvedValue("Resultado")
       mockSaveToChrome.mockResolvedValue(true)
@@ -536,28 +492,22 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
-      // Buscamos el botón "No" dentro del SuccessModal que se acaba de abrir
       const noButton = screen.getByRole("button", { name: "No" })
       await userEvent.click(noButton)
 
-      // Verifica que se ejecuten los estados de cierre y la navegación de bienvenida
       expect(baseProps.onWelcome).toHaveBeenCalled()
     })
 
-    // ── COBERTURA LÍNEA 291: Estado loading (Spinner de carga) ──
     it("línea 291: renderiza el estado de carga cuando la IA está generando", async () => {
-      // Modificamos el objeto de control antes del renderizado para activar isLoading
       geminiMockControl.isLoading = true
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
       await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
       await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
       
-      // Al renderizar el ConfirmModal o el layout con isLoading = true, validamos que el componente reaccione
       expect(screen.getByTestId("real-confirm-modal")).toBeInTheDocument()
     })
 
-    // ── COBERTURA LÍNEAS 334-337: Confirmación de desvío a Clases Base ──
     it("líneas 334-337: redirige a onGoToBaseClass con el proyecto pendiente al confirmar en el WarningModal", async () => {
       mockGenerate.mockResolvedValue("Resultado")
       mockSaveToChrome.mockResolvedValue(true)
@@ -569,20 +519,16 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
-      // Abrimos el WarningModal de Clases Base pulsando "Sí" (Ya que el proyecto Vet no tiene baseClasses)
       await userEvent.click(screen.getByRole("button", { name: "Sí" }))
 
-      // Pulsamos en el botón de confirmación del WarningModal ("Ir a crear Clases Base")
       const confirmWarningBtn = screen.getByRole("button", { name: "Ir a crear Clases Base" })
       await userEvent.click(confirmWarningBtn)
 
-      // Verificamos que se limpie el estado temporal y se despache la acción con el proyecto correcto
       expect(baseProps.onGoToBaseClass).toHaveBeenCalledWith(
         expect.objectContaining({ id: "project_veterinaria" })
       )
     })
 
-    // ── COBERTURA LÍNEAS 339-341: Cancelación en el WarningModal de Clases Base ──
     it("líneas 339-341: limpia el estado y redirige a la pantalla de Inicio al cancelar el WarningModal", async () => {
       mockGenerate.mockResolvedValue("Resultado")
       mockSaveToChrome.mockResolvedValue(true)
@@ -594,14 +540,11 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
-      // Abrimos el WarningModal
       await userEvent.click(screen.getByRole("button", { name: "Sí" }))
 
-      // Buscamos el botón Cancelar asignado al WarningModal
       const cancelWarningBtn = screen.getByRole("button", { name: "Cancelar" })
       await userEvent.click(cancelWarningBtn)
 
-      // Valida que limpie el proyecto pendiente y ejecute el ruteo de salida (onWelcome)
       expect(baseProps.onWelcome).toHaveBeenCalled()
     })
   })

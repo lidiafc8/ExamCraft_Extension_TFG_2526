@@ -2,11 +2,7 @@ import React from "react"
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { describe, test, expect, beforeEach, vi } from "vitest"
 import "@testing-library/jest-dom"
-import EntityRelationshipsWorkflowScreen from "./EntityRelationshipsWorkflowScreen" // Ajusta la ruta si es necesario
-
-// ==========================================
-// 1. MOCKS DE MÓDULOS E IMPORTS ESTÁTICOS
-// ==========================================
+import EntityRelationshipsWorkflowScreen from "./EntityRelationshipsWorkflowScreen" 
 
 vi.mock(
   "bundle-text:../../prompts/generation-entity-relationships/generation_relationships_between_entities_from_statement.md",
@@ -65,9 +61,6 @@ vi.mock("~src/components/WorkflowComponents", () => ({
   )
 }))
 
-// ==========================================
-// 2. CONFIGURACIÓN DEL ENTORNO Y HOOKS
-// ==========================================
 
 const mockGenerate = vi.fn()
 const mockSetResponseText = vi.fn()
@@ -101,10 +94,6 @@ const defaultProps = {
   onCreateExamByParts: vi.fn()
 }
 
-// ==========================================
-// 3. SUITE DE PRUEBAS DE INTEGRACIÓN
-// ==========================================
-
 describe("EntityRelationshipsWorkflowScreen - Integration Tests Suite", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -117,9 +106,6 @@ describe("EntityRelationshipsWorkflowScreen - Integration Tests Suite", () => {
     }
   })
 
-  // ------------------------------------------
-  // A. FLUJO POSITIVO (HAPPY PATH)
-  // ------------------------------------------
   describe("Flujos Positivos", () => {
     test("Debería seleccionar un proyecto, generar relaciones, guardar y avanzar a la creación de tests", async () => {
       const fakeStorage = {
@@ -130,37 +116,30 @@ describe("EntityRelationshipsWorkflowScreen - Integration Tests Suite", () => {
 
       render(<EntityRelationshipsWorkflowScreen {...defaultProps} />)
 
-      // 1. Esperar y seleccionar el examen en la pantalla inicial
       await waitFor(() => {
         expect(screen.getByTestId("project-btn-project_1")).toBeInTheDocument()
       })
       fireEvent.click(screen.getByTestId("project-btn-project_1"))
 
-      // 2. Confirmar el uso del contexto en el Modal
       expect(screen.getByText(/¿Deseas utilizar Examen de Ajedrez como base/i)).toBeInTheDocument()
       fireEvent.click(screen.getByRole("button", { name: "Confirmar" }))
 
-      // 3. Modificar u observar el editor del prompt y gatillar la generación
       expect(screen.getByTestId("prompt-editor")).toBeInTheDocument()
       fireEvent.click(screen.getByRole("button", { name: "Generar" }))
 
       expect(mockGenerate).toHaveBeenCalled()
 
-      // 4. Verificar que se renderiza el SplitResultView con el output de la IA
       await waitFor(() => {
         expect(screen.getByTestId("split-view")).toBeInTheDocument()
       })
 
-      // 5. Presionar en Guardar para persistir en Chrome Storage
       fireEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
-      // 6. Validar que aparece el Modal de éxito y presionar "Sí" para avanzar a los tests
       await waitFor(() => {
         expect(screen.getByText(/¡Guardado correctamente!/i)).toBeInTheDocument()
       })
       fireEvent.click(screen.getByRole("button", { name: "Sí" }))
 
-      // 7. Verificar llamada al callback externo con la configuración estructurada
       expect(defaultProps.onCreateTest).toHaveBeenCalledWith({
         project: expect.objectContaining({ id: "project_1", domainName: "Ajedrez" }),
         constraints: "",
@@ -171,16 +150,13 @@ describe("EntityRelationshipsWorkflowScreen - Integration Tests Suite", () => {
     })
   })
 
-  // ------------------------------------------
-  // B. FLUJO NEGATIVO / CONTROL DE ERRORES
-  // ------------------------------------------
   describe("Flujos Negativos y Alertas", () => {
     test("Debería permanecer en el editor de inputs si Gemini devuelve un resultado inválido o null", async () => {
       const fakeStorage = {
         "project_1": { domainName: "Veterinaria", extensionFinish: "Enunciado base" }
       }
       mockGetStorage.mockImplementation((fields: any, callback: Function) => callback(fakeStorage))
-      mockGenerate.mockResolvedValueOnce(null) // Simula fallo o cancelación de la IA
+      mockGenerate.mockResolvedValueOnce(null) 
 
       render(<EntityRelationshipsWorkflowScreen {...defaultProps} />)
 
@@ -191,7 +167,6 @@ describe("EntityRelationshipsWorkflowScreen - Integration Tests Suite", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Generar" }))
 
-      // Forzar aserción asíncrona y verificar que el flujo no avanzó al SplitResultView
       await waitFor(() => {
         expect(mockGenerate).toHaveBeenCalled()
       })
@@ -201,7 +176,7 @@ describe("EntityRelationshipsWorkflowScreen - Integration Tests Suite", () => {
 
     test("Debería mostrar un WarningModal e interrumpir el flujo si el proyecto no posee Clases Base generadas", async () => {
       const fakeStorage = {
-        "project_1": { domainName: "Ajedrez", extensionFinish: "Enunciado base" } // Sin la propiedad baseClasses
+        "project_1": { domainName: "Ajedrez", extensionFinish: "Enunciado base" }
       }
       mockGetStorage.mockImplementation((fields: any, callback: Function) => callback(fakeStorage))
       mockGenerate.mockResolvedValueOnce("Relaciones completas")
@@ -218,12 +193,10 @@ describe("EntityRelationshipsWorkflowScreen - Integration Tests Suite", () => {
         fireEvent.click(screen.getByRole("button", { name: "Guardar" }))
       })
 
-      // Al confirmarse el guardado...
       await waitFor(() => {
         fireEvent.click(screen.getByRole("button", { name: "Sí" }))
       })
 
-      // Debería interrumpir pidiendo que se generen primero las clases base redirigiendo al docente
       expect(screen.getByText(/Faltan las Clases Base/i)).toBeInTheDocument()
       fireEvent.click(screen.getByRole("button", { name: "Ir a crear Clases Base" }))
       

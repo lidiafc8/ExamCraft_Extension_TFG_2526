@@ -2,13 +2,8 @@ import React from "react"
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { describe, test, expect, beforeEach, vi } from "vitest"
 import "@testing-library/jest-dom"
-import ContextWorkflowScreen from "./ContextWorkflowScreen" // Ajusta la ruta según tu estructura de carpetas
+import ContextWorkflowScreen from "./ContextWorkflowScreen" 
 
-// ==========================================
-// 1. MOCKS DE MÓDULOS E IMPORTS ESTÁTICOS
-// ==========================================
-
-// Mock de la importación del archivo Markdown
 vi.mock(
   "bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md",
   () => {
@@ -18,7 +13,6 @@ vi.mock(
   }
 )
 
-// Mock de las utilidades de parseo de prompts
 vi.mock("../../utils/promptParser", () => ({
   parseMasterPrompt: () => ({
     visibleText: "Prompt visible para {{DOMAIN}}",
@@ -26,7 +20,6 @@ vi.mock("../../utils/promptParser", () => ({
   })
 }))
 
-// Mocks de componentes de presentación para aislar la lógica del flujo
 vi.mock("~src/components/Header", () => ({
   Header: () => <div data-testid="header" />
 }))
@@ -57,10 +50,6 @@ vi.mock("../../components/WorkflowComponents", () => ({
   )
 }))
 
-// ==========================================
-// 2. CONFIGURACIÓN DEL HOOK Y ENTORNO CHROME
-// ==========================================
-
 const mockGenerate = vi.fn()
 const mockSetResponseText = vi.fn()
 
@@ -73,7 +62,6 @@ vi.mock("../../components/GeminiGeneration", () => ({
   })
 }))
 
-// Mock global de la API de Chrome
 const mockGetStorage = vi.fn()
 declare var globalThis: any
 
@@ -85,7 +73,6 @@ globalThis.chrome = {
   }
 }
 
-// Props por defecto compartidas entre pruebas
 const defaultProps = {
   domainName: "Veterinaria",
   onBack: vi.fn(),
@@ -96,10 +83,6 @@ const defaultProps = {
   onCreateDiagram: vi.fn(),
   onComponents: vi.fn()
 }
-
-// ==========================================
-// 3. SUITES DE PRUEBAS DE INTEGRACIÓN
-// ==========================================
 
 describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
   beforeEach(() => {
@@ -114,9 +97,6 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
     }
   })
 
-  // ------------------------------------------
-  // A. FLUJO POSITIVO (HAPPY PATH)
-  // ------------------------------------------
   describe("Flujos Positivos", () => {
     beforeEach(() => {
       mockGetStorage.mockImplementation((fields: any, callback: Function) => callback({}))
@@ -127,31 +107,25 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
 
       render(<ContextWorkflowScreen {...defaultProps} />)
 
-      // 1. Comprobar renderizado en Paso 1 (Modo Input)
       expect(screen.getByTestId("stepper")).toHaveTextContent("Paso: 1")
       const input = screen.getByTestId("prompt-input") as HTMLTextAreaElement
       expect(input.value).toContain("Veterinaria")
-
-      // 2. Simular click en Generar Enunciado
+      
       const generateBtn = screen.getByRole("button", { name: /Generar Enunciado/i })
       fireEvent.click(generateBtn)
 
       expect(mockGenerate).toHaveBeenCalled()
 
-      // 3. Verificar que cambia a la vista de resultados (Paso 1 - result)
       await waitFor(() => {
         expect(screen.getByTestId("split-view")).toBeInTheDocument()
       })
 
-      // 4. Hacer click en Confirmar y Continuar para pasar al Paso 2
       const confirmBtn = screen.getByRole("button", { name: /Confirmar y Continuar/i })
       fireEvent.click(confirmBtn)
 
-      // 5. Verificar que nos encontramos en la pantalla de confirmación (Paso 2)
       expect(screen.getByTestId("stepper")).toHaveTextContent("Paso: 2")
       expect(screen.getByText(/¿Está seguro que desea usar el texto de enunciado generado?/i)).toBeInTheDocument()
 
-      // 6. Confirmar definitivamente para gatillar el callback de creación de diagrama UML
       const finalConfirmBtn = screen.getByRole("button", { name: /Confirmar y pasar al paso 2/i })
       fireEvent.click(finalConfirmBtn)
 
@@ -159,9 +133,6 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
     })
   })
 
-  // ------------------------------------------
-  // B. FLUJO NEGATIVO / MANEJO DE ERRORES
-  // ------------------------------------------
   describe("Flujos Negativos", () => {
     beforeEach(() => {
       mockGetStorage.mockImplementation((fields: any, callback: Function) => callback({}))
@@ -179,15 +150,12 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
         expect(mockGenerate).toHaveBeenCalled()
       })
 
-      // Verificamos que NO avanzó a la vista split-view de resultados
       expect(screen.queryByTestId("split-view")).not.toBeInTheDocument()
       expect(screen.getByTestId("prompt-editor")).toBeInTheDocument()
     })
   })
 
-  // ------------------------------------------
-  // C. CASOS LÍMITE (BOUNDARY / EDGE CASES)
-  // ------------------------------------------
+
   describe("Casos Límite", () => {
     test("Debería mapear, filtrar e inyectar múltiples extensiones previas correctas del storage ignorando otros dominios", async () => {
       const fakeStorage = {
@@ -205,7 +173,6 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
         fireEvent.click(generateBtn)
       })
 
-      // Corregido: Se busca 'veterinaria' en minúsculas coincidiendo con la transformación real del componente
       expect(mockGenerate).toHaveBeenCalledWith(expect.stringContaining("EXTENSIÓN FUNCIONAL PREVIA 1 (veterinaria)"))
       expect(mockGenerate).toHaveBeenCalledWith(expect.stringContaining("Texto Extensión 1"))
       expect(mockGenerate).toHaveBeenCalledWith(expect.stringContaining("EXTENSIÓN FUNCIONAL PREVIA 2 (Proyecto Custom)"))
@@ -225,9 +192,6 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
     })
   })
 
-  // ------------------------------------------
-  // D. FLUJOS ALTERNATIVOS Y NAVEGACIÓN
-  // ------------------------------------------
   describe("Variaciones de Flujo y Cancelaciones", () => {
     beforeEach(() => {
       mockGetStorage.mockImplementation((fields: any, callback: Function) => callback({}))
@@ -256,7 +220,6 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
       const cancelBtn = screen.getByRole("button", { name: /Cancelar y seguir editando enunciado/i })
       fireEvent.click(cancelBtn)
 
-      // Corregido: Tras la cancelación vuelve al Paso 1 pero se mantiene en la split-view de resultados
       expect(screen.getByTestId("stepper")).toHaveTextContent("Paso: 1")
       const inputRegreso = screen.getByTestId("prompt-result-input") as HTMLTextAreaElement
       expect(inputRegreso.value).toBe("Prompt modificado por segunda vez")

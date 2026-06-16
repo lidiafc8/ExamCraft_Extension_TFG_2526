@@ -5,11 +5,9 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 import "@testing-library/jest-dom";
 import FinishFunctionalExtensionScreen from "./FinishFunctionalExtensionScreen";
 
-// === EXTENDER MATCHERS PARA JEST-DOM ===
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers";
 expect.extend(jestDomMatchers);
 
-// --- MOCK DE COMPONENTES AUXILIARES E INTERFAZ ---
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome, breadcrumbItems }: any) => (
     <header data-testid="mock-header">
@@ -41,7 +39,6 @@ vi.mock("../../components/MermaidViewer", () => ({
   ),
 }));
 
-// --- MOCK DE MODALES ---
 const mockDownloadMarkdown = vi.fn();
 vi.mock("~src/utils/downloadUtils", () => ({
   downloadMarkdown: (...args: any[]) => mockDownloadMarkdown(...args),
@@ -64,7 +61,6 @@ vi.mock("../../components/modals/SaveModal", () => ({
       <button onClick={onClose}>Cerrar Guardado</button>
       <button onClick={() => {
         const payload = buildPayload("Mi Examen Custom");
-        // Ejecutamos la función constructora del payload para verificar su estructura interna
         if (payload && typeof payload === "object") {
           onSuccess();
         }
@@ -75,7 +71,6 @@ vi.mock("../../components/modals/SaveModal", () => ({
   ),
 }));
 
-// --- SUITE PRINCIPAL DE PRUEBAS ---
 describe("FinishFunctionalExtensionScreen", () => {
   const baseProps = {
     domainName: "sistema bancario",
@@ -101,11 +96,9 @@ describe("FinishFunctionalExtensionScreen", () => {
       expect(screen.getByTestId("mock-header")).toBeInTheDocument();
       expect(screen.getByText("SISTEMA BANCARIO: Resultado Final")).toBeInTheDocument();
       
-      // Comprobar que el valor del textarea refleja el enunciado
       const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
       expect(textarea.value).toBe(baseProps.extensionStatement);
       
-      // Comprobar visor Mermaid activo
       expect(screen.getByTestId("mermaid-viewer-mock")).toBeInTheDocument();
       expect(screen.getByText(/class Banco/i)).toBeInTheDocument();
     });
@@ -161,13 +154,10 @@ describe("FinishFunctionalExtensionScreen", () => {
         />
       );
 
-      // Abrir modal de descarga
       await userEvent.click(screen.getByRole("button", { name: "Descargar (.md)" }));
       
-      // Confirmar la descarga para ejecutar handleConfirmDownload
       await userEvent.click(screen.getByRole("button", { name: "Confirmar Descarga" }));
 
-      // Comprobamos que el contenido inyectado a downloadMarkdown contenga el fallback de texto
       expect(mockDownloadMarkdown).toHaveBeenCalledWith(
         expect.stringContaining("No hay texto de enunciado."),
         "archivo_personalizado.md"
@@ -192,7 +182,6 @@ describe("FinishFunctionalExtensionScreen", () => {
     });
 
     it("línea 148: ejecuta buildPayload con éxito procesando el fallback vacío cuando extensionMermaid no existe", async () => {
-      // Renderizamos el componente dejando extensionMermaid vacío de forma intencional
       render(
         <FinishFunctionalExtensionScreen 
           {...baseProps} 
@@ -200,15 +189,11 @@ describe("FinishFunctionalExtensionScreen", () => {
         />
       );
 
-      // Abrimos el modal de guardado
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
       expect(screen.getByTestId("save-modal-mock")).toBeInTheDocument();
 
-      // Forzamos al mock de SaveModal a ejecutar buildPayload() en caliente
-      // Esto obligará a ejecutar la línea 148 evaluando el caso falso del ternario (: "")
       await userEvent.click(screen.getByRole("button", { name: "Confirmar Guardado" }));
 
-      // Verificamos que el flujo continúe sin romperse y se redirija correctamente
       expect(baseProps.onWelcome).toHaveBeenCalled();
     });
   });
@@ -224,7 +209,6 @@ describe("FinishFunctionalExtensionScreen", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "Descargar (.md)" }));
       
-      // Verificamos la expresión regular .replace(/\s+/g, "_") aplicada en el modal
       const suggestedName = screen.getByTestId("default-filename").textContent;
       expect(suggestedName).toBe("Extension_Funcional__mi_nombre_con_espacios_");
     });
@@ -234,18 +218,14 @@ describe("FinishFunctionalExtensionScreen", () => {
     it("abre, cierra y confirma de forma asíncrona la descarga cerrando el modal al finalizar", async () => {
       render(<FinishFunctionalExtensionScreen {...baseProps} />);
       
-      // Comprobar que no existe el modal
       expect(screen.queryByTestId("download-modal-mock")).not.toBeInTheDocument();
 
-      // Abrir modal
       await userEvent.click(screen.getByRole("button", { name: "Descargar (.md)" }));
       expect(screen.getByTestId("download-modal-mock")).toBeInTheDocument();
 
-      // Cancelar modal
       await userEvent.click(screen.getByRole("button", { name: "Cancelar Descarga" }));
       expect(screen.queryByTestId("download-modal-mock")).not.toBeInTheDocument();
 
-      // Volver a abrir y confirmar
       await userEvent.click(screen.getByRole("button", { name: "Descargar (.md)" }));
       await userEvent.click(screen.getByRole("button", { name: "Confirmar Descarga" }));
       
@@ -258,21 +238,16 @@ describe("FinishFunctionalExtensionScreen", () => {
 
       expect(screen.queryByTestId("save-modal-mock")).not.toBeInTheDocument();
 
-      // Abrir modal de guardado
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
       expect(screen.getByTestId("save-modal-mock")).toBeInTheDocument();
 
-      // Probar botón cerrar del modal
       await userEvent.click(screen.getByRole("button", { name: "Cerrar Guardado" }));
       expect(screen.queryByTestId("save-modal-mock")).not.toBeInTheDocument();
 
-      // Volver a abrir para probar la confirmación y la construcción de la carga útil (payload)
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
       
-      // Al hacer click, el SaveModal ficticio invoca internamente a buildPayload()
       await userEvent.click(screen.getByRole("button", { name: "Confirmar Guardado" }));
       
-      // Al ser exitoso el retorno simulado, se llama a onWelcome()
       expect(baseProps.onWelcome).toHaveBeenCalled();
     });
   });

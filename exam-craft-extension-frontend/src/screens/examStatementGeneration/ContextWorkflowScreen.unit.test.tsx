@@ -2,11 +2,9 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-// Soluciona el error "Invalid Chai property: toBeInTheDocument"
 import "@testing-library/jest-dom"; 
 import ContextWorkflowScreen from "./ContextWorkflowScreen";
 
-// --- MOCKS DE DEPENDENCIAS ESTÁTICAS Y COMPONENTES ---
 vi.mock("bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md", () => ({
   default: "Texto del Prompt base para {{DOMAIN}}\n---\nContexto Oculto de Plantilla",
 }));
@@ -18,7 +16,6 @@ vi.mock("../../utils/promptParser", () => ({
   }),
 }));
 
-// --- CONFIGURACIÓN DEL MOCK DINÁMICO DE GEMINI ---
 const geminiMockControl = {
   responseText: "Propuesta de enunciado generado por Gemini para pruebas",
   isLoading: false,
@@ -41,7 +38,6 @@ vi.mock("../../components/GeminiGeneration", () => ({
   },
 }));
 
-// --- MOCK DE COMPONENTES DE INTERFAZ AUXILIARES ---
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome, breadcrumbItems }: any) => (
     <header data-testid="mock-header">
@@ -103,7 +99,6 @@ vi.mock("../../components/WorkflowComponents", () => ({
   ),
 }));
 
-// --- SUITE PRINCIPAL DE PRUEBAS ---
 describe("ContextWorkflowScreen", () => {
   const baseProps = {
     domainName: "Veterinaria",
@@ -265,7 +260,6 @@ describe("ContextWorkflowScreen", () => {
     it("líneas 261 y 291: renderiza el spinner de carga en el workflow completo cuando la IA está generando", async () => {
       let resolverPromesa: (value: any) => void = () => {};
       
-      // 1. Configuramos el mock para que cambie el estado a TRUE al ejecutarse la generación
       mockGenerate.mockImplementation(() => {
         geminiMockControl.isLoading = true;
         return new Promise((resolve) => {
@@ -273,29 +267,22 @@ describe("ContextWorkflowScreen", () => {
         });
       });
 
-      // Renderizamos el componente inicialmente (isLoading = false)
       const { rerender } = render(<ContextWorkflowScreen {...baseProps} />);
 
-      // 2. Disparamos la generación inicial
       const generateBtn = screen.getByRole("button", { name: "Generar Enunciado" });
       await userEvent.click(generateBtn);
 
-      // Sincronizamos el estado de carga
       rerender(<ContextWorkflowScreen {...baseProps} />);
 
-      // --- COMPROBACIÓN LÍNEA 261 ---
       let spinner = document.querySelector(".loading-spinner");
       expect(spinner).toBeInTheDocument();
 
-      // 3. Simulamos fin de la carga y avanzamos a la pantalla de resultados
       geminiMockControl.isLoading = false;
       resolverPromesa("Enunciado generado OK");
 
       rerender(<ContextWorkflowScreen {...baseProps} />);
       expect(await screen.findByTestId("split-result-view")).toBeInTheDocument();
 
-      // --- COMPROBACIÓN LÍNEA 291 ---
-      // Redefinimos el mock para la acción de re-generación interna
       mockGenerate.mockImplementation(() => {
         geminiMockControl.isLoading = true;
         return new Promise((resolve) => {
@@ -303,39 +290,29 @@ describe("ContextWorkflowScreen", () => {
         });
       });
 
-      // SOLUCIÓN AL ERROR DE ACCESIBILIDAD: Buscamos el elemento interactivo usando selectores de clase
       const volverGenerarBtn = document.querySelector(".btn-step.generate");
       expect(volverGenerarBtn).toBeTruthy();
       await userEvent.click(volverGenerarBtn!);
 
-      // Sincronizamos el árbol con la carga en el botón activa
       rerender(<ContextWorkflowScreen {...baseProps} />);
 
-      // Verificamos que el spinner se ha renderizado en la sección de acciones
       spinner = document.querySelector(".loading-spinner");
       expect(spinner).toBeInTheDocument();
 
-      // Restauramos estados de control por seguridad
       geminiMockControl.isLoading = false;
       resolverPromesa("OK");
     })
 
     it("línea 69: interrumpe el efecto de inicialización si el prompt base de markdown está vacío o indefinido", async () => {
-      // Importamos dinámicamente o mockeamos el prompt base para que devuelva una cadena vacía
       const promptMock = vi.mocked(await vi.importMock("bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md"));
       const originalDefault = promptMock.default;
-      
-      // Forzamos que el archivo markdown importado no devuelva texto
       promptMock.default = "";
 
       render(<ContextWorkflowScreen {...baseProps} />);
-      
-      // Al estar vacío, la línea 69 hace el "return" inmediato sin invocar a parseMasterPrompt.
-      // Comprobamos que el editor se monta, pero el cuadro de texto estará vacío.
+
       const textarea = screen.getByTestId("prompt-textarea") as HTMLTextAreaElement;
       expect(textarea.value).toBe("");
 
-      // Restauramos el mock original para no romper otros tests independientes
       promptMock.default = originalDefault;
     });
 
