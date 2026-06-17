@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import GenerationTestScreen from "./GenerationTestsScreen"
 
 const mockGenerate = vi.fn()
@@ -13,10 +14,14 @@ let mockIsLoading = false
 
 vi.mock("~src/components/GeminiGeneration", () => ({
   useGeminiGeneration: vi.fn(() => ({
-    get responseText() { return mockResponseTextValue },
-    get isLoading() { return mockIsLoading },
+    get responseText() {
+      return mockResponseTextValue
+    },
+    get isLoading() {
+      return mockIsLoading
+    },
     setResponseText: mockSetResponseText,
-    generate: mockGenerate,
+    generate: mockGenerate
   }))
 }))
 
@@ -32,45 +37,86 @@ vi.mock("~src/utils/chromeStorageUtils", () => ({
 
 const mockDownloadMarkdown = vi.fn()
 vi.mock("~src/utils/downloadUtils", () => ({
-  downloadMarkdown: vi.fn((content, filename) => mockDownloadMarkdown(content, filename))
+  downloadMarkdown: vi.fn((content, filename) =>
+    mockDownloadMarkdown(content, filename)
+  )
 }))
 
 vi.mock("~src/components/Header", () => ({
-  Header: ({ currentStep }: any) => <header data-testid="mock-header">{currentStep}</header>
+  Header: ({ currentStep }: any) => (
+    <header data-testid="mock-header">{currentStep}</header>
+  )
 }))
 
 vi.mock("~src/components/WorkflowComponents", () => ({
-  PromptEditor: ({ title, promptText, onGenerate, onBack, onPromptChange }: any) => (
+  PromptEditor: ({
+    title,
+    promptText,
+    onGenerate,
+    onBack,
+    onPromptChange
+  }: any) => (
     <div data-testid="prompt-editor">
       <h3>{title}</h3>
-      <textarea 
-        data-testid="prompt-textarea" 
-        value={promptText} 
-        onChange={(e) => onPromptChange(e.target.value)} 
+      <textarea
+        data-testid="prompt-textarea"
+        value={promptText}
+        onChange={(e) => onPromptChange(e.target.value)}
       />
       <button onClick={onGenerate}>Generar Tests</button>
       <button onClick={onBack}>Atrás</button>
     </div>
   ),
-  SplitResultView: ({ promptText, responseText, footer, onPromptChange, onResponseChange }: any) => (
+  SplitResultView: ({
+    promptText,
+    responseText,
+    footer,
+    onPromptChange,
+    onResponseChange
+  }: any) => (
     <div data-testid="split-result-view">
-      <textarea data-testid="split-prompt" value={promptText} onChange={(e) => onPromptChange(e.target.value)} />
-      <textarea data-testid="split-response" value={responseText} onChange={(e) => onResponseChange(e.target.value)} />
+      <textarea
+        data-testid="split-prompt"
+        value={promptText}
+        onChange={(e) => onPromptChange(e.target.value)}
+      />
+      <textarea
+        data-testid="split-response"
+        value={responseText}
+        onChange={(e) => onResponseChange(e.target.value)}
+      />
       {footer}
     </div>
   )
 }))
 
 vi.mock("~src/components/modals/DownloadConfirmModal", () => ({
-  DownloadConfirmModal: ({ isOpen, defaultFileName, onConfirm, onCancel }: any) => {
+  DownloadConfirmModal: ({
+    isOpen,
+    defaultFileName,
+    onConfirm,
+    onCancel
+  }: any) => {
     if (!isOpen) return null
     return (
       <div data-testid="download-modal">
-        <input data-testid="filename-input" defaultValue={defaultFileName} id="custom-filename-input" />
-        <button onClick={() => {
-          const val = (document.getElementById("custom-filename-input") as HTMLInputElement)?.value || defaultFileName
-          onConfirm(val)
-        }}>Confirmar descarga</button>
+        <input
+          data-testid="filename-input"
+          defaultValue={defaultFileName}
+          id="custom-filename-input"
+        />
+        <button
+          onClick={() => {
+            const val =
+              (
+                document.getElementById(
+                  "custom-filename-input"
+                ) as HTMLInputElement
+              )?.value || defaultFileName
+            onConfirm(val)
+          }}>
+          Confirmar descarga
+        </button>
         <button onClick={onCancel}>Cancelar descarga</button>
       </div>
     )
@@ -82,7 +128,9 @@ vi.mock("~src/components/modals/SuccessModal", () => ({
     <div data-testid="success-modal">
       <h4>{title}</h4>
       {actions.map((act: any, idx: number) => (
-        <button key={idx} onClick={act.onClick}>{act.label}</button>
+        <button key={idx} onClick={act.onClick}>
+          {act.label}
+        </button>
       ))}
     </div>
   )
@@ -103,7 +151,8 @@ const PROJECT_BASE = {
   id: "proj_123",
   domainName: "Veterinaria",
   extensionFinish: "Enunciado general del examen de la clínica veterinaria.",
-  baseClasses: "```java\npackage org.springframework.samples.petclinic.model;\npublic class Animal {}\n```",
+  baseClasses:
+    "```java\npackage org.springframework.samples.petclinic.model;\npublic class Animal {}\n```",
   attributeConstraints: "El nombre del animal no puede ser nulo."
 }
 
@@ -112,7 +161,8 @@ const baseProps = {
     project: PROJECT_BASE,
     constraints: "El nombre del animal no puede ser nulo.",
     entityRelationships: "Un Dueño tiene muchos Animales.",
-    baseClass: "```java\npackage org.springframework.samples.petclinic.model;\npublic class Animal {}\n```",
+    baseClass:
+      "```java\npackage org.springframework.samples.petclinic.model;\npublic class Animal {}\n```",
     targetType: "attributes" as const
   },
   source: "attributes" as const,
@@ -150,38 +200,51 @@ describe("GenerationTestScreen", () => {
     it("renderiza correctamente en modo de restricciones inicializando el prompt", () => {
       render(<GenerationTestScreen {...baseProps} />)
 
-      expect(screen.getByTestId("mock-header").textContent).toBe("TESTS DE RESTRICCIONES")
+      expect(screen.getByTestId("mock-header").textContent).toBe(
+        "TESTS DE RESTRICCIONES"
+      )
       expect(screen.getByTestId("prompt-editor")).not.toBeNull()
-      expect((screen.getByTestId("prompt-textarea") as HTMLTextAreaElement).value).toBe("Plantilla Base para veterinaria")
+      expect(
+        (screen.getByTestId("prompt-textarea") as HTMLTextAreaElement).value
+      ).toBe("Plantilla Base para veterinaria")
     })
 
     it("renderiza correctamente en modo de relaciones con los nombres de archivo adecuados", () => {
       render(
-        <GenerationTestScreen 
-          {...baseProps} 
-          source="entityRelationships" 
-          initialData={{ ...baseProps.initialData, targetType: "entityRelationships" }} 
+        <GenerationTestScreen
+          {...baseProps}
+          source="entityRelationships"
+          initialData={{
+            ...baseProps.initialData,
+            targetType: "entityRelationships"
+          }}
         />
       )
 
-      expect(screen.getByTestId("mock-header").textContent).toBe("TESTS DE RELACIONES")
+      expect(screen.getByTestId("mock-header").textContent).toBe(
+        "TESTS DE RELACIONES"
+      )
     })
 
     it("completa la generación del test exitosamente y cambia al modo de vista dividida (Result)", async () => {
-      mockGenerate.mockResolvedValue("```java\npackage org.test;\npublic class Test1 {}\n```")
+      mockGenerate.mockResolvedValue(
+        "```java\npackage org.test;\npublic class Test1 {}\n```"
+      )
       mockResponseTextValue = "package org.test;\npublic class Test1 {}"
-      
+
       render(<GenerationTestScreen {...baseProps} />)
-      
+
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
       expect(mockGenerate).toHaveBeenCalled()
-      expect(mockSetResponseText).toHaveBeenCalledWith("package org.test;\npublic class Test1 {}")
-      
+      expect(mockSetResponseText).toHaveBeenCalledWith(
+        "package org.test;\npublic class Test1 {}"
+      )
+
       mockResponseTextValue = "package org.test;\npublic class Test1 {}"
       render(<GenerationTestScreen {...baseProps} />)
-      
+
       expect(await screen.findByTestId("split-result-view")).not.toBeNull()
       expect(screen.getByText("Código generado para Test1.java")).not.toBeNull()
     })
@@ -189,21 +252,25 @@ describe("GenerationTestScreen", () => {
     it("permite modificar el contenido del prompt y de la respuesta en la vista dividida", async () => {
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
-      
+
       render(<GenerationTestScreen {...baseProps} />)
-      
+
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      const splitPrompt = await screen.findByTestId("split-prompt") as HTMLTextAreaElement
-      const splitResponse = await screen.findByTestId("split-response") as HTMLTextAreaElement
+      const splitPrompt = (await screen.findByTestId(
+        "split-prompt"
+      )) as HTMLTextAreaElement
+      const splitResponse = (await screen.findByTestId(
+        "split-response"
+      )) as HTMLTextAreaElement
 
-      splitPrompt.addEventListener('input', (e) => {
-        splitPrompt.value = (e.target as HTMLTextAreaElement).value;
-      });
-      splitResponse.addEventListener('input', (e) => {
-        splitResponse.value = (e.target as HTMLTextAreaElement).value;
-      });
+      splitPrompt.addEventListener("input", (e) => {
+        splitPrompt.value = (e.target as HTMLTextAreaElement).value
+      })
+      splitResponse.addEventListener("input", (e) => {
+        splitResponse.value = (e.target as HTMLTextAreaElement).value
+      })
 
       await userEvent.type(splitPrompt, " Añadiendo cambios")
       await userEvent.type(splitResponse, " // Comentario nuevo")
@@ -215,28 +282,37 @@ describe("GenerationTestScreen", () => {
     it("descarga el archivo markdown configurando el nombre por defecto sugerido", async () => {
       mockResponseTextValue = "public class Test1 {}"
       render(<GenerationTestScreen {...baseProps} />)
-      
+
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      const btnDescargar = screen.getByRole("button", { name: "Descargar (.md)" })
+      const btnDescargar = screen.getByRole("button", {
+        name: "Descargar (.md)"
+      })
       await userEvent.click(btnDescargar)
 
       expect(screen.getByTestId("download-modal")).not.toBeNull()
 
-      const btnConfirmarDescarga = screen.getByRole("button", { name: "Confirmar descarga" })
+      const btnConfirmarDescarga = screen.getByRole("button", {
+        name: "Confirmar descarga"
+      })
       await userEvent.click(btnConfirmarDescarga)
 
-      expect(mockDownloadMarkdown).toHaveBeenCalledWith("public class Test1 {}", "Test1-Veterinaria")
+      expect(mockDownloadMarkdown).toHaveBeenCalledWith(
+        "public class Test1 {}",
+        "Test1-Veterinaria"
+      )
     })
 
     it("guarda de forma exitosa los tests del archivo actual en el almacenamiento de Chrome local", async () => {
       mockResponseTextValue = "public class Test1 {}"
-      mockChromeGet.mockImplementation((keys, cb) => cb({ [PROJECT_BASE.id]: { testPartsMap: {} } }))
+      mockChromeGet.mockImplementation((keys, cb) =>
+        cb({ [PROJECT_BASE.id]: { testPartsMap: {} } })
+      )
       mockChromeSet.mockImplementation((data, cb) => cb?.())
 
       render(<GenerationTestScreen {...baseProps} />)
-      
+
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
@@ -268,12 +344,16 @@ describe("GenerationTestScreen", () => {
     it("Muestra un diálogo modal de error si falla la llamada de guardado en el almacenamiento de Chrome", async () => {
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
-      
-      mockChromeGet.mockImplementation((keys, cb) => cb({ [PROJECT_BASE.id]: {} }))
-      mockSaveToChrome.mockRejectedValue(new Error("Storage Quota Limit Reached"))
+
+      mockChromeGet.mockImplementation((keys, cb) =>
+        cb({ [PROJECT_BASE.id]: {} })
+      )
+      mockSaveToChrome.mockRejectedValue(
+        new Error("Storage Quota Limit Reached")
+      )
 
       render(<GenerationTestScreen {...baseProps} />)
-      
+
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
@@ -285,7 +365,9 @@ describe("GenerationTestScreen", () => {
         expect(screen.getByText("Storage Quota Limit Reached")).not.toBeNull()
       })
 
-      const btnConfirmarErr = screen.getByRole("button", { name: "Confirmar Error" })
+      const btnConfirmarErr = screen.getByRole("button", {
+        name: "Confirmar Error"
+      })
       await userEvent.click(btnConfirmarErr)
       expect(screen.queryByTestId("confirm-modal")).toBeNull()
     })
@@ -293,12 +375,14 @@ describe("GenerationTestScreen", () => {
     it("asigna un mensaje por defecto si la excepción al guardar carece de propiedad message", async () => {
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
-      
-      mockChromeGet.mockImplementation((keys, cb) => cb({ [PROJECT_BASE.id]: {} }))
-      mockSaveToChrome.mockRejectedValue({}) 
+
+      mockChromeGet.mockImplementation((keys, cb) =>
+        cb({ [PROJECT_BASE.id]: {} })
+      )
+      mockSaveToChrome.mockRejectedValue({})
 
       render(<GenerationTestScreen {...baseProps} />)
-      
+
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
@@ -315,10 +399,10 @@ describe("GenerationTestScreen", () => {
         ...baseProps,
         initialData: { ...baseProps.initialData, project: null }
       }
-      
+
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
-      
+
       render(<GenerationTestScreen {...propsSinProyecto} />)
 
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
@@ -341,7 +425,9 @@ describe("GenerationTestScreen", () => {
         }
       }
       render(<GenerationTestScreen {...propsDominioDesconocido} />)
-      expect((screen.getByTestId("prompt-textarea") as HTMLTextAreaElement).value).toBe("Plantilla Base para ajedrez internacional")
+      expect(
+        (screen.getByTestId("prompt-textarea") as HTMLTextAreaElement).value
+      ).toBe("Plantilla Base para ajedrez internacional")
     })
 
     it("extrae correctamente el paquete común base analizando múltiples bloques Java", () => {
@@ -371,7 +457,9 @@ describe("GenerationTestScreen", () => {
         hiddenContext: "ctx"
       })
       render(<GenerationTestScreen {...baseProps} />)
-      expect((screen.getByTestId("prompt-textarea") as HTMLTextAreaElement).value).toBe("veterinaria debe coincidir con veterinaria")
+      expect(
+        (screen.getByTestId("prompt-textarea") as HTMLTextAreaElement).value
+      ).toBe("veterinaria debe coincidir con veterinaria")
     })
 
     it("utiliza el fallback predeterminado si los bloques java carecen de declaración de paquete", () => {
@@ -390,7 +478,7 @@ describe("GenerationTestScreen", () => {
       const propsDatosVacios = {
         ...baseProps,
         initialData: {
-          project: { id: "p1" }, 
+          project: { id: "p1" },
           constraints: "",
           entityRelationships: "",
           baseClass: ""
@@ -403,27 +491,36 @@ describe("GenerationTestScreen", () => {
     it("cierra el modal de descarga sin invocar el callback utilitario si se cancela la acción", async () => {
       mockGenerate.mockResolvedValue("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
-      
+
       render(<GenerationTestScreen {...baseProps} />)
 
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
-      const btnDescargar = await screen.findByRole("button", { name: "Descargar (.md)" })
+      const btnDescargar = await screen.findByRole("button", {
+        name: "Descargar (.md)"
+      })
       await userEvent.click(btnDescargar)
 
-      const btnCancelarDescarga = screen.getByRole("button", { name: "Cancelar descarga" })
+      const btnCancelarDescarga = screen.getByRole("button", {
+        name: "Cancelar descarga"
+      })
       await userEvent.click(btnCancelarDescarga)
 
       expect(screen.queryByTestId("download-modal")).toBeNull()
       expect(mockDownloadMarkdown).not.toHaveBeenCalled()
     })
-    
+
     it("confecciona rutas de migración dinámicas adaptadas según el tipo de source general", () => {
-      const { rerender } = render(<GenerationTestScreen {...baseProps} source="general" />)
+      const { rerender } = render(
+        <GenerationTestScreen {...baseProps} source="general" />
+      )
       expect(screen.getByTestId("mock-header")).not.toBeNull()
 
-      const propsSourceRelationships = { ...baseProps, source: "entityRelationships" as const }
+      const propsSourceRelationships = {
+        ...baseProps,
+        source: "entityRelationships" as const
+      }
       rerender(<GenerationTestScreen {...propsSourceRelationships} />)
       expect(screen.getByTestId("mock-header")).not.toBeNull()
     })
@@ -432,24 +529,25 @@ describe("GenerationTestScreen", () => {
       mockGenerate.mockResolvedValueOnce("public class Test1 {}")
       mockResponseTextValue = "public class Test1 {}"
       mockIsLoading = false
-      
+
       render(<GenerationTestScreen {...baseProps} />)
 
       const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
       await userEvent.click(btnGenerar)
 
       const unhandledSpy = vi.spyOn(process, "emit")
-      
-      mockGenerate.mockImplementationOnce(() => 
+
+      mockGenerate.mockImplementationOnce(() =>
         Promise.reject(new Error("Gemini API Quota Exceeded")).catch(() => {})
       )
 
-      const btnRegenerar = await screen.findByRole("button", { name: "Volver a generar" })
-      
+      const btnRegenerar = await screen.findByRole("button", {
+        name: "Volver a generar"
+      })
+
       try {
         await userEvent.click(btnRegenerar)
-      } catch (err) {
-      }
+      } catch (err) {}
 
       await waitFor(() => {
         expect(screen.getByTestId("split-result-view")).not.toBeNull()
@@ -459,36 +557,35 @@ describe("GenerationTestScreen", () => {
     })
 
     describe("Casos de Cobertura Adicionales", () => {
-      
       it("ejecuta las líneas 148-153 asegurando los fallbacks vacíos en el payload de logs", async () => {
-      mockGenerate.mockResolvedValue("public class Test1 {}")
-      mockResponseTextValue = "public class Test1 {}"
-      
-      const propsDatosNulos = {
-        ...baseProps,
-        initialData: {
-          ...baseProps.initialData,
-          project: {
-            id: "proj_999",
-            domainName: undefined,      
-            extensionFinish: undefined, 
-            baseClasses: undefined      
+        mockGenerate.mockResolvedValue("public class Test1 {}")
+        mockResponseTextValue = "public class Test1 {}"
+
+        const propsDatosNulos = {
+          ...baseProps,
+          initialData: {
+            ...baseProps.initialData,
+            project: {
+              id: "proj_999",
+              domainName: undefined,
+              extensionFinish: undefined,
+              baseClasses: undefined
+            }
           }
         }
-      }
 
-      render(<GenerationTestScreen {...propsDatosNulos} />)
-      
-      const textarea = screen.getByTestId("prompt-textarea")
-      await userEvent.clear(textarea)
-      await userEvent.type(textarea, "Generar código de pruebas estructurado")
+        render(<GenerationTestScreen {...propsDatosNulos} />)
 
-      const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
-      await userEvent.click(btnGenerar)
+        const textarea = screen.getByTestId("prompt-textarea")
+        await userEvent.clear(textarea)
+        await userEvent.type(textarea, "Generar código de pruebas estructurado")
 
-      const splitView = await screen.findByTestId("split-result-view")
-      expect(splitView).not.toBeNull()
-    })
+        const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
+        await userEvent.click(btnGenerar)
+
+        const splitView = await screen.findByTestId("split-result-view")
+        expect(splitView).not.toBeNull()
+      })
 
       it("ejecuta las líneas 174-175 evaluando el fallback cuando las relaciones del proyecto vienen vacías", () => {
         const propsRelacionesVacias = {
@@ -513,13 +610,15 @@ describe("GenerationTestScreen", () => {
         mockGenerate.mockResolvedValueOnce("public class Test1 {}")
         mockResponseTextValue = "public class Test1 {}"
         mockIsLoading = false
-        
+
         const { rerender } = render(<GenerationTestScreen {...baseProps} />)
-        
+
         const btnGenerar = screen.getByRole("button", { name: "Generar Tests" })
         await userEvent.click(btnGenerar)
 
-        const btnVolverGenerar = await screen.findByRole("button", { name: "Volver a generar" })
+        const btnVolverGenerar = await screen.findByRole("button", {
+          name: "Volver a generar"
+        })
         expect(btnVolverGenerar).not.toBeNull()
 
         mockIsLoading = true
@@ -527,7 +626,6 @@ describe("GenerationTestScreen", () => {
 
         expect(screen.queryByText("Volver a generar")).toBeNull()
       })
-
     })
-  }) 
+  })
 })

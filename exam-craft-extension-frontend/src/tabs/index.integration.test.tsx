@@ -1,7 +1,9 @@
-import { render, screen, fireEvent } from "@testing-library/react"
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { fireEvent, render, screen } from "@testing-library/react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
-import IndexTab from "./index" 
+
+import IndexTab from "./index"
 
 vi.mock("../screens/principal/WelcomeScreen", () => ({
   default: ({ onStart, onCreateExam, onStorage }: any) => (
@@ -15,7 +17,9 @@ vi.mock("../screens/principal/WelcomeScreen", () => ({
 
 vi.mock("../screens/principal/GithubScreen", () => ({
   default: ({ onBack }: any) => (
-    <div data-testid="screen-github"><button onClick={onBack}>Volver</button></div>
+    <div data-testid="screen-github">
+      <button onClick={onBack}>Volver</button>
+    </div>
   )
 }))
 
@@ -57,28 +61,46 @@ vi.mock("~src/screens/codeGeneration/CodeSelectionGenerateScreen", () => ({
 vi.mock("../screens/codeGeneration/SelectionGenerationTestScreen", () => ({
   default: ({ onCreateTest1 }: any) => (
     <div data-testid="screen-testGeneral">
-      <button onClick={() => onCreateTest1({ project: {}, constraints: "" })}>Crear Test General</button>
+      <button onClick={() => onCreateTest1({ project: {}, constraints: "" })}>
+        Crear Test General
+      </button>
     </div>
   )
 }))
 
-vi.mock("~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen", () => ({
-  default: ({ onCreateTest, onGoToBaseClass }: any) => (
-    <div data-testid="screen-attributesConstraints">
-      <button onClick={() => onCreateTest({ targetPart: "test1_attributes" })}>Crear Test Atributos</button>
-      <button onClick={() => onGoToBaseClass({ id: "1" })}>Clases Base</button>
-    </div>
-  )
-}))
+vi.mock(
+  "~src/screens/examStatementGeneration/AttributesConstraintsWorkflowScreen",
+  () => ({
+    default: ({ onCreateTest, onGoToBaseClass }: any) => (
+      <div data-testid="screen-attributesConstraints">
+        <button
+          onClick={() => onCreateTest({ targetPart: "test1_attributes" })}>
+          Crear Test Atributos
+        </button>
+        <button onClick={() => onGoToBaseClass({ id: "1" })}>
+          Clases Base
+        </button>
+      </div>
+    )
+  })
+)
 
-vi.mock("~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen", () => ({
-  default: ({ onCreateTest, onGoToBaseClass }: any) => (
-    <div data-testid="screen-entityRelationships">
-      <button onClick={() => onCreateTest({ targetPart: "test2_relationships" })}>Crear Test Relaciones</button>
-      <button onClick={() => onGoToBaseClass({ id: "1" })}>Clases Base desde Relaciones</button>
-    </div>
-  )
-}))
+vi.mock(
+  "~src/screens/examStatementGeneration/EntityRelationshipsWorkflowScreen",
+  () => ({
+    default: ({ onCreateTest, onGoToBaseClass }: any) => (
+      <div data-testid="screen-entityRelationships">
+        <button
+          onClick={() => onCreateTest({ targetPart: "test2_relationships" })}>
+          Crear Test Relaciones
+        </button>
+        <button onClick={() => onGoToBaseClass({ id: "1" })}>
+          Clases Base desde Relaciones
+        </button>
+      </div>
+    )
+  })
+)
 
 vi.mock("../screens/codeGeneration/GenerationTestsScreen", () => ({
   default: ({ onBack }: any) => (
@@ -107,7 +129,7 @@ describe("IndexTab Router & Workflow Integration Tests", () => {
 
   it("debería iniciar por defecto en la pantalla de bienvenida y permitir navegar a GitHub", () => {
     render(<IndexTab />)
-    
+
     expect(screen.getByTestId("screen-welcome")).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "Ir a Github" }))
@@ -125,30 +147,42 @@ describe("IndexTab Router & Workflow Integration Tests", () => {
 
   it("debería recordar el origen 'attributes' y regresar allí al pulsar volver en los tests", () => {
     render(<IndexTab />)
-    
+
     fireEvent.click(screen.getByRole("button", { name: "Ir a Crear Examen" }))
     fireEvent.click(screen.getByRole("button", { name: "Por partes" }))
-    fireEvent.click(screen.getByRole("button", { name: "Configurar Enunciados" }))
+    fireEvent.click(
+      screen.getByRole("button", { name: "Configurar Enunciados" })
+    )
     fireEvent.click(screen.getByRole("button", { name: "Ir a Atributos" }))
-    
-    expect(screen.getByTestId("screen-attributesConstraints")).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole("button", { name: "Crear Test Atributos" }))
+    expect(
+      screen.getByTestId("screen-attributesConstraints")
+    ).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Crear Test Atributos" })
+    )
     expect(screen.getByTestId("screen-testAttributes")).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "Volver Atrás" }))
-    expect(screen.getByTestId("screen-attributesConstraints")).toBeInTheDocument()
+    expect(
+      screen.getByTestId("screen-attributesConstraints")
+    ).toBeInTheDocument()
   })
 
   it("debería recordar el origen 'entityRelationships' y regresar allí al pulsar volver en los tests", () => {
     render(<IndexTab />)
-    
+
     fireEvent.click(screen.getByRole("button", { name: "Ir a Crear Examen" }))
     fireEvent.click(screen.getByRole("button", { name: "Por partes" }))
-    fireEvent.click(screen.getByRole("button", { name: "Configurar Enunciados" }))
+    fireEvent.click(
+      screen.getByRole("button", { name: "Configurar Enunciados" })
+    )
     fireEvent.click(screen.getByRole("button", { name: "Ir a Relaciones" }))
 
-    fireEvent.click(screen.getByRole("button", { name: "Crear Test Relaciones" }))
+    fireEvent.click(
+      screen.getByRole("button", { name: "Crear Test Relaciones" })
+    )
     expect(screen.getByTestId("screen-testAttributes")).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "Volver Atrás" }))
@@ -157,12 +191,12 @@ describe("IndexTab Router & Workflow Integration Tests", () => {
 
   it("debería retornar a 'testGeneral' si el test se originó desde la pantalla de código general", () => {
     render(<IndexTab />)
-    
+
     fireEvent.click(screen.getByRole("button", { name: "Ir a Crear Examen" }))
     fireEvent.click(screen.getByRole("button", { name: "Por partes" }))
     fireEvent.click(screen.getByRole("button", { name: "Generar Código" }))
     fireEvent.click(screen.getByRole("button", { name: "Tests Generales" }))
-    
+
     fireEvent.click(screen.getByRole("button", { name: "Crear Test General" }))
     expect(screen.getByTestId("screen-testAttributes")).toBeInTheDocument()
 
@@ -172,28 +206,36 @@ describe("IndexTab Router & Workflow Integration Tests", () => {
 
   it("debería volver a Atributos si se entró a Clases Base desde la pantalla de Atributos", () => {
     render(<IndexTab />)
-    
+
     fireEvent.click(screen.getByRole("button", { name: "Ir a Crear Examen" }))
     fireEvent.click(screen.getByRole("button", { name: "Por partes" }))
-    fireEvent.click(screen.getByRole("button", { name: "Configurar Enunciados" }))
+    fireEvent.click(
+      screen.getByRole("button", { name: "Configurar Enunciados" })
+    )
     fireEvent.click(screen.getByRole("button", { name: "Ir a Atributos" }))
-    
+
     fireEvent.click(screen.getByRole("button", { name: "Clases Base" }))
     expect(screen.getByTestId("screen-generateBaseClasses")).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "Volver Base Classes" }))
-    expect(screen.getByTestId("screen-attributesConstraints")).toBeInTheDocument()
+    expect(
+      screen.getByTestId("screen-attributesConstraints")
+    ).toBeInTheDocument()
   })
 
   it("debería volver a Relaciones si se entró a Clases Base desde la pantalla de Relaciones", () => {
     render(<IndexTab />)
-    
+
     fireEvent.click(screen.getByRole("button", { name: "Ir a Crear Examen" }))
     fireEvent.click(screen.getByRole("button", { name: "Por partes" }))
-    fireEvent.click(screen.getByRole("button", { name: "Configurar Enunciados" }))
+    fireEvent.click(
+      screen.getByRole("button", { name: "Configurar Enunciados" })
+    )
     fireEvent.click(screen.getByRole("button", { name: "Ir a Relaciones" }))
-    
-    fireEvent.click(screen.getByRole("button", { name: "Clases Base desde Relaciones" }))
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Clases Base desde Relaciones" })
+    )
     expect(screen.getByTestId("screen-generateBaseClasses")).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "Volver Base Classes" }))

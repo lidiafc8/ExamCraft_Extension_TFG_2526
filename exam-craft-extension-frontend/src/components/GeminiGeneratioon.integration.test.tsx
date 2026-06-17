@@ -1,8 +1,11 @@
-import { renderHook, act } from "@testing-library/react"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import { act, renderHook } from "@testing-library/react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
+import { generateWithAI } from "../services/geminiService"
 import { useGeminiGeneration } from "./GeminiGeneration"
 
 expect.extend(jestDomMatchers)
@@ -11,7 +14,6 @@ vi.mock("../services/geminiService", () => ({
   generateWithAI: vi.fn()
 }))
 
-import { generateWithAI } from "../services/geminiService"
 const mockGenerateWithAI = generateWithAI as ReturnType<typeof vi.fn>
 
 const mockFetch = vi.fn()
@@ -40,7 +42,10 @@ describe("Integración: useGeminiGeneration", () => {
     })
 
     it("activa isLoading durante la generación y lo desactiva al terminar", async () => {
-      mockGenerateWithAI.mockResolvedValue({ result: "respuesta generada", provider: "gemini" })
+      mockGenerateWithAI.mockResolvedValue({
+        result: "respuesta generada",
+        provider: "gemini"
+      })
 
       const { result } = renderHook(() => useGeminiGeneration(defaultOptions))
 
@@ -52,7 +57,10 @@ describe("Integración: useGeminiGeneration", () => {
     })
 
     it("actualiza responseText con el resultado de generateWithAI", async () => {
-      mockGenerateWithAI.mockResolvedValue({ result: "respuesta generada", provider: "gemini" })
+      mockGenerateWithAI.mockResolvedValue({
+        result: "respuesta generada",
+        provider: "gemini"
+      })
 
       const { result } = renderHook(() => useGeminiGeneration(defaultOptions))
 
@@ -64,7 +72,10 @@ describe("Integración: useGeminiGeneration", () => {
     })
 
     it("retorna el resultado de la generación como string", async () => {
-      mockGenerateWithAI.mockResolvedValue({ result: "texto resultado", provider: "gemini" })
+      mockGenerateWithAI.mockResolvedValue({
+        result: "texto resultado",
+        provider: "gemini"
+      })
 
       const { result } = renderHook(() => useGeminiGeneration(defaultOptions))
 
@@ -77,7 +88,10 @@ describe("Integración: useGeminiGeneration", () => {
     })
 
     it("envía el log al servidor con los datos correctos", async () => {
-      mockGenerateWithAI.mockResolvedValue({ result: "respuesta", provider: "gemini" })
+      mockGenerateWithAI.mockResolvedValue({
+        result: "respuesta",
+        provider: "gemini"
+      })
 
       const { result } = renderHook(() => useGeminiGeneration(defaultOptions))
 
@@ -184,7 +198,10 @@ describe("Integración: useGeminiGeneration", () => {
     })
 
     it("resetea responseText a vacío al iniciar una nueva generación", async () => {
-      mockGenerateWithAI.mockResolvedValue({ result: "primera respuesta", provider: "gemini" })
+      mockGenerateWithAI.mockResolvedValue({
+        result: "primera respuesta",
+        provider: "gemini"
+      })
 
       const { result } = renderHook(() => useGeminiGeneration(defaultOptions))
 
@@ -193,7 +210,10 @@ describe("Integración: useGeminiGeneration", () => {
       })
       expect(result.current.responseText).toBe("primera respuesta")
 
-      mockGenerateWithAI.mockResolvedValue({ result: "segunda respuesta", provider: "gemini" })
+      mockGenerateWithAI.mockResolvedValue({
+        result: "segunda respuesta",
+        provider: "gemini"
+      })
 
       await act(async () => {
         await result.current.generate("payload 2")
@@ -204,7 +224,10 @@ describe("Integración: useGeminiGeneration", () => {
 
     it("llama a buildLogPayload con el resultado exacto devuelto por generateWithAI", async () => {
       const buildLogPayload = vi.fn().mockReturnValue({ custom: "data" })
-      mockGenerateWithAI.mockResolvedValue({ result: "resultado exacto", provider: "gemini" })
+      mockGenerateWithAI.mockResolvedValue({
+        result: "resultado exacto",
+        provider: "gemini"
+      })
 
       const { result } = renderHook(() =>
         useGeminiGeneration({ logExerciseName: "test", buildLogPayload })
@@ -234,11 +257,19 @@ describe("Integración: useGeminiGeneration", () => {
 
   describe("Flujo Completo", () => {
     it("flujo completo: generar, loguear y actualizar estado correctamente", async () => {
-      const buildLogPayload = vi.fn().mockReturnValue({ dominio: "veterinaria" })
-      mockGenerateWithAI.mockResolvedValue({ result: "clases generadas", provider: "gemini" })
+      const buildLogPayload = vi
+        .fn()
+        .mockReturnValue({ dominio: "veterinaria" })
+      mockGenerateWithAI.mockResolvedValue({
+        result: "clases generadas",
+        provider: "gemini"
+      })
 
       const { result } = renderHook(() =>
-        useGeminiGeneration({ logExerciseName: "base-classes", buildLogPayload })
+        useGeminiGeneration({
+          logExerciseName: "base-classes",
+          buildLogPayload
+        })
       )
 
       expect(result.current.responseText).toBe("")
@@ -278,7 +309,10 @@ describe("Integración: useGeminiGeneration", () => {
       expect(result.current.isLoading).toBe(false)
       expect(result.current.responseText).toBe("")
 
-      mockGenerateWithAI.mockResolvedValue({ result: "recuperado", provider: "gemini" })
+      mockGenerateWithAI.mockResolvedValue({
+        result: "recuperado",
+        provider: "gemini"
+      })
 
       await act(async () => {
         await result.current.generate("nuevo payload")

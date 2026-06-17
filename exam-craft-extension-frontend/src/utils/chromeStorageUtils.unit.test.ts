@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { saveToChrome, getAllFromChrome } from "./chromeStorageUtils"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import { getAllFromChrome, saveToChrome } from "./chromeStorageUtils"
 
 function buildChromeMock({
   setError = null as any,
@@ -14,11 +15,14 @@ function buildChromeMock({
           else delete (globalThis as any).chrome?.runtime?.lastError
           callback()
         }),
-        get: vi.fn((_keys: any, callback: (items: Record<string, any>) => void) => {
-          if (getError) (globalThis as any).chrome.runtime.lastError = getError
-          else delete (globalThis as any).chrome?.runtime?.lastError
-          callback(getItems)
-        })
+        get: vi.fn(
+          (_keys: any, callback: (items: Record<string, any>) => void) => {
+            if (getError)
+              (globalThis as any).chrome.runtime.lastError = getError
+            else delete (globalThis as any).chrome?.runtime?.lastError
+            callback(getItems)
+          }
+        )
       }
     },
     runtime: {
@@ -133,7 +137,9 @@ describe("chromeStorageUtils", () => {
 
       it("no llama a set si chrome.storage.local no está disponible", async () => {
         setGlobalChrome(null)
-        try { await saveToChrome("k", {}) } catch {}
+        try {
+          await saveToChrome("k", {})
+        } catch {}
         expect((globalThis as any).chrome).toBeUndefined()
       })
     })
@@ -158,7 +164,11 @@ describe("chromeStorageUtils", () => {
       it("acepta data con claves especiales (espacios, emojis, unicode)", async () => {
         const mock = buildChromeMock()
         setGlobalChrome(mock)
-        const data = { "clave con espacios": "valor", "🔑": "emoji", "日本語": "unicode" }
+        const data = {
+          "clave con espacios": "valor",
+          "🔑": "emoji",
+          日本語: "unicode"
+        }
         await saveToChrome("special_key", data)
         expect(mock.storage.local.set).toHaveBeenCalledWith(
           { special_key: data },
@@ -337,9 +347,7 @@ describe("chromeStorageUtils", () => {
       })
 
       it("los items del resultado contienen _key incluso si el value no tiene propiedades", async () => {
-        setGlobalChrome(
-          buildChromeMock({ getItems: { bare_key: {} } })
-        )
+        setGlobalChrome(buildChromeMock({ getItems: { bare_key: {} } }))
         const result = await getAllFromChrome()
         expect(result[0]).toEqual({ _key: "bare_key" })
       })

@@ -1,13 +1,15 @@
-import React, { useState } from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React, { useState } from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
-import WelcomeScreen from "./WelcomeScreen"
-import CreateExamSelectionScreen from "../chooseCreate/CreateExamSelectionScreen"
 import CreateExamByPartsScreen from "../chooseCreate/CreateExamByPartsScreen"
+import CreateExamSelectionScreen from "../chooseCreate/CreateExamSelectionScreen"
+import WelcomeScreen from "./WelcomeScreen"
 
 expect.extend(jestDomMatchers)
 
@@ -17,21 +19,33 @@ vi.mock("~src/components/Header", () => ({
       <span data-testid="current-step">{currentStep}</span>
       <button onClick={onWelcome}>Ir a Inicio</button>
       {breadcrumbItems?.map((item: any) => (
-        <button key={item.label} onClick={item.action}>{item.label}</button>
+        <button key={item.label} onClick={item.action}>
+          {item.label}
+        </button>
       ))}
     </header>
   )
 }))
 
 vi.mock("../../../assets/images/exam.png", () => ({ default: "exam.png" }))
-vi.mock("../../../assets/images/archive.png", () => ({ default: "archive.png" }))
-vi.mock("../../../assets/images/complete_exam.png", () => ({ default: "complete_exam.png" }))
-vi.mock("../../../assets/images/parts_exam.png", () => ({ default: "parts_exam.png" }))
+vi.mock("../../../assets/images/archive.png", () => ({
+  default: "archive.png"
+}))
+vi.mock("../../../assets/images/complete_exam.png", () => ({
+  default: "complete_exam.png"
+}))
+vi.mock("../../../assets/images/parts_exam.png", () => ({
+  default: "parts_exam.png"
+}))
 vi.mock("../../../assets/images/code.png", () => ({ default: "code.png" }))
-vi.mock("../../../assets/images/statement.png", () => ({ default: "statement.png" }))
+vi.mock("../../../assets/images/statement.png", () => ({
+  default: "statement.png"
+}))
 
 function MiniApp() {
-  const [screen_name, setScreen] = useState<"welcome" | "createExam" | "createByParts">("welcome")
+  const [screen_name, setScreen] = useState<
+    "welcome" | "createExam" | "createByParts"
+  >("welcome")
 
   if (screen_name === "createExam") {
     return (
@@ -72,7 +86,9 @@ describe("Integración: flujo de navegación Welcome → CreateExam → ByParts"
     await userEvent.click(screen.getByText("Crear examen"))
 
     expect(screen.getByText("CREAR NUEVO EXAMEN")).toBeInTheDocument()
-    expect(screen.queryByText("¡BIENVENIDO A EXAMCRAFT!")).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("¡BIENVENIDO A EXAMCRAFT!")
+    ).not.toBeInTheDocument()
   })
 
   it("navega de CreateExamSelectionScreen a CreateExamByPartsScreen", async () => {

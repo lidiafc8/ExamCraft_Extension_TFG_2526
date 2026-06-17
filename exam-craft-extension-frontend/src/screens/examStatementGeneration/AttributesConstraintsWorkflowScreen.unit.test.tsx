@@ -1,8 +1,17 @@
 import React from "react"
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom/vitest"
-import { render, screen, cleanup, waitFor, within } from "@testing-library/react"
+
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within
+} from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+
 import AttributesConstraintsWorkflowScreen from "./AttributesConstraintsWorkflowScreen"
 
 const geminiMockControl = {
@@ -25,10 +34,14 @@ vi.mock("~src/components/GeminiGeneration", () => ({
 vi.mock("~src/components/Header", () => ({
   Header: ({ onWelcome, breadcrumbItems, currentStep }: any) => (
     <header className="app-header" data-testid="real-header">
-      <button onClick={onWelcome} aria-label="Ir a inicio">Logo</button>
+      <button onClick={onWelcome} aria-label="Ir a inicio">
+        Logo
+      </button>
       <nav>
         {breadcrumbItems.map((item: any) => (
-          <button key={item.label} onClick={item.action}>{item.label}</button>
+          <button key={item.label} onClick={item.action}>
+            {item.label}
+          </button>
         ))}
         <span>{currentStep}</span>
       </nav>
@@ -58,12 +71,17 @@ vi.mock("~src/components/FolderExamsSelector", () => ({
         </div>
       )
     }
-    const filtered = projects.filter((p: any) => p.domainName?.toLowerCase() === selectedFolder.toLowerCase())
+    const filtered = projects.filter(
+      (p: any) => p.domainName?.toLowerCase() === selectedFolder.toLowerCase()
+    )
     return (
       <div data-testid="selector-projects-view">
         <span>Exámenes de {selectedFolder.toUpperCase()}</span>
         {filtered.map((proj: any) => (
-          <button key={proj.id} title="Abrir examen" onClick={() => onSelectProject(proj)}>
+          <button
+            key={proj.id}
+            title="Abrir examen"
+            onClick={() => onSelectProject(proj)}>
             {displayName(proj)}
           </button>
         ))}
@@ -74,7 +92,14 @@ vi.mock("~src/components/FolderExamsSelector", () => ({
 }))
 
 vi.mock("~src/components/WorkflowComponents", () => ({
-  PromptEditor: ({ title, description, promptText, onPromptChange, onGenerate, onBack }: any) => (
+  PromptEditor: ({
+    title,
+    description,
+    promptText,
+    onPromptChange,
+    onGenerate,
+    onBack
+  }: any) => (
     <div data-testid="real-prompt-editor">
       <h2>{title}</h2>
       <div>{description}</div>
@@ -87,17 +112,38 @@ vi.mock("~src/components/WorkflowComponents", () => ({
       {onBack && <button onClick={onBack}>Volver Editor</button>}
     </div>
   ),
-  SplitResultView: ({ promptText, responseText, onPromptChange, onResponseChange, footer }: any) => (
+  SplitResultView: ({
+    promptText,
+    responseText,
+    onPromptChange,
+    onResponseChange,
+    footer
+  }: any) => (
     <div data-testid="real-split-view">
-      <textarea data-testid="split-left-prompt" value={promptText} onChange={(e) => onPromptChange(e.target.value)} />
-      <textarea data-testid="split-right-response" value={responseText} onChange={(e) => onResponseChange(e.target.value)} />
+      <textarea
+        data-testid="split-left-prompt"
+        value={promptText}
+        onChange={(e) => onPromptChange(e.target.value)}
+      />
+      <textarea
+        data-testid="split-right-response"
+        value={responseText}
+        onChange={(e) => onResponseChange(e.target.value)}
+      />
       {footer && <div data-testid="split-footer">{footer}</div>}
     </div>
   )
 }))
 
 vi.mock("~src/components/modals/ConfirmModal", () => ({
-  ConfirmModal: ({ title, message, warning, onConfirm, onCancel, confirmLabel }: any) => (
+  ConfirmModal: ({
+    title,
+    message,
+    warning,
+    onConfirm,
+    onCancel,
+    confirmLabel
+  }: any) => (
     <div data-testid="real-confirm-modal">
       <h3>{title}</h3>
       <div>{message}</div>
@@ -114,31 +160,46 @@ vi.mock("~src/components/modals/SuccessModal", () => ({
       <h3>{title}</h3>
       <p>{message}</p>
       {actions.map((act: any) => (
-        <button key={act.label} onClick={act.onClick}>{act.label}</button>
+        <button key={act.label} onClick={act.onClick}>
+          {act.label}
+        </button>
       ))}
     </div>
   )
 }))
 
 vi.mock("~src/components/modals/DownloadConfirmModal", () => ({
-  DownloadConfirmModal: ({ isOpen, onConfirm, onCancel, defaultFileName }: any) => {
+  DownloadConfirmModal: ({
+    isOpen,
+    onConfirm,
+    onCancel,
+    defaultFileName
+  }: any) => {
     if (!isOpen) return null
     return (
       <div data-testid="real-download-modal">
         <input
           data-testid="download-name-input"
           defaultValue={defaultFileName}
-          onChange={() => {}} 
+          onChange={() => {}}
         />
         <button onClick={onCancel}>Cancelar</button>
-        <button onClick={() => onConfirm("archivo_test.md")}>Descargar (.md)</button>
+        <button onClick={() => onConfirm("archivo_test.md")}>
+          Descargar (.md)
+        </button>
       </div>
     )
   }
 }))
 
 vi.mock("~src/components/modals/WarningModal", () => ({
-  WarningModal: ({ title, message, confirmLabel, onConfirm, onCancel }: any) => (
+  WarningModal: ({
+    title,
+    message,
+    confirmLabel,
+    onConfirm,
+    onCancel
+  }: any) => (
     <div data-testid="real-warning-modal">
       <h3>{title}</h3>
       <div>{message}</div>
@@ -174,9 +235,12 @@ vi.mock("~src/components/GeminiGeneration", () => ({
   })
 }))
 
-vi.mock("bundle-text:../../prompts/generation-constraints-attributes/generation_attribute_constraints_from_statement.md", () => ({
-  default: "markdown-raw-content"
-}))
+vi.mock(
+  "bundle-text:../../prompts/generation-constraints-attributes/generation_attribute_constraints_from_statement.md",
+  () => ({
+    default: "markdown-raw-content"
+  })
+)
 vi.mock("~src/utils/logUtils", () => ({ getLogConfig: () => ({}) }))
 vi.mock("../../css/Cards.css", () => ({}))
 vi.mock("../storage/css/FoldersGridScreen.css", () => ({}))
@@ -186,7 +250,7 @@ const PRUEBA_PROYECTO_NUEVO = {
   domainName: "clínica veterinaria",
   customName: "Examen Perros y Gatos",
   extensionFinish: "Enunciado del flujo de la clínica veterinaria",
-  attributeConstraints: "" 
+  attributeConstraints: ""
 }
 
 const PRUEBA_PROYECTO_EXISTENTE = {
@@ -220,7 +284,7 @@ describe("AttributesConstraintsWorkflowScreen", () => {
   beforeEach(() => {
     cleanup()
     vi.clearAllMocks()
-    
+
     mockGetChromeStorage.mockImplementation((_keys, callback) => {
       callback({
         project_vet: PRUEBA_PROYECTO_NUEVO,
@@ -233,8 +297,10 @@ describe("AttributesConstraintsWorkflowScreen", () => {
   describe("Casos Positivos", () => {
     it("carga y filtra los proyectos del Chrome Storage mostrando la vista de carpetas", async () => {
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      expect(screen.getByTestId("real-header")).toHaveTextContent("RESTRICCIONES DE ATRIBUTOS")
-      
+      expect(screen.getByTestId("real-header")).toHaveTextContent(
+        "RESTRICCIONES DE ATRIBUTOS"
+      )
+
       await waitFor(() => {
         expect(screen.getByTestId("selector-folders-view")).toBeInTheDocument()
       })
@@ -242,94 +308,145 @@ describe("AttributesConstraintsWorkflowScreen", () => {
 
     it("navega correctamente a la vista de proyectos dentro de una carpeta", async () => {
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      const folderBtn = await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      const folderBtn = await screen.findByRole("button", {
+        name: "CLÍNICA VETERINARIA"
+      })
       await userEvent.click(folderBtn)
 
       expect(screen.getByTestId("selector-projects-view")).toBeInTheDocument()
-      expect(screen.getByText("Exámenes de CLÍNICA VETERINARIA")).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "Examen Perros y Gatos" })).toBeInTheDocument()
+      expect(
+        screen.getByText("Exámenes de CLÍNICA VETERINARIA")
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      ).toBeInTheDocument()
     })
 
     it("abre el ConfirmModal de forma transparente al elegir un proyecto sin restricciones previas", async () => {
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
 
       expect(screen.getByTestId("real-confirm-modal")).toBeInTheDocument()
       expect(screen.queryByTestId("modal-warning")).not.toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "Confirmar" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Confirmar" })
+      ).toBeInTheDocument()
     })
 
     it("renderiza el PromptEditor con los textos parseados tras confirmar el proyecto", async () => {
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
 
       expect(screen.getByTestId("real-prompt-editor")).toBeInTheDocument()
-      expect(screen.getByTestId("prompt-textarea")).toHaveValue("Prompt base de restricciones")
+      expect(screen.getByTestId("prompt-textarea")).toHaveValue(
+        "Prompt base de restricciones"
+      )
     })
 
     it("transiciona a la vista SplitResultView de manera exitosa tras invocar la generación con la IA", async () => {
-      mockGenerate.mockResolvedValue("Propuesta de restricciones simuladas por Gemini IA")
+      mockGenerate.mockResolvedValue(
+        "Propuesta de restricciones simuladas por Gemini IA"
+      )
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
 
       expect(mockGenerate).toHaveBeenCalled()
       expect(screen.getByTestId("real-split-view")).toBeInTheDocument()
-      expect(screen.getByTestId("split-right-response")).toHaveValue("Propuesta de restricciones simuladas por Gemini IA")
+      expect(screen.getByTestId("split-right-response")).toHaveValue(
+        "Propuesta de restricciones simuladas por Gemini IA"
+      )
     })
 
     it("abre el modal de éxito tras guardar de forma persistente en Chrome Storage", async () => {
-      mockGenerate.mockResolvedValue("Propuesta de restricciones simuladas por Gemini IA")
+      mockGenerate.mockResolvedValue(
+        "Propuesta de restricciones simuladas por Gemini IA"
+      )
       mockSaveToChrome.mockResolvedValue(true)
-      
+
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
 
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
-      
-      expect(mockSaveToChrome).toHaveBeenCalledWith("project_veterinaria", expect.any(Object))
-      expect(await screen.findByTestId("real-success-modal")).toBeInTheDocument()
+
+      expect(mockSaveToChrome).toHaveBeenCalledWith(
+        "project_veterinaria",
+        expect.any(Object)
+      )
+      expect(
+        await screen.findByTestId("real-success-modal")
+      ).toBeInTheDocument()
     })
 
     it("procesa la descarga del archivo Markdown disparando los utils nativos", async () => {
       mockGenerate.mockResolvedValue("Resultado")
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
 
       const footerContainer = screen.getByTestId("split-footer")
-      const openModalBtn = within(footerContainer).getByRole("button", { name: "Descargar (.md)" })
+      const openModalBtn = within(footerContainer).getByRole("button", {
+        name: "Descargar (.md)"
+      })
       await userEvent.click(openModalBtn)
 
       const downloadModal = screen.getByTestId("real-download-modal")
       expect(downloadModal).toBeInTheDocument()
 
-      const confirmDownloadBtn = within(downloadModal).getByRole("button", { name: "Descargar (.md)" })
+      const confirmDownloadBtn = within(downloadModal).getByRole("button", {
+        name: "Descargar (.md)"
+      })
       await userEvent.click(confirmDownloadBtn)
 
       expect(mockDownloadMarkdown).toHaveBeenCalledWith(
-        expect.stringContaining("# Restricciones de Atributos - Examen Perros y Gatos"),
+        expect.stringContaining(
+          "# Restricciones de Atributos - Examen Perros y Gatos"
+        ),
         "archivo_test.md"
       )
     })
   })
-    describe("Casos Negativos", () => {
+  describe("Casos Negativos", () => {
     it("cancela el flujo de trabajo y limpia la selección si se declina el ConfirmModal", async () => {
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
 
       expect(screen.getByTestId("real-confirm-modal")).toBeInTheDocument()
       await userEvent.click(screen.getByRole("button", { name: "Cancelar" }))
@@ -342,8 +459,12 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       mockGenerate.mockResolvedValue(null)
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
 
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
 
@@ -354,16 +475,24 @@ describe("AttributesConstraintsWorkflowScreen", () => {
     it("captura y lanza una alerta controlada si la llamada de guardado a saveToChrome es rechazada", async () => {
       const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {})
       mockGenerate.mockResolvedValue("Resultado")
-      mockSaveToChrome.mockRejectedValue(new Error("Error crítico de cuota de almacenamiento"))
+      mockSaveToChrome.mockRejectedValue(
+        new Error("Error crítico de cuota de almacenamiento")
+      )
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
-      expect(alertSpy).toHaveBeenCalledWith("Error crítico de cuota de almacenamiento")
+      expect(alertSpy).toHaveBeenCalledWith(
+        "Error crítico de cuota de almacenamiento"
+      )
       alertSpy.mockRestore()
     })
   })
@@ -371,13 +500,20 @@ describe("AttributesConstraintsWorkflowScreen", () => {
   describe("Casos de Límite y Reglas de Negocio", () => {
     it("inyecta la advertencia de reemplazo si el examen ya cuenta con restricciones de atributos registradas", async () => {
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "AJEDREZ" }))
-      await userEvent.click(screen.getByRole("button", { name: "Final Ajedrez Magnvs" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "AJEDREZ" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Final Ajedrez Magnvs" })
+      )
 
-      const msgRegex = /Este examen ya tiene restricciones de atributos generadas\..*Si continúas, las restricciones anteriores serán reemplazadas por las nuevas\./i
-      
+      const msgRegex =
+        /Este examen ya tiene restricciones de atributos generadas\..*Si continúas, las restricciones anteriores serán reemplazadas por las nuevas\./i
+
       expect(screen.getByTestId("modal-warning")).toHaveTextContent(msgRegex)
-      expect(screen.getByRole("button", { name: "Continuar y reemplazar" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Continuar y reemplazar" })
+      ).toBeInTheDocument()
     })
 
     it("dispara un WarningModal al presionar 'Sí' en el SuccessModal si el proyecto carece de clases base", async () => {
@@ -385,8 +521,12 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       mockSaveToChrome.mockResolvedValue(true)
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
@@ -398,13 +538,21 @@ describe("AttributesConstraintsWorkflowScreen", () => {
     })
 
     it("llama de manera directa a onCreateTest si el examen posee sus Clases Base tras la confirmación", async () => {
-      mockGenerate.mockResolvedValue("Propuesta de restricciones simuladas por Gemini IA")
+      mockGenerate.mockResolvedValue(
+        "Propuesta de restricciones simuladas por Gemini IA"
+      )
       mockSaveToChrome.mockResolvedValue(true)
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "AJEDREZ" }))
-      await userEvent.click(screen.getByRole("button", { name: "Final Ajedrez Magnvs" }))
-      await userEvent.click(screen.getByRole("button", { name: "Continuar y reemplazar" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "AJEDREZ" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Final Ajedrez Magnvs" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Continuar y reemplazar" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
@@ -419,7 +567,8 @@ describe("AttributesConstraintsWorkflowScreen", () => {
             id: "project_ajedrez",
             domainName: "ajedrez",
             customName: "Final Ajedrez Magnvs",
-            attributeConstraints: "Propuesta de restricciones simuladas por Gemini IA"
+            attributeConstraints:
+              "Propuesta de restricciones simuladas por Gemini IA"
           })
         })
       )
@@ -427,11 +576,13 @@ describe("AttributesConstraintsWorkflowScreen", () => {
 
     it("ejecuta de manera exitosa los ruteos configurados en el sistema de Breadcrumbs", async () => {
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      
+
       await userEvent.click(screen.getByRole("button", { name: "INICIO" }))
       expect(baseProps.onWelcome).toHaveBeenCalled()
 
-      await userEvent.click(screen.getByRole("button", { name: "CREAR EXAMEN" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "CREAR EXAMEN" })
+      )
       expect(baseProps.onCreateExam).toHaveBeenCalled()
 
       await userEvent.click(screen.getByRole("button", { name: "POR PARTES" }))
@@ -443,9 +594,9 @@ describe("AttributesConstraintsWorkflowScreen", () => {
   })
 
   describe("Cobertura de Ramas y Líneas Específicas", () => {
-    
     beforeEach(() => {
-      geminiMockControl.responseText = "Propuesta de restricciones simuladas por Gemini IA"
+      geminiMockControl.responseText =
+        "Propuesta de restricciones simuladas por Gemini IA"
       geminiMockControl.isLoading = false
     })
 
@@ -454,8 +605,12 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       mockGenerate.mockResolvedValue("Resultado")
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
 
@@ -467,12 +622,16 @@ describe("AttributesConstraintsWorkflowScreen", () => {
     it("línea 155: muestra el mensaje por defecto en el alert si el error capturado no es una instancia de Error", async () => {
       const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {})
       mockGenerate.mockResolvedValue("Resultado válido")
-      
+
       mockSaveToChrome.mockRejectedValue("Error de Texto Plano Crítico")
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
@@ -486,8 +645,12 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       mockSaveToChrome.mockResolvedValue(true)
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
@@ -502,9 +665,13 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       geminiMockControl.isLoading = true
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
-      
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
+
       expect(screen.getByTestId("real-confirm-modal")).toBeInTheDocument()
     })
 
@@ -513,15 +680,21 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       mockSaveToChrome.mockResolvedValue(true)
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
       await userEvent.click(screen.getByRole("button", { name: "Sí" }))
 
-      const confirmWarningBtn = screen.getByRole("button", { name: "Ir a crear Clases Base" })
+      const confirmWarningBtn = screen.getByRole("button", {
+        name: "Ir a crear Clases Base"
+      })
       await userEvent.click(confirmWarningBtn)
 
       expect(baseProps.onGoToBaseClass).toHaveBeenCalledWith(
@@ -534,8 +707,12 @@ describe("AttributesConstraintsWorkflowScreen", () => {
       mockSaveToChrome.mockResolvedValue(true)
 
       render(<AttributesConstraintsWorkflowScreen {...baseProps} />)
-      await userEvent.click(await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" }))
-      await userEvent.click(screen.getByRole("button", { name: "Examen Perros y Gatos" }))
+      await userEvent.click(
+        await screen.findByRole("button", { name: "CLÍNICA VETERINARIA" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Examen Perros y Gatos" })
+      )
       await userEvent.click(screen.getByRole("button", { name: "Confirmar" }))
       await userEvent.click(screen.getByRole("button", { name: "Generar" }))
       await userEvent.click(screen.getByRole("button", { name: "Guardar" }))

@@ -1,6 +1,8 @@
-import { render, screen, fireEvent } from "@testing-library/react"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import { fireEvent, render, screen } from "@testing-library/react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import { GeneratedCodeScreen } from "./GenerationCodeScreen"
 
 describe("GenerationCodeScreen Integration Tests", () => {
@@ -13,7 +15,7 @@ describe("GenerationCodeScreen Integration Tests", () => {
     id: "project-123",
     name: "Mi Examen Personalizado",
     baseClasses: "public class Main {}",
-    tests: [], 
+    tests: []
   }
 
   const defaultProps = {
@@ -26,17 +28,21 @@ describe("GenerationCodeScreen Integration Tests", () => {
     onUpdateProject: mockOnUpdateProject,
     onDeleteTest: mockOnDeleteTest,
     onDeleteSection: mockOnDeleteSection,
-    navigate: mockNavigate,
+    navigate: mockNavigate
   }
 
   const errorProps = {
     ...defaultProps,
-    onUpdateProject: vi.fn().mockRejectedValue(new Error("Error de conexión con el servidor")),
+    onUpdateProject: vi
+      .fn()
+      .mockRejectedValue(new Error("Error de conexión con el servidor"))
   }
 
   const stringErrorProps = {
     ...defaultProps,
-    onUpdateProject: vi.fn().mockRejectedValue("Error genérico en formato string"),
+    onUpdateProject: vi
+      .fn()
+      .mockRejectedValue("Error genérico en formato string")
   }
 
   const ensureTestButtonExists = (callbackToTrigger: () => void) => {
@@ -56,7 +62,7 @@ describe("GenerationCodeScreen Integration Tests", () => {
 
   it("debería abrir el modal y borrar la sección completa de clases base", async () => {
     render(<GeneratedCodeScreen {...defaultProps} />)
-    
+
     const deleteBtn = screen.getByTitle("Eliminar Clases Base")
     fireEvent.click(deleteBtn)
   })
@@ -68,7 +74,7 @@ describe("GenerationCodeScreen Integration Tests", () => {
 
     const deleteTestBtn = screen.getByTitle("Eliminar TestDos.java")
     fireEvent.click(deleteTestBtn)
-    
+
     expect(mockOnDeleteTest).toHaveBeenCalled()
   })
 
@@ -86,16 +92,17 @@ describe("GenerationCodeScreen Integration Tests", () => {
 
   it("debería cerrar el modal sin aplicar cambios si se cancela la eliminación", async () => {
     render(<GeneratedCodeScreen {...defaultProps} />)
-    
+
     const deleteBtn = screen.getByTitle("Eliminar Clases Base")
     fireEvent.click(deleteBtn)
   })
 
-
   it("debería permitir editar las clases base y mostrar el botón de guardar cambios", async () => {
     render(<GeneratedCodeScreen {...defaultProps} />)
 
-    expect(screen.queryByRole("button", { name: "Guardar cambios" })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Guardar cambios" })
+    ).not.toBeInTheDocument()
 
     const editToggles = screen.getAllByText("🔒 No editable")
     fireEvent.click(editToggles[0])
@@ -110,7 +117,9 @@ describe("GenerationCodeScreen Integration Tests", () => {
 
     const textarea = screen.getByRole("textbox")
     if (textarea) {
-      fireEvent.change(textarea, { target: { value: "public class Main { // Código modificado }" } })
+      fireEvent.change(textarea, {
+        target: { value: "public class Main { // Código modificado }" }
+      })
     }
   })
 
@@ -134,7 +143,9 @@ describe("GenerationCodeScreen Integration Tests", () => {
 
     const textarea = screen.getByRole("textbox")
     if (textarea) {
-      fireEvent.change(textarea, { target: { value: "cambio con error string" } })
+      fireEvent.change(textarea, {
+        target: { value: "cambio con error string" }
+      })
     }
   })
 })

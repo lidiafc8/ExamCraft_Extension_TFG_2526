@@ -1,8 +1,10 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import React from "react"
-import { render, screen, fireEvent, waitFor } from "@testing-library/react"
-import { describe, test, expect, beforeEach, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
+
 import "@testing-library/jest-dom"
-import ContextWorkflowScreen from "./ContextWorkflowScreen" 
+
+import ContextWorkflowScreen from "./ContextWorkflowScreen"
 
 vi.mock(
   "bundle-text:../../prompts/functional-extension-generation/generation_statement_functional_extension.md",
@@ -87,7 +89,7 @@ const defaultProps = {
 describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     globalThis.chrome = {
       storage: {
         local: {
@@ -99,7 +101,9 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
 
   describe("Flujos Positivos", () => {
     beforeEach(() => {
-      mockGetStorage.mockImplementation((fields: any, callback: Function) => callback({}))
+      mockGetStorage.mockImplementation((fields: any, callback: Function) =>
+        callback({})
+      )
     })
 
     test("Debería completar el flujo completo desde el input hasta la confirmación final y paso al diagrama UML", async () => {
@@ -110,8 +114,10 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
       expect(screen.getByTestId("stepper")).toHaveTextContent("Paso: 1")
       const input = screen.getByTestId("prompt-input") as HTMLTextAreaElement
       expect(input.value).toContain("Veterinaria")
-      
-      const generateBtn = screen.getByRole("button", { name: /Generar Enunciado/i })
+
+      const generateBtn = screen.getByRole("button", {
+        name: /Generar Enunciado/i
+      })
       fireEvent.click(generateBtn)
 
       expect(mockGenerate).toHaveBeenCalled()
@@ -120,22 +126,34 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
         expect(screen.getByTestId("split-view")).toBeInTheDocument()
       })
 
-      const confirmBtn = screen.getByRole("button", { name: /Confirmar y Continuar/i })
+      const confirmBtn = screen.getByRole("button", {
+        name: /Confirmar y Continuar/i
+      })
       fireEvent.click(confirmBtn)
 
       expect(screen.getByTestId("stepper")).toHaveTextContent("Paso: 2")
-      expect(screen.getByText(/¿Está seguro que desea usar el texto de enunciado generado?/i)).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          /¿Está seguro que desea usar el texto de enunciado generado?/i
+        )
+      ).toBeInTheDocument()
 
-      const finalConfirmBtn = screen.getByRole("button", { name: /Confirmar y pasar al paso 2/i })
+      const finalConfirmBtn = screen.getByRole("button", {
+        name: /Confirmar y pasar al paso 2/i
+      })
       fireEvent.click(finalConfirmBtn)
 
-      expect(defaultProps.onCreateDiagram).toHaveBeenCalledWith("Resultado exitoso de la IA")
+      expect(defaultProps.onCreateDiagram).toHaveBeenCalledWith(
+        "Resultado exitoso de la IA"
+      )
     })
   })
 
   describe("Flujos Negativos", () => {
     beforeEach(() => {
-      mockGetStorage.mockImplementation((fields: any, callback: Function) => callback({}))
+      mockGetStorage.mockImplementation((fields: any, callback: Function) =>
+        callback({})
+      )
     })
 
     test("Debería mantenerse en la vista 'input' si la llamada a Gemini falla y devuelve null", async () => {
@@ -143,7 +161,9 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
 
       render(<ContextWorkflowScreen {...defaultProps} />)
 
-      const generateBtn = screen.getByRole("button", { name: /Generar Enunciado/i })
+      const generateBtn = screen.getByRole("button", {
+        name: /Generar Enunciado/i
+      })
       fireEvent.click(generateBtn)
 
       await waitFor(() => {
@@ -155,30 +175,57 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
     })
   })
 
-
   describe("Casos Límite", () => {
     test("Debería mapear, filtrar e inyectar múltiples extensiones previas correctas del storage ignorando otros dominios", async () => {
       const fakeStorage = {
-        "project_1": { domainName: "veterinaria", extensionFinish: "Texto Extensión 1" },
-        "project_2": { domainName: "arquitectura", extensionFinish: "Texto Extensión 2" },
-        "project_3": { domainName: "VETERINARIA", customName: "Proyecto Custom", extensionFinish: "Texto Extensión 3" }
+        project_1: {
+          domainName: "veterinaria",
+          extensionFinish: "Texto Extensión 1"
+        },
+        project_2: {
+          domainName: "arquitectura",
+          extensionFinish: "Texto Extensión 2"
+        },
+        project_3: {
+          domainName: "VETERINARIA",
+          customName: "Proyecto Custom",
+          extensionFinish: "Texto Extensión 3"
+        }
       }
-      mockGetStorage.mockImplementation((fields: any, callback: Function) => callback(fakeStorage))
+      mockGetStorage.mockImplementation((fields: any, callback: Function) =>
+        callback(fakeStorage)
+      )
       mockGenerate.mockResolvedValueOnce("OK")
 
-      render(<ContextWorkflowScreen {...defaultProps} domainName="Veterinaria" />)
+      render(
+        <ContextWorkflowScreen {...defaultProps} domainName="Veterinaria" />
+      )
 
       await waitFor(() => {
-        const generateBtn = screen.getByRole("button", { name: /Generar Enunciado/i })
+        const generateBtn = screen.getByRole("button", {
+          name: /Generar Enunciado/i
+        })
         fireEvent.click(generateBtn)
       })
 
-      expect(mockGenerate).toHaveBeenCalledWith(expect.stringContaining("EXTENSIÓN FUNCIONAL PREVIA 1 (veterinaria)"))
-      expect(mockGenerate).toHaveBeenCalledWith(expect.stringContaining("Texto Extensión 1"))
-      expect(mockGenerate).toHaveBeenCalledWith(expect.stringContaining("EXTENSIÓN FUNCIONAL PREVIA 2 (Proyecto Custom)"))
-      expect(mockGenerate).toHaveBeenCalledWith(expect.stringContaining("Texto Extensión 3"))
-      
-      expect(mockGenerate).not.toHaveBeenCalledWith(expect.stringContaining("Texto Extensión 2"))
+      expect(mockGenerate).toHaveBeenCalledWith(
+        expect.stringContaining("EXTENSIÓN FUNCIONAL PREVIA 1 (veterinaria)")
+      )
+      expect(mockGenerate).toHaveBeenCalledWith(
+        expect.stringContaining("Texto Extensión 1")
+      )
+      expect(mockGenerate).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "EXTENSIÓN FUNCIONAL PREVIA 2 (Proyecto Custom)"
+        )
+      )
+      expect(mockGenerate).toHaveBeenCalledWith(
+        expect.stringContaining("Texto Extensión 3")
+      )
+
+      expect(mockGenerate).not.toHaveBeenCalledWith(
+        expect.stringContaining("Texto Extensión 2")
+      )
     })
 
     test("No debería romper la aplicación ni lanzar excepciones si chrome.storage es undefined (Entorno Web/No Extensión)", () => {
@@ -194,7 +241,9 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
 
   describe("Variaciones de Flujo y Cancelaciones", () => {
     beforeEach(() => {
-      mockGetStorage.mockImplementation((fields: any, callback: Function) => callback({}))
+      mockGetStorage.mockImplementation((fields: any, callback: Function) =>
+        callback({})
+      )
     })
 
     test("Debería permitir al usuario cancelar en el Paso 2, regresar al Paso 1 y conservar las modificaciones manuales del prompt", async () => {
@@ -202,26 +251,42 @@ describe("ContextWorkflowScreen - Integration Tests Suite (Vitest)", () => {
 
       render(<ContextWorkflowScreen {...defaultProps} />)
 
-      const inputPaso1 = screen.getByTestId("prompt-input") as HTMLTextAreaElement
-      fireEvent.change(inputPaso1, { target: { value: "Prompt modificado manualmente por el docente" } })
+      const inputPaso1 = screen.getByTestId(
+        "prompt-input"
+      ) as HTMLTextAreaElement
+      fireEvent.change(inputPaso1, {
+        target: { value: "Prompt modificado manualmente por el docente" }
+      })
 
-      fireEvent.click(screen.getByRole("button", { name: /Generar Enunciado/i }))
+      fireEvent.click(
+        screen.getByRole("button", { name: /Generar Enunciado/i })
+      )
 
       await waitFor(() => {
         expect(screen.getByTestId("split-view")).toBeInTheDocument()
       })
 
-      const inputResult = screen.getByTestId("prompt-result-input") as HTMLTextAreaElement
-      fireEvent.change(inputResult, { target: { value: "Prompt modificado por segunda vez" } })
+      const inputResult = screen.getByTestId(
+        "prompt-result-input"
+      ) as HTMLTextAreaElement
+      fireEvent.change(inputResult, {
+        target: { value: "Prompt modificado por segunda vez" }
+      })
 
-      fireEvent.click(screen.getByRole("button", { name: /Confirmar y Continuar/i }))
+      fireEvent.click(
+        screen.getByRole("button", { name: /Confirmar y Continuar/i })
+      )
       expect(screen.getByTestId("stepper")).toHaveTextContent("Paso: 2")
 
-      const cancelBtn = screen.getByRole("button", { name: /Cancelar y seguir editando enunciado/i })
+      const cancelBtn = screen.getByRole("button", {
+        name: /Cancelar y seguir editando enunciado/i
+      })
       fireEvent.click(cancelBtn)
 
       expect(screen.getByTestId("stepper")).toHaveTextContent("Paso: 1")
-      const inputRegreso = screen.getByTestId("prompt-result-input") as HTMLTextAreaElement
+      const inputRegreso = screen.getByTestId(
+        "prompt-result-input"
+      ) as HTMLTextAreaElement
       expect(inputRegreso.value).toBe("Prompt modificado por segunda vez")
     })
   })

@@ -1,12 +1,15 @@
-import React from "react"
 import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
-import SelectionGenerationTestScreen from "./SelectionGenerationTestScreen"
 import { getAllFromChrome } from "~src/utils/chromeStorageUtils"
+
+import SelectionGenerationTestScreen from "./SelectionGenerationTestScreen"
 
 expect.extend(jestDomMatchers)
 
@@ -31,7 +34,12 @@ vi.mock("~src/components/Header", () => ({
 }))
 
 vi.mock("../../components/FolderExamsSelector", () => ({
-  FolderExamSelector: ({ projects, onSelectProject, onBack, displayName }: any) => (
+  FolderExamSelector: ({
+    projects,
+    onSelectProject,
+    onBack,
+    displayName
+  }: any) => (
     <div data-testid="selector-step-mock">
       <button onClick={onBack}>Volver Selector</button>
       <ul>
@@ -56,12 +64,12 @@ const mockProjects = [
     entityRelationships: "relationships { length > 10 caracteres }",
     customName: "Examen Final A",
     testPartsMap: {
-      test1_attributes: { code: "  " }, 
-      test2_relationships: { code: "const valid = true;" } 
+      test1_attributes: { code: "  " },
+      test2_relationships: { code: "const valid = true;" }
     }
   },
   {
-    _key: "project_invalido_corto", 
+    _key: "project_invalido_corto",
     domainName: "Historia",
     baseClasses: "corto",
     attributeConstraints: "corto"
@@ -89,10 +97,14 @@ describe("Integración: SelectionGenerationTestScreen", () => {
 
       expect(screen.getByTestId("header-mock")).toBeInTheDocument()
       expect(screen.getByTestId("current-step")).toHaveTextContent("TESTS")
-      
+
       expect(screen.getByRole("button", { name: "INICIO" })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "CREAR EXAMEN" })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "POR PARTES" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "CREAR EXAMEN" })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "POR PARTES" })
+      ).toBeInTheDocument()
       expect(screen.getByRole("button", { name: "CÓDIGO" })).toBeInTheDocument()
     })
 
@@ -103,8 +115,12 @@ describe("Integración: SelectionGenerationTestScreen", () => {
         expect(screen.getByTestId("selector-step-mock")).toBeInTheDocument()
       })
 
-      expect(screen.getByRole("button", { name: "Examen Final A" })).toBeInTheDocument()
-      expect(screen.queryByRole("button", { name: /Historia/i })).not.toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Examen Final A" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /Historia/i })
+      ).not.toBeInTheDocument()
     })
 
     it("ejecuta los callbacks de navegación del Header y del Selector", async () => {
@@ -116,8 +132,12 @@ describe("Integración: SelectionGenerationTestScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "CÓDIGO" }))
       expect(defaultProps.onCodeGeneration).toHaveBeenCalledTimes(1)
 
-      await waitFor(() => screen.getByRole("button", { name: "Volver Selector" }))
-      await userEvent.click(screen.getByRole("button", { name: "Volver Selector" }))
+      await waitFor(() =>
+        screen.getByRole("button", { name: "Volver Selector" })
+      )
+      await userEvent.click(
+        screen.getByRole("button", { name: "Volver Selector" })
+      )
       expect(defaultProps.onBack).toHaveBeenCalledTimes(1)
     })
   })
@@ -125,17 +145,28 @@ describe("Integración: SelectionGenerationTestScreen", () => {
   describe("Paso 2: Selección de Partes a Evaluar", () => {
     const avanzarAlPasoPartes = async () => {
       render(<SelectionGenerationTestScreen {...defaultProps} />)
-      const proyectoBtn = await screen.findByRole("button", { name: "Examen Final A" })
+      const proyectoBtn = await screen.findByRole("button", {
+        name: "Examen Final A"
+      })
       await userEvent.click(proyectoBtn)
     }
 
     it("cambia de paso y muestra las partes evaluables del proyecto seleccionado", async () => {
       await avanzarAlPasoPartes()
 
-      expect(screen.getByRole("heading", { name: "¿Qué parte quieres evaluar?", level: 1 })).toBeInTheDocument()
-      
-      expect(screen.getByRole("button", { name: /Restricciones de Atributos/i })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: /Relaciones entre Entidades/i })).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", {
+          name: "¿Qué parte quieres evaluar?",
+          level: 1
+        })
+      ).toBeInTheDocument()
+
+      expect(
+        screen.getByRole("button", { name: /Restricciones de Atributos/i })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: /Relaciones entre Entidades/i })
+      ).toBeInTheDocument()
     })
 
     it("permite regresar al paso del selector mediante el botón Volver", async () => {
@@ -145,60 +176,93 @@ describe("Integración: SelectionGenerationTestScreen", () => {
       await userEvent.click(btnVolver)
 
       expect(screen.getByTestId("selector-step-mock")).toBeInTheDocument()
-      expect(screen.queryByRole("heading", { name: "¿Qué parte quieres evaluar?" })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("heading", { name: "¿Qué parte quieres evaluar?" })
+      ).not.toBeInTheDocument()
     })
   })
 
   describe("Flujo del Modal de Confirmación (Portales)", () => {
     const avanzarAlPasoPartes = async () => {
       render(<SelectionGenerationTestScreen {...defaultProps} />)
-      const proyectoBtn = await screen.findByRole("button", { name: "Examen Final A" })
+      const proyectoBtn = await screen.findByRole("button", {
+        name: "Examen Final A"
+      })
       await userEvent.click(proyectoBtn)
     }
 
     it("abre el modal sin advertencia si la parte seleccionada no tiene tests previos", async () => {
       await avanzarAlPasoPartes()
 
-      const btnAtributos = screen.getByRole("button", { name: /Restricciones de Atributos/i })
+      const btnAtributos = screen.getByRole("button", {
+        name: /Restricciones de Atributos/i
+      })
       await userEvent.click(btnAtributos)
 
-      const modalTitle = screen.getByRole("heading", { name: "Confirmar Parte", level: 3 })
+      const modalTitle = screen.getByRole("heading", {
+        name: "Confirmar Parte",
+        level: 3
+      })
       expect(modalTitle).toBeInTheDocument()
-      
-      expect(screen.getByText(/¿Deseas utilizar el ejercicio seleccionado como base para generar los tests de Restricciones de Atributos?/i)).toBeInTheDocument()
-      expect(screen.queryByText(/Al generar nuevos se sobrescribirán los anteriores/i)).not.toBeInTheDocument()
+
+      expect(
+        screen.getByText(
+          /¿Deseas utilizar el ejercicio seleccionado como base para generar los tests de Restricciones de Atributos?/i
+        )
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByText(
+          /Al generar nuevos se sobrescribirán los anteriores/i
+        )
+      ).not.toBeInTheDocument()
     })
 
     it("abre el modal con mensaje de advertencia si la parte seleccionada ya tiene tests guardados", async () => {
       await avanzarAlPasoPartes()
 
-      const btnRelaciones = screen.getByRole("button", { name: /Relaciones entre Entidades/i })
+      const btnRelaciones = screen.getByRole("button", {
+        name: /Relaciones entre Entidades/i
+      })
       await userEvent.click(btnRelaciones)
 
-      expect(screen.getByRole("heading", { name: "Confirmar Examen", level: 3 })).toBeInTheDocument()
-      expect(screen.getByText(/Ya existen tests guardados para Relaciones entre Entidades. Al generar nuevos se sobrescribirán los anteriores./i)).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", { name: "Confirmar Examen", level: 3 })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          /Ya existen tests guardados para Relaciones entre Entidades. Al generar nuevos se sobrescribirán los anteriores./i
+        )
+      ).toBeInTheDocument()
     })
 
     it("cierra el modal sin realizar acciones al presionar Cancelar", async () => {
       await avanzarAlPasoPartes()
 
-      await userEvent.click(screen.getByRole("button", { name: /Restricciones de Atributos/i }))
-      
+      await userEvent.click(
+        screen.getByRole("button", { name: /Restricciones de Atributos/i })
+      )
+
       const btnCancelar = screen.getByRole("button", { name: "Cancelar" })
       expect(btnCancelar).toBeInTheDocument()
 
       await userEvent.click(btnCancelar)
-      
-      expect(screen.queryByRole("button", { name: "Cancelar" })).not.toBeInTheDocument()
-      expect(screen.queryByRole("heading", { name: "Confirmar Parte", level: 3 })).not.toBeInTheDocument()
+
+      expect(
+        screen.queryByRole("button", { name: "Cancelar" })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("heading", { name: "Confirmar Parte", level: 3 })
+      ).not.toBeInTheDocument()
       expect(defaultProps.onCreateTest1).not.toHaveBeenCalled()
     })
 
     it("ejecuta onCreateTest1 con el payload correspondiente al confirmar la acción", async () => {
       await avanzarAlPasoPartes()
 
-      await userEvent.click(screen.getByRole("button", { name: /Restricciones de Atributos/i }))
-      
+      await userEvent.click(
+        screen.getByRole("button", { name: /Restricciones de Atributos/i })
+      )
+
       const btnConfirmar = screen.getByRole("button", { name: "Confirmar" })
       await userEvent.click(btnConfirmar)
 
@@ -210,8 +274,10 @@ describe("Integración: SelectionGenerationTestScreen", () => {
         baseClass: mockProjects[0].baseClasses,
         targetType: "attributes"
       })
-      
-      expect(screen.queryByRole("button", { name: "Confirmar" })).not.toBeInTheDocument()
+
+      expect(
+        screen.queryByRole("button", { name: "Confirmar" })
+      ).not.toBeInTheDocument()
     })
   })
 })

@@ -1,8 +1,10 @@
-import React from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
 import { Header } from "./Header"
@@ -28,7 +30,9 @@ describe("Integración: Header", () => {
       render(<Header {...defaultProps} />)
 
       expect(screen.getByAltText("Logo ExamCraft")).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "Ir a inicio" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Ir a inicio" })
+      ).toBeInTheDocument()
     })
 
     it("renderiza todos los items del breadcrumb", () => {
@@ -42,7 +46,9 @@ describe("Integración: Header", () => {
       render(<Header {...defaultProps} />)
 
       expect(screen.getByText("POR PARTES")).toBeInTheDocument()
-      expect(screen.queryByRole("button", { name: "POR PARTES" })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "POR PARTES" })
+      ).not.toBeInTheDocument()
     })
 
     it("renderiza los separadores entre breadcrumbs", () => {
@@ -87,14 +93,12 @@ describe("Integración: Header", () => {
   describe("Casos Negativos", () => {
     it("no renderiza ningún breadcrumb si el array está vacío", () => {
       render(
-        <Header
-          onWelcome={vi.fn()}
-          breadcrumbItems={[]}
-          currentStep="INICIO"
-        />
+        <Header onWelcome={vi.fn()} breadcrumbItems={[]} currentStep="INICIO" />
       )
 
-      expect(screen.queryByRole("button", { name: "INICIO" })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "INICIO" })
+      ).not.toBeInTheDocument()
       expect(screen.getByText("INICIO")).toBeInTheDocument()
     })
 
@@ -124,15 +128,11 @@ describe("Integración: Header", () => {
 
   describe("Casos Límite", () => {
     it("renderiza correctamente con breadcrumbs vacío y currentStep vacío", () => {
-      render(
-        <Header
-          onWelcome={vi.fn()}
-          breadcrumbItems={[]}
-          currentStep=""
-        />
-      )
+      render(<Header onWelcome={vi.fn()} breadcrumbItems={[]} currentStep="" />)
 
-      expect(screen.getByRole("button", { name: "Ir a inicio" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Ir a inicio" })
+      ).toBeInTheDocument()
     })
 
     it("maneja correctamente muchos breadcrumbs sin romperse", () => {
@@ -206,21 +206,23 @@ describe("Integración: Header", () => {
     })
 
     it("flujo completo: header con breadcrumbs vacíos solo permite navegar con el logo", async () => {
-        const onWelcome = vi.fn()
+      const onWelcome = vi.fn()
 
-        render(
-            <Header
-            onWelcome={onWelcome}
-            breadcrumbItems={[]}
-            currentStep="INICIO"
-            />
-        )
+      render(
+        <Header
+          onWelcome={onWelcome}
+          breadcrumbItems={[]}
+          currentStep="INICIO"
+        />
+      )
 
-        expect(screen.queryByText("INICIO")).toBeInTheDocument()
-        expect(screen.queryAllByRole("button", { name: "INICIO" })).toHaveLength(0) 
+      expect(screen.queryByText("INICIO")).toBeInTheDocument()
+      expect(screen.queryAllByRole("button", { name: "INICIO" })).toHaveLength(
+        0
+      )
 
-        await userEvent.click(screen.getByRole("button", { name: "Ir a inicio" }))
-        expect(onWelcome).toHaveBeenCalledTimes(1)
-        })
+      await userEvent.click(screen.getByRole("button", { name: "Ir a inicio" }))
+      expect(onWelcome).toHaveBeenCalledTimes(1)
+    })
   })
 })

@@ -1,10 +1,11 @@
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react"
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
 
-import { ExamDetailScreen } from "./ExamDetailScreen"
 import { generateWithAI } from "../../services/geminiService"
+import { ExamDetailScreen } from "./ExamDetailScreen"
 
 vi.mock("../../services/geminiService", () => ({
   generateWithAI: vi.fn()
@@ -15,7 +16,10 @@ vi.mock("../../components/Header", () => ({
     <header data-testid="mock-header">
       <h1>{currentStep}</h1>
       {breadcrumbItems.map((item: any, idx: number) => (
-        <button key={idx} data-testid={`breadcrumb-btn-${idx}`} onClick={item.action}>
+        <button
+          key={idx}
+          data-testid={`breadcrumb-btn-${idx}`}
+          onClick={item.action}>
           {item.label}
         </button>
       ))}
@@ -45,11 +49,18 @@ vi.mock("~src/components/modals/DeleteConfirmationModal", () => ({
 }))
 
 vi.mock("~src/components/modals/DownloadConfirmModal", () => ({
-  DownloadConfirmModal: ({ isOpen, defaultFileName, onConfirm, onCancel }: any) =>
+  DownloadConfirmModal: ({
+    isOpen,
+    defaultFileName,
+    onConfirm,
+    onCancel
+  }: any) =>
     isOpen ? (
       <div data-testid="download-modal">
         <p>Descargar {defaultFileName}</p>
-        <button onClick={() => onConfirm("archivo-final.md")}>Confirmar Descarga</button>
+        <button onClick={() => onConfirm("archivo-final.md")}>
+          Confirmar Descarga
+        </button>
         <button onClick={onCancel}>Cancelar Descarga</button>
       </div>
     ) : null
@@ -104,14 +115,18 @@ describe("Integration Test - ExamDetailScreen", () => {
   it("debería montar la vista inicial, reflejar los datos del proyecto y navegar por breadcrumbs", () => {
     render(<ExamDetailScreen {...defaultProps} />)
 
-    expect(screen.getByTestId("mock-header")).toHaveTextContent("Examen Final de Prueba")
+    expect(screen.getByTestId("mock-header")).toHaveTextContent(
+      "Examen Final de Prueba"
+    )
     expect(screen.getByText("Extensión Funcional")).toBeInTheDocument()
 
     const textareas = screen.getAllByRole("textbox") as HTMLTextAreaElement[]
     expect(textareas[0].value).toContain("Enunciado inicial del problema.")
     expect(textareas[1].value).toBe("Edad debe ser > 0")
 
-    expect(screen.getByTestId("mermaid-viewer").textContent).toMatch(/clean-classDiagram\s*Animal\s*<\|--\s*Perro/)
+    expect(screen.getByTestId("mermaid-viewer").textContent).toMatch(
+      /clean-classDiagram\s*Animal\s*<\|--\s*Perro/
+    )
 
     fireEvent.click(screen.getByTestId("breadcrumb-btn-0"))
     expect(defaultProps.onWelcome).toHaveBeenCalledTimes(1)
@@ -128,15 +143,22 @@ describe("Integration Test - ExamDetailScreen", () => {
 
   it("debería activar la edición de campos, procesar el debounce de la IA para regenerar el diagrama y guardar los cambios", async () => {
     vi.useFakeTimers()
-    vi.mocked(generateWithAI).mockResolvedValue({ result: "classDiagram\nAnimal <|-- Gato", provider: "gemini" })
+    vi.mocked(generateWithAI).mockResolvedValue({
+      result: "classDiagram\nAnimal <|-- Gato",
+      provider: "gemini"
+    })
 
     render(<ExamDetailScreen {...defaultProps} />)
 
-    const btnLockCombined = screen.getAllByRole("button", { name: "🔒 No editable" })[0]
+    const btnLockCombined = screen.getAllByRole("button", {
+      name: "🔒 No editable"
+    })[0]
     fireEvent.click(btnLockCombined)
 
     const textareaCombined = screen.getAllByRole("textbox")[0]
-    fireEvent.change(textareaCombined, { target: { value: "Nuevo enunciado modificado." } })
+    fireEvent.change(textareaCombined, {
+      target: { value: "Nuevo enunciado modificado." }
+    })
 
     act(() => {
       vi.advanceTimersByTime(1500)
@@ -145,10 +167,14 @@ describe("Integration Test - ExamDetailScreen", () => {
     vi.useRealTimers()
 
     await waitFor(() => {
-      expect(generateWithAI).toHaveBeenCalledWith(expect.stringContaining("Nuevo enunciado modificado."))
+      expect(generateWithAI).toHaveBeenCalledWith(
+        expect.stringContaining("Nuevo enunciado modificado.")
+      )
     })
 
-    const btnGuardar = await screen.findByRole("button", { name: "Guardar cambios" })
+    const btnGuardar = await screen.findByRole("button", {
+      name: "Guardar cambios"
+    })
     fireEvent.click(btnGuardar)
 
     await waitFor(() => {
@@ -166,11 +192,15 @@ describe("Integration Test - ExamDetailScreen", () => {
     fireEvent.click(btnPreview)
     expect(screen.getByText("Previsualización del Examen")).toBeInTheDocument()
 
-    const closePreviewBtn = document.querySelector(".preview-close-btn") || screen.getAllByText("✕")[0]
+    const closePreviewBtn =
+      document.querySelector(".preview-close-btn") ||
+      screen.getAllByText("✕")[0]
     fireEvent.click(closePreviewBtn)
-    
+
     await waitFor(() => {
-      expect(screen.queryByText("Previsualización del Examen")).not.toBeInTheDocument()
+      expect(
+        screen.queryByText("Previsualización del Examen")
+      ).not.toBeInTheDocument()
     })
 
     fireEvent.click(menuBtn)
@@ -185,7 +215,11 @@ describe("Integration Test - ExamDetailScreen", () => {
     fireEvent.click(btnDeploy)
     expect(screen.getByTestId("github-modal")).toBeInTheDocument()
     fireEvent.click(screen.getByText("Hacer Deploy"))
-    expect(defaultProps.onGitHubDeploy).toHaveBeenCalledWith("fake-token-123", expect.any(Object), expect.any(String))
+    expect(defaultProps.onGitHubDeploy).toHaveBeenCalledWith(
+      "fake-token-123",
+      expect.any(Object),
+      expect.any(String)
+    )
   })
 
   it("debería abrir el modal de borrado de secciones y confirmar su eliminación", () => {
@@ -195,20 +229,28 @@ describe("Integration Test - ExamDetailScreen", () => {
     fireEvent.click(deleteButtons[0])
 
     expect(screen.getByTestId("delete-modal")).toBeInTheDocument()
-    expect(screen.getByText("Eliminar Restricciones de Atributos?")).toBeInTheDocument()
+    expect(
+      screen.getByText("Eliminar Restricciones de Atributos?")
+    ).toBeInTheDocument()
 
     fireEvent.click(screen.getByText("Confirmar Borrado"))
-    expect(defaultProps.onDeleteSection).toHaveBeenCalledWith("attributeConstraints")
+    expect(defaultProps.onDeleteSection).toHaveBeenCalledWith(
+      "attributeConstraints"
+    )
   })
 
   it("debería llamar a las callbacks correspondientes para visualizar el código generado de examen y de la solución", () => {
     render(<ExamDetailScreen {...defaultProps} />)
 
-    const btnVerExamen = screen.getByRole("button", { name: "Ver Código Examen" })
+    const btnVerExamen = screen.getByRole("button", {
+      name: "Ver Código Examen"
+    })
     fireEvent.click(btnVerExamen)
     expect(defaultProps.onShowGeneratedCode).toHaveBeenCalledTimes(1)
 
-    const btnVerSolucion = screen.getByRole("button", { name: "Ver Código Solución" })
+    const btnVerSolucion = screen.getByRole("button", {
+      name: "Ver Código Solución"
+    })
     fireEvent.click(btnVerSolucion)
     expect(defaultProps.onShowSolutionGeneratedCode).toHaveBeenCalledTimes(1)
   })
@@ -220,9 +262,18 @@ describe("Integration Test - ExamDetailScreen", () => {
       entityRelationships: ""
     }
 
-    render(<ExamDetailScreen {...defaultProps} selectedProject={emptySectionProject} />)
+    render(
+      <ExamDetailScreen
+        {...defaultProps}
+        selectedProject={emptySectionProject}
+      />
+    )
 
-    expect(screen.getByText("Aún no se han creado las restricciones de atributos.")).toBeInTheDocument()
-    expect(screen.getByText("Aún no se han creado las relaciones entre entidades.")).toBeInTheDocument()
+    expect(
+      screen.getByText("Aún no se han creado las restricciones de atributos.")
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText("Aún no se han creado las relaciones entre entidades.")
+    ).toBeInTheDocument()
   })
 })

@@ -1,5 +1,5 @@
-import { vi } from "vitest"
 import React from "react"
+import { vi } from "vitest"
 
 const e = React.createElement
 
@@ -25,7 +25,15 @@ vi.mock("./FoldersGridScreen", () => ({
 }))
 
 vi.mock("./ExamSelectionScreen", () => ({
-  DomainFolderScreen: ({ onSelectProject, onBack, onDeleteProject, onRenameProject, setEditingId, setTempName, projectsInFolder }: any) =>
+  DomainFolderScreen: ({
+    onSelectProject,
+    onBack,
+    onDeleteProject,
+    onRenameProject,
+    setEditingId,
+    setTempName,
+    projectsInFolder
+  }: any) =>
     e(
       "div",
       { "data-testid": "screen-domain-folder" },
@@ -35,11 +43,7 @@ vi.mock("./ExamSelectionScreen", () => ({
           "div",
           { key: p.id, "data-testid": `project-item-${p.id}` },
           e("span", null, p.customName || p.domainName),
-          e(
-            "button",
-            { onClick: () => onSelectProject(p) },
-            "Ver Detalle"
-          ),
+          e("button", { onClick: () => onSelectProject(p) }, "Ver Detalle"),
           e(
             "button",
             { onClick: () => onDeleteProject(p.id) },
@@ -62,16 +66,20 @@ vi.mock("./ExamSelectionScreen", () => ({
 }))
 
 vi.mock("./ExamDetailScreen", () => ({
-  ExamDetailScreen: ({ onShowGeneratedCode, onShowSolutionGeneratedCode, onBack, onDownload, onGitHubDeploy, onDeleteProject, selectedProject }: any) =>
+  ExamDetailScreen: ({
+    onShowGeneratedCode,
+    onShowSolutionGeneratedCode,
+    onBack,
+    onDownload,
+    onGitHubDeploy,
+    onDeleteProject,
+    selectedProject
+  }: any) =>
     e(
       "div",
       { "data-testid": "screen-exam-detail" },
       e("button", { onClick: onBack }, "Volver a Selección"),
-      e(
-        "button",
-        { onClick: onShowGeneratedCode },
-        "Ver Código Generado"
-      ),
+      e("button", { onClick: onShowGeneratedCode }, "Ver Código Generado"),
       e(
         "button",
         { onClick: onShowSolutionGeneratedCode },
@@ -96,7 +104,13 @@ vi.mock("./ExamDetailScreen", () => ({
 }))
 
 vi.mock("./GenerationCodeScreen", () => ({
-  GeneratedCodeScreen: ({ onBack, onDeleteSection, onDeleteTest, onUpdateProject, selectedProject }: any) =>
+  GeneratedCodeScreen: ({
+    onBack,
+    onDeleteSection,
+    onDeleteTest,
+    onUpdateProject,
+    selectedProject
+  }: any) =>
     e(
       "div",
       { "data-testid": "screen-generated-code" },
@@ -113,7 +127,13 @@ vi.mock("./GenerationCodeScreen", () => ({
       ),
       e(
         "button",
-        { onClick: () => onUpdateProject({ ...selectedProject, baseClasses: "CuerpoModificado" }) },
+        {
+          onClick: () =>
+            onUpdateProject({
+              ...selectedProject,
+              baseClasses: "CuerpoModificado"
+            })
+        },
         "Actualizar Proyecto Async"
       )
     )

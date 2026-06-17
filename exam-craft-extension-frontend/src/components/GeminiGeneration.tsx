@@ -25,7 +25,7 @@ export function useGeminiGeneration({
     setIsLoading(true)
     setResponseText("")
     try {
-      const { result, provider } = await generateWithAI(payload);
+      const { result, provider } = await generateWithAI(payload)
       setResponseText(result)
 
       try {
@@ -35,7 +35,7 @@ export function useGeminiGeneration({
           body: JSON.stringify({
             ejercicio: logExerciseName,
             proveedor: provider,
-            ...buildLogPayload(result,)
+            ...buildLogPayload(result)
           })
         })
       } catch {

@@ -1,52 +1,52 @@
-import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
-const mockCreate = vi.fn();
-const mockAddListener = vi.fn();
+const mockCreate = vi.fn()
+const mockAddListener = vi.fn()
 
 vi.stubGlobal("chrome", {
   action: {
     onClicked: {
-      addListener: mockAddListener,
-    },
+      addListener: mockAddListener
+    }
   },
   tabs: {
-    create: mockCreate,
-  },
-});
+    create: mockCreate
+  }
+})
 
-let registeredCallback: () => void;
+let registeredCallback: () => void
 
 beforeAll(async () => {
-  await import("./background");
-  registeredCallback = mockAddListener.mock.calls[0][0];
-});
+  await import("./background")
+  registeredCallback = mockAddListener.mock.calls[0][0]
+})
 
 beforeEach(() => {
-  mockCreate.mockClear();
-});
+  mockCreate.mockClear()
+})
 
 describe("background.ts – registro del listener", () => {
   it("registra exactamente un listener en chrome.action.onClicked", () => {
-    expect(mockAddListener).toHaveBeenCalledTimes(1);
-  });
+    expect(mockAddListener).toHaveBeenCalledTimes(1)
+  })
 
   it("NO llama a tabs.create al registrar el listener", () => {
-    expect(mockCreate).not.toHaveBeenCalled();
-  });
+    expect(mockCreate).not.toHaveBeenCalled()
+  })
 
   it("el listener llama a chrome.tabs.create con la URL correcta", () => {
-    registeredCallback();
-    expect(mockCreate).toHaveBeenCalledWith({ url: "tabs/index.html" });
-  });
+    registeredCallback()
+    expect(mockCreate).toHaveBeenCalledWith({ url: "tabs/index.html" })
+  })
 
   it("el listener solo abre una pestaña por click", () => {
-    registeredCallback();
-    expect(mockCreate).toHaveBeenCalledTimes(1);
-  });
+    registeredCallback()
+    expect(mockCreate).toHaveBeenCalledTimes(1)
+  })
 
   it("llamar el listener dos veces abre dos pestañas", () => {
-    registeredCallback();
-    registeredCallback();
-    expect(mockCreate).toHaveBeenCalledTimes(2);
-  });
-});
+    registeredCallback()
+    registeredCallback()
+    expect(mockCreate).toHaveBeenCalledTimes(2)
+  })
+})

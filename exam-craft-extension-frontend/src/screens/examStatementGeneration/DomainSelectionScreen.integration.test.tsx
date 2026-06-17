@@ -1,9 +1,10 @@
-import { render, screen, fireEvent } from "@testing-library/react"
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
 
-import DomainSelectionScreen from "./DomainSelectionScreen" 
+import DomainSelectionScreen from "./DomainSelectionScreen"
 
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, breadcrumbItems }: any) => (
@@ -15,9 +16,15 @@ vi.mock("~src/components/Header", () => ({
   )
 }))
 
-vi.mock("../../../assets/images/chess.png", () => ({ default: "chess-mock-path" }))
-vi.mock("../../../assets/images/comingSoon.png", () => ({ default: "soon-mock-path" }))
-vi.mock("../../../assets/images/petclinic.png", () => ({ default: "pet-mock-path" }))
+vi.mock("../../../assets/images/chess.png", () => ({
+  default: "chess-mock-path"
+}))
+vi.mock("../../../assets/images/comingSoon.png", () => ({
+  default: "soon-mock-path"
+}))
+vi.mock("../../../assets/images/petclinic.png", () => ({
+  default: "pet-mock-path"
+}))
 
 describe("Integration Test - DomainSelectionScreen", () => {
   const defaultProps = {
@@ -57,12 +64,18 @@ describe("Integration Test - DomainSelectionScreen", () => {
   it("debería llamar a onSelectDomain con los argumentos correctos al hacer click en las tarjetas activas", () => {
     render(<DomainSelectionScreen {...defaultProps} />)
 
-    const btnVeterinaria = screen.getByRole("button", { name: /icono clínica veterinaria clínica veterinaria/i })
+    const btnVeterinaria = screen.getByRole("button", {
+      name: /icono clínica veterinaria clínica veterinaria/i
+    })
     fireEvent.click(btnVeterinaria)
     expect(defaultProps.onSelectDomain).toHaveBeenCalledTimes(1)
-    expect(defaultProps.onSelectDomain).toHaveBeenCalledWith("Clínica Veterinaria")
+    expect(defaultProps.onSelectDomain).toHaveBeenCalledWith(
+      "Clínica Veterinaria"
+    )
 
-    const btnAjedrez = screen.getByRole("button", { name: /icono ajedrez ajedrez/i })
+    const btnAjedrez = screen.getByRole("button", {
+      name: /icono ajedrez ajedrez/i
+    })
     fireEvent.click(btnAjedrez)
     expect(defaultProps.onSelectDomain).toHaveBeenCalledTimes(2)
     expect(defaultProps.onSelectDomain).toHaveBeenLastCalledWith("Ajedrez")
@@ -71,12 +84,16 @@ describe("Integration Test - DomainSelectionScreen", () => {
   it("no debería permitir interacción ni disparar eventos en la tarjeta deshabilitada (Crear nuevo dominio)", () => {
     render(<DomainSelectionScreen {...defaultProps} />)
 
-    const btnDeshabilitado = screen.getByRole("button", { name: /icono comingsoon crear nuevo dominio/i })
-    
+    const btnDeshabilitado = screen.getByRole("button", {
+      name: /icono comingsoon crear nuevo dominio/i
+    })
+
     expect(btnDeshabilitado).toBeDisabled()
 
     fireEvent.click(btnDeshabilitado)
-    expect(defaultProps.onSelectDomain).not.toHaveBeenCalledWith("Crear nuevo dominio")
+    expect(defaultProps.onSelectDomain).not.toHaveBeenCalledWith(
+      "Crear nuevo dominio"
+    )
   })
 
   it("debería ejecutar correctamente las acciones de navegación de los botones y breadcrumbs", () => {

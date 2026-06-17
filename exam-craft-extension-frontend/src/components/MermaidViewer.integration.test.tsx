@@ -1,9 +1,12 @@
-import React from "react"
-import { render, screen, act, fireEvent } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach, afterEach } from "vitest"
+import React from "react"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
+import mermaid from "mermaid"
 
 import { MermaidViewer, sanitizeForRender } from "./MermaidViewer"
 
@@ -16,7 +19,6 @@ vi.mock("mermaid", () => ({
   }
 }))
 
-import mermaid from "mermaid"
 const mockMermaid = mermaid as unknown as {
   initialize: ReturnType<typeof vi.fn>
   render: ReturnType<typeof vi.fn>
@@ -29,34 +31,41 @@ describe("Integración: MermaidViewer", () => {
     vi.clearAllMocks()
     forceEmptySvgMock = false
 
-    vi.stubGlobal("DOMParser", class {
-      parseFromString() {
-        if (forceEmptySvgMock) {
-          return { querySelector: () => null } 
+    vi.stubGlobal(
+      "DOMParser",
+      class {
+        parseFromString() {
+          if (forceEmptySvgMock) {
+            return { querySelector: () => null }
+          }
+          const svgEl = {
+            getAttribute: (attr: string) =>
+              attr === "width" ? "100" : attr === "height" ? "100" : null,
+            setAttribute: vi.fn(function (this: any, attr, val) {
+              this[attr] = val
+            }),
+            removeAttribute: vi.fn(),
+            style: { maxWidth: "", display: "" },
+            querySelector: (sel: string) => (sel === "svg" ? svgEl : null)
+          }
+          return { querySelector: () => svgEl }
         }
-        const svgEl = {
-          getAttribute: (attr: string) => attr === "width" ? "100" : attr === "height" ? "100" : null,
-          setAttribute: vi.fn(function(this: any, attr, val) {
-            this[attr] = val
-          }),
-          removeAttribute: vi.fn(),
-          style: { maxWidth: "", display: "" },
-          querySelector: (sel: string) => sel === "svg" ? svgEl : null
-        }
-        return { querySelector: () => svgEl }
       }
-    })
+    )
 
-    vi.stubGlobal("XMLSerializer", class {
-      serializeToString(el: any) {
-        if (!el) return ""
-        const width = el.width || "100%"
-        const height = el.height || "auto"
-        const maxWidth = el.style.maxWidth || "none"
-        const display = el.style.display || "block"
-        return `<svg width="${width}" height="${height}" style="max-width: ${maxWidth}; display: ${display};"><g></g></svg>`
+    vi.stubGlobal(
+      "XMLSerializer",
+      class {
+        serializeToString(el: any) {
+          if (!el) return ""
+          const width = el.width || "100%"
+          const height = el.height || "auto"
+          const maxWidth = el.style.maxWidth || "none"
+          const display = el.style.display || "block"
+          return `<svg width="${width}" height="${height}" style="max-width: ${maxWidth}; display: ${display};"><g></g></svg>`
+        }
       }
-    })
+    )
 
     mockMermaid.render.mockResolvedValue({
       svg: '<svg width="100" height="100"><g></g></svg>'
@@ -78,7 +87,7 @@ describe("Integración: MermaidViewer", () => {
       expect(result).not.toContain("\\n")
     })
 
-    it("reemplaza \\\" por comillas dobles reales", () => {
+    it('reemplaza \\" por comillas dobles reales', () => {
       const result = sanitizeForRender(`classDiagram\\n  A : \\"nombre\\"`)
       expect(result).toContain('"nombre"')
     })
@@ -149,7 +158,9 @@ describe("Integración: MermaidViewer", () => {
     })
 
     it("abre llaves con salto de línea correctamente cuando hay contenido", () => {
-      const result = sanitizeForRender("classDiagram\n  class A {\n  String name\n}")
+      const result = sanitizeForRender(
+        "classDiagram\n  class A {\n  String name\n}"
+      )
       expect(result).toContain("{")
       expect(result).toContain("}")
     })
@@ -182,7 +193,7 @@ describe("Integración: MermaidViewer", () => {
 
     it("aplica dimensiones responsivas al SVG (width 100%, height auto y estilos reseteados)", async () => {
       render(<MermaidViewer chartCode="classDiagram\nA-->B" />)
-      
+
       await act(async () => {})
 
       const innerContent = document.querySelector(".mermaid-inner-content")
@@ -196,7 +207,7 @@ describe("Integración: MermaidViewer", () => {
     })
 
     it("retorna el string crudo en fixSvgDimensions si el parser no localiza el nodo svg", async () => {
-      forceEmptySvgMock = true 
+      forceEmptySvgMock = true
 
       render(<MermaidViewer chartCode="classDiagram\nA-->B" />)
       await act(async () => {})
@@ -249,7 +260,9 @@ describe("Integración: MermaidViewer", () => {
       render(<MermaidViewer chartCode="classDiagram\nA-->B" />)
       await act(async () => {})
 
-      const container = document.querySelector(".mermaid-outer-container") as HTMLElement
+      const container = document.querySelector(
+        ".mermaid-outer-container"
+      ) as HTMLElement
 
       fireEvent.mouseDown(container, { clientX: 100, clientY: 100 })
       fireEvent.mouseMove(container, { clientX: 150, clientY: 120 })
@@ -262,7 +275,9 @@ describe("Integración: MermaidViewer", () => {
       render(<MermaidViewer chartCode="classDiagram\nA-->B" />)
       await act(async () => {})
 
-      const container = document.querySelector(".mermaid-outer-container") as HTMLElement
+      const container = document.querySelector(
+        ".mermaid-outer-container"
+      ) as HTMLElement
 
       fireEvent.mouseDown(container, { clientX: 100, clientY: 100 })
       fireEvent.mouseUp(container)
@@ -275,7 +290,9 @@ describe("Integración: MermaidViewer", () => {
       render(<MermaidViewer chartCode="classDiagram\nA-->B" />)
       await act(async () => {})
 
-      const container = document.querySelector(".mermaid-outer-container") as HTMLElement
+      const container = document.querySelector(
+        ".mermaid-outer-container"
+      ) as HTMLElement
 
       fireEvent.mouseDown(container, { clientX: 100, clientY: 100 })
       vi.spyOn(console, "error").mockImplementation(() => {})
@@ -289,7 +306,9 @@ describe("Integración: MermaidViewer", () => {
       render(<MermaidViewer chartCode="classDiagram\nA-->B" />)
       await act(async () => {})
 
-      const container = document.querySelector(".mermaid-outer-container") as HTMLElement
+      const container = document.querySelector(
+        ".mermaid-outer-container"
+      ) as HTMLElement
 
       fireEvent.wheel(container, { deltaY: -100, preventDefault: vi.fn() })
 
@@ -300,7 +319,9 @@ describe("Integración: MermaidViewer", () => {
       render(<MermaidViewer chartCode="classDiagram\nA-->B" />)
       await act(async () => {})
 
-      const container = document.querySelector(".mermaid-outer-container") as HTMLElement
+      const container = document.querySelector(
+        ".mermaid-outer-container"
+      ) as HTMLElement
 
       fireEvent.wheel(container, { deltaY: 100, preventDefault: vi.fn() })
 
@@ -325,7 +346,9 @@ describe("Integración: MermaidViewer", () => {
       render(<MermaidViewer chartCode="diagrama roto" />)
       await act(async () => {})
 
-      expect(screen.getByText("Error renderizando: Error crítico fatal crudo")).toBeInTheDocument()
+      expect(
+        screen.getByText("Error renderizando: Error crítico fatal crudo")
+      ).toBeInTheDocument()
     })
 
     it("muestra el código que falló en un details al producirse error", async () => {
@@ -377,7 +400,9 @@ describe("Integración: MermaidViewer", () => {
     })
 
     it("re-renderiza el SVG cuando cambia chartCode", async () => {
-      const { rerender } = render(<MermaidViewer chartCode="classDiagram\nA-->B" />)
+      const { rerender } = render(
+        <MermaidViewer chartCode="classDiagram\nA-->B" />
+      )
       await act(async () => {})
 
       expect(mockMermaid.render).toHaveBeenCalledTimes(1)

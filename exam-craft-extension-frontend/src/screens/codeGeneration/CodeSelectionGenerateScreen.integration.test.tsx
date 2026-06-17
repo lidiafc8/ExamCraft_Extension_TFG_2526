@@ -1,8 +1,10 @@
-import React from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
 import CodeSelectionGenerateScreen from "./CodeSelectionGenerateScreen"
@@ -43,8 +45,12 @@ describe("Integración: CodeSelectionGenerateScreen", () => {
     it("renderiza correctamente los títulos principales y las instrucciones de la vista", () => {
       render(<CodeSelectionGenerateScreen {...defaultProps} />)
 
-      expect(screen.getByRole("heading", { name: "GENERACIÓN DE CÓDIGO", level: 1 })).toBeInTheDocument()
-      expect(screen.getByText("¿Qué parte de código te gustaría generar primero?")).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", { name: "GENERACIÓN DE CÓDIGO", level: 1 })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText("¿Qué parte de código te gustaría generar primero?")
+      ).toBeInTheDocument()
     })
 
     it("pasa la configuración exacta de migas de pan y paso activo 'CÓDIGO' al Header", () => {
@@ -52,18 +58,26 @@ describe("Integración: CodeSelectionGenerateScreen", () => {
 
       expect(screen.getByTestId("header-mock")).toBeInTheDocument()
       expect(screen.getByTestId("current-step")).toHaveTextContent("CÓDIGO")
-      
+
       expect(screen.getByRole("button", { name: "INICIO" })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "CREAR EXAMEN" })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "POR PARTES" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "CREAR EXAMEN" })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "POR PARTES" })
+      ).toBeInTheDocument()
     })
 
     it("renderiza todos los botones del menú de selección vertical y el botón de regreso", () => {
       render(<CodeSelectionGenerateScreen {...defaultProps} />)
 
-      expect(screen.getByRole("button", { name: "Clases base" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Clases base" })
+      ).toBeInTheDocument()
       expect(screen.getByRole("button", { name: "Tests" })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "Solución" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Solución" })
+      ).toBeInTheDocument()
       expect(screen.getByRole("button", { name: "Volver" })).toBeInTheDocument()
     })
   })
@@ -78,7 +92,9 @@ describe("Integración: CodeSelectionGenerateScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "INICIO" }))
       expect(defaultProps.onWelcome).toHaveBeenCalledTimes(2)
 
-      await userEvent.click(screen.getByRole("button", { name: "CREAR EXAMEN" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "CREAR EXAMEN" })
+      )
       expect(defaultProps.onBack).toHaveBeenCalledTimes(1)
 
       await userEvent.click(screen.getByRole("button", { name: "POR PARTES" }))

@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
+
 import { cleanMermaidCode } from "./MermaidCodeCleaner"
 
 describe("Integración: cleanMermaidCode", () => {
-
   describe("Casos Positivos", () => {
     it("elimina los bloques de código markdown ```mermaid y ```", () => {
       const input = "```mermaid\nclassDiagram\n  A --> B\n```"
@@ -43,7 +43,7 @@ describe("Integración: cleanMermaidCode", () => {
       expect(result).not.toContain("\\n")
     })
 
-    it("reemplaza \\\" por comillas dobles reales", () => {
+    it('reemplaza \\" por comillas dobles reales', () => {
       const input = `classDiagram\n  A : \\"nombre\\"`
       const result = cleanMermaidCode(input)
 
@@ -58,9 +58,9 @@ describe("Integración: cleanMermaidCode", () => {
     })
 
     it("añade espacio y salto de línea al abrir llave {", () => {
-        const input = "classDiagram\n  class A{\n  String name\n}"
-        const result = cleanMermaidCode(input)
-        expect(result).toContain(" {")
+      const input = "classDiagram\n  class A{\n  String name\n}"
+      const result = cleanMermaidCode(input)
+      expect(result).toContain(" {")
     })
 
     it("añade salto de línea al cerrar llave }", () => {
@@ -169,7 +169,7 @@ describe("Integración: cleanMermaidCode", () => {
       expect(result).toContain("A --> B")
     })
 
-    it("elimina comillas dobles vacías \"\" del resultado", () => {
+    it('elimina comillas dobles vacías "" del resultado', () => {
       const input = `classDiagram\n  A "" B`
       const result = cleanMermaidCode(input)
 
@@ -177,11 +177,11 @@ describe("Integración: cleanMermaidCode", () => {
     })
 
     it("normaliza *--> y o--> eliminando espacios intermedios", () => {
-        const input = "classDiagram\n  A * --> B\n  C o --> D"
-        const result = cleanMermaidCode(input)
-        expect(result).toContain("*")
-        expect(result).toContain("o")
-        expect(result).toContain(" --> ")
+      const input = "classDiagram\n  A * --> B\n  C o --> D"
+      const result = cleanMermaidCode(input)
+      expect(result).toContain("*")
+      expect(result).toContain("o")
+      expect(result).toContain(" --> ")
     })
 
     it("añade salto de línea antes de %% comentarios", () => {

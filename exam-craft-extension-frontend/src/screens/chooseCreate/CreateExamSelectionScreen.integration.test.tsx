@@ -1,8 +1,10 @@
-import React from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
 import CreateExamSelectionScreen from "./CreateExamSelectionScreen"
@@ -25,8 +27,12 @@ vi.mock("~src/components/Header", () => ({
   )
 }))
 
-vi.mock("../../../assets/images/parts_exam.png", () => ({ default: "mock-parts-icon.png" }))
-vi.mock("../../../assets/images/complete_exam.png", () => ({ default: "mock-complete-icon.png" }))
+vi.mock("../../../assets/images/parts_exam.png", () => ({
+  default: "mock-parts-icon.png"
+}))
+vi.mock("../../../assets/images/complete_exam.png", () => ({
+  default: "mock-complete-icon.png"
+}))
 
 const defaultProps = {
   onBack: vi.fn(),
@@ -42,15 +48,21 @@ describe("Integración: CreateExamSelectionScreen", () => {
     it("renderiza los títulos, el subtítulo y la estructura semántica de la pantalla", () => {
       render(<CreateExamSelectionScreen {...defaultProps} />)
 
-      expect(screen.getByRole("heading", { name: "CREAR NUEVO EXAMEN", level: 1 })).toBeInTheDocument()
-      expect(screen.getByText("Selecciona la modalidad de creación")).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", { name: "CREAR NUEVO EXAMEN", level: 1 })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText("Selecciona la modalidad de creación")
+      ).toBeInTheDocument()
     })
 
     it("pasa la configuración correcta de migas de pan y paso activo al Header", () => {
       render(<CreateExamSelectionScreen {...defaultProps} />)
 
       expect(screen.getByTestId("header-mock")).toBeInTheDocument()
-      expect(screen.getByTestId("current-step")).toHaveTextContent("CREAR EXAMEN")
+      expect(screen.getByTestId("current-step")).toHaveTextContent(
+        "CREAR EXAMEN"
+      )
       expect(screen.getByRole("button", { name: "INICIO" })).toBeInTheDocument()
     })
 
@@ -85,14 +97,18 @@ describe("Integración: CreateExamSelectionScreen", () => {
     it("ejecuta el callback onCreateExamByParts al hacer clic en la tarjeta de creación por partes", async () => {
       render(<CreateExamSelectionScreen {...defaultProps} />)
 
-      await userEvent.click(screen.getByRole("button", { name: /Crear examen por partes/i }))
+      await userEvent.click(
+        screen.getByRole("button", { name: /Crear examen por partes/i })
+      )
       expect(defaultProps.onCreateExamByParts).toHaveBeenCalledTimes(1)
     })
 
     it("ejecuta el callback onBack al presionar el botón general de 'Volver'", async () => {
       render(<CreateExamSelectionScreen {...defaultProps} />)
 
-      await userEvent.click(screen.getByRole("main").querySelector(".btn-back") as HTMLButtonElement)
+      await userEvent.click(
+        screen.getByRole("main").querySelector(".btn-back") as HTMLButtonElement
+      )
       expect(defaultProps.onBack).toHaveBeenCalledTimes(1)
     })
   })
@@ -101,7 +117,9 @@ describe("Integración: CreateExamSelectionScreen", () => {
     it("mantiene deshabilitada la tarjeta de 'Crear examen completo' y bloquea cualquier evento de clic", async () => {
       render(<CreateExamSelectionScreen {...defaultProps} />)
 
-      const botonDeshabilitado = screen.getByRole("button", { name: /Crear examen completo/i })
+      const botonDeshabilitado = screen.getByRole("button", {
+        name: /Crear examen completo/i
+      })
 
       expect(botonDeshabilitado).toBeDisabled()
       expect(botonDeshabilitado).toHaveClass("disabled-card")

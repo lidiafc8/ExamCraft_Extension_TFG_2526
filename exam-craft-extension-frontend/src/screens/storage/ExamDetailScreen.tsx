@@ -177,9 +177,9 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         entityRelationships,
         updatedAt: new Date().toISOString()
       })
-      setEditingCombined(false)               
-      setEditingAttributeConstraints(false)  
-      setEditingEntityRelationships(false) 
+      setEditingCombined(false)
+      setEditingAttributeConstraints(false)
+      setEditingEntityRelationships(false)
     } catch (err) {
       alert(err instanceof Error ? err.message : "No se pudo guardar.")
     } finally {

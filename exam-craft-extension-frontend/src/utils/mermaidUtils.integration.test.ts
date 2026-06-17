@@ -1,7 +1,12 @@
-import { describe, it, expect } from "vitest"
-import { cleanMermaidCode, extractMermaidCode, sanitizeMermaidForModal } from "./mermaidUtils"  
-describe("Mermaid Utilities Tests", () => {
+import { describe, expect, it } from "vitest"
 
+import {
+  cleanMermaidCode,
+  extractMermaidCode,
+  sanitizeMermaidForModal
+} from "./mermaidUtils"
+
+describe("Mermaid Utilities Tests", () => {
   describe("cleanMermaidCode", () => {
     it("debería retornar un string vacío si la entrada es nula o vacía", () => {
       expect(cleanMermaidCode("")).toBe("")
@@ -9,7 +14,8 @@ describe("Mermaid Utilities Tests", () => {
     })
 
     it("debería eliminar por completo las etiquetas HTML y reemplazar los &nbsp; por espacios", () => {
-      const rawCode = "<div>classDiagram</div><br/><span>Persona &nbsp;--&gt; Empleado</span>"
+      const rawCode =
+        "<div>classDiagram</div><br/><span>Persona &nbsp;--&gt; Empleado</span>"
       const result = cleanMermaidCode(rawCode)
 
       expect(result).toBe("classDiagramPersona  --&gt; Empleado")
@@ -51,9 +57,10 @@ describe("Mermaid Utilities Tests", () => {
     })
 
     it("debería devolver un string vacío si no encuentra las palabras clave del diagrama", () => {
-      const textWithoutDiagramKeywords = "----------\nTexto plano sin palabras clave de mermaid"
+      const textWithoutDiagramKeywords =
+        "----------\nTexto plano sin palabras clave de mermaid"
       const result = extractMermaidCode(textWithoutDiagramKeywords)
-      
+
       expect(result).toBe("")
     })
   })
@@ -72,7 +79,9 @@ describe("Mermaid Utilities Tests", () => {
       const result = sanitizeMermaidForModal(richText)
 
       expect(result.startsWith("classDiagram")).toBe(true)
-      expect(result).toContain("classDiagram\nclass Cliente {\n  +String nombre\n}\n  // comentario de bloque")
+      expect(result).toContain(
+        "classDiagram\nclass Cliente {\n  +String nombre\n}\n  // comentario de bloque"
+      )
     })
 
     it("debería limpiar tags secundarios (span), espacios web y parsear los símbolos de menor/mayor que", () => {

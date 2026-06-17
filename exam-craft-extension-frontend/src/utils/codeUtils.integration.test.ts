@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
+
 import { parseJavaFiles } from "./codeUtils"
 
 describe("parseJavaFiles Utility Tests", () => {
-  
   it("debería retornar un array vacío si el texto de entrada está vacío o es nulo", () => {
     expect(parseJavaFiles("")).toEqual([])
     expect(parseJavaFiles(undefined as any)).toEqual([])
@@ -40,7 +40,7 @@ describe("parseJavaFiles Utility Tests", () => {
     const result = parseJavaFiles(rawText)
 
     expect(result).toHaveLength(1)
-    expect(result[0].filename).toBe("Main.java") 
+    expect(result[0].filename).toBe("Main.java")
     expect(result[0].path).toBe("src/main/java/com/example/Main.java")
   })
 
@@ -101,7 +101,8 @@ describe("parseJavaFiles Utility Tests", () => {
   })
 
   it("debería usar el fallback de formato irregular si hay texto pero no contiene bloques Markdown con triple acento (```)", () => {
-    const rawText = "public class EstiloPlanoNoMarkdown { // sin formato de bloques }"
+    const rawText =
+      "public class EstiloPlanoNoMarkdown { // sin formato de bloques }"
 
     const result = parseJavaFiles(rawText)
 

@@ -1,30 +1,30 @@
-import { defineConfig } from "vitest/config";
-import type { Plugin } from "vitest/config"; 
-import react from "@vitejs/plugin-react";
-import path from "path";
+import path from "path"
+import react from "@vitejs/plugin-react"
+import { defineConfig } from "vitest/config"
+import type { Plugin } from "vitest/config"
 
 function bundleTextPlugin(): Plugin {
   return {
     name: "bundle-text",
     resolveId(id) {
       if (id.startsWith("bundle-text:")) {
-        return "\0bundle-text-mock";
+        return "\0bundle-text-mock"
       }
     },
     load(id) {
       if (id === "\0bundle-text-mock") {
-        return `export default "";`;
+        return `export default "";`
       }
-    },
-  };
+    }
+  }
 }
 
 export default defineConfig({
   plugins: [react(), bundleTextPlugin()],
   resolve: {
     alias: {
-      "~src": path.resolve(__dirname, "./src"),
-    },
+      "~src": path.resolve(__dirname, "./src")
+    }
   },
   test: {
     environment: "happy-dom",
@@ -33,7 +33,7 @@ export default defineConfig({
       "src/**/*.test.tsx",
       "src/**/*.test.ts",
       "src/**/*.integration.test.tsx",
-      "src/**/*.integration.test.ts",
+      "src/**/*.integration.test.ts"
     ],
     coverage: {
       provider: "v8",
@@ -46,8 +46,8 @@ export default defineConfig({
         "src/**/*.test.tsx",
         "src/**/*.integration.test.ts",
         "src/**/*.integration.test.tsx",
-        "src/**/__mocks__/**",
-      ],
-    },
-  },
-});
+        "src/**/__mocks__/**"
+      ]
+    }
+  }
+})

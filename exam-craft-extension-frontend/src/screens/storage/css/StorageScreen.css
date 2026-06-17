@@ -168,7 +168,10 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   cursor: pointer;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
   box-shadow: 0 2px 8px rgba(74, 124, 89, 0.18);
 }
 

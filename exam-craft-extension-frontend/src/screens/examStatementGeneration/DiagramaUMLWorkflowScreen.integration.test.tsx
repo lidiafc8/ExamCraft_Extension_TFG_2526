@@ -1,14 +1,19 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react"
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import React from "react"
-import "@testing-library/jest-dom" 
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import DiagramUMLWorkflowScreen from "./DiagramaUMLWorkflowScreen"
+import "@testing-library/jest-dom"
+
 import { useGeminiGeneration } from "../../components/GeminiGeneration"
+import DiagramUMLWorkflowScreen from "./DiagramaUMLWorkflowScreen"
 
-vi.mock("bundle-text:../../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md", () => ({
-  default: "Texto visible con {{DOMAIN}} y datos ocultos\n---\nContexto oculto parseado"
-}))
+vi.mock(
+  "bundle-text:../../prompts/functional-extension-generation/generation_UML_diagram_functional_extension.md",
+  () => ({
+    default:
+      "Texto visible con {{DOMAIN}} y datos ocultos\n---\nContexto oculto parseado"
+  })
+)
 
 vi.mock("../../utils/promptParser", () => ({
   parseMasterPrompt: vi.fn(() => ({
@@ -19,7 +24,7 @@ vi.mock("../../utils/promptParser", () => ({
 
 const mockGenerate = vi.fn()
 const mockSetResponseText = vi.fn()
-let mockIsLoading = false 
+let mockIsLoading = false
 
 vi.mock("../../components/GeminiGeneration", () => ({
   useGeminiGeneration: vi.fn(() => ({
@@ -50,15 +55,24 @@ vi.mock("../../components/Header", () => ({
 }))
 
 vi.mock("../../components/WorkflowComponents", () => ({
-  StepperHeader: ({ currentStep }: any) => <div data-testid="stepper">Paso {currentStep}</div>,
-  PromptEditor: ({ title, description, promptText, onGenerate, onPromptChange, onBack }: any) => (
+  StepperHeader: ({ currentStep }: any) => (
+    <div data-testid="stepper">Paso {currentStep}</div>
+  ),
+  PromptEditor: ({
+    title,
+    description,
+    promptText,
+    onGenerate,
+    onPromptChange,
+    onBack
+  }: any) => (
     <div data-testid="prompt-editor">
       <h1>{title}</h1>
       <div>{description}</div>
-      <textarea 
-        data-testid="editor-textarea" 
-        value={promptText} 
-        onChange={(e) => onPromptChange(e.target.value)} 
+      <textarea
+        data-testid="editor-textarea"
+        value={promptText}
+        onChange={(e) => onPromptChange(e.target.value)}
       />
       <button onClick={onBack}>Atrás</button>
       <button onClick={onGenerate}>Generar Diagrama UML</button>
@@ -83,7 +97,6 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockIsLoading = false
-    
   })
 
   it("debería realizar el flujo completo: renderizado inicial, edición, generación, visualización de resultados y confirmación", async () => {
@@ -95,14 +108,18 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
     expect(screen.getByText("DIAGRAMA UML")).toBeInTheDocument()
     expect(screen.getByTestId("stepper")).toHaveTextContent("Paso 2")
     expect(screen.getByText("VETERINARIA: Diagrama UML")).toBeInTheDocument()
-    
-    const textarea = screen.getByTestId("editor-textarea") as HTMLTextAreaElement
+
+    const textarea = screen.getByTestId(
+      "editor-textarea"
+    ) as HTMLTextAreaElement
     expect(textarea.value).toBe("Prompt base para Veterinaria")
 
     fireEvent.click(screen.getByText("Ir a Inicio"))
     expect(defaultProps.onWelcome).toHaveBeenCalledTimes(1)
 
-    fireEvent.change(textarea, { target: { value: "Prompt modificado por el usuario" } })
+    fireEvent.change(textarea, {
+      target: { value: "Prompt modificado por el usuario" }
+    })
     fireEvent.click(screen.getByText("Generar Diagrama UML"))
 
     expect(mockGenerate).toHaveBeenCalledWith(
@@ -110,7 +127,9 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText("Extensión Funcional con Diagrama UML")).toBeInTheDocument()
+      expect(
+        screen.getByText("Extensión Funcional con Diagrama UML")
+      ).toBeInTheDocument()
     })
 
     expect(screen.queryByTestId("prompt-editor")).not.toBeInTheDocument()
@@ -120,7 +139,9 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
     expect(mermaidViewer).toHaveTextContent("clean-código-crudo-de-ia")
 
     const textareasResult = screen.getAllByRole("textbox")
-    fireEvent.change(textareasResult[1], { target: { value: "classDiagram modificado" } })
+    fireEvent.change(textareasResult[1], {
+      target: { value: "classDiagram modificado" }
+    })
     expect(mockSetResponseText).toHaveBeenCalledWith("classDiagram modificado")
 
     fireEvent.click(screen.getByText("Confirmar Diagrama UML"))
@@ -141,7 +162,7 @@ describe("Integration Test - DiagramUMLWorkflowScreen", () => {
     })
 
     render(<DiagramUMLWorkflowScreen {...defaultProps} />)
-    
+
     expect(screen.getByTestId("prompt-editor")).toBeInTheDocument()
   })
 })

@@ -1,11 +1,13 @@
-import React from "react"
-import { render, screen, act } from "@testing-library/react"
+import { act, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, it, expect, vi, beforeEach } from "vitest"
-import "@testing-library/jest-dom" 
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import "@testing-library/jest-dom"
+
+import { parseJavaFiles } from "~src/utils/codeUtils"
 
 import { GeneratedCodeScreen } from "./GenerationCodeScreen"
-import { parseJavaFiles } from "~src/utils/codeUtils"
 
 type ComponentProps = React.ComponentProps<typeof GeneratedCodeScreen>
 
@@ -52,7 +54,11 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
     vi.clearAllMocks()
 
     vi.mocked(parseJavaFiles).mockReturnValue([
-      { path: "src/Tablero.linea", filename: "Tablero.java", code: "public class Tablero {}" }
+      {
+        path: "src/Tablero.linea",
+        filename: "Tablero.java",
+        code: "public class Tablero {}"
+      }
     ])
 
     baseProps = {
@@ -62,7 +68,10 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
         domainName: "Ajedrez",
         baseClasses: "public class Tablero {}",
         testPartsMap: {
-          "test-key-1": { fileName: "TableroTest.java", code: "@Test void testMovimiento() {}" }
+          "test-key-1": {
+            fileName: "TableroTest.java",
+            code: "@Test void testMovimiento() {}"
+          }
         }
       },
       selectedDomainFolder: "Ajedrez_2026",
@@ -84,15 +93,21 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
         "INICIO > EXÁMENES ANTERIORES > AJEDREZ_2026 > Examen de Ajedrez Avanzado"
       )
       expect(screen.getByText("public class Tablero {}")).toBeInTheDocument()
-      expect(screen.getByText("@Test void testMovimiento() {}")).toBeInTheDocument()
+      expect(
+        screen.getByText("@Test void testMovimiento() {}")
+      ).toBeInTheDocument()
     })
 
     it("abre la edición de clases base, modifica el contenido y guarda mandando el payload estructurado", async () => {
       render(<GeneratedCodeScreen {...baseProps} />)
 
-      expect(screen.queryByRole("button", { name: "Guardar cambios" })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Guardar cambios" })
+      ).not.toBeInTheDocument()
 
-      const toggleEdit = screen.getAllByRole("button", { name: "🔒 No editable" })[0]
+      const toggleEdit = screen.getAllByRole("button", {
+        name: "🔒 No editable"
+      })[0]
       await userEvent.click(toggleEdit)
       expect(toggleEdit).toHaveTextContent("✎ Editando")
 
@@ -100,7 +115,9 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
       await userEvent.clear(cajaTexto)
       await userEvent.type(cajaTexto, "public class TableroModificado {{}")
 
-      const botonGuardar = screen.getByRole("button", { name: "Guardar cambios" })
+      const botonGuardar = screen.getByRole("button", {
+        name: "Guardar cambios"
+      })
       expect(botonGuardar).toBeInTheDocument()
       await userEvent.click(botonGuardar)
 
@@ -115,20 +132,27 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
     it("permite modificar una sección de test individual sin alterar las clases base de origen", async () => {
       render(<GeneratedCodeScreen {...baseProps} />)
 
-      const toggleEditTest = screen.getAllByRole("button", { name: "🔒 No editable" })[1]
+      const toggleEditTest = screen.getAllByRole("button", {
+        name: "🔒 No editable"
+      })[1]
       await userEvent.click(toggleEditTest)
 
       const cajaTexto = screen.getByRole("textbox")
       await userEvent.clear(cajaTexto)
       await userEvent.type(cajaTexto, "// Código de test reescrito")
 
-      await userEvent.click(screen.getByRole("button", { name: "Guardar cambios" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Guardar cambios" })
+      )
 
       expect(baseProps.onUpdateProject).toHaveBeenCalledWith(
         expect.objectContaining({
           baseClasses: "public class Tablero {}",
           testPartsMap: {
-            "test-key-1": { fileName: "TableroTest.java", code: "// Código de test reescrito" }
+            "test-key-1": {
+              fileName: "TableroTest.java",
+              code: "// Código de test reescrito"
+            }
           }
         })
       )
@@ -138,37 +162,51 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
   describe("Casos Negativos y Manejo de Errores", () => {
     it("lanza un alert en pantalla si la API falla y desbloquea el botón de guardar", async () => {
       const alertMock = vi.spyOn(window, "alert").mockImplementation(() => {})
-      baseProps.onUpdateProject = vi.fn().mockRejectedValue(new Error("Error de conexión 500"))
+      baseProps.onUpdateProject = vi
+        .fn()
+        .mockRejectedValue(new Error("Error de conexión 500"))
 
       render(<GeneratedCodeScreen {...baseProps} />)
 
-      await userEvent.click(screen.getAllByRole("button", { name: "🔒 No editable" })[0])
+      await userEvent.click(
+        screen.getAllByRole("button", { name: "🔒 No editable" })[0]
+      )
       await userEvent.type(screen.getByRole("textbox"), "Fallo simulado")
 
-      const botonGuardar = screen.getByRole("button", { name: "Guardar cambios" })
+      const botonGuardar = screen.getByRole("button", {
+        name: "Guardar cambios"
+      })
       await userEvent.click(botonGuardar)
 
       expect(alertMock).toHaveBeenCalledWith("Error de conexión 500")
-      expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeEnabled()
-      
+      expect(
+        screen.getByRole("button", { name: "Guardar cambios" })
+      ).toBeEnabled()
+
       alertMock.mockRestore()
     })
 
     it("usa la función genérica onDeleteSection si el callback especializado onDeleteTest no viene definido", async () => {
-      const propsSinBorradorEspecializado = { ...baseProps, onDeleteTest: undefined }
+      const propsSinBorradorEspecializado = {
+        ...baseProps,
+        onDeleteTest: undefined
+      }
 
       render(<GeneratedCodeScreen {...propsSinBorradorEspecializado} />)
 
       const botonCruces = screen.getAllByRole("button", { name: "✕" })
       await userEvent.click(botonCruces[1])
 
-      await userEvent.click(screen.getByRole("button", { name: "Confirmar Borrado" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Confirmar Borrado" })
+      )
 
-      expect(baseProps.onDeleteSection).toHaveBeenCalledWith("testPart:test-key-1")
+      expect(baseProps.onDeleteSection).toHaveBeenCalledWith(
+        "testPart:test-key-1"
+      )
     })
   })
 
-  
   describe("Casos Limite y Sincronización de Estados", () => {
     it("renderiza correctamente los textos de control vacíos si el payload no trae información", () => {
       vi.mocked(parseJavaFiles).mockReturnValue([])
@@ -184,9 +222,17 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
 
       render(<GeneratedCodeScreen {...emptyProps} />)
 
-      expect(screen.getByText("Aún no se han generado las clases base para este examen.")).toBeInTheDocument()
-      expect(screen.getByText("Aún no se han generado los tests para este examen.")).toBeInTheDocument()
-      expect(screen.queryByRole("button", { name: "🔒 No editable" })).not.toBeInTheDocument()
+      expect(
+        screen.getByText(
+          "Aún no se han generado las clases base para este examen."
+        )
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText("Aún no se han generado los tests para este examen.")
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "🔒 No editable" })
+      ).not.toBeInTheDocument()
     })
 
     it("cierra el modal por completo si el usuario presiona el botón Cancelar", async () => {
@@ -195,7 +241,9 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
       await userEvent.click(screen.getAllByRole("button", { name: "✕" })[0])
       expect(screen.getByTestId("delete-modal")).toBeInTheDocument()
 
-      await userEvent.click(screen.getByRole("button", { name: "Cancelar Borrado" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Cancelar Borrado" })
+      )
       expect(screen.queryByTestId("delete-modal")).not.toBeInTheDocument()
       expect(baseProps.onDeleteSection).not.toHaveBeenCalled()
     })
@@ -205,7 +253,11 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
       expect(screen.getByText("public class Tablero {}")).toBeInTheDocument()
 
       vi.mocked(parseJavaFiles).mockReturnValue([
-        { path: "src/Tablero.java", filename: "Tablero.java", code: "public class TableroV2 {}" }
+        {
+          path: "src/Tablero.java",
+          filename: "Tablero.java",
+          code: "public class TableroV2 {}"
+        }
       ])
 
       const proyectoActualizado = {
@@ -213,12 +265,20 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
         customName: "Examen de Ajedrez Avanzado",
         baseClasses: "public class TableroV2 {}",
         testPartsMap: {
-          "test-key-1": { fileName: "TableroTest.java", code: "@Test void testNuevo() {}" }
+          "test-key-1": {
+            fileName: "TableroTest.java",
+            code: "@Test void testNuevo() {}"
+          }
         }
       }
 
       await act(async () => {
-        rerender(<GeneratedCodeScreen {...baseProps} selectedProject={proyectoActualizado} />)
+        rerender(
+          <GeneratedCodeScreen
+            {...baseProps}
+            selectedProject={proyectoActualizado}
+          />
+        )
       })
 
       expect(screen.getByText("public class TableroV2 {}")).toBeInTheDocument()
@@ -232,9 +292,15 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
           id: "id-corrupto",
           baseClasses: "public class Valida {}",
           testPartsMap: {
-            "test-valido": { fileName: "OkTest.java", code: "public class OkTest {}" },
+            "test-valido": {
+              fileName: "OkTest.java",
+              code: "public class OkTest {}"
+            },
             "test-sin-codigo": { fileName: "NoCodeTest.java", code: "" },
-            "test-sin-nombre": { fileName: "", code: "public class NoNameTest {}" }
+            "test-sin-nombre": {
+              fileName: "",
+              code: "public class NoNameTest {}"
+            }
           }
         }
       }
@@ -242,7 +308,9 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
       render(<GeneratedCodeScreen {...propsCorruptas} />)
 
       const bloquesDeCodigo = screen.getAllByTestId("java-code-block")
-      const filenamesRenderizados = bloquesDeCodigo.map(el => el.getAttribute("data-filename"))
+      const filenamesRenderizados = bloquesDeCodigo.map((el) =>
+        el.getAttribute("data-filename")
+      )
       expect(filenamesRenderizados).toContain("OkTest.java")
       expect(filenamesRenderizados).not.toContain("NoCodeTest.java")
     })
@@ -253,7 +321,9 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
       const botonBorrarSeccion = screen.getAllByRole("button", { name: "✕" })[0]
       await userEvent.click(botonBorrarSeccion)
 
-      const botonConfirmar = screen.getByRole("button", { name: "Confirmar Borrado" })
+      const botonConfirmar = screen.getByRole("button", {
+        name: "Confirmar Borrado"
+      })
       await userEvent.click(botonConfirmar)
 
       expect(baseProps.onDeleteSection).toHaveBeenCalled()
@@ -265,7 +335,9 @@ describe("GeneratedCodeScreen - Suite Completa de Tests", () => {
       const botonBorrarTest = screen.getAllByRole("button", { name: "✕" })[1]
       await userEvent.click(botonBorrarTest)
 
-      const botonConfirmar = screen.getByRole("button", { name: "Confirmar Borrado" })
+      const botonConfirmar = screen.getByRole("button", {
+        name: "Confirmar Borrado"
+      })
       await userEvent.click(botonConfirmar)
 
       expect(baseProps.onDeleteTest).toHaveBeenCalledWith("test-key-1")

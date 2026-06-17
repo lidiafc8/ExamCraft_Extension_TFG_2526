@@ -1,12 +1,13 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { vi, describe, it, expect, beforeEach } from "vitest";
-import "@testing-library/jest-dom";
+import { fireEvent, render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { DomainFolderScreen } from "./ExamSelectionScreen";
+import "@testing-library/jest-dom"
 
-type DomainFolderScreenProps = React.ComponentProps<typeof DomainFolderScreen>;
+import { DomainFolderScreen } from "./ExamSelectionScreen"
+
+type DomainFolderScreenProps = React.ComponentProps<typeof DomainFolderScreen>
 
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome, breadcrumbItems }: any) => (
@@ -21,11 +22,11 @@ vi.mock("~src/components/Header", () => ({
         ))}
       </div>
     </header>
-  ),
-}));
+  )
+}))
 
 vi.mock("~src/components/modals/DeleteConfirmationModal", () => ({
-  DeleteConfirmationModal: ({ isOpen, itemName, onConfirm, onCancel }: any) => (
+  DeleteConfirmationModal: ({ isOpen, itemName, onConfirm, onCancel }: any) =>
     isOpen ? (
       <div data-testid="mock-delete-modal">
         <p>¿Borrar {itemName}?</p>
@@ -33,24 +34,23 @@ vi.mock("~src/components/modals/DeleteConfirmationModal", () => ({
         <button onClick={onCancel}>Cancelar Borrado</button>
       </div>
     ) : null
-  ),
-}));
+}))
 
 vi.mock("../../../assets/images/exam.png", () => ({
   default: "mock-exam-image.png"
-}));
+}))
 
 describe("DomainFolderScreen", () => {
-  let baseProps: DomainFolderScreenProps;
+  let baseProps: DomainFolderScreenProps
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.clearAllMocks()
 
     baseProps = {
       selectedDomainFolder: "Matemáticas",
       projectsInFolder: [
         { id: "p1", domainName: "Matemáticas", customName: "Álgebra Lineal" },
-        { id: "p2", domainName: "Matemáticas", customName: "" }, 
+        { id: "p2", domainName: "Matemáticas", customName: "" }
       ],
       editingId: null,
       tempName: "",
@@ -60,171 +60,187 @@ describe("DomainFolderScreen", () => {
       onDeleteProject: vi.fn(),
       onRenameProject: vi.fn(),
       setEditingId: vi.fn(),
-      setTempName: vi.fn(),
-    };
-  });
+      setTempName: vi.fn()
+    }
+  })
 
   describe("Casos Positivos y Renderizado Core", () => {
     it("renderiza correctamente los títulos transformados a mayúsculas y los contenedores principales", () => {
-      render(<DomainFolderScreen {...baseProps} />);
+      render(<DomainFolderScreen {...baseProps} />)
 
-      expect(screen.getByTestId("mock-header")).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "CARPETA: MATEMÁTICAS" })).toBeInTheDocument();
-    });
+      expect(screen.getByTestId("mock-header")).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", { name: "CARPETA: MATEMÁTICAS" })
+      ).toBeInTheDocument()
+    })
 
     it("mapea la lista de proyectos aplicando el customName o el string de fallback", () => {
-      render(<DomainFolderScreen {...baseProps} />);
+      render(<DomainFolderScreen {...baseProps} />)
 
-      expect(screen.getByText("Álgebra Lineal")).toBeInTheDocument();
-      expect(screen.getByText("Examen de Matemáticas")).toBeInTheDocument();
-    });
+      expect(screen.getByText("Álgebra Lineal")).toBeInTheDocument()
+      expect(screen.getByText("Examen de Matemáticas")).toBeInTheDocument()
+    })
 
     it("ejecuta onSelectProject al hacer clic en el botón de icono para abrir el examen", async () => {
-      render(<DomainFolderScreen {...baseProps} />);
-      
-      const openButtons = screen.getAllByRole("button", { name: "Abrir examen" });
-      await userEvent.click(openButtons[0]);
+      render(<DomainFolderScreen {...baseProps} />)
 
-      expect(baseProps.onSelectProject).toHaveBeenCalledTimes(1);
-      expect(baseProps.onSelectProject).toHaveBeenCalledWith(baseProps.projectsInFolder[0]);
-    });
+      const openButtons = screen.getAllByRole("button", {
+        name: "Abrir examen"
+      })
+      await userEvent.click(openButtons[0])
+
+      expect(baseProps.onSelectProject).toHaveBeenCalledTimes(1)
+      expect(baseProps.onSelectProject).toHaveBeenCalledWith(
+        baseProps.projectsInFolder[0]
+      )
+    })
 
     it("gatilla las rutas de navegación superiores mapeadas en los Breadcrumbs", async () => {
-      render(<DomainFolderScreen {...baseProps} />);
+      render(<DomainFolderScreen {...baseProps} />)
 
-      await userEvent.click(screen.getByRole("button", { name: "INICIO" }));
-      expect(baseProps.onWelcome).toHaveBeenCalledTimes(1);
-    });
+      await userEvent.click(screen.getByRole("button", { name: "INICIO" }))
+      expect(baseProps.onWelcome).toHaveBeenCalledTimes(1)
+    })
 
     it("ejecuta onBack al pulsar el botón 'Volver' al pie de la página", async () => {
-      render(<DomainFolderScreen {...baseProps} />);
+      render(<DomainFolderScreen {...baseProps} />)
 
-      const volverBtn = screen.getByRole("button", { name: "Volver" });
-      await userEvent.click(volverBtn);
+      const volverBtn = screen.getByRole("button", { name: "Volver" })
+      await userEvent.click(volverBtn)
 
-      expect(baseProps.onBack).toHaveBeenCalledTimes(1);
-    });
-  });
+      expect(baseProps.onBack).toHaveBeenCalledTimes(1)
+    })
+  })
 
   describe("Flujo e Interacciones de Borrado", () => {
     it("abre el modal con los datos del ítem seleccionado deteniendo la propagación", async () => {
-      render(<DomainFolderScreen {...baseProps} />);
-      
-      const deleteButtons = screen.getAllByTitle("Borrar examen");
-      
+      render(<DomainFolderScreen {...baseProps} />)
+
+      const deleteButtons = screen.getAllByTitle("Borrar examen")
+
       fireEvent(
         deleteButtons[0],
         new MouseEvent("click", { bubbles: true, cancelable: true })
-      );
-      
-      expect(screen.getByTestId("mock-delete-modal")).toBeInTheDocument();
-      expect(screen.getByText("¿Borrar Álgebra Lineal?")).toBeInTheDocument();
-    });
+      )
+
+      expect(screen.getByTestId("mock-delete-modal")).toBeInTheDocument()
+      expect(screen.getByText("¿Borrar Álgebra Lineal?")).toBeInTheDocument()
+    })
 
     it("ejecuta onDeleteProject con el ID correspondiente al confirmar la acción en el modal", async () => {
-      render(<DomainFolderScreen {...baseProps} />);
-      
-      const deleteButtons = screen.getAllByTitle("Borrar examen");
-      await userEvent.click(deleteButtons[0]);
+      render(<DomainFolderScreen {...baseProps} />)
 
-      const confirmBtn = screen.getByRole("button", { name: "Confirmar Borrado" });
-      await userEvent.click(confirmBtn);
+      const deleteButtons = screen.getAllByTitle("Borrar examen")
+      await userEvent.click(deleteButtons[0])
 
-      expect(baseProps.onDeleteProject).toHaveBeenCalledWith("p1");
-      expect(screen.queryByTestId("mock-delete-modal")).not.toBeInTheDocument();
-    });
+      const confirmBtn = screen.getByRole("button", {
+        name: "Confirmar Borrado"
+      })
+      await userEvent.click(confirmBtn)
+
+      expect(baseProps.onDeleteProject).toHaveBeenCalledWith("p1")
+      expect(screen.queryByTestId("mock-delete-modal")).not.toBeInTheDocument()
+    })
 
     it("resetea el estado y cierra el modal sin alterar los datos si se cancela la operación", async () => {
-      render(<DomainFolderScreen {...baseProps} />);
-      
-      const deleteButtons = screen.getAllByTitle("Borrar examen");
-      await userEvent.click(deleteButtons[0]);
+      render(<DomainFolderScreen {...baseProps} />)
 
-      const cancelBtn = screen.getByRole("button", { name: "Cancelar Borrado" });
-      await userEvent.click(cancelBtn);
+      const deleteButtons = screen.getAllByTitle("Borrar examen")
+      await userEvent.click(deleteButtons[0])
 
-      expect(baseProps.onDeleteProject).not.toHaveBeenCalled();
-      expect(screen.queryByTestId("mock-delete-modal")).not.toBeInTheDocument();
-    });
-  });
+      const cancelBtn = screen.getByRole("button", { name: "Cancelar Borrado" })
+      await userEvent.click(cancelBtn)
+
+      expect(baseProps.onDeleteProject).not.toHaveBeenCalled()
+      expect(screen.queryByTestId("mock-delete-modal")).not.toBeInTheDocument()
+    })
+  })
 
   describe("Flujo de Renombrado Inline e Inputs de Teclado", () => {
     it("conmuta de botón de texto a input de edición cuando editingId coincide con el proyecto", () => {
-      baseProps.editingId = "p1";
-      baseProps.tempName = "Nuevo Nombre Temporal";
-      
-      render(<DomainFolderScreen {...baseProps} />);
+      baseProps.editingId = "p1"
+      baseProps.tempName = "Nuevo Nombre Temporal"
 
-      const input = screen.getByRole("textbox");
-      expect(input).toBeInTheDocument();
-      expect(input).toHaveValue("Nuevo Nombre Temporal");
-    });
+      render(<DomainFolderScreen {...baseProps} />)
+
+      const input = screen.getByRole("textbox")
+      expect(input).toBeInTheDocument()
+      expect(input).toHaveValue("Nuevo Nombre Temporal")
+    })
 
     it("ejecuta setEditingId y setTempName cargando el displayName al hacer clic sobre el texto del examen", async () => {
-      render(<DomainFolderScreen {...baseProps} />);
-      
-      const labelButton = screen.getByRole("button", { name: "Álgebra Lineal" });
-      
+      render(<DomainFolderScreen {...baseProps} />)
+
+      const labelButton = screen.getByRole("button", { name: "Álgebra Lineal" })
+
       fireEvent(
         labelButton,
         new MouseEvent("click", { bubbles: true, cancelable: true })
-      );
+      )
 
-      expect(baseProps.setEditingId).toHaveBeenCalledWith("p1");
-      expect(baseProps.setTempName).toHaveBeenCalledWith("Álgebra Lineal");
-    });
+      expect(baseProps.setEditingId).toHaveBeenCalledWith("p1")
+      expect(baseProps.setTempName).toHaveBeenCalledWith("Álgebra Lineal")
+    })
 
     it("lanza onRenameProject al perder el foco (onBlur) sobre el input de edición", () => {
-      baseProps.editingId = "p1";
-      baseProps.tempName = "Cambio por Desenfoque";
-      render(<DomainFolderScreen {...baseProps} />);
+      baseProps.editingId = "p1"
+      baseProps.tempName = "Cambio por Desenfoque"
+      render(<DomainFolderScreen {...baseProps} />)
 
-      const input = screen.getByRole("textbox");
-      fireEvent.blur(input);
+      const input = screen.getByRole("textbox")
+      fireEvent.blur(input)
 
-      expect(baseProps.onRenameProject).toHaveBeenCalledWith("p1", "Cambio por Desenfoque");
-    });
+      expect(baseProps.onRenameProject).toHaveBeenCalledWith(
+        "p1",
+        "Cambio por Desenfoque"
+      )
+    })
 
     it("lanza onRenameProject de forma exitosa al pulsar la tecla 'Enter'", async () => {
-      baseProps.editingId = "p1";
-      baseProps.tempName = "Nombre via Enter";
-      render(<DomainFolderScreen {...baseProps} />);
+      baseProps.editingId = "p1"
+      baseProps.tempName = "Nombre via Enter"
+      render(<DomainFolderScreen {...baseProps} />)
 
-      const input = screen.getByRole("textbox");
-      await userEvent.type(input, "{enter}");
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "{enter}")
 
-      expect(baseProps.onRenameProject).toHaveBeenCalledWith("p1", "Nombre via Enter");
-    });
+      expect(baseProps.onRenameProject).toHaveBeenCalledWith(
+        "p1",
+        "Nombre via Enter"
+      )
+    })
 
     it("cancela el modo de edición llamando a setEditingId(null) sin persistir al pulsar 'Escape'", async () => {
-      baseProps.editingId = "p1";
-      baseProps.tempName = "Texto Cancelado";
-      render(<DomainFolderScreen {...baseProps} />);
+      baseProps.editingId = "p1"
+      baseProps.tempName = "Texto Cancelado"
+      render(<DomainFolderScreen {...baseProps} />)
 
-      const input = screen.getByRole("textbox");
-      await userEvent.type(input, "{escape}");
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "{escape}")
 
-      expect(baseProps.setEditingId).toHaveBeenCalledWith(null);
-      expect(baseProps.onRenameProject).not.toHaveBeenCalled();
-    });
-  });
+      expect(baseProps.setEditingId).toHaveBeenCalledWith(null)
+      expect(baseProps.onRenameProject).not.toHaveBeenCalled()
+    })
+  })
 
   describe("Casos de Error y Límites de Datos", () => {
     it("renderiza de forma segura el contenedor sin arrojar errores si projectsInFolder está vacío", () => {
-      baseProps.projectsInFolder = [];
-      render(<DomainFolderScreen {...baseProps} />);
+      baseProps.projectsInFolder = []
+      render(<DomainFolderScreen {...baseProps} />)
 
-      const cardsContainer = document.querySelector(".cards-container");
-      expect(cardsContainer).toBeInTheDocument();
-    });
+      const cardsContainer = document.querySelector(".cards-container")
+      expect(cardsContainer).toBeInTheDocument()
+    })
 
     it("procesa correctamente cadenas con caracteres especiales o espacios múltiples en selectedDomainFolder", () => {
-      baseProps.selectedDomainFolder = "ciencias-computación / versión 2.0 @";
-      render(<DomainFolderScreen {...baseProps} />);
+      baseProps.selectedDomainFolder = "ciencias-computación / versión 2.0 @"
+      render(<DomainFolderScreen {...baseProps} />)
 
       expect(
-        screen.getByRole("heading", { name: "CARPETA: CIENCIAS-COMPUTACIÓN / VERSIÓN 2.0 @" })
-      ).toBeInTheDocument();
-    });
-  });
-});
+        screen.getByRole("heading", {
+          name: "CARPETA: CIENCIAS-COMPUTACIÓN / VERSIÓN 2.0 @"
+        })
+      ).toBeInTheDocument()
+    })
+  })
+})

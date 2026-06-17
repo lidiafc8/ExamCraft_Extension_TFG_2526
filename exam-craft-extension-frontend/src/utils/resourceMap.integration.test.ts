@@ -1,28 +1,39 @@
-import { describe, it, expect, vi } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
-vi.mock("bundle-text:../prompts/resources/functional_extension_examples_previous_exams.md", () => ({
-  default: "Contenido de extensiones funcionales"
-}))
+import { RESOURCE_MAP } from "./resourceMap"
 
-vi.mock("bundle-text:../prompts/resources/attribute_constraints_examples_previous_exams.md", () => ({
-  default: "Contenido de restricciones de atributos"
-}))
+vi.mock(
+  "bundle-text:../prompts/resources/functional_extension_examples_previous_exams.md",
+  () => ({
+    default: "Contenido de extensiones funcionales"
+  })
+)
 
-vi.mock("bundle-text:../prompts/resources/relationships_between_entities_examples_previous_exams.md", () => ({
-  default: "Contenido de relaciones entre entidades"
-}))
+vi.mock(
+  "bundle-text:../prompts/resources/attribute_constraints_examples_previous_exams.md",
+  () => ({
+    default: "Contenido de restricciones de atributos"
+  })
+)
 
-vi.mock("bundle-text:../prompts/resources/base_classes_structure_examples_previous_exams.md", () => ({
-  default: "Contenido de estructura de clases base"
-}))
+vi.mock(
+  "bundle-text:../prompts/resources/relationships_between_entities_examples_previous_exams.md",
+  () => ({
+    default: "Contenido de relaciones entre entidades"
+  })
+)
 
-import { RESOURCE_MAP } from "./resourceMap" 
+vi.mock(
+  "bundle-text:../prompts/resources/base_classes_structure_examples_previous_exams.md",
+  () => ({
+    default: "Contenido de estructura de clases base"
+  })
+)
 
 describe("RESOURCE_MAP Static Configuration Tests", () => {
-  
   it("debería contener exactamente las 4 llaves de archivos Markdown requeridas", () => {
     const keys = Object.keys(RESOURCE_MAP)
-    
+
     expect(keys).toHaveLength(4)
     expect(keys).toEqual(
       expect.arrayContaining([

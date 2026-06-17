@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
-import { parseMasterPrompt } from "./promptParser" 
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import { parseMasterPrompt } from "./promptParser"
 
 vi.mock("./resourceMap", () => ({
   RESOURCE_MAP: {
@@ -9,14 +10,14 @@ vi.mock("./resourceMap", () => ({
 }))
 
 describe("parseMasterPrompt Utility Tests", () => {
-  
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   it("debería retornar el texto completo como visibleText y hiddenContext vacío si no incluye la clave SPLIT_KEY", () => {
-    const rawText = "Texto plano sin cabeceras especiales ni prompts estructurados."
-    
+    const rawText =
+      "Texto plano sin cabeceras especiales ni prompts estructurados."
+
     const result = parseMasterPrompt(rawText)
 
     expect(result).toEqual({
@@ -36,9 +37,13 @@ describe("parseMasterPrompt Utility Tests", () => {
 
     const result = parseMasterPrompt(rawText)
 
-    expect(result.visibleText).toBe("Genera una clase que herede de la plantilla provista.")
-    
-    expect(result.hiddenContext).toContain("--- ARCHIVO / RECURSO: PlantillaExamen.java ---")
+    expect(result.visibleText).toBe(
+      "Genera una clase que herede de la plantilla provista."
+    )
+
+    expect(result.hiddenContext).toContain(
+      "--- ARCHIVO / RECURSO: PlantillaExamen.java ---"
+    )
     expect(result.hiddenContext).toContain("public class PlantillaExamen {}")
   })
 
@@ -55,8 +60,12 @@ describe("parseMasterPrompt Utility Tests", () => {
     const result = parseMasterPrompt(rawText)
 
     expect(result.visibleText).toBe("Prompt de prueba.")
-    expect(result.hiddenContext).toContain("--- ARCHIVO / RECURSO: PlantillaExamen.java ---")
-    expect(result.hiddenContext).toContain("--- ARCHIVO / RECURSO: Configuracion.json ---")
+    expect(result.hiddenContext).toContain(
+      "--- ARCHIVO / RECURSO: PlantillaExamen.java ---"
+    )
+    expect(result.hiddenContext).toContain(
+      "--- ARCHIVO / RECURSO: Configuracion.json ---"
+    )
   })
 
   it("debería omitir el recurso en el hiddenContext e imprimir un log en consola si el archivo no existe en el mapa", () => {
@@ -74,9 +83,11 @@ describe("parseMasterPrompt Utility Tests", () => {
 
     expect(result.hiddenContext).toBe("")
     expect(result.visibleText).toBe("Crea un algoritmo genérico.")
-    
+
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Recurso dinámico o no encontrado en map: 'ArchivoInexistente.java'")
+      expect.stringContaining(
+        "Recurso dinámico o no encontrado en map: 'ArchivoInexistente.java'"
+      )
     )
   })
 })

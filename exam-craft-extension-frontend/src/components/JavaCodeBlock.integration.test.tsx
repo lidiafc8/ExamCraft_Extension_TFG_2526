@@ -1,7 +1,9 @@
-import React from "react"
 import { render, screen } from "@testing-library/react"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
 import { JavaCodeBlock } from "./JavaCodeBlock"
@@ -92,7 +94,9 @@ describe("Integración: JavaCodeBlock", () => {
     })
 
     it("renderiza sin errores cuando el filename está vacío", () => {
-      const { container } = render(<JavaCodeBlock filename="" code={simpleCode} />)
+      const { container } = render(
+        <JavaCodeBlock filename="" code={simpleCode} />
+      )
 
       const h4 = container.querySelector("h4")
       expect(h4?.textContent).toBe("")
@@ -174,7 +178,10 @@ describe("Integración: JavaCodeBlock", () => {
       const { container } = render(
         <div>
           <JavaCodeBlock filename="ClassA.java" code="public class A {}" />
-          <JavaCodeBlock filename="ClassB.java" code="public class B extends A {}" />
+          <JavaCodeBlock
+            filename="ClassB.java"
+            code="public class B extends A {}"
+          />
           <JavaCodeBlock filename="ClassC.java" code="public interface C {}" />
         </div>
       )

@@ -92,7 +92,10 @@ async function executeProvider(providerId, prompt) {
     try {
       return await provider.callApi(prompt, key, provider.model)
     } catch (err) {
-      console.error(`[${providerId.toUpperCase()}] Error caused by:`, err.message)
+      console.error(
+        `[${providerId.toUpperCase()}] Error caused by:`,
+        err.message
+      )
       console.warn(
         `[${providerId.toUpperCase()}] Key failed, attempting the next...`
       )
@@ -143,7 +146,7 @@ function formatTitle(key) {
 
 app.post("/save-log", (req, res) => {
   try {
-    const { ejercicio, dominio, proveedor,...dynamicFields } = req.body
+    const { ejercicio, dominio, proveedor, ...dynamicFields } = req.body
 
     const domainTranslations = {
       "clínica veterinaria": "petClinic",
@@ -155,11 +158,17 @@ app.post("/save-log", (req, res) => {
     const safeExercise = ejercicio
       ? ejercicio.toLowerCase().replace(/\s+/g, "_")
       : "general_exercise"
-    const safeProvider = proveedor 
-      ? proveedor.toLowerCase().trim() 
+    const safeProvider = proveedor
+      ? proveedor.toLowerCase().trim()
       : "unknown_provider"
 
-    const folderPath = path.join(__dirname, "logs", safeProvider, safeExercise, englishDomain)
+    const folderPath = path.join(
+      __dirname,
+      "logs",
+      safeProvider,
+      safeExercise,
+      englishDomain
+    )
 
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath, { recursive: true })

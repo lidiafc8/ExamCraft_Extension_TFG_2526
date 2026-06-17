@@ -1,8 +1,10 @@
-import React from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
 import CreateExamByPartsScreen from "./CreateExamByPartsScreen"
@@ -25,8 +27,12 @@ vi.mock("~src/components/Header", () => ({
   )
 }))
 
-vi.mock("../../../assets/images/statement.png", () => ({ default: "mock-statement-icon.png" }))
-vi.mock("../../../assets/images/code.png", () => ({ default: "mock-code-icon.png" }))
+vi.mock("../../../assets/images/statement.png", () => ({
+  default: "mock-statement-icon.png"
+}))
+vi.mock("../../../assets/images/code.png", () => ({
+  default: "mock-code-icon.png"
+}))
 
 const defaultProps = {
   onBack: vi.fn(),
@@ -44,8 +50,15 @@ describe("Integración: CreateExamByPartsScreen", () => {
     it("renderiza correctamente los títulos, subtítulos y los contenedores de acción de la vista", () => {
       render(<CreateExamByPartsScreen {...defaultProps} />)
 
-      expect(screen.getByRole("heading", { name: "CREAR EXAMEN POR PARTES", level: 1 })).toBeInTheDocument()
-      expect(screen.getByText("¿Qué parte te gustaría generar primero?")).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", {
+          name: "CREAR EXAMEN POR PARTES",
+          level: 1
+        })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText("¿Qué parte te gustaría generar primero?")
+      ).toBeInTheDocument()
     })
 
     it("pasa las propiedades de navegación y las migas de pan esperadas al componente Header", () => {
@@ -53,9 +66,11 @@ describe("Integración: CreateExamByPartsScreen", () => {
 
       expect(screen.getByTestId("header-mock")).toBeInTheDocument()
       expect(screen.getByTestId("current-step")).toHaveTextContent("POR PARTES")
-      
+
       expect(screen.getByRole("button", { name: "INICIO" })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "CREAR EXAMEN" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "CREAR EXAMEN" })
+      ).toBeInTheDocument()
     })
 
     it("renderiza las tarjetas con sus etiquetas correspondientes e imágenes asociadas", () => {
@@ -85,7 +100,9 @@ describe("Integración: CreateExamByPartsScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "INICIO" }))
       expect(defaultProps.onWelcome).toHaveBeenCalledTimes(2)
 
-      await userEvent.click(screen.getByRole("button", { name: "CREAR EXAMEN" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "CREAR EXAMEN" })
+      )
       expect(defaultProps.onBack).toHaveBeenCalledTimes(1)
     })
 

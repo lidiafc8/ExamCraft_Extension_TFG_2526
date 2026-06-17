@@ -1,25 +1,29 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { downloadMarkdown } from "./downloadUtils" 
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { downloadMarkdown } from "./downloadUtils"
 
 function buildDomMocks() {
   const createdLinks: any[] = []
 
-  const appendChildSpy = vi.spyOn(document.body, "appendChild").mockImplementation((node) => node as any)
-  
-  const createElementSpy = vi.spyOn(document, "createElement").mockImplementation((tagName) => {
-    if (tagName === "a") {
-      const linkEl = {
-        href: "",
-        download: "",
-        click: vi.fn(),
-        remove: vi.fn()
+  const appendChildSpy = vi
+    .spyOn(document.body, "appendChild")
+    .mockImplementation((node) => node as any)
+
+  const createElementSpy = vi
+    .spyOn(document, "createElement")
+    .mockImplementation((tagName) => {
+      if (tagName === "a") {
+        const linkEl = {
+          href: "",
+          download: "",
+          click: vi.fn(),
+          remove: vi.fn()
+        }
+        createdLinks.push(linkEl)
+        return linkEl as any
       }
-      createdLinks.push(linkEl)
-      return linkEl as any
-    }
-    return {} as any
-  })
+      return {} as any
+    })
 
   const createObjectURLSpy = vi
     .spyOn(URL, "createObjectURL")
@@ -28,7 +32,13 @@ function buildDomMocks() {
     .spyOn(URL, "revokeObjectURL")
     .mockImplementation(() => {})
 
-  return { createdLinks, appendChildSpy, createElementSpy, createObjectURLSpy, revokeObjectURLSpy }
+  return {
+    createdLinks,
+    appendChildSpy,
+    createElementSpy,
+    createObjectURLSpy,
+    revokeObjectURLSpy
+  }
 }
 
 describe("exportUtils", () => {
@@ -80,7 +90,7 @@ describe("exportUtils", () => {
 
     it("añade el enlace al body antes de hacer click", () => {
       const callOrder: string[] = []
-      
+
       mocks.createElementSpy.mockImplementation(() => {
         const linkEl = {
           href: "",
@@ -91,7 +101,7 @@ describe("exportUtils", () => {
         mocks.createdLinks.push(linkEl)
         return linkEl as any
       })
-      
+
       mocks.appendChildSpy.mockImplementation(() => {
         callOrder.push("appendChild")
         return {} as any
@@ -110,7 +120,7 @@ describe("exportUtils", () => {
 
     it("llama a link.remove() después de hacer click", () => {
       const callOrder: string[] = []
-      
+
       mocks.createElementSpy.mockImplementation(() => {
         const linkEl = {
           href: "",
@@ -130,12 +140,14 @@ describe("exportUtils", () => {
 
     it("llama a URL.revokeObjectURL con la URL creada para liberar memoria", () => {
       downloadMarkdown("# Test", "revoke-test")
-      expect(mocks.revokeObjectURLSpy).toHaveBeenCalledWith("blob:mock-url-1234")
+      expect(mocks.revokeObjectURLSpy).toHaveBeenCalledWith(
+        "blob:mock-url-1234"
+      )
     })
 
     it("revoca la URL después de hacer click y remove", () => {
       const callOrder: string[] = []
-      
+
       mocks.createElementSpy.mockImplementation(() => {
         const linkEl = {
           href: "",
@@ -146,7 +158,9 @@ describe("exportUtils", () => {
         mocks.createdLinks.push(linkEl)
         return linkEl as any
       })
-      mocks.revokeObjectURLSpy.mockImplementation(() => callOrder.push("revoke"))
+      mocks.revokeObjectURLSpy.mockImplementation(() =>
+        callOrder.push("revoke")
+      )
 
       downloadMarkdown("# Test", "orden-completo")
       expect(callOrder).toEqual(["click", "remove", "revoke"])
@@ -238,7 +252,9 @@ describe("exportUtils", () => {
 
     it("fileName con ruta de directorios: solo añade .md al final sin modificar la ruta", () => {
       downloadMarkdown("# Test", "carpeta/subcarpeta/archivo")
-      expect(mocks.createdLinks[0].download).toBe("carpeta/subcarpeta/archivo.md")
+      expect(mocks.createdLinks[0].download).toBe(
+        "carpeta/subcarpeta/archivo.md"
+      )
     })
 
     it("createObjectURL se llama exactamente una vez por invocación", () => {
@@ -306,7 +322,9 @@ describe("exportUtils", () => {
         callOrder.push("appendChild")
         return {} as any
       })
-      mocks.revokeObjectURLSpy.mockImplementation(() => callOrder.push("revokeObjectURL"))
+      mocks.revokeObjectURLSpy.mockImplementation(() =>
+        callOrder.push("revokeObjectURL")
+      )
 
       downloadMarkdown("# Test", "orden-total")
 
@@ -363,7 +381,9 @@ describe("exportUtils", () => {
       expect(mocks.appendChildSpy).toHaveBeenCalledWith(mocks.createdLinks[0])
       expect(mocks.createdLinks[0].click).toHaveBeenCalledTimes(1)
       expect(mocks.createdLinks[0].remove).toHaveBeenCalledTimes(1)
-      expect(mocks.revokeObjectURLSpy).toHaveBeenCalledWith("blob:mock-url-1234")
+      expect(mocks.revokeObjectURLSpy).toHaveBeenCalledWith(
+        "blob:mock-url-1234"
+      )
     })
 
     it("dos descargas simultáneas (consecutivas) no se interfieren entre sí", async () => {
@@ -376,8 +396,14 @@ describe("exportUtils", () => {
 
       expect(mocks.createObjectURLSpy).toHaveBeenCalledTimes(2)
       expect(mocks.revokeObjectURLSpy).toHaveBeenCalledTimes(2)
-      expect(mocks.revokeObjectURLSpy).toHaveBeenNthCalledWith(1, "blob:url-examen-A")
-      expect(mocks.revokeObjectURLSpy).toHaveBeenNthCalledWith(2, "blob:url-examen-B")
+      expect(mocks.revokeObjectURLSpy).toHaveBeenNthCalledWith(
+        1,
+        "blob:url-examen-A"
+      )
+      expect(mocks.revokeObjectURLSpy).toHaveBeenNthCalledWith(
+        2,
+        "blob:url-examen-B"
+      )
 
       expect(mocks.createdLinks).toHaveLength(2)
       expect(mocks.createdLinks[0].download).toBe("examen-a.md")

@@ -1,7 +1,8 @@
-import React from "react"
-import { render, screen, fireEvent, act } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
 
 import { ExamDetailScreen } from "./ExamDetailScreen"
@@ -9,7 +10,7 @@ import { ExamDetailScreen } from "./ExamDetailScreen"
 type ExamDetailScreenProps = React.ComponentProps<typeof ExamDetailScreen>
 
 vi.mock("../../services/geminiService", () => ({
-  generateWithAI: vi.fn(),
+  generateWithAI: vi.fn()
 }))
 
 vi.mock("../../components/Header", () => ({
@@ -25,17 +26,17 @@ vi.mock("../../components/Header", () => ({
         ))}
       </div>
     </header>
-  ),
+  )
 }))
 
 vi.mock("../../components/MermaidViewer", () => ({
   MermaidViewer: ({ chartCode }: { chartCode: string }) => (
     <div data-testid="mermaid-viewer">{chartCode}</div>
-  ),
+  )
 }))
 
 vi.mock("../../components/MermaidCodeCleaner", () => ({
-  cleanMermaidCode: (code: string) => `cleaned-${code}`,
+  cleanMermaidCode: (code: string) => `cleaned-${code}`
 }))
 
 vi.mock("~src/components/modals/DeleteConfirmationModal", () => ({
@@ -46,29 +47,42 @@ vi.mock("~src/components/modals/DeleteConfirmationModal", () => ({
         <button onClick={onConfirm}>Confirmar Borrado</button>
         <button onClick={onCancel}>Cancelar Borrado</button>
       </div>
-    ) : null,
+    ) : null
 }))
 
 vi.mock("~src/components/modals/DownloadConfirmModal", () => ({
-  DownloadConfirmModal: ({ isOpen, defaultFileName, onConfirm, onCancel }: any) =>
+  DownloadConfirmModal: ({
+    isOpen,
+    defaultFileName,
+    onConfirm,
+    onCancel
+  }: any) =>
     isOpen ? (
       <div data-testid="download-modal">
         <span>Descargar {defaultFileName}</span>
-        <button onClick={() => onConfirm("archivo-descargado.md")}>Confirmar Descarga</button>
+        <button onClick={() => onConfirm("archivo-descargado.md")}>
+          Confirmar Descarga
+        </button>
         <button onClick={onCancel}>Cancelar Descarga</button>
       </div>
-    ) : null,
+    ) : null
 }))
 
 vi.mock("~src/components/modals/GitHubDeployModal", () => ({
-  GitHubDeployModal: ({ isOpen, newRepoName, onConfirm, onClose, uploadListString }: any) => (
+  GitHubDeployModal: ({
+    isOpen,
+    newRepoName,
+    onConfirm,
+    onClose,
+    uploadListString
+  }: any) => (
     <div data-testid="github-modal">
       <span>Repo: {newRepoName}</span>
       <pre>{uploadListString}</pre>
       <button onClick={() => onConfirm("mock-token")}>Confirmar Deploy</button>
       <button onClick={onClose}>Cerrar Deploy</button>
     </div>
-  ),
+  )
 }))
 
 describe("ExamDetailScreen", () => {
@@ -84,11 +98,12 @@ describe("ExamDetailScreen", () => {
       domainName: "Ajedrez",
       extensionStatement: "Enunciado base de la aplicación de ajedrez.",
       extensionMermaid: "classDiagram\nclass Tablero",
-      attributeConstraints: "El tamaño del tablero debe ser de 8x8 de forma obligatoria.",
+      attributeConstraints:
+        "El tamaño del tablero debe ser de 8x8 de forma obligatoria.",
       entityRelationships: "Un Tablero contiene 64 Casillas.",
       baseClasses: "class Pieza {}",
       testPartsMap: { test1: "void testMover()" },
-      fullSolution: "public class AjedrezSolution {}",
+      fullSolution: "public class AjedrezSolution {}"
     }
 
     baseProps = {
@@ -104,7 +119,7 @@ describe("ExamDetailScreen", () => {
       onDeleteProject: vi.fn(),
       onShowSolutionGeneratedCode: vi.fn(),
       onDeleteSection: vi.fn(),
-      onUpdateProject: vi.fn().mockResolvedValue(undefined),
+      onUpdateProject: vi.fn().mockResolvedValue(undefined)
     }
 
     Storage.prototype.getItem = vi.fn().mockReturnValue("gh_token_existente")
@@ -114,9 +129,15 @@ describe("ExamDetailScreen", () => {
     it("renderiza correctamente el título personalizado y las secciones de contenido", () => {
       render(<ExamDetailScreen {...baseProps} />)
 
-      expect(screen.getByRole("heading", { name: "Examen Parcial de Ajedrez" })).toBeInTheDocument()
-      expect(screen.getByText("Enunciado y Código Diagrama UML")).toBeInTheDocument()
-      expect(screen.getByText("Definición de Restricciones")).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", { name: "Examen Parcial de Ajedrez" })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText("Enunciado y Código Diagrama UML")
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText("Definición de Restricciones")
+      ).toBeInTheDocument()
       expect(screen.getByText("Definición de Relaciones")).toBeInTheDocument()
     })
 
@@ -131,7 +152,7 @@ describe("ExamDetailScreen", () => {
       expect(textareas[2]).toHaveValue(mockProject.entityRelationships)
 
       const viewer = await screen.findByTestId("mermaid-viewer")
-      
+
       expect(viewer).toHaveTextContent(/cleaned-classDiagram\s+class Tablero/)
     })
 
@@ -141,7 +162,9 @@ describe("ExamDetailScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "INICIO" }))
       expect(baseProps.onWelcome).toHaveBeenCalled()
 
-      await userEvent.click(screen.getByRole("button", { name: "EXÁMENES ANTERIORES" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "EXÁMENES ANTERIORES" })
+      )
       expect(baseProps.onGoToFolders).toHaveBeenCalled()
 
       await userEvent.click(screen.getByRole("button", { name: "AJEDREZ" }))
@@ -151,10 +174,14 @@ describe("ExamDetailScreen", () => {
     it("ejecuta las funciones callback al presionar los botones para visualizar códigos generados", async () => {
       render(<ExamDetailScreen {...baseProps} />)
 
-      await userEvent.click(screen.getByRole("button", { name: "Ver Código Examen" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Ver Código Examen" })
+      )
       expect(baseProps.onShowGeneratedCode).toHaveBeenCalled()
 
-      await userEvent.click(screen.getByRole("button", { name: "Ver Código Solución" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Ver Código Solución" })
+      )
       expect(baseProps.onShowSolutionGeneratedCode).toHaveBeenCalled()
     })
   })
@@ -167,33 +194,49 @@ describe("ExamDetailScreen", () => {
     })
 
     it("abre la vista previa del examen en pantalla completa y permite cerrarla", async () => {
-      await userEvent.click(screen.getByRole("button", { name: "Previsualizar" }))
-      
-      const previewTitle = await screen.findByRole("heading", { name: "Previsualización del Examen" })
+      await userEvent.click(
+        screen.getByRole("button", { name: "Previsualizar" })
+      )
+
+      const previewTitle = await screen.findByRole("heading", {
+        name: "Previsualización del Examen"
+      })
       expect(previewTitle).toBeInTheDocument()
-      
-      const closeBtn = screen.getAllByRole("button").find(btn => 
-        btn.className.includes("preview-close-btn")
-      ) as HTMLElement;
-      
+
+      const closeBtn = screen
+        .getAllByRole("button")
+        .find((btn) =>
+          btn.className.includes("preview-close-btn")
+        ) as HTMLElement
+
       await userEvent.click(closeBtn)
-      expect(screen.queryByRole("heading", { name: "Previsualización del Examen" })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("heading", { name: "Previsualización del Examen" })
+      ).not.toBeInTheDocument()
     })
 
     it("abre el modal de confirmation de descarga y procesa el callback al confirmar", async () => {
-      await userEvent.click(screen.getByRole("button", { name: "Descargar (.md)" }))
-      
+      await userEvent.click(
+        screen.getByRole("button", { name: "Descargar (.md)" })
+      )
+
       expect(screen.getByTestId("download-modal")).toBeInTheDocument()
-      await userEvent.click(screen.getByRole("button", { name: "Confirmar Descarga" }))
-      
+      await userEvent.click(
+        screen.getByRole("button", { name: "Confirmar Descarga" })
+      )
+
       expect(baseProps.onDownload).toHaveBeenCalledWith("archivo-descargado.md")
     })
 
     it("despliega el modal de GitHub construyendo la lista correcta de ficheros a subir", async () => {
-      await userEvent.click(screen.getByRole("button", { name: "Crear repositorio GitHub" }))
-      
+      await userEvent.click(
+        screen.getByRole("button", { name: "Crear repositorio GitHub" })
+      )
+
       expect(screen.getByTestId("github-modal")).toBeInTheDocument()
-      expect(screen.getByText(/README\.md \(Enunciado y UML\)/)).toBeInTheDocument()
+      expect(
+        screen.getByText(/README\.md \(Enunciado y UML\)/)
+      ).toBeInTheDocument()
       expect(screen.getByText(/Restricciones de atributos/)).toBeInTheDocument()
     })
 

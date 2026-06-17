@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
-import { generateWithAI } from "./geminiService" 
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import { generateWithAI } from "./geminiService"
 
 describe("generateWithAI Service Tests", () => {
-  
   beforeEach(() => {
     vi.clearAllMocks()
     vi.stubGlobal("fetch", vi.fn())
@@ -45,13 +45,13 @@ describe("generateWithAI Service Tests", () => {
     } as unknown as Response)
 
     const finalResult = await generateWithAI("Dame una solución")
-    
+
     expect(finalResult.provider).toBe("unknown")
   })
 
   it("debería lanzar un error si la respuesta del backend no contiene la propiedad 'text'", async () => {
     const mockResponseData = {
-      provider: "anthropic" 
+      provider: "anthropic"
     }
 
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -111,7 +111,7 @@ describe("generateWithAI Service Tests", () => {
     await expect(generateWithAI("Prueba apagado")).rejects.toThrow(
       "Failed to fetch"
     )
-    
+
     expect(console.error).toHaveBeenCalled()
   })
 })

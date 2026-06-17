@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { downloadMarkdown } from "./downloadUtils" 
-import { downloadProjectAsMarkdown } from "./exportUtils"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { downloadMarkdown } from "./downloadUtils"
+import { downloadProjectAsMarkdown } from "./exportUtils"
 
 function buildDomMocks() {
   const linkEl = {
@@ -11,7 +11,9 @@ function buildDomMocks() {
     remove: vi.fn()
   }
 
-  const appendChildSpy = vi.spyOn(document.body, "appendChild").mockReturnValue(linkEl as any)
+  const appendChildSpy = vi
+    .spyOn(document.body, "appendChild")
+    .mockReturnValue(linkEl as any)
   const createElementSpy = vi
     .spyOn(document, "createElement")
     .mockReturnValue(linkEl as any)
@@ -22,7 +24,13 @@ function buildDomMocks() {
     .spyOn(URL, "revokeObjectURL")
     .mockImplementation(() => {})
 
-  return { linkEl, appendChildSpy, createElementSpy, createObjectURLSpy, revokeObjectURLSpy }
+  return {
+    linkEl,
+    appendChildSpy,
+    createElementSpy,
+    createObjectURLSpy,
+    revokeObjectURLSpy
+  }
 }
 
 describe("downloadMarkdown", () => {
@@ -104,14 +112,18 @@ describe("downloadMarkdown", () => {
 
     it("llama a URL.revokeObjectURL con la URL creada para liberar memoria", () => {
       downloadMarkdown("# Test", "revoke-test")
-      expect(mocks.revokeObjectURLSpy).toHaveBeenCalledWith("blob:mock-url-1234")
+      expect(mocks.revokeObjectURLSpy).toHaveBeenCalledWith(
+        "blob:mock-url-1234"
+      )
     })
 
     it("revoca la URL después de hacer click y remove", () => {
       const callOrder: string[] = []
       mocks.linkEl.click.mockImplementation(() => callOrder.push("click"))
       mocks.linkEl.remove.mockImplementation(() => callOrder.push("remove"))
-      mocks.revokeObjectURLSpy.mockImplementation(() => callOrder.push("revoke"))
+      mocks.revokeObjectURLSpy.mockImplementation(() =>
+        callOrder.push("revoke")
+      )
 
       downloadMarkdown("# Test", "orden-completo")
       expect(callOrder).toEqual(["click", "remove", "revoke"])
@@ -266,7 +278,9 @@ describe("downloadMarkdown", () => {
       })
       mocks.linkEl.click.mockImplementation(() => callOrder.push("click"))
       mocks.linkEl.remove.mockImplementation(() => callOrder.push("remove"))
-      mocks.revokeObjectURLSpy.mockImplementation(() => callOrder.push("revokeObjectURL"))
+      mocks.revokeObjectURLSpy.mockImplementation(() =>
+        callOrder.push("revokeObjectURL")
+      )
 
       downloadMarkdown("# Test", "orden-total")
 
@@ -323,7 +337,9 @@ describe("downloadMarkdown", () => {
       expect(mocks.appendChildSpy).toHaveBeenCalledWith(mocks.linkEl)
       expect(mocks.linkEl.click).toHaveBeenCalledTimes(1)
       expect(mocks.linkEl.remove).toHaveBeenCalledTimes(1)
-      expect(mocks.revokeObjectURLSpy).toHaveBeenCalledWith("blob:mock-url-1234")
+      expect(mocks.revokeObjectURLSpy).toHaveBeenCalledWith(
+        "blob:mock-url-1234"
+      )
     })
 
     it("dos descargas simultáneas (consecutivas) no se interfieren entre sí", () => {

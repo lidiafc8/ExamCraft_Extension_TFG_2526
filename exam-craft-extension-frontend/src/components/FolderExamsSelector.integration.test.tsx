@@ -1,8 +1,10 @@
-import React, { useState } from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React, { useState } from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
 import { FolderExamSelector } from "./FolderExamsSelector"
@@ -13,15 +15,26 @@ vi.mock("../../assets/images/archive.png", () => ({ default: "archive.png" }))
 vi.mock("../../assets/images/exam.png", () => ({ default: "exam.png" }))
 
 const mockProjects = [
-  { id: "project_1", domainName: "clínica veterinaria", customName: "Examen Veterinaria 1" },
-  { id: "project_2", domainName: "clínica veterinaria", customName: "Examen Veterinaria 2" },
-  { id: "project_3", domainName: "ajedrez", customName: "Examen Ajedrez 1" },
+  {
+    id: "project_1",
+    domainName: "clínica veterinaria",
+    customName: "Examen Veterinaria 1"
+  },
+  {
+    id: "project_2",
+    domainName: "clínica veterinaria",
+    customName: "Examen Veterinaria 2"
+  },
+  { id: "project_3", domainName: "ajedrez", customName: "Examen Ajedrez 1" }
 ]
 
 const allowedFolders = ["clínica veterinaria", "ajedrez"]
-const displayName = (proj: any) => proj.customName || `Examen de ${proj.domainName}`
+const displayName = (proj: any) =>
+  proj.customName || `Examen de ${proj.domainName}`
 
-function SelectorWrapper(props: Partial<React.ComponentProps<typeof FolderExamSelector>> = {}) {
+function SelectorWrapper(
+  props: Partial<React.ComponentProps<typeof FolderExamSelector>> = {}
+) {
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
 
   return (
@@ -99,7 +112,9 @@ describe("Integración: FolderExamSelector", () => {
     it("muestra mensaje vacío por defecto si no hay proyectos", () => {
       render(<SelectorWrapper projects={[]} />)
 
-      expect(screen.getByText("No hay exámenes creados todavía.")).toBeInTheDocument()
+      expect(
+        screen.getByText("No hay exámenes creados todavía.")
+      ).toBeInTheDocument()
     })
 
     it("muestra mensaje vacío personalizado si se pasa emptyFoldersMessage", () => {
@@ -110,7 +125,9 @@ describe("Integración: FolderExamSelector", () => {
         />
       )
 
-      expect(screen.getByText("Sin exámenes disponibles aún.")).toBeInTheDocument()
+      expect(
+        screen.getByText("Sin exámenes disponibles aún.")
+      ).toBeInTheDocument()
     })
 
     it("no muestra carpetas que no tienen ningún proyecto asignado", () => {
@@ -154,9 +171,7 @@ describe("Integración: FolderExamSelector", () => {
 
   describe("Casos Límite", () => {
     it("maneja correctamente un proyecto sin customName usando el domainName", async () => {
-      const sinCustomName = [
-        { id: "project_x", domainName: "ajedrez" }
-      ]
+      const sinCustomName = [{ id: "project_x", domainName: "ajedrez" }]
       render(<SelectorWrapper projects={sinCustomName} />)
 
       await userEvent.click(screen.getByText("AJEDREZ")).catch(() => {})
@@ -164,7 +179,11 @@ describe("Integración: FolderExamSelector", () => {
 
     it("es insensible a mayúsculas al comparar domainName con las carpetas permitidas", () => {
       const proyectoMayusculas = [
-        { id: "project_y", domainName: "CLÍNICA VETERINARIA", customName: "Test mayúsculas" }
+        {
+          id: "project_y",
+          domainName: "CLÍNICA VETERINARIA",
+          customName: "Test mayúsculas"
+        }
       ]
       render(<SelectorWrapper projects={proyectoMayusculas} />)
 
@@ -217,11 +236,7 @@ describe("Integración: FolderExamSelector", () => {
     })
 
     it("flujo completo: filtrar proyectos → entrar en carpeta → ver solo los filtrados", async () => {
-      render(
-        <SelectorWrapper
-          filterProject={(p) => p.id === "project_3"}
-        />
-      )
+      render(<SelectorWrapper filterProject={(p) => p.id === "project_3"} />)
 
       expect(screen.queryByText("CLÍNICA VETERINARIA")).not.toBeInTheDocument()
       expect(screen.getByText("AJEDREZ")).toBeInTheDocument()

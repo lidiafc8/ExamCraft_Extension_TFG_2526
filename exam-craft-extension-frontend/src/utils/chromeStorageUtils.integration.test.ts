@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { saveToChrome, getAllFromChrome } from "./chromeStorageUtils" 
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import { getAllFromChrome, saveToChrome } from "./chromeStorageUtils"
 
 describe("Chrome Storage Service Tests", () => {
   const originalChrome = globalThis.chrome
@@ -13,7 +14,10 @@ describe("Chrome Storage Service Tests", () => {
     globalThis.chrome = originalChrome
   })
 
-  const mockChromeStorage = (method: "set" | "get", implementation: (...args: any[]) => any) => {
+  const mockChromeStorage = (
+    method: "set" | "get",
+    implementation: (...args: any[]) => any
+  ) => {
     globalThis.chrome = {
       storage: {
         local: {
@@ -37,8 +41,10 @@ describe("Chrome Storage Service Tests", () => {
       mockChromeStorage("set", (data: any, callback: () => void) => callback())
 
       const dataToSave = { name: "Examen Patrones de Diseño", version: 1 }
-      
-      await expect(saveToChrome("exam_001", dataToSave)).resolves.toBeUndefined()
+
+      await expect(
+        saveToChrome("exam_001", dataToSave)
+      ).resolves.toBeUndefined()
       expect(globalThis.chrome.storage.local.set).toHaveBeenCalledWith(
         { exam_001: dataToSave },
         expect.any(Function)
@@ -47,13 +53,15 @@ describe("Chrome Storage Service Tests", () => {
 
     it("debería rechazar la promesa si chrome.runtime.lastError contiene un fallo", async () => {
       const mockError = new Error("Quota exceeded")
-      
+
       mockChromeStorage("set", (data: any, callback: () => void) => {
         globalThis.chrome.runtime.lastError = mockError
         callback()
       })
 
-      await expect(saveToChrome("exam_fail", { data: "test" })).rejects.toThrow("Quota exceeded")
+      await expect(saveToChrome("exam_fail", { data: "test" })).rejects.toThrow(
+        "Quota exceeded"
+      )
     })
   })
 
@@ -65,15 +73,20 @@ describe("Chrome Storage Service Tests", () => {
 
     it("debería recuperar los elementos mapeándolos con su estructura '_key'", async () => {
       const mockItems = {
-        "key_1": { id: "1", titulo: "Examen de JS" },
-        "key_2": { id: "2", titulo: "Examen de Java" }
+        key_1: { id: "1", titulo: "Examen de JS" },
+        key_2: { id: "2", titulo: "Examen de Java" }
       }
 
-      mockChromeStorage("get", (target: any, callback: (items: any) => void) => callback(mockItems))
+      mockChromeStorage("get", (target: any, callback: (items: any) => void) =>
+        callback(mockItems)
+      )
 
       const itemsResult = await getAllFromChrome()
 
-      expect(globalThis.chrome.storage.local.get).toHaveBeenCalledWith(null, expect.any(Function))
+      expect(globalThis.chrome.storage.local.get).toHaveBeenCalledWith(
+        null,
+        expect.any(Function)
+      )
       expect(itemsResult).toEqual([
         { id: "1", titulo: "Examen de JS", _key: "key_1" },
         { id: "2", titulo: "Examen de Java", _key: "key_2" }
@@ -83,10 +96,13 @@ describe("Chrome Storage Service Tests", () => {
     it("debería rechazar la promesa si ocurre un error leyendo el almacenamiento", async () => {
       const mockError = new Error("Error de lectura")
 
-      mockChromeStorage("get", (target: any, callback: (items: any) => void) => {
-        globalThis.chrome.runtime.lastError = mockError
-        callback({})
-      })
+      mockChromeStorage(
+        "get",
+        (target: any, callback: (items: any) => void) => {
+          globalThis.chrome.runtime.lastError = mockError
+          callback({})
+        }
+      )
 
       await expect(getAllFromChrome()).rejects.toThrow("Error de lectura")
     })

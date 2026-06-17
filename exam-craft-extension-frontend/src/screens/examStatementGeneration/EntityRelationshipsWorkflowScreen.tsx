@@ -84,8 +84,15 @@ export default function EntityRelationshipsWorkflowScreen({
   const [promptText, setPromptText] = useState("")
   const [hiddenContext, setHiddenContext] = useState("")
 
-  const { responseText, isLoading, setResponseText, generate } = 
-    useGeminiGeneration(getLogConfig("entity-relationships", selectedProject, hiddenContext, promptText));
+  const { responseText, isLoading, setResponseText, generate } =
+    useGeminiGeneration(
+      getLogConfig(
+        "entity-relationships",
+        selectedProject,
+        hiddenContext,
+        promptText
+      )
+    )
 
   useEffect(() => {
     if (step === "selection" && globalThis.chrome?.storage?.local) {

@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
+
 import { parseJavaFiles } from "./codeUtils"
 
 describe("parseJavaFiles", () => {
-
   describe("Casos positivos", () => {
     it("devuelve array vacío si rawText es string vacío", () => {
       expect(parseJavaFiles("")).toEqual([])
@@ -23,14 +23,16 @@ describe("parseJavaFiles", () => {
     })
 
     it("extrae el filename correcto cuando la ruta está en el texto antes del bloque", () => {
-      const input = "src/main/Tablero.java\n```java\npublic class Tablero {}\n```"
+      const input =
+        "src/main/Tablero.java\n```java\npublic class Tablero {}\n```"
       const result = parseJavaFiles(input)
       expect(result[0].filename).toBe("Tablero.java")
       expect(result[0].path).toBe("src/main/Tablero.java")
     })
 
     it("extrae el path completo cuando hay subdirectorios en la ruta", () => {
-      const input = "com/example/service/UserService.java\n```java\nclass UserService {}\n```"
+      const input =
+        "com/example/service/UserService.java\n```java\nclass UserService {}\n```"
       const result = parseJavaFiles(input)
       expect(result[0].path).toBe("com/example/service/UserService.java")
       expect(result[0].filename).toBe("UserService.java")
@@ -40,7 +42,7 @@ describe("parseJavaFiles", () => {
       const input = "// src/Animal.java\n```java\nclass Animal {}\n```"
       const result = parseJavaFiles(input)
       expect(result[0].filename).toBe("Animal.java")
-      expect(result[0].path).toBe("/Animal.java") 
+      expect(result[0].path).toBe("/Animal.java")
     })
 
     it("extrae la ruta con prefijo '// Archivo:' antes del bloque", () => {
@@ -58,7 +60,8 @@ describe("parseJavaFiles", () => {
     })
 
     it("detecta el path dentro del bloque con prefijo 'Path:'", () => {
-      const input = "```java\nPath: com/app/Main.java\npublic class Main {}\n```"
+      const input =
+        "```java\nPath: com/app/Main.java\npublic class Main {}\n```"
       const result = parseJavaFiles(input)
       expect(result[0].filename).toBe("Main.java")
       expect(result[0].code).toBe("public class Main {}")
@@ -89,7 +92,8 @@ describe("parseJavaFiles", () => {
     })
 
     it("usa la última referencia .java encontrada antes del bloque si hay varias", () => {
-      const input = "src/Primero.java\nsrc/Ultimo.java\n```java\nclass Ultimo {}\n```"
+      const input =
+        "src/Primero.java\nsrc/Ultimo.java\n```java\nclass Ultimo {}\n```"
       const result = parseJavaFiles(input)
       expect(result[0].filename).toBe("Ultimo.java")
     })
@@ -114,7 +118,8 @@ describe("parseJavaFiles", () => {
     })
 
     it("acepta rutas con guiones en el nombre del fichero", () => {
-      const input = "src/my-service/My-Class.java\n```java\nclass MyClass {}\n```"
+      const input =
+        "src/my-service/My-Class.java\n```java\nclass MyClass {}\n```"
       const result = parseJavaFiles(input)
       expect(result[0].filename).toBe("My-Class.java")
     })
@@ -201,7 +206,8 @@ describe("parseJavaFiles", () => {
     })
 
     it("path en texto previo tiene prioridad sobre path dentro del bloque", () => {
-      const input = "src/Externo.java\n```java\nArchivo: src/Interno.java\nclass X {}\n```"
+      const input =
+        "src/Externo.java\n```java\nArchivo: src/Interno.java\nclass X {}\n```"
       const result = parseJavaFiles(input)
       expect(result[0].filename).toBe("Externo.java")
     })
@@ -345,7 +351,7 @@ describe("parseJavaFiles", () => {
 
       expect(result[2].filename).toBe("Identificable.java")
       expect(result[2].code).toContain("public interface Identificable")
-      expect(result[2].code).not.toContain("Path:")      
+      expect(result[2].code).not.toContain("Path:")
       expect(result[3].filename).toBe("MainTest.java")
       expect(result[3].code).toContain("@Test")
 
@@ -388,7 +394,8 @@ describe("parseJavaFiles", () => {
     })
 
     it("respuesta con texto introductorio largo + bloque → no activa el fallback", () => {
-      const intro = "Esta es una explicación muy larga sobre el examen.\n".repeat(20)
+      const intro =
+        "Esta es una explicación muy larga sobre el examen.\n".repeat(20)
       const input = intro + "Resultado.java\n```java\nclass Resultado {}\n```"
       const result = parseJavaFiles(input)
       expect(result).toHaveLength(1)
@@ -420,7 +427,7 @@ describe("parseJavaFiles", () => {
         "import java.util.List;",
         "import java.util.ArrayList;",
         "",
-        "@SuppressWarnings(\"unchecked\")",
+        '@SuppressWarnings("unchecked")',
         "public class Complejo<T extends Comparable<T>> {",
         "    private List<T> items = new ArrayList<>();",
         "",

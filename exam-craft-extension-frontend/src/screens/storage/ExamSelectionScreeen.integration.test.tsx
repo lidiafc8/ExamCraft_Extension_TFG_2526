@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
-import { render, screen, fireEvent } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
 import type { ComponentProps } from "react"
-import "@testing-library/jest-dom/vitest" 
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import "@testing-library/jest-dom/vitest"
 
 import { DomainFolderScreen } from "./ExamSelectionScreen"
 
@@ -11,7 +12,6 @@ type DomainFolderScreenProps = ComponentProps<typeof DomainFolderScreen>
 vi.mock("../../../assets/images/exam.png", () => ({
   default: "exam-mock-image.png"
 }))
-
 
 vi.mock("~src/components/Header", () => ({
   Header: ({ currentStep, onWelcome }: any) => (
@@ -40,7 +40,7 @@ describe("DomainFolderScreen Integration Tests", () => {
 
   const mockProjects = [
     { id: "1", customName: "Examen Matemáticas", domainName: "Ciencias" },
-    { id: "2", customName: "", domainName: "Historia" } 
+    { id: "2", customName: "", domainName: "Historia" }
   ]
 
   beforeEach(() => {
@@ -63,10 +63,10 @@ describe("DomainFolderScreen Integration Tests", () => {
     render(<DomainFolderScreen {...defaultProps} />)
 
     expect(screen.getByText("CARPETA: MATEMÁTICAS")).toBeInTheDocument()
-    
+
     expect(screen.getByText("Examen Matemáticas")).toBeInTheDocument()
     expect(screen.getByText("Examen de Historia")).toBeInTheDocument()
-    
+
     expect(screen.getByRole("button", { name: "Volver" })).toBeInTheDocument()
   })
 
@@ -85,14 +85,14 @@ describe("DomainFolderScreen Integration Tests", () => {
   it("debería ejecutar onSelectProject al abrir un examen", () => {
     render(<DomainFolderScreen {...defaultProps} />)
     const openButtons = screen.getAllByTitle("Abrir examen")
-    
+
     fireEvent.click(openButtons[0])
     expect(defaultProps.onSelectProject).toHaveBeenCalledWith(mockProjects[0])
   })
 
   it("debería activar el modo edición al hacer click en la etiqueta del proyecto", () => {
     render(<DomainFolderScreen {...defaultProps} />)
-    
+
     const labelButton = screen.getByText("Examen Matemáticas")
     fireEvent.click(labelButton)
 
@@ -116,27 +116,45 @@ describe("DomainFolderScreen Integration Tests", () => {
   })
 
   it("debería ejecutar onRenameProject al perder el foco (onBlur) en el input", () => {
-    const customProps: DomainFolderScreenProps = { ...defaultProps, editingId: "1", tempName: "Nombre Blur" }
+    const customProps: DomainFolderScreenProps = {
+      ...defaultProps,
+      editingId: "1",
+      tempName: "Nombre Blur"
+    }
     render(<DomainFolderScreen {...customProps} />)
 
     const input = screen.getByDisplayValue("Nombre Blur")
     fireEvent.blur(input)
 
-    expect(defaultProps.onRenameProject).toHaveBeenCalledWith("1", "Nombre Blur")
+    expect(defaultProps.onRenameProject).toHaveBeenCalledWith(
+      "1",
+      "Nombre Blur"
+    )
   })
 
   it("debería ejecutar onRenameProject al presionar la tecla Enter", () => {
-    const customProps: DomainFolderScreenProps = { ...defaultProps, editingId: "1", tempName: "Nombre Enter" }
+    const customProps: DomainFolderScreenProps = {
+      ...defaultProps,
+      editingId: "1",
+      tempName: "Nombre Enter"
+    }
     render(<DomainFolderScreen {...customProps} />)
 
     const input = screen.getByDisplayValue("Nombre Enter")
     fireEvent.keyDown(input, { key: "Enter", code: "Enter" })
 
-    expect(defaultProps.onRenameProject).toHaveBeenCalledWith("1", "Nombre Enter")
+    expect(defaultProps.onRenameProject).toHaveBeenCalledWith(
+      "1",
+      "Nombre Enter"
+    )
   })
 
   it("debería cancelar la edición (setEditingId(null)) al presionar la tecla Escape", () => {
-    const customProps: DomainFolderScreenProps = { ...defaultProps, editingId: "1", tempName: "Nombre Escape" }
+    const customProps: DomainFolderScreenProps = {
+      ...defaultProps,
+      editingId: "1",
+      tempName: "Nombre Escape"
+    }
     render(<DomainFolderScreen {...customProps} />)
 
     const input = screen.getByDisplayValue("Nombre Escape")
@@ -146,7 +164,11 @@ describe("DomainFolderScreen Integration Tests", () => {
   })
 
   it("no debería hacer nada en el onKeyDown si se presiona otra tecla distinta", () => {
-    const customProps: DomainFolderScreenProps = { ...defaultProps, editingId: "1", tempName: "Test Tecla" }
+    const customProps: DomainFolderScreenProps = {
+      ...defaultProps,
+      editingId: "1",
+      tempName: "Test Tecla"
+    }
     render(<DomainFolderScreen {...customProps} />)
 
     const input = screen.getByDisplayValue("Test Tecla")
@@ -158,11 +180,11 @@ describe("DomainFolderScreen Integration Tests", () => {
 
   it("debería abrir el modal de confirmación al hacer click en el botón de borrar", () => {
     render(<DomainFolderScreen {...defaultProps} />)
-    
+
     expect(screen.queryByTestId("delete-modal")).not.toBeInTheDocument()
 
     const deleteButtons = screen.getAllByTitle("Borrar examen")
-    fireEvent.click(deleteButtons[0]) 
+    fireEvent.click(deleteButtons[0])
 
     expect(screen.getByTestId("delete-modal")).toBeInTheDocument()
     expect(screen.getByText("¿Borrar Examen Matemáticas?")).toBeInTheDocument()
@@ -170,7 +192,7 @@ describe("DomainFolderScreen Integration Tests", () => {
 
   it("debería ejecutar onDeleteProject y cerrar el modal al confirmar el borrado", () => {
     render(<DomainFolderScreen {...defaultProps} />)
-    
+
     const deleteButtons = screen.getAllByTitle("Borrar examen")
     fireEvent.click(deleteButtons[0])
 
@@ -183,7 +205,7 @@ describe("DomainFolderScreen Integration Tests", () => {
 
   it("debería cerrar el modal sin borrar al hacer click en cancelar", () => {
     render(<DomainFolderScreen {...defaultProps} />)
-    
+
     const deleteButtons = screen.getAllByTitle("Borrar examen")
     fireEvent.click(deleteButtons[0])
 

@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { downloadProjectAsMarkdown } from "./exportUtils" 
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import { downloadProjectAsMarkdown } from "./exportUtils"
 import { sanitizeMermaidForModal } from "./mermaidUtils"
 
 vi.mock("./mermaidUtils", () => ({
-  sanitizeMermaidForModal: vi.fn((text) => text) 
+  sanitizeMermaidForModal: vi.fn((text) => text)
 }))
 
 describe("downloadProjectAsMarkdown Utility Tests", () => {
@@ -12,7 +13,9 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    globalThis.URL.createObjectURL = vi.fn().mockReturnValue("blob:http://localhost/mock-uuid")
+    globalThis.URL.createObjectURL = vi
+      .fn()
+      .mockReturnValue("blob:http://localhost/mock-uuid")
     globalThis.URL.revokeObjectURL = vi.fn()
 
     linkMock = {
@@ -23,7 +26,9 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
     }
 
     vi.spyOn(document, "createElement").mockReturnValue(linkMock as any)
-    vi.spyOn(document.body, "appendChild").mockImplementation(() => linkMock as any)
+    vi.spyOn(document.body, "appendChild").mockImplementation(
+      () => linkMock as any
+    )
   })
 
   afterEach(() => {
@@ -41,11 +46,13 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
       extensionFinish: "Enunciado de la extensión"
     }
 
-    const blobSpy = vi.spyOn(globalThis, "Blob").mockImplementation((chunks) => {
-      const text = chunks[0] as string
-      expect(text).toContain("# Examen: Patrones Estructurales")
-      return {} as Blob
-    })
+    const blobSpy = vi
+      .spyOn(globalThis, "Blob")
+      .mockImplementation((chunks) => {
+        const text = chunks[0] as string
+        expect(text).toContain("# Examen: Patrones Estructurales")
+        return {} as Blob
+      })
 
     downloadProjectAsMarkdown(fakeProject, "test")
     expect(blobSpy).toHaveBeenCalled()
@@ -57,11 +64,13 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
       extensionFinish: "Enunciado de la extensión"
     }
 
-    const blobSpy = vi.spyOn(globalThis, "Blob").mockImplementation((chunks) => {
-      const text = chunks[0] as string
-      expect(text).toContain("# Examen de Matemáticas")
-      return {} as Blob
-    })
+    const blobSpy = vi
+      .spyOn(globalThis, "Blob")
+      .mockImplementation((chunks) => {
+        const text = chunks[0] as string
+        expect(text).toContain("# Examen de Matemáticas")
+        return {} as Blob
+      })
 
     downloadProjectAsMarkdown(fakeProject, "test")
     expect(blobSpy).toHaveBeenCalled()
@@ -70,17 +79,24 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
   it("debería procesar y aislar el bloque de código Mermaid si se detecta un diagrama", () => {
     const fakeProject = {
       customName: "Examen con Diagrama",
-      extensionFinish: "Texto introductorio\nclassDiagram\nclass Persona {\n  +String nombre\n}"
+      extensionFinish:
+        "Texto introductorio\nclassDiagram\nclass Persona {\n  +String nombre\n}"
     }
 
-    vi.mocked(sanitizeMermaidForModal).mockReturnValueOnce("classDiagram\nclass Persona {\n  +String nombre\n}")
+    vi.mocked(sanitizeMermaidForModal).mockReturnValueOnce(
+      "classDiagram\nclass Persona {\n  +String nombre\n}"
+    )
 
-    const blobSpy = vi.spyOn(globalThis, "Blob").mockImplementation((chunks) => {
-      const text = chunks[0] as string
-      expect(text).toContain("## 1. Extensión Funcional\nTexto introductorio")
-      expect(text).toContain("### Diagrama de Clases\n```mermaid\nclassDiagram\nclass Persona {\n  +String nombre\n}\n```")
-      return {} as Blob
-    })
+    const blobSpy = vi
+      .spyOn(globalThis, "Blob")
+      .mockImplementation((chunks) => {
+        const text = chunks[0] as string
+        expect(text).toContain("## 1. Extensión Funcional\nTexto introductorio")
+        expect(text).toContain(
+          "### Diagrama de Clases\n```mermaid\nclassDiagram\nclass Persona {\n  +String nombre\n}\n```"
+        )
+        return {} as Blob
+      })
 
     downloadProjectAsMarkdown(fakeProject, "test")
     expect(sanitizeMermaidForModal).toHaveBeenCalled()
@@ -91,21 +107,31 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
     const fakeProject = {
       customName: "Examen Tests",
       testPartsMap: {
-        "B_Test.java": { fileName: "B_Test.java", code: "```java\npublic class B {}\n```" },
+        "B_Test.java": {
+          fileName: "B_Test.java",
+          code: "```java\npublic class B {}\n```"
+        },
         "A_Test.java": { fileName: "A_Test.java", code: "public class A {}" }
       }
     }
 
-    const blobSpy = vi.spyOn(globalThis, "Blob").mockImplementation((chunks) => {
-      const text = chunks[0] as string
-      
-      expect(text).toContain("### 📄 A_Test.java\n```java\npublic class A {}\n```")
-      expect(text).toContain("### 📄 B_Test.java\n```java\npublic class B {}\n```")
-      
-      
-      expect(text.indexOf("A_Test.java")).toBeLessThan(text.indexOf("B_Test.java"))
-      return {} as Blob
-    })
+    const blobSpy = vi
+      .spyOn(globalThis, "Blob")
+      .mockImplementation((chunks) => {
+        const text = chunks[0] as string
+
+        expect(text).toContain(
+          "### 📄 A_Test.java\n```java\npublic class A {}\n```"
+        )
+        expect(text).toContain(
+          "### 📄 B_Test.java\n```java\npublic class B {}\n```"
+        )
+
+        expect(text.indexOf("A_Test.java")).toBeLessThan(
+          text.indexOf("B_Test.java")
+        )
+        return {} as Blob
+      })
 
     downloadProjectAsMarkdown(fakeProject, "test")
     expect(blobSpy).toHaveBeenCalled()
@@ -117,11 +143,15 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
       baseClasses: "public class Base {}"
     }
 
-    const blobSpy = vi.spyOn(globalThis, "Blob").mockImplementation((chunks) => {
-      const text = chunks[0] as string
-      expect(text).toContain("## 4. Clases Base\n```java\npublic class Base {}\n```")
-      return {} as Blob
-    })
+    const blobSpy = vi
+      .spyOn(globalThis, "Blob")
+      .mockImplementation((chunks) => {
+        const text = chunks[0] as string
+        expect(text).toContain(
+          "## 4. Clases Base\n```java\npublic class Base {}\n```"
+        )
+        return {} as Blob
+      })
 
     downloadProjectAsMarkdown(fakeProject, "test")
     expect(blobSpy).toHaveBeenCalled()
@@ -130,14 +160,16 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
   it("debería cerrar los backticks impares en formatCodeSection para evitar romper la estética del Markdown", () => {
     const fakeProject = {
       customName: "Examen Backticks Impares",
-      baseClasses: "```java\npublic class Incompleta {" 
+      baseClasses: "```java\npublic class Incompleta {"
     }
 
-    const blobSpy = vi.spyOn(globalThis, "Blob").mockImplementation((chunks) => {
-      const text = chunks[0] as string
-      expect(text).toContain("```java\npublic class Incompleta {\n```")
-      return {} as Blob
-    })
+    const blobSpy = vi
+      .spyOn(globalThis, "Blob")
+      .mockImplementation((chunks) => {
+        const text = chunks[0] as string
+        expect(text).toContain("```java\npublic class Incompleta {\n```")
+        return {} as Blob
+      })
 
     downloadProjectAsMarkdown(fakeProject, "test")
     expect(blobSpy).toHaveBeenCalled()
@@ -152,8 +184,10 @@ describe("downloadProjectAsMarkdown Utility Tests", () => {
     expect(linkMock.href).toBe("blob:http://localhost/mock-uuid")
     expect(document.body.appendChild).toHaveBeenCalledWith(linkMock)
     expect(linkMock.click).toHaveBeenCalledTimes(1)
-    
+
     expect(linkMock.remove).toHaveBeenCalledTimes(1)
-    expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith("blob:http://localhost/mock-uuid")
+    expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith(
+      "blob:http://localhost/mock-uuid"
+    )
   })
 })

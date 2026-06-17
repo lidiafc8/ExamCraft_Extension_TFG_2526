@@ -1,12 +1,14 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { downloadMarkdown } from "./downloadUtils" 
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import { downloadMarkdown } from "./downloadUtils"
 
 describe("downloadMarkdown Utility Tests", () => {
-  
   beforeEach(() => {
     vi.clearAllMocks()
 
-    globalThis.URL.createObjectURL = vi.fn().mockReturnValue("blob:http://localhost/mock-uuid")
+    globalThis.URL.createObjectURL = vi
+      .fn()
+      .mockReturnValue("blob:http://localhost/mock-uuid")
     globalThis.URL.revokeObjectURL = vi.fn()
   })
 
@@ -22,14 +24,17 @@ describe("downloadMarkdown Utility Tests", () => {
       remove: vi.fn()
     } as any
 
-    const createElementSpy = vi.spyOn(document, "createElement").mockReturnValue(linkMock)
-    const appendChildSpy = vi.spyOn(document.body, "appendChild").mockImplementation(() => linkMock)
+    const createElementSpy = vi
+      .spyOn(document, "createElement")
+      .mockReturnValue(linkMock)
+    const appendChildSpy = vi
+      .spyOn(document.body, "appendChild")
+      .mockImplementation(() => linkMock)
 
     downloadMarkdown("# Mi Examen", " examen_patrones   ")
 
-    
     expect(createElementSpy).toHaveBeenCalledWith("a")
-    expect(linkMock.download).toBe("examen_patrones.md") 
+    expect(linkMock.download).toBe("examen_patrones.md")
   })
 
   it("no debería duplicar la extensión si el nombre del archivo ya termina en .md", () => {
@@ -45,7 +50,7 @@ describe("downloadMarkdown Utility Tests", () => {
 
     downloadMarkdown("# Enunciado", "final_PROYECTO.MD")
 
-    expect(linkMock.download).toBe("final_PROYECTO.MD") 
+    expect(linkMock.download).toBe("final_PROYECTO.MD")
   })
 
   it("debería realizar el flujo completo: crear el Blob, simular el click y limpiar el DOM", () => {
@@ -56,8 +61,12 @@ describe("downloadMarkdown Utility Tests", () => {
       remove: vi.fn()
     } as any
 
-    const createElementSpy = vi.spyOn(document, "createElement").mockReturnValue(linkMock)
-    const appendChildSpy = vi.spyOn(document.body, "appendChild").mockImplementation(() => linkMock)
+    const createElementSpy = vi
+      .spyOn(document, "createElement")
+      .mockReturnValue(linkMock)
+    const appendChildSpy = vi
+      .spyOn(document.body, "appendChild")
+      .mockImplementation(() => linkMock)
 
     downloadMarkdown("Contenido Markdown", "test.md")
 
@@ -68,6 +77,8 @@ describe("downloadMarkdown Utility Tests", () => {
     expect(linkMock.click).toHaveBeenCalledTimes(1)
 
     expect(linkMock.remove).toHaveBeenCalledTimes(1)
-    expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith("blob:http://localhost/mock-uuid")
+    expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith(
+      "blob:http://localhost/mock-uuid"
+    )
   })
 })

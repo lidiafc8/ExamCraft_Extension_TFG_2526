@@ -1,8 +1,10 @@
-import React from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
 import StatementPartSelectionScreen from "./StatementPartSelectionScreen"
@@ -43,8 +45,17 @@ describe("Integración: StatementPartSelectionScreen", () => {
     it("renderiza correctamente los títulos de la sección y las instrucciones", () => {
       render(<StatementPartSelectionScreen {...defaultProps} />)
 
-      expect(screen.getByRole("heading", { name: "GENERACIÓN DE ENUNCIADO", level: 1 })).toBeInTheDocument()
-      expect(screen.getByText("¿Qué parte del enunciado te gustaría generar primero?")).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", {
+          name: "GENERACIÓN DE ENUNCIADO",
+          level: 1
+        })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          "¿Qué parte del enunciado te gustaría generar primero?"
+        )
+      ).toBeInTheDocument()
     })
 
     it("pasa las propiedades de navegación y paso actual de forma correcta al subcomponente Header", () => {
@@ -52,18 +63,28 @@ describe("Integración: StatementPartSelectionScreen", () => {
 
       expect(screen.getByTestId("header-mock")).toBeInTheDocument()
       expect(screen.getByTestId("current-step")).toHaveTextContent("ENUNCIADO")
-      
+
       expect(screen.getByRole("button", { name: "INICIO" })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "CREAR EXAMEN" })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "POR PARTES" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "CREAR EXAMEN" })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "POR PARTES" })
+      ).toBeInTheDocument()
     })
 
     it("renderiza todos los botones del menú de selección y el botón de regreso", () => {
       render(<StatementPartSelectionScreen {...defaultProps} />)
 
-      expect(screen.getByRole("button", { name: "Extensión funcional" })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "Restricciones de atributos" })).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "Relaciones entre entidades" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Extensión funcional" })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Restricciones de atributos" })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Relaciones entre entidades" })
+      ).toBeInTheDocument()
       expect(screen.getByRole("button", { name: "Volver" })).toBeInTheDocument()
     })
   })
@@ -76,9 +97,11 @@ describe("Integración: StatementPartSelectionScreen", () => {
       expect(defaultProps.onWelcome).toHaveBeenCalledTimes(1)
 
       await userEvent.click(screen.getByRole("button", { name: "INICIO" }))
-      expect(defaultProps.onWelcome).toHaveBeenCalledTimes(2) 
+      expect(defaultProps.onWelcome).toHaveBeenCalledTimes(2)
 
-      await userEvent.click(screen.getByRole("button", { name: "CREAR EXAMEN" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "CREAR EXAMEN" })
+      )
       expect(defaultProps.onBack).toHaveBeenCalledTimes(1)
 
       await userEvent.click(screen.getByRole("button", { name: "POR PARTES" }))
@@ -88,20 +111,28 @@ describe("Integración: StatementPartSelectionScreen", () => {
     it("ejecuta los respectivos callbacks al hacer clic en las opciones del menú vertical", async () => {
       render(<StatementPartSelectionScreen {...defaultProps} />)
 
-      await userEvent.click(screen.getByRole("button", { name: "Extensión funcional" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Extensión funcional" })
+      )
       expect(defaultProps.onFunctionalExtension).toHaveBeenCalledTimes(1)
 
-      await userEvent.click(screen.getByRole("button", { name: "Restricciones de atributos" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Restricciones de atributos" })
+      )
       expect(defaultProps.onAttributesConstraints).toHaveBeenCalledTimes(1)
 
-      await userEvent.click(screen.getByRole("button", { name: "Relaciones entre entidades" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Relaciones entre entidades" })
+      )
       expect(defaultProps.onEntityRelationships).toHaveBeenCalledTimes(1)
     })
 
     it("ejecuta el callback onBack al presionar el botón general de 'Volver'", async () => {
       render(<StatementPartSelectionScreen {...defaultProps} />)
 
-      await userEvent.click(screen.getByRole("main").querySelector(".btn-back") as HTMLButtonElement)
+      await userEvent.click(
+        screen.getByRole("main").querySelector(".btn-back") as HTMLButtonElement
+      )
       expect(defaultProps.onBack).toHaveBeenCalledTimes(1)
     })
   })

@@ -1,7 +1,8 @@
-import { describe, it, expect } from "vitest"
-import { buildStandardLogPayload, getLogConfig } from "./logUtils" 
-describe("Log Utilities Tests", () => {
+import { describe, expect, it } from "vitest"
 
+import { buildStandardLogPayload, getLogConfig } from "./logUtils"
+
+describe("Log Utilities Tests", () => {
   describe("buildStandardLogPayload", () => {
     it("debería construir el payload correctamente con datos planos estándar", () => {
       const mockProject = {
@@ -31,7 +32,12 @@ describe("Log Utilities Tests", () => {
         extensionFinish: "Enunciado del examen"
       }
 
-      const result = buildStandardLogPayload("Resultado", mockProject, "Ctx", "Prompt")
+      const result = buildStandardLogPayload(
+        "Resultado",
+        mockProject,
+        "Ctx",
+        "Prompt"
+      )
 
       expect(result.dominio).toBe("Diseño-Patrones-Fábrica")
     })
@@ -53,7 +59,12 @@ describe("Log Utilities Tests", () => {
         extensionFinish: "Examen sin dominio explícito"
       }
 
-      const result = buildStandardLogPayload("Resultado", mockProject, "Ctx", "Prompt")
+      const result = buildStandardLogPayload(
+        "Resultado",
+        mockProject,
+        "Ctx",
+        "Prompt"
+      )
       expect(result.dominio).toBe("unknown")
     })
   })

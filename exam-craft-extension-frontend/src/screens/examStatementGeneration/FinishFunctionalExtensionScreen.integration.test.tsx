@@ -1,27 +1,42 @@
+import { fireEvent, render, screen } from "@testing-library/react"
 import React from "react"
-import { render, screen, fireEvent } from "@testing-library/react"
-import { describe, test, expect, beforeEach, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
+
 import "@testing-library/jest-dom"
-import FinishFunctionalExtensionScreen from "./FinishFunctionalExtensionScreen" 
+
+import FinishFunctionalExtensionScreen from "./FinishFunctionalExtensionScreen"
 
 vi.mock("~src/components/Header", () => ({
-  Header: ({ currentStep }: any) => <div data-testid="header">{currentStep}</div>
+  Header: ({ currentStep }: any) => (
+    <div data-testid="header">{currentStep}</div>
+  )
 }))
 
 vi.mock("../../components/WorkflowComponents", () => ({
-  StepperHeader: ({ currentStep }: any) => <div data-testid="stepper-header">Paso: {currentStep}</div>
+  StepperHeader: ({ currentStep }: any) => (
+    <div data-testid="stepper-header">Paso: {currentStep}</div>
+  )
 }))
 
 vi.mock("../../components/MermaidViewer", () => ({
-  MermaidViewer: ({ chartCode }: any) => <div data-testid="mermaid-viewer">{chartCode}</div>
+  MermaidViewer: ({ chartCode }: any) => (
+    <div data-testid="mermaid-viewer">{chartCode}</div>
+  )
 }))
 
 vi.mock("~src/components/modals/DownloadConfirmModal", () => ({
-  DownloadConfirmModal: ({ isOpen, onConfirm, onCancel, defaultFileName }: any) =>
+  DownloadConfirmModal: ({
+    isOpen,
+    onConfirm,
+    onCancel,
+    defaultFileName
+  }: any) =>
     isOpen ? (
       <div data-testid="download-modal">
         <span>{defaultFileName}</span>
-        <button onClick={() => onConfirm("archivo_personalizado.md")}>Confirmar Descarga</button>
+        <button onClick={() => onConfirm("archivo_personalizado.md")}>
+          Confirmar Descarga
+        </button>
         <button onClick={onCancel}>Cancelar</button>
       </div>
     ) : null
@@ -34,8 +49,7 @@ vi.mock("~src/components/modals/SaveModal", () => ({
         onClick={() => {
           buildPayload("Mi Examen Custom")
           onSuccess()
-        }}
-      >
+        }}>
         Confirmar Guardado
       </button>
       <button onClick={onClose}>Cerrar</button>
@@ -61,7 +75,6 @@ const defaultProps = {
   onComponents: vi.fn()
 }
 
-
 describe("FinishFunctionalExtensionScreen - Integration Tests Suite", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -77,16 +90,27 @@ describe("FinishFunctionalExtensionScreen - Integration Tests Suite", () => {
       expect(screen.getByText("AJEDREZ: Resultado Final")).toBeInTheDocument()
 
       const textarea = screen.getByRole("textbox") as HTMLTextAreaElement
-      expect(textarea.value).toBe("Enunciado extendido sobre el juego de ajedrez.")
+      expect(textarea.value).toBe(
+        "Enunciado extendido sobre el juego de ajedrez."
+      )
       expect(textarea).toHaveAttribute("readOnly")
-      expect(screen.getByTestId("mermaid-viewer")).toHaveTextContent(/classDiagram\s+Class01\s+<\|--\s+AveryLongClass/)
+      expect(screen.getByTestId("mermaid-viewer")).toHaveTextContent(
+        /classDiagram\s+Class01\s+<\|--\s+AveryLongClass/
+      )
     })
 
     test("Debería mostrar un mensaje de contingencia si no se proporciona código Mermaid", () => {
-      render(<FinishFunctionalExtensionScreen {...defaultProps} extensionMermaid="" />)
+      render(
+        <FinishFunctionalExtensionScreen
+          {...defaultProps}
+          extensionMermaid=""
+        />
+      )
 
       expect(screen.queryByTestId("mermaid-viewer")).not.toBeInTheDocument()
-      expect(screen.getByText("No se pudo extraer el diagrama del texto.")).toBeInTheDocument()
+      expect(
+        screen.getByText("No se pudo extraer el diagrama del texto.")
+      ).toBeInTheDocument()
     })
   })
 
@@ -103,21 +127,31 @@ describe("FinishFunctionalExtensionScreen - Integration Tests Suite", () => {
     test("Debería abrir el modal de descarga, generar el contenido Markdown estructurado y cerrarse al confirmar", () => {
       render(<FinishFunctionalExtensionScreen {...defaultProps} />)
 
-      const downloadBtn = screen.getByRole("button", { name: /Descargar \(.md\)/i })
+      const downloadBtn = screen.getByRole("button", {
+        name: /Descargar \(.md\)/i
+      })
       fireEvent.click(downloadBtn)
 
       expect(screen.getByTestId("download-modal")).toBeInTheDocument()
-      expect(screen.getByText("Extension_Funcional_Ajedrez")).toBeInTheDocument()
+      expect(
+        screen.getByText("Extension_Funcional_Ajedrez")
+      ).toBeInTheDocument()
 
-      const confirmDownloadBtn = screen.getByRole("button", { name: /Confirmar Descarga/i })
+      const confirmDownloadBtn = screen.getByRole("button", {
+        name: /Confirmar Descarga/i
+      })
       fireEvent.click(confirmDownloadBtn)
 
       expect(mockDownloadMarkdown).toHaveBeenCalledWith(
-        expect.stringContaining("# Extensión Funcional - Ajedrez\n\n## Enunciado\nEnunciado extendido sobre el juego de ajedrez."),
+        expect.stringContaining(
+          "# Extensión Funcional - Ajedrez\n\n## Enunciado\nEnunciado extendido sobre el juego de ajedrez."
+        ),
         "archivo_personalizado.md"
       )
       expect(mockDownloadMarkdown).toHaveBeenCalledWith(
-        expect.stringContaining("```mermaid\nclassDiagram\nClass01 <|-- AveryLongClass\n```"),
+        expect.stringContaining(
+          "```mermaid\nclassDiagram\nClass01 <|-- AveryLongClass\n```"
+        ),
         "archivo_personalizado.md"
       )
 
@@ -132,7 +166,9 @@ describe("FinishFunctionalExtensionScreen - Integration Tests Suite", () => {
 
       expect(screen.getByTestId("save-modal")).toBeInTheDocument()
 
-      const confirmSaveBtn = screen.getByRole("button", { name: /Confirmar Guardado/i })
+      const confirmSaveBtn = screen.getByRole("button", {
+        name: /Confirmar Guardado/i
+      })
       fireEvent.click(confirmSaveBtn)
 
       expect(defaultProps.onWelcome).toHaveBeenCalledTimes(1)

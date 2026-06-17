@@ -1,10 +1,12 @@
-import React from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, it, expect, vi } from "vitest"
+import React from "react"
+import { describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
 
 import { VisualSolutionCodeScreen } from "./VisualSolutionCodeScreen"
+
 import "../../setupComponentMocks"
 
 describe("VisualSolutionCodeScreen - Pruebas Unitarias", () => {
@@ -26,18 +28,28 @@ describe("VisualSolutionCodeScreen - Pruebas Unitarias", () => {
 
   const renderScreen = (customProps = {}) => {
     const finalProps = { ...baseProps, ...customProps }
-    return render(<VisualSolutionCodeScreen selectedDomainFolder={""} onWelcome={function (): void {
-      throw new Error("Function not implemented.")
-    } } onGoToExams={function (): void {
-      throw new Error("Function not implemented.")
-    } } onGoToFolders={function (): void {
-      throw new Error("Function not implemented.")
-    } } {...finalProps} />)
+    return render(
+      <VisualSolutionCodeScreen
+        selectedDomainFolder={""}
+        onWelcome={function (): void {
+          throw new Error("Function not implemented.")
+        }}
+        onGoToExams={function (): void {
+          throw new Error("Function not implemented.")
+        }}
+        onGoToFolders={function (): void {
+          throw new Error("Function not implemented.")
+        }}
+        {...finalProps}
+      />
+    )
   }
 
   it("debería renderizar correctamente la pantalla con el título de la solución", () => {
     renderScreen()
-    expect(screen.getByRole("heading", { name: "Solución Completa", level: 2 })).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "Solución Completa", level: 2 })
+    ).toBeInTheDocument()
   })
 
   it("debería ejecutar la función onBack al pulsar el botón de regresar", async () => {
@@ -48,11 +60,13 @@ describe("VisualSolutionCodeScreen - Pruebas Unitarias", () => {
 
   it("debería solicitar el borrado de la sección fullSolution al hacer clic en borrar", async () => {
     renderScreen()
-    
+
     await userEvent.click(screen.getByRole("button", { name: "✕" }))
-    
-    const confirmButton = screen.queryByRole("button", { name: /confirmar|eliminar|sí|aceptar/i })
-    
+
+    const confirmButton = screen.queryByRole("button", {
+      name: /confirmar|eliminar|sí|aceptar/i
+    })
+
     if (confirmButton) {
       await userEvent.click(confirmButton)
     }

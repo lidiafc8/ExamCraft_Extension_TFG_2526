@@ -1,8 +1,11 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
-import { VisualSolutionCodeScreen } from "./VisualSolutionCodeScreen"
+
 import { parseJavaFiles } from "~src/utils/codeUtils"
+
+import { VisualSolutionCodeScreen } from "./VisualSolutionCodeScreen"
 
 vi.mock("~src/utils/codeUtils", () => ({
   parseJavaFiles: vi.fn((rawCode) => {
@@ -37,7 +40,6 @@ vi.mock("~src/components/modals/DeleteConfirmationModal", () => ({
   }
 }))
 
-
 describe("VisualSolutionCodeScreen Integration Tests", () => {
   const mockOnBack = vi.fn()
   const mockOnWelcome = vi.fn()
@@ -69,7 +71,6 @@ describe("VisualSolutionCodeScreen Integration Tests", () => {
     vi.spyOn(window, "alert").mockImplementation(() => {})
   })
 
-  
   it("debería mostrar el estado vacío si el proyecto no contiene solución", () => {
     vi.mocked(parseJavaFiles).mockReturnValueOnce([])
 
@@ -79,7 +80,9 @@ describe("VisualSolutionCodeScreen Integration Tests", () => {
     }
     render(<VisualSolutionCodeScreen {...emptyProps} />)
 
-    expect(screen.getByText(/Aún no se ha generado una solución completa/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Aún no se ha generado una solución completa/i)
+    ).toBeInTheDocument()
     expect(screen.queryByText("🔒 No editable")).not.toBeInTheDocument()
   })
 
@@ -109,7 +112,9 @@ describe("VisualSolutionCodeScreen Integration Tests", () => {
     fireEvent.click(screen.getByText("🔒 No editable"))
 
     const textarea = screen.getByRole("textbox")
-    fireEvent.change(textarea, { target: { value: "public class SolucionModificada {}" } })
+    fireEvent.change(textarea, {
+      target: { value: "public class SolucionModificada {}" }
+    })
 
     const saveBtn = screen.getByRole("button", { name: "Guardar cambios" })
     fireEvent.click(saveBtn)
@@ -117,11 +122,13 @@ describe("VisualSolutionCodeScreen Integration Tests", () => {
     expect(saveBtn).toHaveTextContent("Guardando...")
 
     await waitFor(() => {
-      expect(mockOnUpdateProject).toHaveBeenCalledWith(expect.objectContaining({
-        id: "proj-abc",
-        fullSolution: "public class SolucionModificada {}",
-        updatedAt: expect.any(String)
-      }))
+      expect(mockOnUpdateProject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: "proj-abc",
+          fullSolution: "public class SolucionModificada {}",
+          updatedAt: expect.any(String)
+        })
+      )
     })
 
     expect(screen.getByText("🔒 No editable")).toBeInTheDocument()
@@ -134,15 +141,17 @@ describe("VisualSolutionCodeScreen Integration Tests", () => {
     render(<VisualSolutionCodeScreen {...defaultProps} />)
 
     fireEvent.click(screen.getByText("🔒 No editable"))
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Cambio erróneo" } })
-    
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "Cambio erróneo" }
+    })
+
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }))
 
     await waitFor(() => {
       expect(window.alert).toHaveBeenCalledWith("Error de red en el Storage")
     })
   })
-  
+
   it("debería abrir el modal de confirmación, confirmar y llamar a onDeleteSection", () => {
     render(<VisualSolutionCodeScreen {...defaultProps} />)
 

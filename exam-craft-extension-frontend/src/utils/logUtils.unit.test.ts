@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, afterEach } from "vitest"
-import { buildStandardLogPayload, getLogConfig } from "./logUtils" 
+import { afterEach, describe, expect, it, vi } from "vitest"
+
+import { buildStandardLogPayload, getLogConfig } from "./logUtils"
 
 interface LogProject {
   domainName?: string
@@ -19,7 +20,12 @@ describe("Logger Utilities", () => {
           domainName: "mi-dominio.com",
           extensionFinish: "Examen Final"
         }
-        const result = buildStandardLogPayload("Éxito", project, "contexto_a", "prompt_b")
+        const result = buildStandardLogPayload(
+          "Éxito",
+          project,
+          "contexto_a",
+          "prompt_b"
+        )
 
         expect(result).toEqual({
           dominio: "mi-dominio.com",
@@ -61,7 +67,12 @@ describe("Logger Utilities", () => {
       })
 
       it("maneja de forma segura valores de project que no cumplen con la interfaz en runtime", () => {
-        const result = buildStandardLogPayload("OK", "no_soy_un_objeto" as any, "ctx", "prmt")
+        const result = buildStandardLogPayload(
+          "OK",
+          "no_soy_un_objeto" as any,
+          "ctx",
+          "prmt"
+        )
         expect(result.dominio).toBe("unknown")
         expect(result.examenSeleccionado).toBeUndefined()
       })
@@ -75,7 +86,7 @@ describe("Logger Utilities", () => {
       })
 
       it("une los elementos correctamente si el domainName es un array de un solo elemento", () => {
-        const project: LogProject = {   domainName: ["single"] as any }
+        const project: LogProject = { domainName: ["single"] as any }
         const result = buildStandardLogPayload("OK", project, "ctx", "prmt")
         expect(result.dominio).toBe("single")
       })
@@ -87,8 +98,16 @@ describe("Logger Utilities", () => {
       })
 
       it("acepta caracteres especiales, emojis y unicode en todas las entradas de texto", () => {
-        const project: LogProject = { domainName: "🌐-domain", extensionFinish: "📝-exam" }
-        const result = buildStandardLogPayload("🚀-res", project, "🥷-ctx", "💬-prmt")
+        const project: LogProject = {
+          domainName: "🌐-domain",
+          extensionFinish: "📝-exam"
+        }
+        const result = buildStandardLogPayload(
+          "🚀-res",
+          project,
+          "🥷-ctx",
+          "💬-prmt"
+        )
 
         expect(result).toEqual({
           dominio: "🌐-domain",
@@ -116,11 +135,21 @@ describe("Logger Utilities", () => {
 
     describe("Flujo e Integración (Closure Capture)", () => {
       it("captura por clausura los argumentos iniciales y los inyecta al ejecutar buildLogPayload", () => {
-        const projectMock: LogProject = { domainName: "educacion.org", extensionFinish: "Quiz 2" }
-        
-        const config = getLogConfig("Historia_Universal", projectMock, "contexto_secreto", "pregunta_visible")
+        const projectMock: LogProject = {
+          domainName: "educacion.org",
+          extensionFinish: "Quiz 2"
+        }
 
-        const payloadFinal = config.buildLogPayload("Esta es la respuesta del usuario")
+        const config = getLogConfig(
+          "Historia_Universal",
+          projectMock,
+          "contexto_secreto",
+          "pregunta_visible"
+        )
+
+        const payloadFinal = config.buildLogPayload(
+          "Esta es la respuesta del usuario"
+        )
 
         expect(payloadFinal).toEqual({
           dominio: "educacion.org",
@@ -132,15 +161,25 @@ describe("Logger Utilities", () => {
       })
 
       it("mantiene el aislamiento de datos si se generan múltiples instancias concurrentes", () => {
-        const configA = getLogConfig("Examen_A", { domainName: "a.com" }, "ctx_a", "prompt_a")
-        const configB = getLogConfig("Examen_B", { domainName: "b.com" }, "ctx_b", "prompt_b")
+        const configA = getLogConfig(
+          "Examen_A",
+          { domainName: "a.com" },
+          "ctx_a",
+          "prompt_a"
+        )
+        const configB = getLogConfig(
+          "Examen_B",
+          { domainName: "b.com" },
+          "ctx_b",
+          "prompt_b"
+        )
 
         const payloadA = configA.buildLogPayload("res_a")
         const payloadB = configB.buildLogPayload("res_b")
 
         expect(payloadA.dominio).toBe("a.com")
         expect(payloadA.promptVisible).toBe("prompt_a")
-        
+
         expect(payloadB.dominio).toBe("b.com")
         expect(payloadB.promptVisible).toBe("prompt_b")
       })

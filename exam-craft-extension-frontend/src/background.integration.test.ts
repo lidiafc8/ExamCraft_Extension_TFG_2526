@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest"
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 const mockAddListener = vi.fn()
 const mockCreate = vi.fn()
@@ -23,7 +23,7 @@ describe("Integración: background script - chrome.action.onClicked", () => {
   })
 
   beforeEach(() => {
-    mockCreate.mockClear() 
+    mockCreate.mockClear()
   })
 
   it("registra un listener en chrome.action.onClicked al cargar el script", () => {

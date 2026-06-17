@@ -1,8 +1,10 @@
-import React from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
 import { DownloadConfirmModal } from "./DownloadConfirmModal"
@@ -23,8 +25,12 @@ describe("Integración: DownloadConfirmModal", () => {
     it("renderiza todos los elementos visuales correctamente cuando está abierto", () => {
       render(<DownloadConfirmModal {...defaultProps} />)
 
-      expect(screen.getByRole("heading", { name: "Nombre del archivo", level: 3 })).toBeInTheDocument()
-      expect(screen.getByText("¿Cómo quieres llamar al archivo Markdown?")).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", { name: "Nombre del archivo", level: 3 })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText("¿Cómo quieres llamar al archivo Markdown?")
+      ).toBeInTheDocument()
       expect(screen.getByText("📥")).toBeInTheDocument()
     })
 
@@ -38,10 +44,14 @@ describe("Integración: DownloadConfirmModal", () => {
     it("llama a onConfirm enviando el valor del input al hacer clic en Descargar", async () => {
       render(<DownloadConfirmModal {...defaultProps} />)
 
-      await userEvent.click(screen.getByRole("button", { name: "Descargar (.md)" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Descargar (.md)" })
+      )
 
       expect(defaultProps.onConfirm).toHaveBeenCalledTimes(1)
-      expect(defaultProps.onConfirm).toHaveBeenCalledWith("mi_examen_de_historia_2026")
+      expect(defaultProps.onConfirm).toHaveBeenCalledWith(
+        "mi_examen_de_historia_2026"
+      )
     })
 
     it("llama a onCancel al hacer clic en Cancelar", async () => {
@@ -56,7 +66,9 @@ describe("Integración: DownloadConfirmModal", () => {
 
   describe("Casos Negativos", () => {
     it("no renderiza nada en absoluto si isOpen es false", () => {
-      const { container } = render(<DownloadConfirmModal {...defaultProps} isOpen={false} />)
+      const { container } = render(
+        <DownloadConfirmModal {...defaultProps} isOpen={false} />
+      )
 
       expect(container.firstChild).toBeNull()
       expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
@@ -82,16 +94,20 @@ describe("Integración: DownloadConfirmModal", () => {
       await userEvent.clear(input)
       expect(input).toHaveValue("")
 
-      await userEvent.click(screen.getByRole("button", { name: "Descargar (.md)" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Descargar (.md)" })
+      )
 
-      expect(defaultProps.onConfirm).toHaveBeenCalledWith("mi examen de historia 2026")
+      expect(defaultProps.onConfirm).toHaveBeenCalledWith(
+        "mi examen de historia 2026"
+      )
     })
 
     it("reemplaza múltiples espacios consecutivos por un único guion bajo", () => {
       render(
-        <DownloadConfirmModal 
-          {...defaultProps} 
-          defaultFileName="examen    con    muchos    espacios" 
+        <DownloadConfirmModal
+          {...defaultProps}
+          defaultFileName="examen    con    muchos    espacios"
         />
       )
 
@@ -106,7 +122,9 @@ describe("Integración: DownloadConfirmModal", () => {
       await userEvent.clear(input)
       await userEvent.type(input, "   nombre_limpio   ")
 
-      await userEvent.click(screen.getByRole("button", { name: "Descargar (.md)" }))
+      await userEvent.click(
+        screen.getByRole("button", { name: "Descargar (.md)" })
+      )
 
       expect(defaultProps.onConfirm).toHaveBeenCalledWith("nombre_limpio")
     })
@@ -115,20 +133,20 @@ describe("Integración: DownloadConfirmModal", () => {
   describe("Flujo Completo", () => {
     it("flujo completo: abre el modal, lee el formateo inicial, escribe un nombre personalizado y descarga", async () => {
       const { rerender } = render(
-        <DownloadConfirmModal 
-          {...defaultProps} 
-          isOpen={false} 
-          defaultFileName="Quiz Inicial" 
+        <DownloadConfirmModal
+          {...defaultProps}
+          isOpen={false}
+          defaultFileName="Quiz Inicial"
         />
       )
 
       expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
 
       rerender(
-        <DownloadConfirmModal 
-          {...defaultProps} 
-          isOpen={true} 
-          defaultFileName="Quiz Inicial" 
+        <DownloadConfirmModal
+          {...defaultProps}
+          isOpen={true}
+          defaultFileName="Quiz Inicial"
         />
       )
 
@@ -137,8 +155,10 @@ describe("Integración: DownloadConfirmModal", () => {
 
       await userEvent.clear(input)
       await userEvent.type(input, "mi_propio_quiz_v2")
-      
-      await userEvent.click(screen.getByRole("button", { name: "Descargar (.md)" }))
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "Descargar (.md)" })
+      )
 
       expect(defaultProps.onConfirm).toHaveBeenCalledTimes(1)
       expect(defaultProps.onConfirm).toHaveBeenCalledWith("mi_propio_quiz_v2")

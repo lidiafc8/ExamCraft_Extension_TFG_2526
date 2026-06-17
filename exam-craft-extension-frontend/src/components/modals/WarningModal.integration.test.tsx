@@ -1,8 +1,10 @@
-import React from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { vi, describe, it, expect, beforeEach } from "vitest"
+import React from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import "@testing-library/jest-dom"
+
 import * as jestDomMatchers from "@testing-library/jest-dom/matchers"
 
 import { WarningModal } from "./WarningModal"
@@ -30,16 +32,27 @@ describe("Integración: WarningModal", () => {
     it("renderiza correctamente el título, el mensaje de advertencia y el icono de peligro ⚠️", () => {
       render(<WarningModal {...defaultProps} />)
 
-      expect(screen.getByRole("heading", { name: "¡ATENCIÓN: ACCIÓN IRREVERSIBLE!", level: 3 })).toBeInTheDocument()
-      expect(screen.getByText("Si continúas, perderás todos los datos guardados de este examen.")).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", {
+          name: "¡ATENCIÓN: ACCIÓN IRREVERSIBLE!",
+          level: 3
+        })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          "Si continúas, perderás todos los datos guardados de este examen."
+        )
+      ).toBeInTheDocument()
       expect(screen.getByText("⚠️")).toBeInTheDocument()
     })
 
     it("ejecuta el callback onCancel al hacer clic en el botón de cancelar", async () => {
       render(<WarningModal {...defaultProps} />)
 
-      await userEvent.click(screen.getByRole("button", { name: "Volver atrás" }))
-      
+      await userEvent.click(
+        screen.getByRole("button", { name: "Volver atrás" })
+      )
+
       expect(defaultProps.onCancel).toHaveBeenCalledTimes(1)
       expect(defaultProps.onConfirm).not.toHaveBeenCalled()
     })
@@ -47,8 +60,10 @@ describe("Integración: WarningModal", () => {
     it("ejecuta el callback onConfirm al hacer clic en el botón de confirmación", async () => {
       render(<WarningModal {...defaultProps} />)
 
-      await userEvent.click(screen.getByRole("button", { name: "Eliminar de todas formas" }))
-      
+      await userEvent.click(
+        screen.getByRole("button", { name: "Eliminar de todas formas" })
+      )
+
       expect(defaultProps.onConfirm).toHaveBeenCalledTimes(1)
       expect(defaultProps.onCancel).not.toHaveBeenCalled()
     })
@@ -64,7 +79,9 @@ describe("Integración: WarningModal", () => {
       render(<WarningModal {...propsSinCancelLabel} />)
 
       // Valida que el fallback asignado en la desestructuración funcione perfectamente
-      expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Cancelar" })
+      ).toBeInTheDocument()
     })
 
     it("soporta e interactúa correctamente con estructuras HTML complejas pasadas en la propiedad message (React.ReactNode)", () => {
@@ -83,7 +100,9 @@ describe("Integración: WarningModal", () => {
       // Verificamos que todo el árbol JSX anidado se pinte en el DOM sin romperse
       expect(screen.getByTestId("mensaje-complejo")).toBeInTheDocument()
       expect(screen.getByText("Se borrará la caché local")).toBeInTheDocument()
-      expect(screen.getByText("Se cerrará tu sesión activa")).toBeInTheDocument()
+      expect(
+        screen.getByText("Se cerrará tu sesión activa")
+      ).toBeInTheDocument()
     })
   })
 })

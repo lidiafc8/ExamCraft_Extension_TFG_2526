@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
 import { generateWithAI } from "./geminiService"
 
 describe("generateWithAI - AI Service Suite", () => {
-  
   beforeEach(() => {
     vi.clearAllMocks()
     globalThis.fetch = vi.fn()
@@ -28,12 +28,15 @@ describe("generateWithAI - AI Service Suite", () => {
       const payload = "Genera un examen de arquitectura de software"
       const result = await generateWithAI(payload)
 
-      expect(globalThis.fetch).toHaveBeenCalledWith("http://localhost:3000/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: payload })
-      })
-      
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "http://localhost:3000/generate",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: payload })
+        }
+      )
+
       expect(result).toEqual({
         result: "Contenido del examen generado",
         provider: "openai"
@@ -57,7 +60,9 @@ describe("generateWithAI - AI Service Suite", () => {
 
   describe("Casos Negativos y Manejo de Errores", () => {
     it("debe extraer el mensaje desde 'details' si la respuesta http no es ok (response.ok === false)", async () => {
-      const mockErrorData = { details: "Límite de tokens excedido en el backend" }
+      const mockErrorData = {
+        details: "Límite de tokens excedido en el backend"
+      }
 
       vi.mocked(globalThis.fetch).mockResolvedValueOnce({
         ok: false,
@@ -107,12 +112,12 @@ describe("generateWithAI - AI Service Suite", () => {
     })
 
     it("debe capturar fallos de red físicos o caídas del servidor local e informar que se verifique la conexión", async () => {
-      vi.mocked(globalThis.fetch).mockRejectedValueOnce(new Error("Failed to fetch"))
-
-      await expect(generateWithAI("Prompt")).rejects.toThrow(
-        "Failed to fetch"
+      vi.mocked(globalThis.fetch).mockRejectedValueOnce(
+        new Error("Failed to fetch")
       )
-      
+
+      await expect(generateWithAI("Prompt")).rejects.toThrow("Failed to fetch")
+
       expect(console.error).toHaveBeenCalled()
     })
 
