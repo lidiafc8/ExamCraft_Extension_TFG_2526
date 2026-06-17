@@ -87,8 +87,15 @@ export default function AttributesConstraintsWorkflowScreen({
   const [pendingProjectForBaseClass, setPendingProjectForBaseClass] =
     useState<Project | null>(null)
 
-  const { responseText, isLoading, setResponseText, generate } = 
-    useGeminiGeneration(getLogConfig("attributes-constraints", selectedProject, hiddenContext, promptText));
+  const { responseText, isLoading, setResponseText, generate } =
+    useGeminiGeneration(
+      getLogConfig(
+        "attributes-constraints",
+        selectedProject,
+        hiddenContext,
+        promptText
+      )
+    )
 
   useEffect(() => {
     if (step === "selection" && globalThis.chrome?.storage?.local) {

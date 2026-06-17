@@ -109,23 +109,23 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     })
   }
 
-   const handleDeleteTest = (testKey: string) => {
-        if (!selectedProject?.id) return;
+  const handleDeleteTest = (testKey: string) => {
+    if (!selectedProject?.id) return
 
-        const updatedProject = { ...selectedProject };
-        const updatedTestMap = { ...(updatedProject.testPartsMap || {}) };
+    const updatedProject = { ...selectedProject }
+    const updatedTestMap = { ...(updatedProject.testPartsMap || {}) }
 
-        delete updatedTestMap[testKey];
-        updatedProject.testPartsMap = updatedTestMap;
+    delete updatedTestMap[testKey]
+    updatedProject.testPartsMap = updatedTestMap
 
-        setSelectedProject(updatedProject);
+    setSelectedProject(updatedProject)
 
-        if (chrome?.storage?.local) {
-            chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
-                console.log(`Test ${testKey} eliminado correctamente.`);
-            });
-        }
-    };
+    if (chrome?.storage?.local) {
+      chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
+        console.log(`Test ${testKey} eliminado correctamente.`)
+      })
+    }
+  }
 
   const handleGitHubDeploy = async (token: string, project: any) => {
     const isPetClinic = project.domainName
@@ -220,7 +220,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
           setDeleteModal({ id, name: selectedProject.customName })
         }
         onDeleteSection={handleDeleteSection}
-        onUpdateProject={handleUpdateProject} 
+        onUpdateProject={handleUpdateProject}
       />
     )
   }

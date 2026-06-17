@@ -58,9 +58,10 @@ async function requestAIDiagram(enunciado: string) {
         ${enunciado}`
 
   const result = await generateWithAI(prompt)
+  const text = typeof result === "string" ? result : ""
   return (
-    result
-      ?.trim()
+    text
+      .trim()
       .replace(/```mermaid\s*/g, "")
       .replace(/```\s*/g, "")
       .trim() || ""
@@ -176,9 +177,9 @@ export const ExamDetailScreen: React.FC<ExamDetailScreenProps> = ({
         entityRelationships,
         updatedAt: new Date().toISOString()
       })
-      setEditingCombined(false)               
-      setEditingAttributeConstraints(false)  
-      setEditingEntityRelationships(false) 
+      setEditingCombined(false)
+      setEditingAttributeConstraints(false)
+      setEditingEntityRelationships(false)
     } catch (err) {
       alert(err instanceof Error ? err.message : "No se pudo guardar.")
     } finally {
