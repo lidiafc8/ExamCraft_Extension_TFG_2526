@@ -31,7 +31,8 @@ export const VisualSolutionCodeScreen: React.FC<
   onBack,
   onGoToExams,
   onGoToFolders,
-  onDeleteSection
+  onDeleteSection,
+  onUpdateProject
 }) => {
   const [sectionToDelete, setSectionToDelete] = useState<{
     key: string
@@ -41,6 +42,25 @@ export const VisualSolutionCodeScreen: React.FC<
   const [fullSolutionRaw, setFullSolutionRaw] = useState<string>(
     selectedProject?.fullSolution || ""
   )
+  const [isSaving, setIsSaving] = useState(false)
+  const isDirty = fullSolutionRaw !== (selectedProject?.fullSolution || "")
+
+  const handleSave = async () => {
+    if (!selectedProject?.id || !onUpdateProject) return
+    setIsSaving(true)
+    try {
+      await onUpdateProject({
+        ...selectedProject,
+        fullSolution: fullSolutionRaw,
+        updatedAt: new Date().toISOString()
+      })
+      setEditingFullSolution(false)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "No se pudo guardar.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   useEffect(() => {
     setFullSolutionRaw(selectedProject?.fullSolution || "")
@@ -140,6 +160,15 @@ export const VisualSolutionCodeScreen: React.FC<
             <button type="button" onClick={onBack} className="btn-back">
               Volver
             </button>
+            {isDirty && (
+              <button
+                type="button"
+                className="btn-save-changes"
+                onClick={handleSave}
+                disabled={isSaving}>
+                {isSaving ? "Guardando..." : "Guardar cambios"}
+              </button>
+            )}
           </div>
 
           <DeleteConfirmationModal

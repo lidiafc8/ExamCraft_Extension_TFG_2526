@@ -155,6 +155,42 @@
   margin: 0;
 }
 
+.btn-save-changes {
+  position: relative;
+  margin: 0;
+  background-color: #4a7c59;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 28px;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+  box-shadow: 0 2px 8px rgba(74, 124, 89, 0.18);
+}
+
+.btn-save-changes:hover:not(:disabled) {
+  background-color: #3a6347;
+  box-shadow: 0 4px 16px rgba(74, 124, 89, 0.28);
+}
+
+.btn-save-changes:active:not(:disabled) {
+  transform: scale(1.12);
+  box-shadow: 0 6px 20px rgba(74, 124, 89, 0.35);
+}
+
+.btn-save-changes:disabled {
+  background-color: #a8c4b0;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 @media (max-width: 960px) {
   .storage-main {
     padding: 24px 20px 40px;

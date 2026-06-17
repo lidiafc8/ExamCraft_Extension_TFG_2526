@@ -1,4 +1,6 @@
-export const generateWithAI = async (prompt: string): Promise<string> => {
+export const generateWithAI = async (
+  prompt: string
+): Promise<{ result: string; provider: string }> => {
   const BACKEND_URL = "http://localhost:3000/generate"
 
   try {
@@ -25,7 +27,10 @@ export const generateWithAI = async (prompt: string): Promise<string> => {
       throw new Error("El backend no devolvió ninguna respuesta válida.")
     }
 
-    return data.text
+    return {
+      result: data.text,
+      provider: data.provider || "unknown"
+    }
   } catch (error: any) {
     console.error("[AI Service] Fetch error:", error)
 

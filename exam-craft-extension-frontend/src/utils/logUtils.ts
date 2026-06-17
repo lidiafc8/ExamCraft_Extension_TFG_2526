@@ -28,6 +28,6 @@ export const getLogConfig = (
   prompt: string
 ) => ({
   logExerciseName: exerciseName,
-  buildLogPayload: (result: string) => 
+  buildLogPayload: (result: string) =>
     buildStandardLogPayload(result, project, context, prompt)
-});
+})

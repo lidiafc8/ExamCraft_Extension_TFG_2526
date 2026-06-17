@@ -40,6 +40,8 @@ Sabiendo y entendiendo esto a fondo, basándote y siguiendo la lógica del enunc
 
 - Omitirás en tu respuesta cualquier mención y explicación sobre las restricciones de los atributos correspondientes a las relaciones entre las entidades, eso se definirá más adelante.
 
+- Tendrás en cuenta la diferencia entre una restricción tipo `@NotBlank`y `@NotNull`, en los atributos tipo String.
+
 - Sé lo más creativo posible en cuanto a restricciones, ni muy simples, ni muy complejas.
 
 - El enunciado deberá seguir la siguiente sintaxis:

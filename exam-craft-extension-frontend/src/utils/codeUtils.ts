@@ -17,14 +17,14 @@ export const parseJavaFiles = (rawText: string) => {
       ...textBefore.matchAll(
         /(?:\/\/[\s\wáéíóú]*[:\s-]*)?([a-zA-Z0-9_./\-]+\.java)/gi // NOSONAR javascript:S5852
       )
-    ] 
+    ]
 
     if (pathsBefore.length > 0) {
       path = pathsBefore[pathsBefore.length - 1][1]
     } else {
       const pathInsideMatch = rawCode.match(
         /^[\s*/]*(?:Archivo|Path)?[\s:]*([a-zA-Z0-9_./\-]+\.java)/i // NOSONAR javascript:S5852
-      ) 
+      )
 
       if (pathInsideMatch) {
         path = pathInsideMatch[1]

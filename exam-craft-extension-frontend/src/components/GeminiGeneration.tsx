@@ -25,7 +25,7 @@ export function useGeminiGeneration({
     setIsLoading(true)
     setResponseText("")
     try {
-      const result = await generateWithAI(payload)
+      const { result, provider } = await generateWithAI(payload)
       setResponseText(result)
 
       try {
@@ -34,6 +34,7 @@ export function useGeminiGeneration({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ejercicio: logExerciseName,
+            proveedor: provider,
             ...buildLogPayload(result)
           })
         })
@@ -42,14 +43,13 @@ export function useGeminiGeneration({
           "Servidor de logs apagado. El log no se guardó en el repo."
         )
       }
-
+      setIsLoading(false)
       return result
     } catch (error) {
       console.error(error)
       alert("Error al generar.")
-      return null
-    } finally {
       setIsLoading(false)
+      return null
     }
   }
 

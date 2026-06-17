@@ -74,6 +74,20 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     })
   }
 
+  const handleUpdateProject = async (updatedProject: any) => {
+    if (!globalThis.chrome?.storage?.local) return
+    return new Promise<void>((resolve, reject) => {
+      chrome.storage.local.set({ [updatedProject.id]: updatedProject }, () => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message))
+        } else {
+          updateProjectInState(updatedProject.id, updatedProject)
+          resolve()
+        }
+      })
+    })
+  }
+
   const handleDeleteDirect = (id: string) => {
     if (!globalThis.chrome?.storage?.local) return
     chrome.storage.local.remove(id, () => removeProjectFromState(id))
@@ -93,6 +107,24 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
     chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
       updateProjectInState(selectedProject.id, updatedProject)
     })
+  }
+
+  const handleDeleteTest = (testKey: string) => {
+    if (!selectedProject?.id) return
+
+    const updatedProject = { ...selectedProject }
+    const updatedTestMap = { ...(updatedProject.testPartsMap || {}) }
+
+    delete updatedTestMap[testKey]
+    updatedProject.testPartsMap = updatedTestMap
+
+    setSelectedProject(updatedProject)
+
+    if (chrome?.storage?.local) {
+      chrome.storage.local.set({ [selectedProject.id]: updatedProject }, () => {
+        console.log(`Test ${testKey} eliminado correctamente.`)
+      })
+    }
   }
 
   const handleGitHubDeploy = async (token: string, project: any) => {
@@ -143,7 +175,8 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             setSelectedDomainFolder(null)
           }}
           onDeleteSection={handleDeleteSection}
-          onDeleteTest={() => {}}
+          onDeleteTest={handleDeleteTest}
+          onUpdateProject={handleUpdateProject}
         />
       )
     }
@@ -164,6 +197,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
             setSelectedDomainFolder(null)
           }}
           onDeleteSection={handleDeleteSection}
+          onUpdateProject={handleUpdateProject}
         />
       )
     }
@@ -186,7 +220,7 @@ export default function StorageExamsIndex({ onWelcome }: Props) {
           setDeleteModal({ id, name: selectedProject.customName })
         }
         onDeleteSection={handleDeleteSection}
-        onUpdateProject={async () => {}}
+        onUpdateProject={handleUpdateProject}
       />
     )
   }
